@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/list"
+    app:startDestination="@+id/deviceListPG"
+    tools:ignore="UnusedNavigation">
+
+    <fragment
+        android:id="@+id/deviceListPG"
+        android:name="co.candyhouse.app.tabs.devices.DeviceListFG"
+        android:label="@string/title_list"
+        tools:layout="@layout/fg_devicelist">
+        <action
+            android:id="@+id/to_regist"
+            app:destination="@id/register_list"
+            app:enterAnim="@anim/slide_in_bottom"
+            app:popExitAnim="@anim/slide_out_up"
+            />
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG"
+            />
+        <action
+            android:id="@+id/action_deviceListPG_to_mainRoomFG"
+            app:destination="@id/mainRoomFG"
+            />
+        <action
+            android:id="@+id/action_deviceListPG_to_SSM2SetAngleFG"
+            app:destination="@id/SSM2SetAngleFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/register_list"
+        android:name="co.candyhouse.app.tabs.devices.RegisterDevicesFG"
+        android:label="fragment_register_list"
+        tools:layout="@layout/fg_rg_device" />
+    <fragment
+        android:id="@+id/scanFG"
+        android:name="co.candyhouse.app.base.scan.ScanFG"
+        android:label="ScanFG" />
+    <fragment
+        android:id="@+id/mainRoomFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.room.MainRoomFG"
+        android:label="MainRoomFG">
+        <action
+            android:id="@+id/action_mainRoomFG_to_SSM2SettingFG"
+            app:destination="@id/SSM2SettingFG"
+
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/SSM2SettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.SSM2SettingFG"
+        android:label="SSM2SettingFG" >
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_SSM2SetAngleFG"
+            app:destination="@id/SSM2SetAngleFG"
+            app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_addMemberFG"
+            app:destination="@id/addMemberFG" />
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_deleteMemberFG"
+            app:destination="@id/deleteMemberFG" />
+
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/SSM2SetAngleFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
+        android:label="SSM2SetAngleFG" />
+    <fragment
+        android:id="@+id/addMemberFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.menber.AddMemberFG"
+        android:label="AddMemberFG" >
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/deleteMemberFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.menber.DeleteMemberFG"
+        android:label="DeleteMemberFG" />
+    <fragment
+        android:id="@+id/myKEYFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.MyKEYFG"
+        android:label="myKEYFG" />
+</navigation>
+<!--    app:enterAnim="@anim/slide_in_right"-->
+<!--    app:exitAnim="@anim/slide_out_left"-->
+<!--    app:popEnterAnim="@anim/slide_in_left"-->
+<!--    app:popExitAnim="@anim/slide_out_right"-->

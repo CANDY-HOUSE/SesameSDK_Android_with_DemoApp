@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home"
+    app:startDestination="@+id/titleScreen"
+    tools:ignore="UnusedNavigation">
+
+    <fragment
+        android:id="@+id/titleScreen"
+        android:name="co.candyhouse.app.tabs.friends.FriendsFG"
+        android:label="@string/title_friends"
+        tools:layout="@layout/fg_friends">
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG" />
+        <action
+            android:id="@+id/to_regist"
+            app:destination="@id/register_list" />
+    </fragment>
+    <fragment
+        android:id="@+id/register_list"
+        android:name="co.candyhouse.app.tabs.devices.RegisterDevicesFG"
+        android:label="fragment_register_list"
+        tools:layout="@layout/fg_rg_device" />
+    <fragment
+        android:id="@+id/scanFG"
+        android:name="co.candyhouse.app.base.scan.ScanFG"
+        android:label="ScanFG" />
+</navigation>

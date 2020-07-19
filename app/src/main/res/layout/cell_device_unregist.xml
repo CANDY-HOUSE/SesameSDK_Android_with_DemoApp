@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="12dp"
+        android:gravity="center"
+        android:text="name"
+        android:textColor="@color/hint"
+        android:textSize="16sp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@+id/title"
+
+        android:src="@drawable/ic_bluetooth" />
+
+    <TextView
+        android:id="@+id/title_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="25dp"
+        android:layout_toRightOf="@+id/title"
+        android:gravity="center"
+        android:text="title_txt"
+        />
+
+    <TextView
+        android:id="@+id/subtitle_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginBottom="25dp"
+        android:layout_toRightOf="@+id/title"
+        android:textColor="@color/text_hint"
+        android:gravity="center"
+        android:text="subtitle_txt"
+
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="12dp"
+        android:background="@color/gray1">
+
+    </View>
+
+</RelativeLayout>

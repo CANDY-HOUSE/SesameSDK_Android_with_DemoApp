@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/balloon"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:background="@android:color/transparent">
+
+  <androidx.appcompat.widget.AppCompatImageView
+    android:id="@+id/balloon_arrow"
+    android:layout_width="15dp"
+    android:layout_height="10dp"
+    android:layout_alignBottom="@+id/balloon_content"
+    android:layout_centerHorizontal="true"
+    android:rotation="180"
+    android:scaleType="fitXY"
+    android:src="@drawable/arrow"
+    android:tint="@android:color/black" />
+
+  <RelativeLayout
+    android:id="@+id/balloon_content"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true">
+
+    <androidx.cardview.widget.CardView
+      android:id="@+id/balloon_card"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_centerInParent="true"
+      app:cardCornerRadius="0dp"
+      app:cardElevation="0dp"
+      tools:cardBackgroundColor="@android:color/darker_gray">
+
+      <LinearLayout
+        android:id="@+id/balloon_detail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+          android:id="@+id/balloon_icon"
+          android:layout_width="28dp"
+          android:layout_height="28dp"
+          android:layout_gravity="center_vertical"
+          android:layout_marginEnd="8dp"
+          android:layout_marginRight="8dp"
+          android:scaleType="fitXY"
+          android:visibility="gone"
+          tools:src="@drawable/arrow" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+          android:id="@+id/balloon_text"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          android:gravity="center"
+          android:textColor="@android:color/white"
+          app:autoSizeTextType="uniform"
+          tools:text="@tools:sample/lorem" />
+
+      </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+  </RelativeLayout>
+
+</RelativeLayout>

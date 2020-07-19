@@ -1,0 +1,352 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray0"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:id="@+id/menu"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/statusbg">
+
+        <include
+            layout="@layout/back_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp" />
+
+        <TextView
+            android:id="@+id/titlec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:text="register page"
+            android:textColor="@color/title">
+
+        </TextView>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/menu"
+        android:layout_marginTop="-1dp">
+
+
+        <RelativeLayout
+            android:id="@+id/ssmid"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/list"
+            android:layout_marginTop="8dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="UUID"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/ssmid_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:paddingRight="12dp"
+                android:scaleType="center" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/gray0" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/chenge_angle_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/ssmid"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/change_sesame_angle"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:paddingRight="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_arrow_gray" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/gray0" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/change_ssm_name_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/chenge_angle_zone"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/change_sesame_name"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/gray0" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/change_ssm_histag_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/change_ssm_name_zone"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="History Tag"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/histag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="12dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/gray0" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/change_ssm_fr_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/change_ssm_histag_zone"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/ssm_update"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/firmwareVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="12dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/gray0" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/qutolock_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/change_ssm_fr_zone"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/autolock"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/autolock_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text=""
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+
+                android:id="@+id/second_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="12dp"
+                android:layout_toRightOf="@+id/autolock_status"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/second"
+
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <Switch
+                android:id="@+id/autolockSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="12dp" />
+        </RelativeLayout>
+
+        <co.utils.wheelview.WheelView
+
+            android:id="@+id/wheelview"
+
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_below="@+id/qutolock_zone"
+            android:layout_weight="1.0"
+
+            android:focusable="true"
+            android:gravity="center"
+            android:visibility="gone"
+            app:dragOut="true"
+            app:textColor="@color/black"
+            app:textSize="12sp" />
+
+        <RelativeLayout
+            android:id="@+id/delete_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/wheelview"
+            android:layout_marginTop="8dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/reset_the_sesame"
+                android:textColor="@color/red"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/drop_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/delete_zone"
+            android:layout_marginTop="8dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/trash_key"
+                android:textColor="@color/red"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/share_zone"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_below="@+id/drop_zone"
+            android:layout_marginTop="8dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/share_key"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

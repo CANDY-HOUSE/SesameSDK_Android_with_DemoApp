@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".BlueSesameControlActivity">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/statusbg">
+
+            <Button
+                android:id="@+id/right_icon"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/ic_icons_outlined_addoutline" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/accessLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="accessLevel" />
+
+            <TextView
+                android:id="@+id/bleid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BleId" />
+
+            <TextView
+                android:id="@+id/nickname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="nickName" />
+
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/connectBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="connect"
+                android:textSize="10dp" />
+
+
+            <Button
+                android:id="@+id/disconnectBtn"
+                android:layout_width="wrap_content"
+
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/connectBtn"
+
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="disconnect"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/connectStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+
+                android:layout_centerVertical="true"
+
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="connectStatus"
+
+                android:textSize="10dp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+
+                android:padding="4dp"
+                android:text="register"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/resetSSM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/register"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="factory reset"
+                android:textSize="8dp" />
+
+            <Button
+                android:id="@+id/unregisterServer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/resetSSM"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="unregister server"
+                android:textSize="8dp" />
+
+            <Button
+                android:id="@+id/registerstatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="status"
+
+                android:textSize="10dp"
+
+                />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/dfu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="dfu"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/firmwareVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/dfu"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="firmwareVersion"
+                android:textSize="8dp" />
+
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="0"
+                android:textSize="10dp" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/setLockAngle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="setLockAngle"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/setUnLockAngle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/setLockAngle"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="setUnLockAngle"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/setAngle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="set Angles"
+                android:textSize="10dp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/lockBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_red"
+                android:padding="4dp"
+                android:text="lock"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/unlockBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/lockBtn"
+                android:background="@drawable/round_blue"
+                android:text="unlock"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+
+            <Button
+                android:id="@+id/moveState"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="4dp"
+                android:layout_toLeftOf="@+id/lockState"
+                android:background="@color/clear"
+                android:text="move"
+                android:textSize="10dp"
+
+                />
+
+            <Button
+                android:id="@+id/lockState"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="status"
+                android:textSize="10dp"
+
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/enableAutolock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_red"
+                android:padding="4dp"
+                android:text="enable"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/disableAutolock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/enableAutolock"
+                android:background="@drawable/round_blue"
+                android:text="disable"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+
+            <Button
+                android:id="@+id/readAutolock"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:layout_toLeftOf="@+id/autolockStatus"
+                android:background="@drawable/round_blue"
+                android:text="read"
+                android:textColor="@color/white"
+                android:textSize="10dp"
+
+                />
+
+            <Button
+                android:id="@+id/autolockStatus"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="status"
+                android:textSize="10dp"
+
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+
+            <Button
+                android:id="@+id/nowAngle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="nowangle"
+                android:textSize="10dp"
+
+                />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+
+            <Button
+                android:id="@+id/cmdResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@color/clear"
+                android:singleLine="true"
+                android:text="cmdResult"
+                android:textSize="10dp"
+
+                />
+
+
+        </RelativeLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="100dp"
+    android:layout_height="50dp">
+
+    <ImageView
+        android:id="@+id/floatingIcon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/app_icon" />
+    <ImageView
+        android:layout_toRightOf="@+id/floatingIcon"
+        android:id="@+id/bleOP"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/app_icon" />
+    <TextView
+
+        android:id="@+id/float_status"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+
+        android:gravity="center"
+        android:text="wwww">
+
+    </TextView>
+
+</RelativeLayout>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="colorPrimary">#28aeb1</color>
+    <color name="colorPrimaryDark">#666666</color>
+    <color name="colorAccent">#28aeb1</color>
+    <color name="white">#fff</color>
+    <color name="hint">#28aeb1</color>
+    <color name="black">#000000</color>
+    <color name="gray0">#eeeeee</color>
+    <color name="gray1">#cccccc</color>
+    <color name="gray2">#999999</color>
+    <color name="gray3">#666666</color>
+    <color name="gray4">#333333</color>
+    <color name="blue">#0000ff</color>
+    <color name="text_hint">#cccccc</color>
+
+    <color name="clear">#00000000</color>
+    <color name="title">#000000</color>
+    <color name="statusbg">#eeeeee</color>
+    <color name="menu_bg">#444444</color>
+    <color name="cancel_btn_bg_color">#D0D0D0</color>
+    <color name="cancel_btn_bg_pressed_color">#B6B6B6</color>
+
+    <color name="confirm_btn_bg_color">@color/colorPrimary</color>
+    <color name="confirm_btn_bg_pressed_color">@color/colorPrimaryDark</color>
+
+    <color name="warning_btn_bg_color">#DD6B55</color>
+    <color name="warning_btn_bg_pressed_color">#CD5B55</color>
+
+    <color name="lightGray">#F5F5F5</color>
+    <color name="darkGray">#424242</color>
+    <color name="darkerGray">#424242</color>
+    <color name="green">#43A047</color>
+    <color name="red">#F44336</color>
+    <color name="lightWhite">#F5F5F5</color>
+    <color name="lock_red">#cc4a44</color>
+    <color name="unlock_blue">#28aeb1</color>
+    <color name="viewfinder_mask">#60000000</color>
+    <color name="viewfinder_laser">#28aeb1</color>
+    <color name="viewfinder_border">#28aeb1</color>
+</resources>

@@ -1,0 +1,163 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    >
+
+    <ImageView
+        android:id="@+id/backicon"
+        android:padding="12dp"
+        android:layout_alignParentRight="true"
+        android:layout_width="50dp"
+        android:src="@drawable/ic_icons_filled_close"
+        android:layout_height="50dp" />
+    <LinearLayout
+        android:id="@+id/top"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_marginTop="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/email"
+                android:layout_centerVertical="true"
+                android:textColor="@color/colorAccent"
+                android:textSize="14sp" />
+
+
+            <EditText
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:id="@+id/mail_edt"
+                android:layout_width="200dp"
+                android:layout_height="32dp"
+                android:textSize="14sp"
+                android:background="@drawable/rounded_edt"
+                android:drawablePadding="4dp"
+                android:gravity="start|center_vertical"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:paddingLeft="12dp"
+                android:singleLine="true"
+                android:text="" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/checkBtn"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:textAllCaps="false"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/round_blue"
+            android:text="@string/send_verification_code"
+            android:textColor="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/second_zone_p"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/verification_code"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="48dp"
+                    android:layout_centerVertical="true"
+
+                    android:id="@+id/confirm_edt"
+                    android:layout_width="150dp"
+                    android:layout_height="32dp"
+                    android:textSize="14sp"
+                    android:background="@drawable/rounded_edt"
+                    android:drawablePadding="4dp"
+                    android:gravity="start|center_vertical"
+                    android:maxLines="1"
+                    android:paddingLeft="12dp"
+                    android:singleLine="true"
+                    android:text="" />
+
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/new_password"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="48dp"
+                    android:layout_centerVertical="true"
+
+                    android:id="@+id/new_password_edt"
+                    android:layout_width="150dp"
+                    android:layout_height="32dp"
+                    android:textSize="14sp"
+                    android:background="@drawable/rounded_edt"
+                    android:drawablePadding="4dp"
+                    android:gravity="start|center_vertical"
+                    android:maxLines="1"
+                    android:paddingLeft="12dp"
+                    android:singleLine="true"
+                    android:text="" />
+
+            </RelativeLayout>
+            <Button
+                android:textAllCaps="false"
+                android:id="@+id/confirmBtn"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/round_blue"
+                android:text="@string/verification"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <ProgressBar
+        android:id="@+id/pBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_margin="150dp"
+        android:indeterminate="false" />
+
+
+</RelativeLayout>
