@@ -2,7 +2,7 @@ package co.candyhouse.app.tabs.devices.ssm2
 
 import co.candyhouse.app.R
 import co.candyhouse.sesame.ble.CHSesame2Status
-import co.candyhouse.sesame.ble.CHSesame2
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 
 fun ssmUIParcer(device: CHSesame2): Int {
     return when (device.deviceStatus) {

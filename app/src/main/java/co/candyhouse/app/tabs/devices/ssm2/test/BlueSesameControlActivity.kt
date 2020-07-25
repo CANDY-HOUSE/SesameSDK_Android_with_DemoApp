@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHBleManagerDelegate
 import co.candyhouse.sesame.ble.CHSesame2Status
-import co.candyhouse.sesame.ble.CHSesame2
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.sesame.deviceprotocol.*
 import co.candyhouse.app.R
@@ -45,7 +45,7 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
         registerstatus.setText(if (ssm!!.isRegistered) "register" else "unregister")
 
         register.setOnClickListener {
-            ssm?.registerSesame { res ->
+            ssm?.registerSesame2 { res ->
 
 
             }

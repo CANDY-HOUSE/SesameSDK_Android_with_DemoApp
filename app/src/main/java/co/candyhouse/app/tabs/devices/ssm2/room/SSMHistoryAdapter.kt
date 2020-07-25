@@ -1,26 +1,27 @@
 package co.candyhouse.app.tabs.devices.ssm2.room
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import co.candyhouse.app.R
-import co.utils.textdrawable.TextDrawable
-import co.utils.textdrawable.util.ColorGenerator
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2History
 import org.zakariya.stickyheaders.SectioningAdapter
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class SSMHistoryAdapter(var mTestGList: ArrayList<Pair<String, List<String>>>) : SectioningAdapter() {
+class SSMHistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesame2History>>>) : SectioningAdapter() {
 
     inner class ItemViewHolder(itemView: View) : SectioningAdapter.ItemViewHolder(itemView) {
         var name: TextView = itemView.findViewById<TextView>(R.id.name)
         var time: TextView = itemView.findViewById<TextView>(R.id.time)
+        var locktype: TextView = itemView.findViewById<TextView>(R.id.locktype)
+        var setting_params: TextView = itemView.findViewById<TextView>(R.id.params)
         var head: ImageView = itemView.findViewById<ImageView>(R.id.head)
-        var locktype: ImageView = itemView.findViewById<ImageView>(R.id.locktype)
 
     }
 
@@ -29,11 +30,11 @@ class SSMHistoryAdapter(var mTestGList: ArrayList<Pair<String, List<String>>>) :
     }
 
     override fun getNumberOfSections(): Int {
-        return mTestGList.size
+        return mGroupHistData.size
     }
 
     override fun getNumberOfItemsInSection(sectionIndex: Int): Int {
-        return mTestGList[sectionIndex].second.size
+        return mGroupHistData[sectionIndex].second.size
     }
 
     override fun doesSectionHaveHeader(sectionIndex: Int): Boolean {
@@ -49,7 +50,7 @@ class SSMHistoryAdapter(var mTestGList: ArrayList<Pair<String, List<String>>>) :
 
     @SuppressLint("SetTextI18n")
     override fun onBindHeaderViewHolder(viewHolder: SectioningAdapter.HeaderViewHolder, sectionIndex: Int, headerType: Int) {
-        val s = mTestGList[sectionIndex]
+        val s = mGroupHistData[sectionIndex]
         val hvh = viewHolder as HeaderViewHolder
         hvh.textView.text = s.first
     }
@@ -61,51 +62,57 @@ class SSMHistoryAdapter(var mTestGList: ArrayList<Pair<String, List<String>>>) :
     }
 
     override fun onBindItemViewHolder(viewHolder: SectioningAdapter.ItemViewHolder, sectionIndex: Int, itemIndex: Int, itemType: Int) {
-        val dataPair = mTestGList[sectionIndex]
+        val dataPair = mGroupHistData[sectionIndex]
         val ivh = viewHolder as ItemViewHolder
-//        val history = dataPair.second[itemIndex].history
-//        val operator = dataPair.second[itemIndex].opetator
-//        ivh.name.text = operator?.name ?: when (history.event) {
-//            "manual-operated" -> MainRoomFG.instance?.getString(R.string.manual_operated)
-//            "auto-lock" -> MainRoomFG.instance?.getString(R.string.autolock)
-//            "manual-lock" -> (if (history.locker) MainRoomFG.instance?.getString(R.string.manua_lock) else MainRoomFG.instance?.getString(R.string.manua_unlock))
-//            else -> history.event
-//        }
+        val history = dataPair.second[itemIndex]
+//        Log.d("tag","recordID:"+history.recordID.toString())
+//        Log.d("tag","date"+history.date.toString())
+//        Log.d("tag","histag"+history.histag.toString())
+        when(history){
+            is CHSesame2History.TimeChanged -> {
+                Log.d("tag","timeBefore"+history.timeBefore.toString())
+                Log.d("tag","timeAfter"+history.timeAfter.toString())
+            }
+            is CHSesame2History.MechSettingUpdated -> {
+                Log.d("tag","lockTargetBefore"+history.lockTargetBefore.toString())
+                Log.d("tag","lockTargetAfter"+history.lockTargetAfter.toString())
+                Log.d("tag","unlockTargetBefore"+history.unlockTargetBefore.toString())
+                Log.d("tag","unlockTargetAfter"+history.unlockTargetAfter.toString())
+            }
+            is CHSesame2History.AutoLockUpdated  -> {
+                Log.d("tag","enabledBefore:"+history.enabledBefore.toString())
+                Log.d("tag","enabledAfter"+history.enabledAfter.toString())
+            }
+        }
 
-//        val time = getTZ().format(showTZ().parse(history.timestamp))
-//        ivh.time.text = time
-//        ivh.head.setImageResource(if (history.locker) R.drawable.ic_icon_locked else R.drawable.ic_icon_unlocked)
+        ivh.locktype.text = history.javaClass.simpleName
+        ivh.time.text = getTZ().format(history.date)
+        ivh.name.text = history.recordID.toString() + ":" + history.historyTag?.let { String(it) }
 
+        ivh.setting_params.text = when (history) {
+            is CHSesame2History.TimeChanged -> history.timeBefore.toString() + " -> " + history.timeAfter
+            is CHSesame2History.AutoLockUpdated -> "" + history.enabledBefore + "-->" + history.enabledAfter
+            is CHSesame2History.MechSettingUpdated -> "lock:" + history.lockTargetBefore + "->" + history.lockTargetAfter + " unlock:" + history.unlockTargetBefore + "->" + history.unlockTargetAfter
+            else -> ""
+        }
 
-//        if (history.event == "lock") {
-//            ivh.head.setImageDrawable(avatatImagGenaroter(operator?.firstname))
-//        } else {
-//            ivh.head.setImageResource(
-//                    when (history.event) {
-//                        "manual-operated" -> R.drawable.ic_handmove
-//                        "manual-lock" -> R.drawable.ic_handmove
-//                        else -> R.drawable.ic_autolock
-//                    }
-//            )
-//        }
+        ivh.head.setImageResource(
+                when (history) {
+                    is CHSesame2History.ManualElse -> R.drawable.ic_handmove
+                    is CHSesame2History.ManualLocked -> R.drawable.ic_icon_locked
+                    is CHSesame2History.ManualUnlocked -> R.drawable.ic_icon_unlocked
+                    is CHSesame2History.AutoLockUpdated -> R.drawable.ic_icons_outlined_setting
+                    is CHSesame2History.AutoLock -> R.drawable.ic_autolock
+                    is CHSesame2History.BLELock -> R.drawable.ic_icon_locked
+                    is CHSesame2History.BLEUnlock -> R.drawable.ic_icon_unlocked
+                    is CHSesame2History.TimeChanged -> R.drawable.ic_icon_time_change
+                    is CHSesame2History.MechSettingUpdated -> R.drawable.ic_icons_outlined_setting
+                    else -> R.drawable.ic_autolock
+                }
+        )
     }
-
-
 }
 
-fun avatatImagGenaroter(name: String? = "NA"): TextDrawable? {
-    //todo cut
-
-    val na = name ?: "NA"
-    val ts = if (na.length == 1) 60 else 38
-    val drawable = TextDrawable.Builder()
-            .setColor(ColorGenerator.DEFAULT.getColorByIndex(na.firstOrNull()?.toInt()))
-            .setShape(TextDrawable.SHAPE_ROUND)
-            .setText(na)
-            .setFontSize(ts)
-            .build()
-    return drawable
-}
 
 fun getTZ(): SimpleDateFormat {
     val sd = SimpleDateFormat("HH:mm:ss a", Locale.getDefault())
@@ -125,3 +132,6 @@ fun groupTZ(): SimpleDateFormat {
 
     return sd
 }
+
+
+

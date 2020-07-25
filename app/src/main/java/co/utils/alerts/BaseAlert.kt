@@ -21,17 +21,18 @@ abstract class BaseAlert(context: Context) : Dialog(context, R.style.AppTheme_Fl
         setCancelable(true)
         setCanceledOnTouchOutside(false)
         setContentView(layout)
-        mAlertView = window.decorView.findViewById(android.R.id.content)
+        mAlertView = window!!.decorView.findViewById(android.R.id.content)
 
         mModalInAnim = AnimationUtils.loadAnimation(context, R.anim.modal_in)
         mModalOutAnim = AnimationUtils.loadAnimation(context, R.anim.modal_out)
 
         mModalOutAnim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(p0: Animation?) { }
+            override fun onAnimationRepeat(p0: Animation?) {}
             override fun onAnimationEnd(p0: Animation?) {
                 Handler().post { super@BaseAlert.dismiss() }
             }
-            override fun onAnimationStart(p0: Animation?) { }
+
+            override fun onAnimationStart(p0: Animation?) {}
         })
 
     }
