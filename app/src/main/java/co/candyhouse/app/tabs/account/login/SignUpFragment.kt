@@ -29,8 +29,8 @@ import pe.startapps.alerts.ext.Alert
 class SignUpFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = Dialog(activity, R.style.AppTheme_FlatDialog)
-        dialog.window.attributes.windowAnimations = R.style.DialogAnimation
+        val dialog = Dialog(context!!, R.style.AppTheme_FlatDialog)
+        dialog.window!!.attributes.windowAnimations = R.style.DialogAnimation
         return dialog
     }
 

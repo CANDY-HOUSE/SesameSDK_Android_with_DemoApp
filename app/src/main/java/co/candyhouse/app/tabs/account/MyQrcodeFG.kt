@@ -25,9 +25,9 @@ import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil
 import cn.bingoogolapple.qrcode.zxing.QRCodeEncoder
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.devices.ssm2.room.avatatImagGenaroter
 import co.candyhouse.sesame.server.CHAccountManager
 import co.candyhouse.app.R
+import co.utils.textdrawable.util.avatatImagGenaroter
 import kotlinx.android.synthetic.main.back_sub.*
 import kotlinx.android.synthetic.main.fg_myqr.*
 

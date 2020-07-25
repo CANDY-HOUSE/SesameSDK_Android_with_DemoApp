@@ -11,11 +11,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.tabs.MainActivity
-import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHBleManagerDelegate
 import co.candyhouse.sesame.ble.CHSesame2Status
-import co.candyhouse.sesame.ble.CHSesame2
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
 import co.utils.L
@@ -34,11 +33,15 @@ class RegisterDevicesFG : Fragment() {
         (activity as MainActivity).hideMenu()
         CHBleManager.delegate = object : CHBleManagerDelegate {
             override fun didDiscoverUnRegisteredSesames(sesames: List<CHSesame2>) {
-                ThreadUtils.runOnUiThread {
-//                    L.d("hcia", "sesames:" + sesames.first().rssi)
 
+                recyclerView.post {
+//                    L.d("hcia", "sesames:" + sesames.first().rssi)
                     mDeviceList.clear()
                     mDeviceList.addAll(sesames.sortedByDescending { it.rssi })
+                    mDeviceList.firstOrNull()?.connnect { }
+//                    mDeviceList.forEach {
+//                        it.connnect { }
+//                    }
                     (recyclerView.adapter as GenericAdapter<*>).notifyDataSetChanged()
                 }
             }
@@ -67,11 +70,12 @@ class RegisterDevicesFG : Fragment() {
                         @SuppressLint("SetTextI18n")
                         override fun bind(data: CHSesame2, pos: Int) {
                             val sesame = data
-                            customName.text = "" + (sesame.rssi + 130) + "%"
+                            customName.text = "" + (if (sesame.rssi == null) 0 else sesame.rssi!! + 130) + "%"
                             uuidTxt.text = sesame.deviceId.toString().toUpperCase()
                             statusTxt.text = getString(R.string.Sesame2) + data.deviceStatus
-                            sesame.connnect() {}
                             itemView.setOnClickListener {
+                                sesame.connnect() {}
+
                                 MainActivity.activity?.showProgress()
                                 if (sesame.deviceStatus == CHSesame2Status.readytoRegister) {
                                     registerSSM(sesame)
@@ -101,20 +105,20 @@ class RegisterDevicesFG : Fragment() {
     }
 
     private fun RecyclerView.ViewHolder.registerSSM(sesame: CHSesame2) {
-        sesame.registerSesame() { res ->
+        sesame.registerSesame2 { res ->
 
             res.onSuccess {
-
                 L.d("hcia", "UI收到成功註冊")
                 sesame.setHistoryTag("ドラえもん".toByteArray()) {}
                 sesame.configureLockPosition(0, 256) {}
                 DeviceListFG.instance?.refleshPage()
-                itemView?.post {
+                activity?.runOnUiThread {
                     findNavController().navigateUp()
                 }
+
             }
             res.onFailure {
-                itemView?.post {
+                itemView.post {
                     Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
                 }
             }

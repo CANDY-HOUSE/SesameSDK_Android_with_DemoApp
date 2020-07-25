@@ -124,11 +124,11 @@ class ScanFG : Fragment(), QRCodeView.Delegate, EasyPermissions.PermissionCallba
         L.d("hcia", "sharedKey:" + sharedKey)
         L.d("hcia", "sharek:" + sharek)
 
-        CHDeviceManager.receiveSesame2Key(sharek!!) {
+        CHDeviceManager.receiveSesame2Keys(sharek!!) {
             it.onSuccess {
                 it.data.forEach {
+                    L.d("hcia", "設定歷史標籤 deviceId:" + it.deviceId)
                     it.setHistoryTag("のび太".toByteArray()) {
-
                     }
                 }
             }

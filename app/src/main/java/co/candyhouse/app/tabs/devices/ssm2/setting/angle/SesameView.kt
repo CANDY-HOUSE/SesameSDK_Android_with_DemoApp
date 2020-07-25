@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import co.candyhouse.sesame.ble.CHSesame2
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.app.R
 import kotlin.math.cos
 import kotlin.math.sin

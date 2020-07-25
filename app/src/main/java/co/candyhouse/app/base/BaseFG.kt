@@ -19,7 +19,7 @@ open class BaseFG : Fragment() {
     val customAdapter by lazy {
         CustomAdapter(object : CustomAdapter.CustomViewHolder.Delegate {
             override fun onCustomItemClick(customItem: BarMenuItem) {
-                customListBalloon?.dismiss()
+                customListBalloon.dismiss()
                 when (customItem.index) {
                     0 -> {
 //                        findNavController().navigate(R.id.to_scan)
@@ -63,7 +63,7 @@ open class BaseFG : Fragment() {
                 .setOnBalloonOutsideTouchListener(object : OnBalloonOutsideTouchListener {
                     override fun onBalloonOutsideTouch(view: View, event: MotionEvent) {
                         menuBtn.isClickable = false
-                        customListBalloon?.dismiss()
+                        customListBalloon.dismiss()
                         menuBtn.postDelayed({
                             menuBtn.isClickable = true
                         }, 300)

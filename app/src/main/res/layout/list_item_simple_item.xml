@@ -40,7 +40,6 @@
         />
 
     <TextView
-
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -51,15 +50,23 @@
         android:text="14:02:06 PM"
         android:textColor="@color/text_hint" />
 
-    <ImageView
-        android:visibility="gone"
+    <TextView
         android:id="@+id/locktype"
-        android:layout_width="45dp"
+        android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:scaleType="fitXY"
+        android:gravity="center_vertical"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="48dp"
         />
 
+    <TextView
+        android:id="@+id/params"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginLeft="10dp"
+        android:textSize="10dp"
+        android:textColor="@color/text_hint" />
 </RelativeLayout>

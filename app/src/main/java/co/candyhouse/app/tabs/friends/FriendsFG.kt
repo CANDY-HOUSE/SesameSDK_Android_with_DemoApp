@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import co.candyhouse.app.tabs.MainActivity
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
-import co.candyhouse.app.tabs.devices.ssm2.room.avatatImagGenaroter
 import co.candyhouse.sesame.server.CHAccountManager
 //import co.candyhouse.sesame.server.a.model.UserProfile
 import co.candyhouse.app.R

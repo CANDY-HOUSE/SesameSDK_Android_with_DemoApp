@@ -26,9 +26,9 @@ import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil
 import cn.bingoogolapple.qrcode.zxing.QRCodeEncoder
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.devices.ssm2.room.avatatImagGenaroter
 import co.candyhouse.sesame.server.CHAccountManager
 import co.candyhouse.app.R
+import co.utils.textdrawable.util.avatatImagGenaroter
 import kotlinx.android.synthetic.main.back_sub.*
 import kotlinx.android.synthetic.main.fg_my_ssmkey.*
 
@@ -60,30 +60,19 @@ class MyKEYFG : BaseNFG() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
-        val sdsd = Uri.Builder()
-        sdsd.scheme("candyhouse")
-        sdsd.authority("SesameUI")
-        sdsd.appendQueryParameter("t", "sharedKey")
-        sdsd.appendQueryParameter("sharedKey", ssm2key)
-        val uri = sdsd.build()
-
-//        L.d("hcia", "uri.toString():" + uri.toString())
-
+        val keyURI = Uri.Builder()
+        keyURI.scheme("candyhouse")
+        keyURI.authority("SesameUI")
+        keyURI.appendQueryParameter("t", "sharedKey")
+        keyURI.appendQueryParameter("sharedKey", ssm2key)
+        val uri = keyURI.build()
         val image = QRCodeEncoder.syncEncodeQRCode(uri.toString(), BGAQRCodeUtil.dp2px(context, 150f))
         qrcode.setImageBitmap(image)
         headv.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
-
-
         headv?.setImageDrawable(avatatImagGenaroter(keyname))
-
         backicon.setOnClickListener {
             findNavController().navigateUp()
         }
-
     }
-
-
 }

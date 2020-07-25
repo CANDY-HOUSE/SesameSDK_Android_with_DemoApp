@@ -20,25 +20,26 @@ import com.victor.library.wheelview.mode.WheelViewRecycleMode
  * Created by Victor on 2017/6/12.
  */
 
-class WheelView<T>: View {
+class WheelView<T> : View {
     private val TAG = "WheelView"
     private val SHADOWS_COLORS = intArrayOf(0xefffffff.toInt(), 0xcfffffff.toInt(), 0x3fffffff)
-    private var paint : Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var textColor : Int = 0x000
-    private var textSize : Float = 19f
+    private var paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var textColor: Int = 0x000
+    private var textSize: Float = 19f
     private var bgColor: Int = 0x000
-    private lateinit var scroller : OverScroller
+    private lateinit var scroller: OverScroller
     public var eachItemHeight = 60
     private var maxShowSize = 7
-    private var prevY : Float = 0f
+    private var prevY: Float = 0f
+
     // Shadows drawables
     private var topShadow: GradientDrawable? = null
     private var bottomShadow: GradientDrawable? = null
 
-    private var gestureDetector : GestureDetector? = null
-    private var wheelScrollListener : WheelScrollListener? = null
+    private var gestureDetector: GestureDetector? = null
+    private var wheelScrollListener: WheelScrollListener? = null
 
-    private var mSelected : Int = 0
+    private var mSelected: Int = 0
 
     private var canDragOutBorder = true
     private var mScrollY: Int = 0
@@ -47,10 +48,11 @@ class WheelView<T>: View {
     private var mFlingDistance: Int = 0
     private var mCurrY: Int = 0
     private lateinit var adapter: IWheelviewAdapter
+
     /**
      * 模式:居中显示；从起始位置显示；循环显示
      */
-    private var wheelViewMode : IWheelViewMode = WheelViewRecycleMode(eachItemHeight, 0)
+    private var wheelViewMode: IWheelViewMode = WheelViewRecycleMode(eachItemHeight, 0)
 
 
     constructor(context: Context?) : this(context, null)
@@ -61,7 +63,7 @@ class WheelView<T>: View {
     }
 
     fun initParams(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
-        val typedArray = context!!.theme.obtainStyledAttributes (attrs, R.styleable.WheelView, defStyleAttr, defStyleRes)
+        val typedArray = context!!.theme.obtainStyledAttributes(attrs, R.styleable.WheelView, defStyleAttr, defStyleRes)
         val count = typedArray.indexCount
         for (i in 0..count) {
             val attr = typedArray.getIndex(i)
@@ -157,12 +159,12 @@ class WheelView<T>: View {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when(event.action) {
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 mFlingDistance = 0
-                if(vTracker == null) {
+                if (vTracker == null) {
                     vTracker = VelocityTracker.obtain()
-                }else{
+                } else {
                     vTracker?.clear()
                 }
 
@@ -183,7 +185,7 @@ class WheelView<T>: View {
                 vTracker?.addMovement(event)
                 vTracker?.computeCurrentVelocity(1000)
                 var currY = event.y
-                var dy : Int = (currY - prevY).toInt()
+                var dy: Int = (currY - prevY).toInt()
                 if (Math.abs(dy) > mEdgeSlop) {
                     if (!canDragOutBorder) {
                         if (scrollY + dy <= 0 && scrollY + dy <= wheelViewMode.getTopMaxScrollHeight()) {
@@ -207,9 +209,9 @@ class WheelView<T>: View {
     }
 
     private fun scrollerStop() {
-        var offset =  if (scrollY < 0) -0.5f else 0.5f
-        var moveIndex : Int = (scrollY * 1f / eachItemHeight + offset).toInt()
-        var dy : Int = scrollY - moveIndex * eachItemHeight
+        var offset = if (scrollY < 0) -0.5f else 0.5f
+        var moveIndex: Int = (scrollY * 1f / eachItemHeight + offset).toInt()
+        var dy: Int = scrollY - moveIndex * eachItemHeight
 
         if (canDragOutBorder && wheelViewMode !is WheelViewRecycleMode) {
             if (scrollY <= 0 && scrollY <= wheelViewMode.getTopMaxScrollHeight()) {
@@ -226,7 +228,7 @@ class WheelView<T>: View {
 
     }
 
-    fun setWheelScrollListener(wheelScrollListener : WheelScrollListener) {
+    fun setWheelScrollListener(wheelScrollListener: WheelScrollListener) {
         this.wheelScrollListener = wheelScrollListener
     }
 
@@ -240,7 +242,7 @@ class WheelView<T>: View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (adapter == null || adapter.count == 0) return
+        if (adapter.count == 0) return
         canvas.drawColor(bgColor)
         clipView(canvas)
         drawText(canvas)
@@ -249,22 +251,22 @@ class WheelView<T>: View {
     }
 
     private fun drawLine(canvas: Canvas) {
-        var baseHeight : Float = (height - eachItemHeight) / 2.toFloat()
+        val baseHeight: Float = (height - eachItemHeight) / 2.toFloat()
         paint.color = resources.getColor(R.color.gray2)
         canvas.drawLine(0f, baseHeight + scrollY, width.toFloat(), baseHeight + scrollY, paint)
-        canvas.drawLine(0f, baseHeight + eachItemHeight + scrollY , width.toFloat(),
+        canvas.drawLine(0f, baseHeight + eachItemHeight + scrollY, width.toFloat(),
                 baseHeight + eachItemHeight + scrollY, paint)
     }
 
     private fun drawText(canvas: Canvas) {
         paint.color = resources.getColor(R.color.black)
-        var y : Float
-        var x : Float
+        var y: Float
+        var x: Float
         var minStart: Int = 0
         var count: Int = adapter.count
         if (wheelViewMode is WheelViewRecycleMode) {
-            minStart = - maxShowSize / 2 - 1 + scrollY / eachItemHeight // 多显示一个，避免闪现
-            count = adapter.count +  scrollY / eachItemHeight
+            minStart = -maxShowSize / 2 - 1 + scrollY / eachItemHeight // 多显示一个，避免闪现
+            count = adapter.count + scrollY / eachItemHeight
         }
         var index: Int = 0
         for (i in minStart until count step 1) {
@@ -283,27 +285,27 @@ class WheelView<T>: View {
     }
 
     private fun getMaxHeight(): Float {
-        var maxHeight : Float = eachItemHeight * maxShowSize.toFloat()
+        var maxHeight: Float = eachItemHeight * maxShowSize.toFloat()
         if (maxHeight > height) {
             maxHeight = height.toFloat()
         }
         return maxHeight
     }
 
-    private fun clipView(canvas : Canvas) {
-        var reqHeight : Float = getMaxHeight()
-        var starOffset : Float = (height - reqHeight) / 2f
+    private fun clipView(canvas: Canvas) {
+        var reqHeight: Float = getMaxHeight()
+        var starOffset: Float = (height - reqHeight) / 2f
         canvas.clipRect(0f, starOffset + scrollY, width.toFloat(),
                 starOffset + reqHeight + scrollY)
     }
 
-    private fun getShadowsHeight() : Int {
+    private fun getShadowsHeight(): Int {
         return (height - eachItemHeight) / 2
     }
 
     private fun drawShadows(canvas: Canvas) {
         val height = getShadowsHeight()
-		topShadow?.setBounds(0, scrollY, width, height + scrollY)
+        topShadow?.setBounds(0, scrollY, width, height + scrollY)
         topShadow?.draw(canvas)
 
         bottomShadow?.setBounds(0, scrollY + eachItemHeight + height, width, getHeight() + scrollY)

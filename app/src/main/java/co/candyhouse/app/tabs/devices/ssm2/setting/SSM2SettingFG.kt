@@ -12,6 +12,7 @@ import co.candyhouse.app.base.BaseSSMFG
 import co.candyhouse.sesame.ble.*
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.wheelview.WheelView
@@ -120,7 +121,7 @@ class SSM2SettingFG : BaseSSMFG() {
                 mSesame?.updateFirmware() { res ->
                     res.onSuccess {
                         val starter = DfuServiceInitiator(it.data.address)
-                        starter.setZip(R.raw.a487e6c9)
+                        starter.setZip(R.raw.fcee7725)
                         starter.setPacketsReceiptNotificationsEnabled(false)
                         starter.setPrepareDataObjectDelay(400)
                         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
@@ -210,7 +211,7 @@ class SSM2SettingFG : BaseSSMFG() {
         delete_zone.setOnClickListener {
             val alert = AlertView("", "", AlertStyle.IOS)
             alert.addAction(AlertAction(getString(R.string.ssm_delete), AlertActionStyle.NEGATIVE) { action ->
-                mSesame?.resetSesame {
+                mSesame?.resetSesame2 {
                     SharedPreferencesUtils.preferences.edit().remove(mSesame?.deviceId.toString()).apply()
                     findNavController().navigateUp()
                     findNavController().navigateUp()
@@ -221,7 +222,7 @@ class SSM2SettingFG : BaseSSMFG() {
         drop_zone.setOnClickListener {
             val alert = AlertView("", "", AlertStyle.IOS)
             alert.addAction(AlertAction(getString(R.string.ssm_delete), AlertActionStyle.NEGATIVE) { action ->
-                mSesame?.dropKey()
+                mSesame?.dropKey(){}
                 SharedPreferencesUtils.preferences.edit().remove(mSesame?.deviceId.toString()).apply()
                 findNavController().navigateUp()
                 findNavController().navigateUp()

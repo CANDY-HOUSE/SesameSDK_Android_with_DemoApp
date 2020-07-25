@@ -13,7 +13,6 @@ import com.amazonaws.mobile.client.results.UserCodeDeliveryDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.account.login.LoginFragment
-import co.candyhouse.app.tabs.devices.ssm2.room.avatatImagGenaroter
 import co.candyhouse.sesame.server.CHAccountManager
 import co.candyhouse.app.R
 import co.utils.SharedPreferencesUtils
@@ -22,6 +21,7 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.objects.AlertAction
+import co.utils.textdrawable.util.avatatImagGenaroter
 import kotlinx.android.synthetic.main.fg_me.*
 import kotlinx.android.synthetic.main.fragment_register.family_name
 import kotlinx.android.synthetic.main.fragment_register.given_name

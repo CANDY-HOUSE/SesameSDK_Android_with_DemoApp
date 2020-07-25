@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.fragment_login.*
 class LoginFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = Dialog(activity, R.style.AppTheme_FlatDialog)
+        val dialog = Dialog(context!!, R.style.AppTheme_FlatDialog)
         return dialog
     }
 

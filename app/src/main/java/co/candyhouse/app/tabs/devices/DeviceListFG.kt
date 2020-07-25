@@ -22,6 +22,9 @@ import co.candyhouse.sesame2.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.account.login.toastMSG
 import co.candyhouse.app.tabs.devices.ssm2.ssmUIParcer
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2
+import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
+import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
 import co.candyhouse.sesame.deviceprotocol.NSError
 import co.utils.L
 import co.utils.SharedPreferencesUtils
@@ -89,24 +92,44 @@ class DeviceListFG : BaseFG() {
                         override fun bind(data: CHSesame2, pos: Int) {
                             val sesame = data
                             sesame.delegate = object : CHSesame2Delegate {
+                                override fun onMechStatusChanged(device: CHSesame2, status: CHSesame2MechStatus, intention: CHSesame2Intention) {
+                                    ssmView.setLock(device)
+                                }
+
                                 override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
 //                                    L.d("hcia", device.deviceId.toString() + " UI chDeviceStatus:" + device.deviceStatus)
 //                                    battery.setBackgroundResource(ssmBatteryParcer(device))
+                                    ssmView.setLock(device)
+
                                     toggle?.post {
                                         toggle.setBackgroundResource(ssmUIParcer(device))
                                         ownerName.text = sesame.deviceStatus.toString()
-                                        battery_percent.text = sesame.mechStatus?.batteryPrecentage().toString() + "%"
+                                        battery_percent.text = sesame.mechStatus?.getBatteryPrecentage().toString() + "%"
                                         battery_percent.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
                                         battery.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
-                                        ssmView.setLock(device)
                                     }
 
                                     if (sesame.deviceStatus == CHSesame2Status.receiveBle) {
-                                        sesame.connnect() {}
+                                        sesame.connnect() {
+                                            it.onFailure {
+//                                                L.d("hcia", "it!!!!!:" + it)
+//                                                L.d("hcia", "it!!!!!:" + (it as NSError).code)
+//                                                L.d("hcia", "it!!!!!:" + (it as NSError).domaon)
+                                                toastMSG(it.message)
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            sesame.connnect() {}
+
+                            sesame.connnect() {
+                                it.onFailure {
+//                                    L.d("hcia", "it!!!!!:" + it)
+//                                    L.d("hcia", "it!!!!!:" + (it as NSError).code)
+//                                    L.d("hcia", "it!!!!!:" + (it as NSError).domaon)
+                                    toastMSG(it.message)
+                                }
+                            }
                             ssmView.setLock(sesame)
                             ssmView.setOnClickListener {
                                 sesame.toggle() {
@@ -121,7 +144,7 @@ class DeviceListFG : BaseFG() {
 
 //                            battery.setBackgroundResource(ssmBatteryParcer(sesame))
                             battery_percent.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
-                            battery_percent.text = sesame.mechStatus?.batteryPrecentage().toString() + "%"
+                            battery_percent.text = sesame.mechStatus?.getBatteryPrecentage().toString() + "%"
 
                             battery.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
                             customName.text = SharedPreferencesUtils.preferences.getString(sesame.deviceId.toString(), sesame.deviceId.toString().toUpperCase())

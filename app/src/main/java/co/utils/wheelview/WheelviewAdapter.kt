@@ -7,28 +7,15 @@ package co.utils.wheelview
 class WheelviewAdapter(private val mList: List<String>) : IWheelviewAdapter {
 
     override fun getItemeTitle(i: Int): String {
-        if (mList != null) {
-            return mList[i]
-        } else {
-            return ""
-        }
+        return mList[i]
     }
 
     override val count: Int
         get() {
-            if (mList != null) {
-                return mList.size
-            } else {
-                return 0
-            }
-
+            return mList.size
         }
 
     override fun get(index: Int): String {
-        if (mList != null) {
-            return mList[index]
-        } else {
-            return ""
-        }
+        return mList[index]
     }
 }
