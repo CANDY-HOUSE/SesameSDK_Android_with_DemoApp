@@ -121,7 +121,7 @@ class SSM2SettingFG : BaseSSMFG() {
                 mSesame?.updateFirmware() { res ->
                     res.onSuccess {
                         val starter = DfuServiceInitiator(it.data.address)
-                        starter.setZip(R.raw.a487e6c9)
+                        starter.setZip(R.raw.fcee7725)
                         starter.setPacketsReceiptNotificationsEnabled(false)
                         starter.setPrepareDataObjectDelay(400)
                         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
