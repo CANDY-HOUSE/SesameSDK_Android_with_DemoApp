@@ -11,10 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.base.BaseSSMFG
-import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.devices.ssm2.room.avatatImagGenaroter
-import co.candyhouse.sesame.deviceprotocol.SSM2CmdResultCode
-import co.candyhouse.sesame.deviceprotocol.SSM2ItemCode
 import co.candyhouse.app.R
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle

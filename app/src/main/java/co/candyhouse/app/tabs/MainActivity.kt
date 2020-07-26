@@ -71,13 +71,13 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     override fun onResume() {
         super.onResume()
 //        L.d("hcia", "onResume 啟動掃描:" )
-        CHBleManager.enableScan()
+        CHBleManager.enableScan{}
     }
 
     override fun onPause() {
         super.onPause()
 //        L.d("hcia", "APP退到背景 斷線全部 onPause:")
-        CHBleManager.disableScan()
+        CHBleManager.disableScan{}
 //        CHBleManager.disconnectAll()
     }
 
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
 
         // Whenever the selected controller changes, setup the action bar.
-        controller.observe(this, Observer { navController ->
+        controller.observe(this, Observer {
             currentNavController = controller
         })
         currentNavController = controller
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return currentNavController?.value?.navigateUp() ?: false
+        return currentNavController.value?.navigateUp() ?: false
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-        CHBleManager.enableScan()
+        CHBleManager.enableScan{}
     }
 
     fun hideMenu() {
@@ -141,8 +141,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     private fun getPermissions() {
         if (EasyPermissions.hasPermissions(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            L.d("hcia", "get PR 啟動掃描::" )
-            CHBleManager.enableScan()
+//            L.d("hcia", "get PR 啟動掃描::" )
+            CHBleManager.enableScan{}
         } else {
             EasyPermissions.requestPermissions(
                     this, "ACCESS_FINE_LOCATION(bluetooth  nead)", 0,
