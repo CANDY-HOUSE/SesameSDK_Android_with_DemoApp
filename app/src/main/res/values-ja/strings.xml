@@ -74,6 +74,22 @@
     <string name="trash_key">このセサミの鍵を捨てる</string>
     <string name="share_key">このセサミの鍵をシェア</string>
 
+
+    <string name="Off">オフ</string>
+    <string name="sec3">3 秒</string>
+    <string name="sec5">5 秒</string>
+    <string name="sec7">7 秒</string>
+    <string name="sec10">10 秒</string>
+    <string name="sec15">15 秒</string>
+    <string name="sec30">30 秒</string>
+    <string name="min1">1 分</string>
+    <string name="min2">2 分</string>
+    <string name="min5">5 分</string>
+    <string name="min10">10 分</string>
+    <string name="min15">15 分</string>
+    <string name="min30">30 分</string>
+    <string name="hr1">1 時間</string>
+
 </resources>
 
 

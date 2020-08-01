@@ -6,6 +6,7 @@ import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 
 fun ssmUIParcer(device: CHSesame2): Int {
     return when (device.deviceStatus) {
+        CHSesame2Status.dfumode -> R.drawable.icon_nosignal
         CHSesame2Status.noSignal -> R.drawable.icon_nosignal
         CHSesame2Status.receiveBle -> R.drawable.icon_receiveblee
         CHSesame2Status.connecting -> R.drawable.icon_receiveblee
@@ -17,5 +18,6 @@ fun ssmUIParcer(device: CHSesame2): Int {
         CHSesame2Status.nosetting -> R.drawable.icon_nosetting
         CHSesame2Status.moved -> R.drawable.icon_unlock
         CHSesame2Status.reset -> R.drawable.icon_nosignal
+        CHSesame2Status.registing -> R.drawable.icon_logining
     }
 }

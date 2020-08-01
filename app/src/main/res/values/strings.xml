@@ -1,4 +1,3 @@
-
 <resources>
     <string name="app_name">Sesame</string>
     <string name="select_an_avatar">Select an Avatar</string>
@@ -56,17 +55,23 @@
     <string name="give_cool_name">Give Sesame a cooool name! 😎</string>
     <string name="no_new_devices">No New Devices</string>
 
-    <string name = "onDeviceDisconnected">onDeviceDisconnected</string>
-    <string name = "onProgressChanged">onProgressChanged</string> 　
-    <string name = "onDeviceDisconnecting">onDeviceDisconnecting</string>
-    <string name = "onDeviceConnected">onDeviceConnected</string> 　
-    <string name = "onDfuProcessStarting">onDfuProcessStarting</string>
-    <string name = "onDfuAborted">onDfuAborted</string>
-    <string name = "onEnablingDfuMode">onEnablingDfuMode</string> 　
-    <string name = "onDfuCompleted">onDfuCompleted</string> 　
-    <string name = "onFirmwareValidating">onFirmwareValidating</string> 　
-    <string name = "onDfuProcessStarted">onDfuProcessStarted</string> 　
-    <string name = "onDeviceConnecting">onDeviceConnecting</string>
+    <string name="onDeviceDisconnected">onDeviceDisconnected</string>
+    <string name="onProgressChanged">onProgressChanged</string>
+    　
+    <string name="onDeviceDisconnecting">onDeviceDisconnecting</string>
+    <string name="onDeviceConnected">onDeviceConnected</string>
+    　
+    <string name="onDfuProcessStarting">onDfuProcessStarting</string>
+    <string name="onDfuAborted">onDfuAborted</string>
+    <string name="onEnablingDfuMode">onEnablingDfuMode</string>
+    　
+    <string name="onDfuCompleted">onDfuCompleted</string>
+    　
+    <string name="onFirmwareValidating">onFirmwareValidating</string>
+    　
+    <string name="onDfuProcessStarted">onDfuProcessStarted</string>
+    　
+    <string name="onDeviceConnecting">onDeviceConnecting</string>
 
     <string name="onError">onError</string>
     <string name="too_close">Too Close</string>
@@ -75,6 +80,21 @@
     <string name="reset_the_sesame">Reset the Sesame and trash the key</string>
     <string name="trash_key">Trash the key of the Sesame</string>
     <string name="share_key">Share the key of the Sesame</string>
+
+    <string name="Off">Off</string>
+    <string name="sec3">3 sec</string>
+    <string name="sec5">5 sec</string>
+    <string name="sec7">7 sec</string>
+    <string name="sec10">10 sec</string>
+    <string name="sec15">15 sec</string>
+    <string name="sec30">30 sec</string>
+    <string name="min1">1 min</string>
+    <string name="min2">2 min</string>
+    <string name="min5">5 min</string>
+    <string name="min10">10 min</string>
+    <string name="min15">15 min</string>
+    <string name="min30">30 min</string>
+    <string name="hr1">1 hr</string>
 
 
 </resources>

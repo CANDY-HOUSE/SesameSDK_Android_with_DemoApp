@@ -37,23 +37,18 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ble_control)
         ssm?.delegate = this
-        ssm?.connnect() {}
 
-        bleid.setText("bleid: " + ssm?.deviceId.toString())
         connectStatus.setText(ssm!!.deviceStatus.toString() + " :" + ssm!!.deviceStatus.value.toString())
-        nickname.setText("nickname: ")
+        sesame_uuid.setText(ssm!!.deviceId.toString())
         registerstatus.setText(if (ssm!!.isRegistered) "register" else "unregister")
 
         register.setOnClickListener {
-            ssm?.registerSesame2 { res ->
-
-
-            }
+            ssm?.registerSesame2 { res -> }
         }
 
 
-        connectBtn.setOnClickListener { ssm?.connnect(){} }
-        disconnectBtn.setOnClickListener { ssm?.disconnect(){} }
+        connectBtn.setOnClickListener { ssm?.connnect() {} }
+        disconnectBtn.setOnClickListener { ssm?.disconnect() {} }
         setAngle.setOnClickListener { ssm?.configureLockPosition(lockDegree, unlockDegree) {} }
         setLockAngle.setOnClickListener {
             setLockAngle.text = "" + nowDegree
@@ -65,13 +60,8 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
         }
         lockBtn.setOnClickListener { ssm?.lock() {} }
         unlockBtn.setOnClickListener { ssm?.unlock() {} }
-//        resetSSM.setOnClickListener { ssm?.unregister() }
-//        unregisterServer.setOnClickListener {
-//            ssm?.unregisterServer() {
-//                it.onSuccess {
-//                }
-//            }
-//        }
+        resetSSM.setOnClickListener { ssm?.resetSesame2 { } }
+
 
         enableAutolock.setOnClickListener {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this)
@@ -128,18 +118,6 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
         }
     }
 
-//    @SuppressLint("SetTextI18n")
-//    override fun didDiscoverSesame(device: CHSesame2) {
-//        runOnUiThread(Runnable {
-//            if (ssm?.bleIdStr == device.bleIdStr) {
-//                ssm = device
-//                ssm?.delegate = this
-//                registerstatus.setText(if (ssm!!.isRegistered) "register" else "unregister")
-//                registerstatus.setTextColor(if (ssm!!.isRegistered) Color.RED else Color.BLACK)
-//                connectStatus.setText(ssm!!.chDeviceStatus.toString() + " :" + ssm!!.chDeviceStatus.value.toString())
-//            }
-//        })
-//    }
 
     @SuppressLint("SetTextI18n")
     override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
@@ -150,7 +128,7 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
     override fun onMechStatusChanged(device: CHSesame2, status: CHSesame2MechStatus, intention: CHSesame2Intention) {
         nowAngle.setText("angle:" + status.position)
         nowDegree = status.position
-        lockState.setText(if (status.inLockRange) "locked" else if (status.inUnlockRange) "unlocked" else "moved")
+        lockState.setText(if (status.isInLockRange) "locked" else if (status.isInUnlockRange) "unlocked" else "moved")
         moveState.setText(intention.value)
     }
 
@@ -159,8 +137,5 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
         setUnLockAngle.setText(settings.unlockPosition.toString())
     }
 
-//    override fun onBleCommandResult(device: CHSesameBleInterface, cmd: SSM2ItemCode, result: SSM2CmdResultCode) {
-//                cmdResult.setText("" + cmd + " " + result)
-//    }
 
 }

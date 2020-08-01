@@ -22,8 +22,6 @@ class SSMCellView @JvmOverloads constructor(
     private var midx: Float? = null
     private var midy: Float? = null
     private var angle: Float = 0f
-    private var lockAngle: Float = 0f
-    private var unlockAngle: Float = 0f
 
     var ssmWidth: Int = 0
     var ssmMargin: Int = 0
@@ -56,8 +54,8 @@ class SSMCellView @JvmOverloads constructor(
         ssmWidth = width * 8 / 10
         ssmMargin = (width - ssmWidth) / 2
 
-        lockWidth = width / 30
-        lockMargin = ssmWidth / 2 + lockWidth
+        lockWidth = width / 30 
+        lockMargin = ssmWidth / 2
         lockCenter = midx!! // must  x = y
     }
 
@@ -73,6 +71,8 @@ class SSMCellView @JvmOverloads constructor(
         val lockMarginY = lockCenter - sin(lockdeg) * (lockMargin)
 
         canvas.drawCircle(lockMarginX.toFloat(), lockMarginY.toFloat(), lockWidth.toFloat(), dotPaint)
+//        dotPaint.setColor(ContextCompat.getColor(context, R.color.red))
+//        canvas.drawCircle(lockMarginX.toFloat(), lockMarginY.toFloat(), 1f, dotPaint)
 
     }
 
@@ -85,7 +85,7 @@ class SSMCellView @JvmOverloads constructor(
 
         } else {
 //            L.d("hcia", "ssm.mechStatus:" + ssm.mechStatus)
-            dotPaint.setColor(ContextCompat.getColor(context, if (ssm.mechStatus!!.inLockRange) R.color.lock_red else R.color.unlock_blue)) //todo crask  mechStatus null
+            dotPaint.setColor(ContextCompat.getColor(context, if (ssm.mechStatus!!.isInLockRange) R.color.lock_red else R.color.unlock_blue)) //todo crask  mechStatus null
             ssm.mechSetting?.unlockPosition
             val degree = ssm.mechStatus!!.position.toFloat() * 360 / 1024
             angle = degree % 360

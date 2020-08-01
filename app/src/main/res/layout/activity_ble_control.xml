@@ -31,23 +31,10 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/accessLevel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="accessLevel" />
-
-            <TextView
-                android:id="@+id/bleid"
+                android:id="@+id/sesame_uuid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="BleId" />
-
-            <TextView
-                android:id="@+id/nickname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="nickName" />
-
 
         </LinearLayout>
 
@@ -126,16 +113,6 @@
                 android:text="factory reset"
                 android:textSize="8dp" />
 
-            <Button
-                android:id="@+id/unregisterServer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_toRightOf="@+id/resetSSM"
-                android:background="@drawable/round_cornor"
-                android:padding="4dp"
-                android:text="unregister server"
-                android:textSize="8dp" />
 
             <Button
                 android:id="@+id/registerstatus"
@@ -181,17 +158,6 @@
                 android:padding="4dp"
                 android:text="firmwareVersion"
                 android:textSize="8dp" />
-
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="8dp"
-                android:background="@color/clear"
-                android:text="0"
-                android:textSize="10dp" />
 
 
         </RelativeLayout>

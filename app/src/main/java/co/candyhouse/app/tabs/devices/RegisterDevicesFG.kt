@@ -17,32 +17,44 @@ import co.candyhouse.sesame.ble.CHSesame2Status
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
+import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
 import co.utils.L
 import co.utils.recycle.EmptyRecyclerView
 import co.utils.recycle.GenericAdapter
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fg_rg_device.*
+import no.nordicsemi.android.dfu.DfuProgressListener
+import no.nordicsemi.android.dfu.DfuServiceInitiator
+import no.nordicsemi.android.dfu.DfuServiceListenerHelper
+import java.lang.Math.pow
 import java.util.*
 
 class RegisterDevicesFG : Fragment() {
 
     private lateinit var recyclerView: EmptyRecyclerView
     var mDeviceList = ArrayList<CHSesame2>()
+    private var lastClickTime = 0L
+    private var FAST_CLICK_DELAY_TIME = 500
 
     override fun onResume() {
         super.onResume()
+
+        DfuServiceListenerHelper.registerProgressListener(activity!!, dfuLs)
+
         (activity as MainActivity).hideMenu()
         CHBleManager.delegate = object : CHBleManagerDelegate {
-            override fun didDiscoverUnRegisteredSesames(sesames: List<CHSesame2>) {
-
-                recyclerView.post {
+            override fun didDiscoverUnRegisteredSesame2s(sesames: List<CHSesame2>) {
+                mDeviceList.clear()
+                mDeviceList.addAll(sesames.sortedByDescending { it.rssi })
+                mDeviceList.firstOrNull()?.connnect { }
+                mDeviceList.let {
+                    recyclerView.post {
 //                    L.d("hcia", "sesames:" + sesames.first().rssi)
-                    mDeviceList.clear()
-                    mDeviceList.addAll(sesames.sortedByDescending { it.rssi })
-                    mDeviceList.firstOrNull()?.connnect { }
-//                    mDeviceList.forEach {
-//                        it.connnect { }
-//                    }
-                    (recyclerView.adapter as GenericAdapter<*>).notifyDataSetChanged()
+                        if (System.currentTimeMillis() - lastClickTime >= FAST_CLICK_DELAY_TIME) {
+                            (recyclerView.adapter as GenericAdapter<*>).notifyDataSetChanged()
+                            lastClickTime = System.currentTimeMillis()
+                        }
+                    }
                 }
             }
         }
@@ -56,6 +68,12 @@ class RegisterDevicesFG : Fragment() {
         recyclerView = view.findViewById<EmptyRecyclerView>(R.id.leaderboard_list).apply {
             setHasFixedSize(true)
             adapter = object : GenericAdapter<Any>(mDeviceList) {
+
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                    return super.onCreateViewHolder(parent, viewType)
+
+                }
+
                 override fun getLayoutId(position: Int, obj: Any): Int {
                     return R.layout.cell_device_unregist
                 }
@@ -70,10 +88,24 @@ class RegisterDevicesFG : Fragment() {
                         @SuppressLint("SetTextI18n")
                         override fun bind(data: CHSesame2, pos: Int) {
                             val sesame = data
-                            customName.text = "" + (if (sesame.rssi == null) 0 else sesame.rssi!! + 130) + "%"
-                            uuidTxt.text = sesame.deviceId.toString().toUpperCase()
-                            statusTxt.text = getString(R.string.Sesame2) + data.deviceStatus
                             itemView.setOnClickListener {
+
+                                if (sesame.deviceStatus == CHSesame2Status.dfumode) {
+                                    sesame.updateFirmware() { res ->
+                                        res.onSuccess {
+                                            val starter = DfuServiceInitiator(it.data.address)
+                                            starter.setZip(R.raw.ss23e8b3f20)
+                                            starter.setPacketsReceiptNotificationsEnabled(false)
+                                            starter.setPrepareDataObjectDelay(400)
+                                            starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
+                                            starter.setDisableNotification(true)
+                                            starter.setForeground(false)
+                                            starter.start(activity!!, DfuService::class.java)
+                                        }
+                                    }
+
+                                    return@setOnClickListener
+                                }
                                 sesame.connnect() {}
 
                                 MainActivity.activity?.showProgress()
@@ -89,6 +121,10 @@ class RegisterDevicesFG : Fragment() {
                                     }
                                 }
                             }
+                            val distance: Int = (pow(10.0, ((sesame.txPowerLevel!! - sesame.rssi!!.toDouble() - 62.0) / 20.0)) * 100).toInt()
+                            customName.text = "" + (if (sesame.rssi == null) "-" else distance.toString() + " cm")
+                            uuidTxt.text = sesame.deviceId.toString().toUpperCase()
+                            statusTxt.text = getString(R.string.Sesame2) + data.deviceStatus
                         }
                     }
                 }
@@ -119,11 +155,98 @@ class RegisterDevicesFG : Fragment() {
             }
             res.onFailure {
                 itemView.post {
-                    Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
                 }
             }
             MainActivity.activity?.hideProgress()
         }
+
     }
+
+    val dfuLs = object : DfuProgressListener {
+        override fun onProgressChanged(deviceAddress: String, percent: Int, speed: Float, avgSpeed: Float, currentPart: Int, partsTotal: Int) {
+            Snackbar.make(recyclerView, "$percent%", Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onDeviceDisconnecting(deviceAddress: String?) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDeviceDisconnecting), Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onDeviceDisconnected(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDeviceDisconnected), Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onDeviceConnected(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDeviceConnected), Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onDfuProcessStarting(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDfuProcessStarting), Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onDfuAborted(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDfuAborted), Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onEnablingDfuMode(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onEnablingDfuMode), Snackbar.LENGTH_LONG).show()
+
+
+        }
+
+        override fun onDfuCompleted(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDfuCompleted), Snackbar.LENGTH_LONG).show()
+
+        }
+
+
+        override fun onFirmwareValidating(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onFirmwareValidating), Snackbar.LENGTH_LONG).show()
+
+
+        }
+
+        override fun onDfuProcessStarted(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDfuProcessStarted), Snackbar.LENGTH_LONG).show()
+
+        }
+
+        override fun onDeviceConnecting(deviceAddress: String) {
+
+            Snackbar.make(recyclerView, getString(R.string.onDeviceConnecting), Snackbar.LENGTH_LONG).show()
+
+
+        }
+
+        override fun onError(deviceAddress: String, error: Int, errorType: Int, message: String?) {
+
+
+            Snackbar.make(recyclerView, getString(R.string.onDfuProcessStarted) + ":" + message, Snackbar.LENGTH_LONG).show()
+
+        }
+
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        DfuServiceListenerHelper.unregisterProgressListener(activity!!, dfuLs)
+    }
+
 
 }

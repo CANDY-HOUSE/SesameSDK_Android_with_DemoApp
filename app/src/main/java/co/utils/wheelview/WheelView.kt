@@ -13,6 +13,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.OverScroller
 import co.candyhouse.app.R
+import co.utils.L
 import com.victor.library.wheelview.mode.IWheelViewMode
 import com.victor.library.wheelview.mode.WheelViewRecycleMode
 
@@ -38,6 +39,7 @@ class WheelView<T> : View {
 
     private var gestureDetector: GestureDetector? = null
     private var wheelScrollListener: WheelScrollListener? = null
+
 
     private var mSelected: Int = 0
 
@@ -100,7 +102,7 @@ class WheelView<T> : View {
                 dy -= scrollDy + dy % eachItemHeight + eachItemHeight
             }
             mFlingDistance = dy
-            Log.e(TAG, "onfling: scrollY = ${scrollY} --- dy = $dy -- scrollY + dy = ${scrollY + dy}")
+//            Log.e(TAG, "onfling: scrollY = ${scrollY} --- dy = $dy -- scrollY + dy = ${scrollY + dy}")
             scroller.startScroll(0, scrollY, 0, dy, 600)
             invalidate()
             return true
@@ -110,11 +112,11 @@ class WheelView<T> : View {
     private val task = Runnable {
         var moveIndex: Int = ((mCurrY + mFlingDistance) * 1f / eachItemHeight).toInt()
         var selected = wheelViewMode.getSelectedIndex(moveIndex)
-        Log.e(TAG, "currY = $mCurrY -- mFlingDistance = $mFlingDistance -- moveIndex = $moveIndex  -- selected = $selected")
-        if (mSelected != selected) {
-            mSelected = selected
-            wheelScrollListener?.changed(mSelected, adapter.get(mSelected))
-        }
+//        Log.e(TAG, "currY = $mCurrY -- mFlingDistance = $mFlingDistance -- moveIndex = $moveIndex  -- selected = $selected")
+//        if (mSelected != selected) {
+        mSelected = selected
+        wheelScrollListener?.changed(mSelected, adapter.get(mSelected))
+//        }
     }
 
     init {
@@ -142,10 +144,10 @@ class WheelView<T> : View {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        var heightMode = MeasureSpec.getMode(heightMeasureSpec)
-        var widthMOde = MeasureSpec.getMode((widthMeasureSpec))
-        var heightM = MeasureSpec.getSize(heightMeasureSpec)
-        var widthM = MeasureSpec.getSize(widthMeasureSpec)
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val widthMOde = MeasureSpec.getMode((widthMeasureSpec))
+        val heightM = MeasureSpec.getSize(heightMeasureSpec)
+        val widthM = MeasureSpec.getSize(widthMeasureSpec)
 
         if (heightMode == MeasureSpec.EXACTLY && widthMOde == MeasureSpec.EXACTLY) {
             setMeasuredDimension(widthM, heightM)
@@ -194,7 +196,7 @@ class WheelView<T> : View {
                             dy -= wheelViewMode.getBottomMaxScrollHeight() - scrollY
                         }
                     }
-                    Log.e(TAG, "currY = $currY  -- prevY = $prevY -- scrollY = $scrollY -- dy = $dy")
+//                    Log.e(TAG, "currY = $currY  -- prevY = $prevY -- scrollY = $scrollY -- dy = $dy")
                     scrollBy(0, -dy)
                     invalidate()
                 }
@@ -228,8 +230,12 @@ class WheelView<T> : View {
 
     }
 
-    fun setWheelScrollListener(wheelScrollListener: WheelScrollListener) {
+    fun setWheelScrollListener(wheelScrollListener: WheelScrollListener, reactNow: Boolean = false) {
         this.wheelScrollListener = wheelScrollListener
+        if (reactNow) {
+            wheelScrollListener.changed(mSelected, adapter.get(mSelected))
+        }
+
     }
 
     override fun computeScroll() {
@@ -262,7 +268,7 @@ class WheelView<T> : View {
         paint.color = resources.getColor(R.color.black)
         var y: Float
         var x: Float
-        var minStart: Int = 0
+        var minStart: Int =  0
         var count: Int = adapter.count
         if (wheelViewMode is WheelViewRecycleMode) {
             minStart = -maxShowSize / 2 - 1 + scrollY / eachItemHeight // 多显示一个，避免闪现
@@ -280,7 +286,7 @@ class WheelView<T> : View {
             }
             x = (width - paint.measureText(adapter.getItemeTitle(index % adapter.count))) / 2
             y = wheelViewMode.getTextDrawY(height, i, paint)
-            canvas.drawText(adapter.getItemeTitle(index % adapter.count), x, y, paint)
+            canvas.drawText(adapter.getItemeTitle(index % adapter.count ), x, y, paint)
         }
     }
 

@@ -15,6 +15,7 @@ import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2History
 import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
 import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
+import co.candyhouse.sesame.deviceprotocol.NSError
 import co.candyhouse.sesame.server.CHResultState
 import co.utils.L
 import co.utils.SharedPreferencesUtils
@@ -27,18 +28,14 @@ import org.zakariya.stickyheaders.StickyHeaderLayoutManager
 class MainRoomFG : BaseSSMFG() {
     private var hispage = 0
     private var mRecyclerView: RecyclerView? = null
-
-    //    private var histoetGroupData: ArrayList<Pair<String, List<CHSesame2History>>> = arrayListOf<Pair<String, List<CHSesame2History>>>()
-    var historys = ArrayList<CHSesame2History>()
+    var mHistorys = ArrayList<CHSesame2History>()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fg_room_main, container, false)
-
         mRecyclerView = view.findViewById<RecyclerView>(R.id.room_list)
         return view
     }
 
-    val mAdapter = SSMHistoryAdapter(arrayListOf<Pair<String, List<CHSesame2History>>>())
-
+    val mAdapter = SSMHistoryAdapter(ArrayList())
 
     @SuppressLint("SimpleDateFormat")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,64 +73,70 @@ class MainRoomFG : BaseSSMFG() {
     @SuppressLint("SimpleDateFormat")
     private fun refleshHistory() {
         mSesame?.getHistories(hispage) {
-//            L.d("hcia", "UI收到 歷史it:" + it.javaClass.simpleName)
-            val his = it.getOrNull()
-//            if (his is CHResultState.CHResultStateBLE) {
-//                L.d("hcia", "資料來源:CHResultStateBLE")
-//            }
-//            if (his is CHResultState.CHResultStateNetworks) {
-//                L.d("hcia", "資料來源:CHResultStateNetworks")
-//            }
 
-//            L.d("hcia", "資料來源:" + his?.javaClass?.simpleName + " 數據量:" + his?.data!!)
+            it.onSuccess {
+                //            L.d("hcia", "UI收到 歷史it:" + it.javaClass.simpleName)
+                val sesameHistorys = it.data
+
 
 //            his?.data?.forEach {
 //                L.d("hcia", "UI收到歷史:" + it.recordID + " type:"  + " " + it.date)
 //            }
 
-            mRecyclerView?.post {
+                mRecyclerView?.post {
 
 //        L.d("hcia", "lists:" + lists.size)
 
-                if (his?.data!!.size == 0) {
-                    return@post
-                }
+                    if (sesameHistorys.size == 0) {
+                        return@post
+                    }
 
-                historys.addAll(his.data)
-                historys = historys.distinctBy {
-                    it.recordID
-                } as ArrayList<CHSesame2History>
+                    mHistorys.addAll(sesameHistorys)
+                    mHistorys = mHistorys.distinctBy {
+                        it.recordID
+                    } as ArrayList<CHSesame2History>
 
-                historys.sortBy {
-                    it.recordID
-                }
-//                L.d("hcia", "總數據量:" + historys.size)
-
-
-                val mTestGoupHistory = historys.groupBy {
-                    groupTZ().format(it.date)
-                }
+                    mHistorys.sortBy {
+                        it.recordID
+                    }
+//                L.d("hcia", "總數據量:" + mHistorys.size)
+                    val mTestGoupHistory = mHistorys.groupBy {
+                        groupTZ().format(it.date)
+                    }
 //                L.d("hcia", "分組:")
-
-
-                mAdapter.mGroupHistData.clear()
-                mAdapter.mGroupHistData.addAll(mTestGoupHistory.toList())
+                    mAdapter.mGroupHistData.clear()
+                    mAdapter.mGroupHistData.addAll(mTestGoupHistory.toList())
 //                L.d("hcia", "添加完畢")
-                if (mRecyclerView?.adapter == null) {
+                    if (mRecyclerView?.adapter == null) {
 //                    L.d("hcia", "初始化")
 
-                    mRecyclerView!!.adapter = mAdapter
-                    if (his?.data.size != 0) {
+                        mRecyclerView!!.adapter = mAdapter
+                        if (sesameHistorys.size != 0) {
+                            mRecyclerView?.layoutManager?.scrollToPosition(mRecyclerView!!.adapter!!.getItemCount() - 1)
+                        }
+                    }
+//                L.d("hcia", "mRecyclerView?.adapter:" + mAdapter)
+                    mAdapter.notifyAllSectionsDataSetChanged()
+                    if (it is CHResultState.CHResultStateBLE) {
+//                    L.d("hcia", "資料來源:CHResultStateBLE")
                         mRecyclerView?.layoutManager?.scrollToPosition(mRecyclerView!!.adapter!!.getItemCount() - 1)
                     }
-                }
-                L.d("hcia", "mRecyclerView?.adapter:" + mAdapter)
-                mAdapter.notifyAllSectionsDataSetChanged()
-                if (his is CHResultState.CHResultStateBLE) {
-//                    L.d("hcia", "資料來源:CHResultStateBLE")
-                    mRecyclerView?.layoutManager?.scrollToPosition(mRecyclerView!!.adapter!!.getItemCount() - 1)
-                }
 //                L.d("hcia", "刷新")
+                }
+            }
+            it.onFailure {
+                // todo kill the hint  if you got!!!
+                // 這裡是個workaround
+                // 理由:多人連線 sesame2 回 busy
+                // 策略:延遲網路請求等待隔壁連上的sesame2上傳完畢後拉取
+
+                if (it is NSError) {
+                    if (it.code == 7) {
+                        hispage = 0
+                        refleshHistory()
+                    }
+                }
+                L.d("hcia", "it!!!!!!!!!!!!!!!!!!:" + it.localizedMessage)//it!!!!!!!!!!!!!!!!!!:BUSY
             }
         }
     }

@@ -14,4 +14,5 @@ class CandyHouseApp : Application() {
         CHConfiguration("SNUrRpqs9P8fFQJfmX94e1if1XriRw7G3uLVMqkK", "ap-northeast-1:0a1820f1-dbb3-4bca-9227-2a92f6abf0ae")
         SharedPreferencesUtils.init(this)
     }
+
 }

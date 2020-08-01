@@ -15,6 +15,7 @@ import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
 import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
 import co.candyhouse.app.R
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
+import co.utils.SharedPreferencesUtils
 import kotlinx.android.synthetic.main.fg_set_angle.*
 import java.lang.Math.abs
 
@@ -35,10 +36,8 @@ class SSM2SetAngleFG : BaseSSMFG() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if(mSesame?.deviceStatus ==  CHSesame2Status.nosetting){
-            mSesame?.configureLockPosition(0, 256){}
-        }
-        titleTextView?.text = "mSesame?.customDeviceName"
+       
+        titleTextView?.text = SharedPreferencesUtils.preferences.getString(mSesame?.deviceId.toString(), mSesame?.deviceId.toString().toUpperCase())
         backicon.setOnClickListener {
             findNavController().navigateUp()
         }

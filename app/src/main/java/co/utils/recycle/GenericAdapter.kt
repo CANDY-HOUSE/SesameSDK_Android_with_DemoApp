@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
+import co.utils.L
 
 /**
  * Created by mohang on 12/12/17.
@@ -30,9 +30,11 @@ abstract class GenericAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return getViewHolder(LayoutInflater.from(parent.context)
+        val view = LayoutInflater.from(parent.context)
                 .inflate(viewType, parent, false)
-                , viewType)
+        val holder = getViewHolder(
+                view, viewType)
+        return holder
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -55,8 +57,6 @@ abstract class GenericAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>
         fun bind(data: T, pos: Int)
     }
 }
-
-
 
 
 fun Int.toDp(): Int = (this / Resources.getSystem().displayMetrics.density).toInt()
