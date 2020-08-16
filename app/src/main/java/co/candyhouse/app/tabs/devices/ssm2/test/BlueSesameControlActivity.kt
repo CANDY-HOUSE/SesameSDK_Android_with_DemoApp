@@ -9,11 +9,11 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHBleManagerDelegate
-import co.candyhouse.sesame.ble.CHSesame2Status
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.sesame.deviceprotocol.*
 import co.candyhouse.app.R
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
 import kotlinx.android.synthetic.main.activity_ble_control.*
 
 
@@ -47,7 +47,7 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
         }
 
 
-        connectBtn.setOnClickListener { ssm?.connnect() {} }
+        connectBtn.setOnClickListener { ssm?.connect() {} }
         disconnectBtn.setOnClickListener { ssm?.disconnect() {} }
         setAngle.setOnClickListener { ssm?.configureLockPosition(lockDegree, unlockDegree) {} }
         setLockAngle.setOnClickListener {

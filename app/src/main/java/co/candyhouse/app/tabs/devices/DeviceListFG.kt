@@ -22,7 +22,9 @@ import co.candyhouse.sesame2.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.account.login.toastMSG
 import co.candyhouse.app.tabs.devices.ssm2.ssmUIParcer
+import co.candyhouse.sesame.ble.Sesame2.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
 import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
 import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
 import co.candyhouse.sesame.deviceprotocol.NSError
@@ -99,18 +101,19 @@ class DeviceListFG : BaseFG() {
                                 override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
 //                                    L.d("hcia", device.deviceId.toString() + " UI chDeviceStatus:" + device.deviceStatus)
 //                                    battery.setBackgroundResource(ssmBatteryParcer(device))
-                                    ssmView.setLock(device)
+//                                    ssmView.setLock(device)
+//                                    L.d("hcia", "status:" + status.toString())
 
                                     toggle?.post {
                                         toggle.setBackgroundResource(ssmUIParcer(device))
-                                        ownerName.text = sesame.deviceStatus.toString()
+                                        ownerName.text = status.toString()
                                         battery_percent.text = sesame.mechStatus?.getBatteryPrecentage().toString() + "%"
                                         battery_percent.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
                                         battery.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
                                     }
 
-                                    if (sesame.deviceStatus == CHSesame2Status.receiveBle) {
-                                        sesame.connnect() {
+                                    if (sesame.deviceStatus == CHSesame2Status.receivedBle) {
+                                        sesame.connect() {
                                             it.onFailure {
 //                                                L.d("hcia", "it!!!!!:" + it)
 //                                                L.d("hcia", "it!!!!!:" + (it as NSError).code)
@@ -122,7 +125,7 @@ class DeviceListFG : BaseFG() {
                                 }
                             }
 
-                            sesame.connnect() {
+                            sesame.connect() {
                                 it.onFailure {
 //                                    L.d("hcia", "it!!!!!:" + it)
 //                                    L.d("hcia", "it!!!!!:" + (it as NSError).code)
@@ -198,10 +201,6 @@ class DeviceListFG : BaseFG() {
             swiperefreshView.isRefreshing = true
         }
         CHDeviceManager.getSesame2s {
-
-//            it.forEach {
-//                L.d("hcia", "UI 拿到it.deviceId:" + it.deviceId + " " + it.deviceStatus)
-//            }
             it.onSuccess {
                 mDeviceList.clear()
                 mDeviceList.addAll(it.data)

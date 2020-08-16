@@ -10,7 +10,7 @@ import androidx.core.graphics.drawable.toBitmap
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.ssmUIParcer
-import co.candyhouse.sesame.ble.CHDeviceLoginStatus
+import co.candyhouse.sesame.ble.Sesame2.CHDeviceLoginStatus
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -54,7 +54,7 @@ class SSMCellView @JvmOverloads constructor(
         ssmWidth = width * 8 / 10
         ssmMargin = (width - ssmWidth) / 2
 
-        lockWidth = width / 30 
+        lockWidth = width / 30
         lockMargin = ssmWidth / 2
         lockCenter = midx!! // must  x = y
     }
@@ -80,16 +80,19 @@ class SSMCellView @JvmOverloads constructor(
 //        ssmImg = getResources().getDrawable(ssmUIParcer(ssm)).toBitmap()
         ssmImg = ContextCompat.getDrawable(context, ssmUIParcer(ssm))!!.toBitmap()
 
-        if (ssm.deviceStatus.value == CHDeviceLoginStatus.unlogined) {
-            dotPaint.setColor(ContextCompat.getColor(context, R.color.clear))
-
-        } else {
-//            L.d("hcia", "ssm.mechStatus:" + ssm.mechStatus)
-            dotPaint.setColor(ContextCompat.getColor(context, if (ssm.mechStatus!!.isInLockRange) R.color.lock_red else R.color.unlock_blue)) //todo crask  mechStatus null
-            ssm.mechSetting?.unlockPosition
-            val degree = ssm.mechStatus!!.position.toFloat() * 360 / 1024
-            angle = degree % 360
+        if (ssm.mechStatus == null) {
+            return
         }
+//        if (ssm.deviceStatus.value == CHDeviceLoginStatus.unlogined) {
+        dotPaint.setColor(ContextCompat.getColor(context, R.color.clear))
+
+//        } else {
+//            L.d("hcia", "ssm.mechStatus:" + ssm.mechStatus)
+        dotPaint.setColor(ContextCompat.getColor(context, if (ssm.mechStatus!!.isInLockRange) R.color.lock_red else R.color.unlock_blue)) //todo crask  mechStatus null
+        ssm.mechSetting?.unlockPosition
+        val degree = ssm.mechStatus!!.position.toFloat() * 360 / 1024
+        angle = degree % 360
+//        }
         invalidate()
     }
 }

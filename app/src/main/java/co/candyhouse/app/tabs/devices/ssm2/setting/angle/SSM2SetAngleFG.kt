@@ -14,6 +14,7 @@ import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
 import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
 import co.candyhouse.app.R
+import co.candyhouse.sesame.ble.Sesame2.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.utils.SharedPreferencesUtils
 import kotlinx.android.synthetic.main.fg_set_angle.*

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -13,11 +14,11 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHBleManagerDelegate
-import co.candyhouse.sesame.ble.CHSesame2Status
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
 import co.utils.L
 import co.utils.recycle.EmptyRecyclerView
 import co.utils.recycle.GenericAdapter
@@ -46,7 +47,7 @@ class RegisterDevicesFG : Fragment() {
             override fun didDiscoverUnRegisteredSesame2s(sesames: List<CHSesame2>) {
                 mDeviceList.clear()
                 mDeviceList.addAll(sesames.sortedByDescending { it.rssi })
-                mDeviceList.firstOrNull()?.connnect { }
+                mDeviceList.firstOrNull()?.connect { }
                 mDeviceList.let {
                     recyclerView.post {
 //                    L.d("hcia", "sesames:" + sesames.first().rssi)
@@ -83,18 +84,35 @@ class RegisterDevicesFG : Fragment() {
                             Binder<CHSesame2> {
                         var customName: TextView = itemView.findViewById(R.id.title)
                         var uuidTxt: TextView = itemView.findViewById(R.id.title_txt)
+                        var update_img: ImageView = itemView.findViewById(R.id.update_fw)
                         var statusTxt: TextView = itemView.findViewById(R.id.subtitle_txt)
 
                         @SuppressLint("SetTextI18n")
                         override fun bind(data: CHSesame2, pos: Int) {
                             val sesame = data
+                            update_img.setOnClickListener {
+                                L.d("hcia", "點擊到更新圖片")
+                                sesame.updateFirmware() { res ->
+                                    res.onSuccess {
+                                        val starter = DfuServiceInitiator(it.data.address)
+                                        starter.setZip(R.raw.d533ef10)
+                                        starter.setPacketsReceiptNotificationsEnabled(false)
+                                        starter.setPrepareDataObjectDelay(400)
+                                        starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
+                                        starter.setDisableNotification(true)
+                                        starter.setForeground(false)
+                                        starter.start(activity!!, DfuService::class.java)
+                                    }
+                                }
+                                return@setOnClickListener
+                            }
                             itemView.setOnClickListener {
 
                                 if (sesame.deviceStatus == CHSesame2Status.dfumode) {
                                     sesame.updateFirmware() { res ->
                                         res.onSuccess {
                                             val starter = DfuServiceInitiator(it.data.address)
-                                            starter.setZip(R.raw.ss23e8b3f20)
+                                            starter.setZip(R.raw.d533ef10)
                                             starter.setPacketsReceiptNotificationsEnabled(false)
                                             starter.setPrepareDataObjectDelay(400)
                                             starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
@@ -103,10 +121,9 @@ class RegisterDevicesFG : Fragment() {
                                             starter.start(activity!!, DfuService::class.java)
                                         }
                                     }
-
                                     return@setOnClickListener
                                 }
-                                sesame.connnect() {}
+                                sesame.connect() {}
 
                                 MainActivity.activity?.showProgress()
                                 if (sesame.deviceStatus == CHSesame2Status.readytoRegister) {

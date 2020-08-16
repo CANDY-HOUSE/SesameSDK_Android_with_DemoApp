@@ -9,10 +9,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseSSMFG
-import co.candyhouse.sesame.ble.CHSesame2Status
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2History
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
 import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
 import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
 import co.candyhouse.sesame.deviceprotocol.NSError
@@ -43,15 +43,16 @@ class MainRoomFG : BaseSSMFG() {
         backicon.setOnClickListener { findNavController().navigateUp() }
         backTitle.text = SharedPreferencesUtils.preferences.getString(mSesame?.deviceId.toString(), mSesame?.deviceId.toString().toUpperCase())
         backTitle.visibility = View.VISIBLE
+
         mRecyclerView!!.layoutManager = StickyHeaderLayoutManager()
         ssmView.setLock(mSesame!!)
-        ssmView.setOnClickListener { mSesame?.toggle() {} }
+        ssmView.setOnClickListener { mSesame?.toggle {} }
         right_icon.setOnClickListener {
             findNavController().navigate(R.id.action_mainRoomFG_to_SSM2SettingFG)
         }
+
         mRecyclerView!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            }
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {}
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -59,7 +60,6 @@ class MainRoomFG : BaseSSMFG() {
                     val firstVisibleItemPosition = (mRecyclerView!!.layoutManager as StickyHeaderLayoutManager)
                             .getFirstVisibleItemViewHolder(false)?.positionInSection
                     if (firstVisibleItemPosition == 0) {
-                        L.d("hcia", "滑到頂")
                         hispage = hispage + 1
                         refleshHistory()
                     }
@@ -77,15 +77,7 @@ class MainRoomFG : BaseSSMFG() {
             it.onSuccess {
                 //            L.d("hcia", "UI收到 歷史it:" + it.javaClass.simpleName)
                 val sesameHistorys = it.data
-
-
-//            his?.data?.forEach {
-//                L.d("hcia", "UI收到歷史:" + it.recordID + " type:"  + " " + it.date)
-//            }
-
                 mRecyclerView?.post {
-
-//        L.d("hcia", "lists:" + lists.size)
 
                     if (sesameHistorys.size == 0) {
                         return@post
@@ -109,10 +101,10 @@ class MainRoomFG : BaseSSMFG() {
 //                L.d("hcia", "添加完畢")
                     if (mRecyclerView?.adapter == null) {
 //                    L.d("hcia", "初始化")
-
                         mRecyclerView!!.adapter = mAdapter
                         if (sesameHistorys.size != 0) {
                             mRecyclerView?.layoutManager?.scrollToPosition(mRecyclerView!!.adapter!!.getItemCount() - 1)
+
                         }
                     }
 //                L.d("hcia", "mRecyclerView?.adapter:" + mAdapter)
@@ -146,8 +138,8 @@ class MainRoomFG : BaseSSMFG() {
         super.onResume()
         mSesame?.delegate = object : CHSesame2Delegate {
             override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
-                if (device.deviceStatus == CHSesame2Status.receiveBle) {
-                    device.connnect() {}
+                if (device.deviceStatus == CHSesame2Status.receivedBle) {
+                    device.connect() {}
                 }
             }
 

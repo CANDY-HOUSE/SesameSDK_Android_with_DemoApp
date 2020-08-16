@@ -42,7 +42,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.concurrent.CountDownLatch
-
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     lateinit var currentNavController: LiveData<NavController>

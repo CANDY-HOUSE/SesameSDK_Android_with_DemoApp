@@ -35,8 +35,7 @@
         android:layout_marginTop="25dp"
         android:layout_toRightOf="@+id/title"
         android:gravity="center"
-        android:text="title_txt"
-        />
+        android:text="title_txt" />
 
     <TextView
         android:id="@+id/subtitle_txt"
@@ -46,9 +45,9 @@
         android:layout_marginLeft="30dp"
         android:layout_marginBottom="25dp"
         android:layout_toRightOf="@+id/title"
-        android:textColor="@color/text_hint"
         android:gravity="center"
         android:text="subtitle_txt"
+        android:textColor="@color/text_hint"
 
         />
 
@@ -60,5 +59,15 @@
         android:background="@color/gray1">
 
     </View>
+
+    <ImageView
+        android:id="@+id/update_fw"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_upgrade">
+
+    </ImageView>
 
 </RelativeLayout>

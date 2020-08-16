@@ -68,20 +68,26 @@ class SSMHistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesame
 //        Log.d("tag","recordID:"+history.recordID.toString())
 //        Log.d("tag","date"+history.date.toString())
 //        Log.d("tag","histag"+history.histag.toString())
-        when(history){
+        when (history) {
             is CHSesame2History.TimeChanged -> {
-                Log.d("tag","timeBefore"+history.timeBefore.toString())
-                Log.d("tag","timeAfter"+history.timeAfter.toString())
+                Log.d("tag", "timeBefore" + history.timeBefore.toString())
+                Log.d("tag", "timeAfter" + history.timeAfter.toString())
             }
             is CHSesame2History.MechSettingUpdated -> {
-                Log.d("tag","lockTargetBefore"+history.lockTargetBefore.toString())
-                Log.d("tag","lockTargetAfter"+history.lockTargetAfter.toString())
-                Log.d("tag","unlockTargetBefore"+history.unlockTargetBefore.toString())
-                Log.d("tag","unlockTargetAfter"+history.unlockTargetAfter.toString())
+                Log.d("tag", "lockTargetBefore" + history.lockTargetBefore.toString())
+                Log.d("tag", "lockTargetAfter" + history.lockTargetAfter.toString())
+                Log.d("tag", "unlockTargetBefore" + history.unlockTargetBefore.toString())
+                Log.d("tag", "unlockTargetAfter" + history.unlockTargetAfter.toString())
             }
-            is CHSesame2History.AutoLockUpdated  -> {
-                Log.d("tag","enabledBefore:"+history.enabledBefore.toString())
-                Log.d("tag","enabledAfter"+history.enabledAfter.toString())
+            is CHSesame2History.AutoLockUpdated -> {
+                Log.d("tag", "enabledBefore:" + history.enabledBefore.toString())
+                Log.d("tag", "enabledAfter" + history.enabledAfter.toString())
+            }
+            is CHSesame2History.BLEAdvParamUpdated -> {
+                Log.d("tag", "intervalBefore:" + history.intervalBefore.toString())
+                Log.d("tag", "intervalAfter" + history.intervalAfter.toString())
+                Log.d("tag", "dbmBefore" + history.dbmBefore.toString())
+                Log.d("tag", "dbmAfter" + history.dbmAfter.toString())
             }
         }
 
@@ -93,6 +99,8 @@ class SSMHistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesame
             is CHSesame2History.TimeChanged -> history.timeBefore.toString() + " -> " + history.timeAfter
             is CHSesame2History.AutoLockUpdated -> "" + history.enabledBefore + "-->" + history.enabledAfter
             is CHSesame2History.MechSettingUpdated -> "lock:" + history.lockTargetBefore + "->" + history.lockTargetAfter + " unlock:" + history.unlockTargetBefore + "->" + history.unlockTargetAfter
+            is CHSesame2History.BLEAdvParamUpdated -> "interval:" + history.intervalBefore + "->" + history.intervalAfter + " dbm:" + history.dbmBefore + "->" + history.dbmAfter
+            is CHSesame2History.DriveFailed -> "stoppedPosition:" + history.stoppedPosition + " end deviceStatus:" + history.deviceStatus
             else -> ""
         }
 
@@ -107,6 +115,9 @@ class SSMHistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesame
                     is CHSesame2History.BLEUnlock -> R.drawable.ic_icon_unlocked
                     is CHSesame2History.TimeChanged -> R.drawable.ic_icon_time_change
                     is CHSesame2History.MechSettingUpdated -> R.drawable.ic_icons_outlined_setting
+                    is CHSesame2History.DriveLocked -> R.drawable.ic_icon_locked
+                    is CHSesame2History.DriveUnLocked -> R.drawable.ic_icon_unlocked
+                    is CHSesame2History.BLEAdvParamUpdated -> R.drawable.ic_icons_outlined_setting
                     else -> R.drawable.ic_autolock
                 }
         )

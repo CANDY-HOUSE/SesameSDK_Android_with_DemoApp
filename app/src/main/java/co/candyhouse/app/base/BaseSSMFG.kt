@@ -7,19 +7,4 @@ open class BaseSSMFG : BaseNFG() {
         @JvmField
         var mSesame: CHSesame2? = null
     }
-
-
-    override fun onResume() {
-        super.onResume()
-//        CHBleManager.delegate = object : CHBleManagerDelegate {
-//            override fun didDiscoverSesame(device: CHSesameBleInterface) {
-//                if (device.bleIdStr == mSesame?.bleIdStr) {
-//                    device.delegate = mSesame?.delegate
-//                    mSesame = device
-//                    mSesame?.connnect()
-//                    return
-//                }
-//            }
-//        }
-    }
 }

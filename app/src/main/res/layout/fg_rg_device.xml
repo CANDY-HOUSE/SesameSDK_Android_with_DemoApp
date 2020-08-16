@@ -16,6 +16,7 @@
         android:padding="22dp"
         android:scaleType="center"
         android:src="@drawable/ic_icons_filled_close" />
+
     <co.utils.recycle.EmptyRecyclerView
         android:id="@+id/leaderboard_list"
         android:layout_width="match_parent"
@@ -33,10 +34,10 @@
 
     <TextView
         android:id="@+id/empty_view"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
-        android:text="@string/no_new_devices"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/no_new_devices">
 
     </TextView>
 

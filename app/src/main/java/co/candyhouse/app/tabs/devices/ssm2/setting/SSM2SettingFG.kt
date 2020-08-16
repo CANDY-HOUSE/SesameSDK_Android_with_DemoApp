@@ -9,11 +9,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.base.BaseSSMFG
-import co.candyhouse.sesame.ble.*
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.account.login.toastMSG
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.wheelview.WheelView
@@ -27,7 +27,6 @@ import kotlinx.android.synthetic.main.fg_setting_main.*
 import no.nordicsemi.android.dfu.DfuProgressListener
 import no.nordicsemi.android.dfu.DfuServiceInitiator
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper
-import org.w3c.dom.Text
 import pe.startapps.alerts.ext.inputTextAlert
 
 class SSM2SettingFG : BaseSSMFG() {
@@ -130,8 +129,8 @@ class SSM2SettingFG : BaseSSMFG() {
             override fun changed(selected: Int, name: Any?) {
                 val interval = advintervalSettingValue.get(selected)
                 mAdvInterval = interval
-                L.d("hcia", "mAdvInterval:" + mAdvInterval)
-                L.d("hcia", "selected:" + selected)
+//                L.d("hcia", "mAdvInterval:" + mAdvInterval)
+//                L.d("hcia", "selected:" + selected)
             }
         }, true)
 
@@ -140,7 +139,7 @@ class SSM2SettingFG : BaseSSMFG() {
             override fun changed(selected: Int, name: Any?) {
                 val txp = dBmsValus.get(selected)
                 mTxpower = txp
-                L.d("hcia", "mTxpower:" + mTxpower)
+//                L.d("hcia", "mTxpower:" + mTxpower)
 //                L.d("hcia", "selected:" + selected)
             }
         }, true)
@@ -153,8 +152,8 @@ class SSM2SettingFG : BaseSSMFG() {
         DfuServiceListenerHelper.registerProgressListener(activity!!, dfuLs)
         mSesame?.delegate = object : CHSesame2Delegate {
             override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
-                if (status == CHSesame2Status.receiveBle) {
-                    device.connnect() {}
+                if (status == CHSesame2Status.receivedBle) {
+                    device.connect() {}
                 }
             }
         }
@@ -196,7 +195,7 @@ class SSM2SettingFG : BaseSSMFG() {
                 mSesame?.updateFirmware() { res ->
                     res.onSuccess {
                         val starter = DfuServiceInitiator(it.data.address)
-                        starter.setZip(R.raw.ss23e8b3f20)
+                        starter.setZip(R.raw.d533ef10)
                         starter.setPacketsReceiptNotificationsEnabled(false)
                         starter.setPrepareDataObjectDelay(400)
                         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
