@@ -107,16 +107,16 @@ class SSMHistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesame
         ivh.head.setImageResource(
                 when (history) {
                     is CHSesame2History.ManualElse -> R.drawable.ic_handmove
-                    is CHSesame2History.ManualLocked -> R.drawable.ic_icon_locked
-                    is CHSesame2History.ManualUnlocked -> R.drawable.ic_icon_unlocked
+                    is CHSesame2History.ManualLocked -> R.drawable.ic_icon_locked_check
+                    is CHSesame2History.ManualUnlocked -> R.drawable.ic_icon_unlock_uncheck
                     is CHSesame2History.AutoLockUpdated -> R.drawable.ic_icons_outlined_setting
                     is CHSesame2History.AutoLock -> R.drawable.ic_autolock
-                    is CHSesame2History.BLELock -> R.drawable.ic_icon_locked
-                    is CHSesame2History.BLEUnlock -> R.drawable.ic_icon_unlocked
+                    is CHSesame2History.BLELock -> R.drawable.ic_icon_lock_uncheck
+                    is CHSesame2History.BLEUnlock -> R.drawable.ic_icon_unlock_uncheck
                     is CHSesame2History.TimeChanged -> R.drawable.ic_icon_time_change
                     is CHSesame2History.MechSettingUpdated -> R.drawable.ic_icons_outlined_setting
-                    is CHSesame2History.DriveLocked -> R.drawable.ic_icon_locked
-                    is CHSesame2History.DriveUnLocked -> R.drawable.ic_icon_unlocked
+                    is CHSesame2History.DriveLocked -> R.drawable.ic_icon_locked_check
+                    is CHSesame2History.DriveUnLocked -> R.drawable.ic_icon_unlocked_check
                     is CHSesame2History.BLEAdvParamUpdated -> R.drawable.ic_icons_outlined_setting
                     else -> R.drawable.ic_autolock
                 }

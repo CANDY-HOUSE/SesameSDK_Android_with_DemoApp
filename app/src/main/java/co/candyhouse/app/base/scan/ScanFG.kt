@@ -129,6 +129,13 @@ class ScanFG : Fragment(), QRCodeView.Delegate, EasyPermissions.PermissionCallba
                 it.data.forEach {
                     L.d("hcia", "設定歷史標籤 deviceId:" + it.deviceId)
                     it.setHistoryTag("のび太".toByteArray()) {
+                        it.onSuccess {
+                            L.d("hcia", "設定歷史標籤成功:")
+                            findNavController().navigateUp()
+                        }
+                        it.onFailure {
+                            L.d("hcia", "設定歷史標籤失敗:")
+                        }
                     }
                 }
             }
@@ -138,7 +145,6 @@ class ScanFG : Fragment(), QRCodeView.Delegate, EasyPermissions.PermissionCallba
         }
 
 
-        findNavController().navigateUp()
     }
 
     override fun onCameraAmbientBrightnessChanged(isDark: Boolean) {

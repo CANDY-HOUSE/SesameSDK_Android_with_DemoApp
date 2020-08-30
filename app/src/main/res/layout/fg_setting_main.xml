@@ -427,9 +427,8 @@
 
             </RelativeLayout>
 
-
             <RelativeLayout
-                android:id="@+id/delete_zone"
+                android:id="@+id/share_zone"
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
                 android:layout_below="@+id/adv_itv_zone"
@@ -443,17 +442,17 @@
                     android:layout_centerVertical="true"
                     android:background="@color/white"
                     android:gravity="center_vertical"
-                    android:text="@string/reset_the_sesame"
-                    android:textColor="@color/red"
+                    android:text="@string/share_key"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </RelativeLayout>
+
 
             <RelativeLayout
                 android:id="@+id/drop_zone"
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
-                android:layout_below="@+id/delete_zone"
+                android:layout_below="@+id/share_zone"
                 android:layout_marginTop="8dp"
                 android:background="@color/white">
 
@@ -471,7 +470,7 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/share_zone"
+                android:id="@+id/delete_zone"
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
                 android:layout_below="@+id/drop_zone"
@@ -485,7 +484,8 @@
                     android:layout_centerVertical="true"
                     android:background="@color/white"
                     android:gravity="center_vertical"
-                    android:text="@string/share_key"
+                    android:text="@string/reset_the_sesame"
+                    android:textColor="@color/red"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </RelativeLayout>
