@@ -105,7 +105,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="50dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_icon_locked" />
+                android:src="@drawable/ic_icon_lock_uncheck" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -132,7 +132,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="50dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_icon_unlocked" />
+                android:src="@drawable/ic_icon_unlock_uncheck" />
 
             <TextView
                 android:layout_width="match_parent"

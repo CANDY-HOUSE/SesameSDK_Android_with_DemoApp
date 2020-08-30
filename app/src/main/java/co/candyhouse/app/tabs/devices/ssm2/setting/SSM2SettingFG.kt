@@ -14,6 +14,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.tabs.account.login.toastMSG
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2ShadowStatus
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.wheelview.WheelView
@@ -151,7 +152,7 @@ class SSM2SettingFG : BaseSSMFG() {
         super.onResume()
         DfuServiceListenerHelper.registerProgressListener(activity!!, dfuLs)
         mSesame?.delegate = object : CHSesame2Delegate {
-            override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
+            override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status,shadowStatus: CHSesame2ShadowStatus?) {
                 if (status == CHSesame2Status.receivedBle) {
                     device.connect() {}
                 }
@@ -195,7 +196,7 @@ class SSM2SettingFG : BaseSSMFG() {
                 mSesame?.updateFirmware() { res ->
                     res.onSuccess {
                         val starter = DfuServiceInitiator(it.data.address)
-                        starter.setZip(R.raw.d533ef10)
+                        starter.setZip(R.raw.ssm540f1476)
                         starter.setPacketsReceiptNotificationsEnabled(false)
                         starter.setPrepareDataObjectDelay(400)
                         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)

@@ -1,5 +1,6 @@
 package co.candyhouse.app.tabs.devices.ssm2.setting.angle
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
@@ -11,6 +12,9 @@ import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.ssmUIParcer
 import co.candyhouse.sesame.ble.Sesame2.CHDeviceLoginStatus
+import co.candyhouse.sesame.utils.runOnUiThread
+import co.utils.L
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -18,6 +22,7 @@ class SSMCellView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private var anim: ValueAnimator? = null
     private var ssmImg: Bitmap
     private var midx: Float? = null
     private var midy: Float? = null
@@ -62,38 +67,63 @@ class SSMCellView @JvmOverloads constructor(
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-//        java.lang.RuntimeException: Canvas: trying to draw too large(260305956bytes) bitmap.
         canvas.drawBitmap(ssmImg, Rect(0, 0, 0 + ssmImg.width, 0 + ssmImg.width), Rect(ssmMargin, ssmMargin, ssmMargin + ssmWidth, ssmMargin + ssmWidth), null)
 
         val lockdeg = angle.toDG()
         val lockMarginX = lockCenter + cos(lockdeg) * (lockMargin)
         val lockMarginY = lockCenter - sin(lockdeg) * (lockMargin)
-
         canvas.drawCircle(lockMarginX.toFloat(), lockMarginY.toFloat(), lockWidth.toFloat(), dotPaint)
-//        dotPaint.setColor(ContextCompat.getColor(context, R.color.red))
-//        canvas.drawCircle(lockMarginX.toFloat(), lockMarginY.toFloat(), 1f, dotPaint)
 
     }
 
-    fun setLock(ssm: CHSesame2) {
-//        ssmImg = getResources().getDrawable(ssmUIParcer(ssm)).toBitmap()
+    fun setLockImage(ssm: CHSesame2) {
         ssmImg = ContextCompat.getDrawable(context, ssmUIParcer(ssm))!!.toBitmap()
+        invalidate()
+    }
 
+    fun setLock(ssm: CHSesame2) {
         if (ssm.mechStatus == null) {
+//            L.d("hcia", "ssm.mechStatus 擋掉了:" + ssm.mechStatus)
             return
         }
-//        if (ssm.deviceStatus.value == CHDeviceLoginStatus.unlogined) {
-        dotPaint.setColor(ContextCompat.getColor(context, R.color.clear))
 
-//        } else {
-//            L.d("hcia", "ssm.mechStatus:" + ssm.mechStatus)
-        dotPaint.setColor(ContextCompat.getColor(context, if (ssm.mechStatus!!.isInLockRange) R.color.lock_red else R.color.unlock_blue)) //todo crask  mechStatus null
-        ssm.mechSetting?.unlockPosition
-        val degree = ssm.mechStatus!!.position.toFloat() * 360 / 1024
-        angle = degree % 360
-//        }
-        invalidate()
+
+//        L.d("hcia", "ssm->target!!:" + ssm.mechStatus!!.target + " 動畫:" + anim?.isRunning)
+
+        dotPaint.setColor(ContextCompat.getColor(context, if (ssm.mechStatus!!.isInLockRange) R.color.lock_red else R.color.unlock_blue))
+        val degree = (ssm.mechStatus!!.position.toFloat() * 360 / 1024)
+        val toTarget = ssm.mechStatus!!.target.toFloat() * 360 / 1024
+
+        if (anim?.isRunning == true) {
+            return
+        }
+//        L.d("hcia", "degree:" + degree + " toTarget:" + toTarget)
+
+        if (ssm.mechStatus!!.target.toInt() == -32768) {
+            post {
+                anim = ValueAnimator.ofFloat(angle, degree)
+                anim!!.duration = 500
+                anim!!.addUpdateListener { animation ->
+                    val currentValue = animation.animatedValue as Float
+                    angle = currentValue
+                    invalidate()
+                }
+                anim!!.start()
+            }
+        } else {
+            post {
+                anim = ValueAnimator.ofFloat(angle, toTarget)
+                anim!!.duration = abs(toTarget.toLong() - angle.toLong()) * 10
+                anim!!.addUpdateListener { animation ->
+                    val currentValue = animation.animatedValue as Float
+                    angle = currentValue
+                    invalidate()
+                }
+                anim!!.start()
+            }
+        }
+
+
     }
 }
 

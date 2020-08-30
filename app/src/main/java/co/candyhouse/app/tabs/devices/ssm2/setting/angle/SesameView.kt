@@ -34,8 +34,8 @@ class SesameView @JvmOverloads constructor(
 
     init {
         ssmImg = ContextCompat.getDrawable(context, R.drawable.img_knob_3x)!!.toBitmap()
-        lockImg = ContextCompat.getDrawable(context, R.drawable.ic_icon_locked)!!.toBitmap()
-        unlockImg = ContextCompat.getDrawable(context, R.drawable.ic_icon_unlocked)!!.toBitmap()
+        lockImg = ContextCompat.getDrawable(context, R.drawable.ic_icon_lock_uncheck)!!.toBitmap()
+        unlockImg = ContextCompat.getDrawable(context, R.drawable.ic_icon_unlock_uncheck)!!.toBitmap()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

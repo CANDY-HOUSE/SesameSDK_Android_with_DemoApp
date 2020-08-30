@@ -1,10 +1,12 @@
 package co.candyhouse.app
 
+import android.animation.ValueAnimator
 import android.app.Application
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHConfiguration
 import co.utils.L
 import co.utils.SharedPreferencesUtils
+
 
 class CandyHouseApp : Application() {
     override fun onCreate() {
@@ -15,3 +17,4 @@ class CandyHouseApp : Application() {
         SharedPreferencesUtils.init(this)
     }
 }
+

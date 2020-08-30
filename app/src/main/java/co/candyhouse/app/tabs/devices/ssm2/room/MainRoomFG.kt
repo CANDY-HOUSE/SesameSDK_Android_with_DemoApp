@@ -9,10 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseSSMFG
-import co.candyhouse.sesame.ble.Sesame2.CHSesame2
-import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
-import co.candyhouse.sesame.ble.Sesame2.CHSesame2History
-import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
+import co.candyhouse.sesame.ble.Sesame2.*
 import co.candyhouse.sesame.deviceprotocol.CHSesame2Intention
 import co.candyhouse.sesame.deviceprotocol.CHSesame2MechStatus
 import co.candyhouse.sesame.deviceprotocol.NSError
@@ -46,6 +43,7 @@ class MainRoomFG : BaseSSMFG() {
 
         mRecyclerView!!.layoutManager = StickyHeaderLayoutManager()
         ssmView.setLock(mSesame!!)
+        ssmView.setLockImage(mSesame!!)
         ssmView.setOnClickListener { mSesame?.toggle {} }
         right_icon.setOnClickListener {
             findNavController().navigate(R.id.action_mainRoomFG_to_SSM2SettingFG)
@@ -75,21 +73,30 @@ class MainRoomFG : BaseSSMFG() {
         mSesame?.getHistories(hispage) {
 
             it.onSuccess {
-                //            L.d("hcia", "UI收到 歷史it:" + it.javaClass.simpleName)
+                L.d("hcia", "UI收到 歷史it:" + it.javaClass.simpleName)
                 val sesameHistorys = it.data
+
+
                 mRecyclerView?.post {
 
                     if (sesameHistorys.size == 0) {
                         return@post
                     }
+                    /**
+                    leftPower its a workaround
+                    a. recordID not correct after reboot
+                    b. timestamp without ms
+                    workaround!!  binding  timestamp with  recordID
+                     */
+                    val leftPower = 10000000000
 
                     mHistorys.addAll(sesameHistorys)
                     mHistorys = mHistorys.distinctBy {
-                        it.recordID
+                        (it.date.getTime() * leftPower + it.recordID)
                     } as ArrayList<CHSesame2History>
 
                     mHistorys.sortBy {
-                        it.recordID
+                        (it.date.getTime() * leftPower + it.recordID)
                     }
 //                L.d("hcia", "總數據量:" + mHistorys.size)
                     val mTestGoupHistory = mHistorys.groupBy {
@@ -128,7 +135,7 @@ class MainRoomFG : BaseSSMFG() {
                         refleshHistory()
                     }
                 }
-                L.d("hcia", "it!!!!!!!!!!!!!!!!!!:" + it.localizedMessage)//it!!!!!!!!!!!!!!!!!!:BUSY
+//                L.d("hcia", "UI it!!!!!!!!!!!!!!!!!!:" + it.localizedMessage)//it!!!!!!!!!!!!!!!!!!:BUSY
             }
         }
     }
@@ -137,10 +144,11 @@ class MainRoomFG : BaseSSMFG() {
     override fun onResume() {
         super.onResume()
         mSesame?.delegate = object : CHSesame2Delegate {
-            override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
+            override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status,shadowStatus: CHSesame2ShadowStatus?) {
                 if (device.deviceStatus == CHSesame2Status.receivedBle) {
                     device.connect() {}
                 }
+                ssmView?.setLockImage(mSesame!!)
             }
 
             override fun onMechStatusChanged(device: CHSesame2, status: CHSesame2MechStatus, intention: CHSesame2Intention) {

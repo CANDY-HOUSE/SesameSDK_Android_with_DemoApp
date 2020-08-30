@@ -19,6 +19,7 @@ import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2ShadowStatus
 import co.utils.L
 import co.utils.recycle.EmptyRecyclerView
 import co.utils.recycle.GenericAdapter
@@ -95,7 +96,7 @@ class RegisterDevicesFG : Fragment() {
                                 sesame.updateFirmware() { res ->
                                     res.onSuccess {
                                         val starter = DfuServiceInitiator(it.data.address)
-                                        starter.setZip(R.raw.d533ef10)
+                                        starter.setZip(R.raw.ssm540f1476)
                                         starter.setPacketsReceiptNotificationsEnabled(false)
                                         starter.setPrepareDataObjectDelay(400)
                                         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
@@ -112,7 +113,7 @@ class RegisterDevicesFG : Fragment() {
                                     sesame.updateFirmware() { res ->
                                         res.onSuccess {
                                             val starter = DfuServiceInitiator(it.data.address)
-                                            starter.setZip(R.raw.d533ef10)
+                                            starter.setZip(R.raw.ssm540f1476)
                                             starter.setPacketsReceiptNotificationsEnabled(false)
                                             starter.setPrepareDataObjectDelay(400)
                                             starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
@@ -126,12 +127,12 @@ class RegisterDevicesFG : Fragment() {
                                 sesame.connect() {}
 
                                 MainActivity.activity?.showProgress()
-                                if (sesame.deviceStatus == CHSesame2Status.readytoRegister) {
+                                if (sesame.deviceStatus == CHSesame2Status.readyToRegister) {
                                     registerSSM(sesame)
                                 } else {
                                     sesame.delegate = object : CHSesame2Delegate {
-                                        override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
-                                            if (status == CHSesame2Status.readytoRegister) {
+                                        override  fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status,shadowStatus: CHSesame2ShadowStatus?) {
+                                            if (status == CHSesame2Status.readyToRegister) {
                                                 registerSSM(sesame)
                                             }
                                         }

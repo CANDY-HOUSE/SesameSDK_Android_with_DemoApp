@@ -14,6 +14,7 @@ import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.sesame.deviceprotocol.*
 import co.candyhouse.app.R
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
+import co.candyhouse.sesame.ble.Sesame2.CHSesame2ShadowStatus
 import kotlinx.android.synthetic.main.activity_ble_control.*
 
 
@@ -120,7 +121,7 @@ class BlueSesameControlActivity : AppCompatActivity(), CHSesame2Delegate, CHBleM
 
 
     @SuppressLint("SetTextI18n")
-    override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status) {
+    override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status, shadowStatus: CHSesame2ShadowStatus?) {
         connectStatus.setText(ssm!!.deviceStatus.toString() + " :" + ssm!!.deviceStatus.value.toString())
     }
 

@@ -70,7 +70,7 @@ repositories {
 dependencies {
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
 //    implementation project(':sesame-sdk')
-    implementation(name: 'sesame-sdk-release', ext: 'aar')
+    implementation(name: 'SesameSDK', ext: 'aar')
 
     implementation deps.kotlin.stdlib
     implementation deps.support.app_compat
