@@ -18,9 +18,9 @@ object ItemUtils {
 
     fun getCustomSamples(context: Context): List<BarMenuItem> {
         val samples = ArrayList<BarMenuItem>()
-        samples.add(BarMenuItem(1,drawable(context, R.drawable.ic_icons_filled_favorites), context.getString(R.string.new_sesame)))
-        samples.add(BarMenuItem(0,drawable(context, R.drawable.ic_icons_filled_add_friends), context.getString(R.string.add_contacts)))
-        samples.add(BarMenuItem(2,drawable(context, R.drawable.ic_icons_filled_scan), context.getString(R.string.scan_the_qr_code)))
+        samples.add(BarMenuItem(1, drawable(context, R.drawable.ic_icons_filled_favorites), context.getString(R.string.new_sesame)))
+        samples.add(BarMenuItem(2, drawable(context, R.drawable.ic_icons_filled_scan), context.getString(R.string.scan_the_qr_code)))
+        samples.add(BarMenuItem(0, drawable(context, R.drawable.ic_icons_filled_favorites), "New Wifi Modeile2"))
         return samples
     }
 

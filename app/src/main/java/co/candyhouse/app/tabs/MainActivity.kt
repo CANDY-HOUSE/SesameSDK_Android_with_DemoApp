@@ -19,29 +19,16 @@ package co.candyhouse.app.tabs
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
-import co.candyhouse.app.AWSConfig
-import co.candyhouse.app.tabs.account.login.LoginFragment
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.account.MeFG
-import co.candyhouse.app.tabs.devices.DeviceListFG
-import co.candyhouse.app.tabs.friends.FriendsFG
-import co.candyhouse.sesame.server.CHAccountManager
-import co.utils.L
-import co.utils.SharedPreferencesUtils
-import com.amazonaws.mobile.client.*
-import com.amazonaws.mobile.config.AWSConfiguration
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
-import java.util.concurrent.CountDownLatch
 
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
@@ -94,7 +81,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private fun setupBottomNavigationBar() {
         val navGraphIds = listOf(
                 R.navigation.list,
-                R.navigation.home,
+//                R.navigation.home,
                 R.navigation.account_ng
         )
 

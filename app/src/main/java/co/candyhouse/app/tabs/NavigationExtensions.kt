@@ -57,25 +57,25 @@ fun BottomNavigationView.setupWithNavController(
     setOnNavigationItemSelectedListener { item ->
         if (item == menu.getItem(0)) {
             MainActivity.nowTab = 0
-            menu.getItem(2).setIcon(R.drawable.ic_icons_outlined_me)
+//            menu.getItem(2).setIcon(R.drawable.ic_icons_outlined_me)
             menu.getItem(1).setIcon(R.drawable.ic_icons_outlined_contacts)
 
             MainActivity.activity?.getWindow()?.statusBarColor = resources.getColor(R.color.gray0)
         }
         if (item == menu.getItem(1)) {
             MainActivity.nowTab = 1
-            menu.getItem(2).setIcon(R.drawable.ic_icons_outlined_me)
+//            menu.getItem(2).setIcon(R.drawable.ic_icons_outlined_me)
             menu.getItem(1).setIcon(R.drawable.ic_icons_filled_contacts)
 
             MainActivity.activity?.getWindow()?.statusBarColor = resources.getColor(R.color.gray0)
         }
-        if (item == menu.getItem(2)) {
-            MainActivity.nowTab = 2
-            menu.getItem(2).setIcon(R.drawable.ic_icons_filled_official_accounts)
-            menu.getItem(1).setIcon(R.drawable.ic_icons_outlined_contacts)
-
-            MainActivity.activity?.getWindow()?.statusBarColor = resources.getColor(R.color.white)
-        }
+//        if (item == menu.getItem(2)) {
+//            MainActivity.nowTab = 2
+////            menu.getItem(2).setIcon(R.drawable.ic_icons_filled_official_accounts)
+//            menu.getItem(1).setIcon(R.drawable.ic_icons_outlined_contacts)
+//
+//            MainActivity.activity?.getWindow()?.statusBarColor = resources.getColor(R.color.white)
+//        }
 
 
         val newlySelectedItemTag = graphIdToTagMap[item.itemId]

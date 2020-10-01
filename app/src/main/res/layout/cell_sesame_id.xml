@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="100dp"
+    android:layout_height="60dp">
+
+    <Button
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:background="@drawable/round_blue"
+        android:layout_marginLeft="13dp"
+        android:layout_toRightOf="@+id/avatar"
+        android:gravity="center"
+        android:text="name"
+        android:textSize="13sp" />
+
+
+</RelativeLayout>

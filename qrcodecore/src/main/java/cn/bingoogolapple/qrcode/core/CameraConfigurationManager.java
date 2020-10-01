@@ -20,19 +20,19 @@ final class CameraConfigurationManager {
     }
 
     void initFromCameraParameters(Camera camera) {
-        Point screenResolution = BGAQRCodeUtil.getScreenResolution(mContext);
+        Point screenResolution = BGQRCodeUtil.getScreenResolution(mContext);
         Point screenResolutionForCamera = new Point();
         screenResolutionForCamera.x = screenResolution.x;
         screenResolutionForCamera.y = screenResolution.y;
 
-        if (BGAQRCodeUtil.isPortrait(mContext)) {
+        if (BGQRCodeUtil.isPortrait(mContext)) {
             screenResolutionForCamera.x = screenResolution.y;
             screenResolutionForCamera.y = screenResolution.x;
         }
 
         mPreviewResolution = getPreviewResolution(camera.getParameters(), screenResolutionForCamera);
 
-        if (BGAQRCodeUtil.isPortrait(mContext)) {
+        if (BGQRCodeUtil.isPortrait(mContext)) {
             mCameraResolution = new Point(mPreviewResolution.y, mPreviewResolution.x);
         } else {
             mCameraResolution = mPreviewResolution;

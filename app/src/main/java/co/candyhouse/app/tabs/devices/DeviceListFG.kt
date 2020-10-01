@@ -106,7 +106,7 @@ class DeviceListFG : BaseFG() {
                                     if (status == CHSesame2Status.receivedBle) {
 //                                        L.d("hcia","下連接----")
                                         sesame.connect() {
-                                            L.d("hcia", "it:" + it)
+//                                            L.d("hcia", "it:" + it)
                                             it.onFailure {
                                                 toastMSG(it.message)
                                             }
@@ -116,10 +116,9 @@ class DeviceListFG : BaseFG() {
                             }
 
 //                            L.d("hcia","下連接＋＋＋")
-
                             sesame.connect() {
                                 it.onFailure {
-                                    L.d("hcia", "it.message:" + it.message)
+//                                    L.d("hcia", "it.message:" + it.message)
 //                                    toastMSG(it.message)
                                 }
                             }
@@ -160,6 +159,7 @@ class DeviceListFG : BaseFG() {
             }
         }
 
+
         return view
     }
 
@@ -169,6 +169,13 @@ class DeviceListFG : BaseFG() {
         testAPI.visibility = if (BuildConfig.BUILD_TYPE == "debug") View.VISIBLE else View.INVISIBLE
         testSwich.visibility = if (BuildConfig.BUILD_TYPE == "debug") View.VISIBLE else View.INVISIBLE
         testSwich.isChecked = false
+        testAPI.setOnClickListener {
+            findNavController().navigate(R.id.action_deviceListPG_to_newWifiMD2FG)
+        }
+
+        //  todo   kill test
+//        findNavController().navigate(R.id.action_deviceListPG_to_newWifiMD2FG)
+
     }
 
 

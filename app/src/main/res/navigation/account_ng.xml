@@ -26,7 +26,7 @@
             android:id="@+id/register"
             android:name="co.candyhouse.app.tabs.account.MeFG"
             android:label="@string/title_me"
-            tools:layout="@layout/fragment_register">
+            tools:layout="@layout/fg_me">
         <action
             android:id="@+id/action_register_to_myQrcodeFG"
             app:destination="@id/myQrcodeFG" />
@@ -36,6 +36,9 @@
         <action
             android:id="@+id/to_regist"
             app:destination="@id/registerDevicesFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_newWifiMD2FG"
+            app:destination="@id/newWifiMD2FG" />
     </fragment>
     <fragment
         android:id="@+id/myQrcodeFG"
@@ -47,7 +50,11 @@
         android:label="ScanFG" />
     <fragment
         android:id="@+id/registerDevicesFG"
-        android:name="co.candyhouse.app.tabs.devices.RegisterDevicesFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.NewSesame2FG"
         android:label="fragment_register"
         tools:layout="@layout/fg_rg_device" />
+    <fragment
+        android:id="@+id/newWifiMD2FG"
+        android:name="co.candyhouse.app.tabs.devices.wm2.NewWifiMD2FG"
+        android:label="NewWifiMD2FG" />
 </navigation>

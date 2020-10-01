@@ -22,7 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil
+import cn.bingoogolapple.qrcode.core.BGQRCodeUtil
 import cn.bingoogolapple.qrcode.zxing.QRCodeEncoder
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.tabs.MainActivity
@@ -66,7 +66,7 @@ class MyKEYFG : BaseNFG() {
         keyURI.appendQueryParameter("t", "sharedKey")
         keyURI.appendQueryParameter("sharedKey", ssm2key)
         val uri = keyURI.build()
-        val image = QRCodeEncoder.syncEncodeQRCode(uri.toString(), BGAQRCodeUtil.dp2px(context, 150f))
+        val image = QRCodeEncoder.syncEncodeQRCode(uri.toString(), BGQRCodeUtil.dp2px(context, 150f))
         qrcode.setImageBitmap(image)
         headv.visibility = View.VISIBLE
         progressBar.visibility = View.GONE

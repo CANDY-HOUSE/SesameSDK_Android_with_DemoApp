@@ -5,10 +5,10 @@
         android:id="@+id/list"
         android:icon="@drawable/ic_keychain_original"
         android:title="@string/title_list" />
-    <item
-        android:id="@+id/home"
-        android:icon="@drawable/ic_icons_outlined_contacts"
-        android:title="@string/title_friends" />
+<!--    <item-->
+<!--        android:id="@+id/home"-->
+<!--        android:icon="@drawable/ic_icons_outlined_contacts"-->
+<!--        android:title="@string/title_friends" />-->
 
     <item
         android:id="@+id/form"

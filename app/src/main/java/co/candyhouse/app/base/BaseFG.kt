@@ -22,7 +22,7 @@ open class BaseFG : Fragment() {
                 customListBalloon.dismiss()
                 when (customItem.index) {
                     0 -> {
-//                        findNavController().navigate(R.id.to_scan)
+                        findNavController().navigate(R.id.action_deviceListPG_to_newWifiMD2FG)
                     }
                     1 -> {
                         findNavController().navigate(R.id.to_regist)

@@ -50,6 +50,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
 
     private void initView(Context context, AttributeSet attrs) {
         mCameraPreview = new CameraPreview(context);
+
         mCameraPreview.setDelegate(new CameraPreview.Delegate() {
             @Override
             public void onStartPreview() {
@@ -261,8 +262,8 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
 
     @Override
     public void onPreviewFrame(final byte[] data, final Camera camera) {
-        if (BGAQRCodeUtil.isDebug()) {
-            BGAQRCodeUtil.d("两次 onPreviewFrame 时间间隔：" + (System.currentTimeMillis() - mLastPreviewFrameTime));
+        if (BGQRCodeUtil.isDebug()) {
+            BGQRCodeUtil.d("两次 onPreviewFrame 时间间隔：" + (System.currentTimeMillis() - mLastPreviewFrameTime));
             mLastPreviewFrameTime = System.currentTimeMillis();
         }
 
@@ -279,7 +280,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
             return;
         }
 
-        mProcessDataTask = new ProcessDataTask(camera, data, this, BGAQRCodeUtil.isPortrait(getContext())).perform();
+        mProcessDataTask = new ProcessDataTask(camera, data, this, BGQRCodeUtil.isPortrait(getContext())).perform();
     }
 
     private void handleAmbientBrightness(byte[] data, Camera camera) {
@@ -322,7 +323,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
                     break;
                 }
             }
-            BGAQRCodeUtil.d("摄像头环境亮度为：" + cameraLight);
+            BGQRCodeUtil.d("摄像头环境亮度为：" + cameraLight);
             if (mDelegate != null) {
                 mDelegate.onCameraAmbientBrightnessChanged(isDarkEnv);
             }
@@ -347,11 +348,11 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
         mProcessDataTask = new ProcessDataTask(bitmap, this).perform();
     }
 
-    protected abstract ScanResult processData(byte[] data, int width, int height, boolean isRetry);
+    protected abstract BGScanResult processData(byte[] data, int width, int height, boolean isRetry);
 
-    protected abstract ScanResult processBitmapData(Bitmap bitmap);
+    protected abstract BGScanResult processBitmapData(Bitmap bitmap);
 
-    void onPostParseData(ScanResult scanResult) {
+    void onPostParseData(BGScanResult scanResult) {
         if (!mSpotAble) {
             return;
         }
@@ -376,7 +377,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
         }
     }
 
-    void onPostParseBitmapOrPicture(ScanResult scanResult) {
+    void onPostParseBitmapOrPicture(BGScanResult scanResult) {
         if (mDelegate != null) {
             String result = scanResult == null ? null : scanResult.result;
             mDelegate.onScanQRCodeSuccess(result);
@@ -420,7 +421,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
             // 不管横屏还是竖屏，size.width 大于 size.height
             Camera.Size size = mCamera.getParameters().getPreviewSize();
             boolean isMirrorPreview = mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT;
-            int statusBarHeight = BGAQRCodeUtil.getStatusBarHeight(getContext());
+            int statusBarHeight = BGQRCodeUtil.getStatusBarHeight(getContext());
 
             PointF[] transformedPoints = new PointF[pointArr.length];
             int index = 0;
@@ -501,7 +502,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
         mAutoZoomAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                onPostParseData(new ScanResult(result));
+                onPostParseData(new BGScanResult(result));
             }
         });
         mAutoZoomAnimator.setDuration(600);
@@ -527,7 +528,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
         float scaleX;
         float scaleY;
 
-        if (BGAQRCodeUtil.isPortrait(getContext())) {
+        if (BGQRCodeUtil.isPortrait(getContext())) {
             scaleX = viewWidth / cameraPreviewHeight;
             scaleY = viewHeight / cameraPreviewWidth;
             result = new PointF((cameraPreviewHeight - originX) * scaleX, (cameraPreviewWidth - originY) * scaleY);

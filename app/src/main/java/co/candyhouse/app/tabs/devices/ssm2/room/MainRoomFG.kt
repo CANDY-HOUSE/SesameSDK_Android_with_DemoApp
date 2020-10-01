@@ -144,7 +144,7 @@ class MainRoomFG : BaseSSMFG() {
     override fun onResume() {
         super.onResume()
         mSesame?.delegate = object : CHSesame2Delegate {
-            override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status,shadowStatus: CHSesame2ShadowStatus?) {
+            override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status, shadowStatus: CHSesame2ShadowStatus?) {
                 if (device.deviceStatus == CHSesame2Status.receivedBle) {
                     device.connect() {}
                 }

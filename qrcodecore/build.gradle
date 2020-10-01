@@ -12,8 +12,12 @@ android {
         versionName "1.0"
     }
 }
+dependencies {
+    //noinspection GradleDependency
+    api 'com.google.zxing:core:3.3.3'
+}
 
 // ./gradlew :qrcodecore:clean :qrcodecore:build :qrcodecore:bintrayUpload -PpublishAar
-if (hasProperty("publishAar")) {
-    apply from: 'https://raw.githubusercontent.com/bingoogolapple/PublishAar/master/jcenter-release.gradle'
-}
+//if (hasProperty("publishAar")) {
+//    apply from: 'https://raw.githubusercontent.com/bingoogolapple/PublishAar/master/jcenter-release.gradle'
+//}

@@ -1,2 +1,2 @@
 include ':app'
-include ':qrcodecore', ':zxing'
+include ':qrcodecore'

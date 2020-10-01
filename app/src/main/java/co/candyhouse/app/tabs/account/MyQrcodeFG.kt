@@ -21,7 +21,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil
+import cn.bingoogolapple.qrcode.core.BGQRCodeUtil
 import cn.bingoogolapple.qrcode.zxing.QRCodeEncoder
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.tabs.MainActivity
@@ -63,7 +63,7 @@ class MyQrcodeFG : BaseNFG() {
 
 //        CHAccountManager.getInvitation() {
 //            it.onSuccess {
-//                val image = QRCodeEncoder.syncEncodeQRCode(it, BGAQRCodeUtil.dp2px(context, 150f))
+//                val image = QRCodeEncoder.syncEncodeQRCode(it, BGQRCodeUtil.dp2px(context, 150f))
 //                qrcode.post {
 //                    qrcode.setImageBitmap(image)
 //                    headv.visibility = View.VISIBLE

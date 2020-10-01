@@ -9,14 +9,7 @@ import android.view.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import co.candyhouse.app.BuildConfig.BUILD_TYPE
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
-import com.amazonaws.mobile.client.results.SignInResult
-import co.candyhouse.app.tabs.devices.DeviceListFG
-import co.candyhouse.app.tabs.friends.FriendsFG
-import co.candyhouse.sesame.server.CHAccountManager
 import co.candyhouse.app.R
-import co.utils.L
 import kotlinx.android.synthetic.main.fragment_login.*
 
 

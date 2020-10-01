@@ -1,4 +1,4 @@
-package co.candyhouse.app.tabs.devices
+package co.candyhouse.app.tabs.devices.ssm2
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -17,6 +17,7 @@ import co.candyhouse.sesame.ble.CHBleManagerDelegate
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Delegate
 import co.candyhouse.app.R
+import co.candyhouse.app.tabs.devices.DeviceListFG
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2Status
 import co.candyhouse.sesame.ble.Sesame2.CHSesame2ShadowStatus
@@ -31,7 +32,7 @@ import no.nordicsemi.android.dfu.DfuServiceListenerHelper
 import java.lang.Math.pow
 import java.util.*
 
-class RegisterDevicesFG : Fragment() {
+class NewSesame2FG : Fragment() {
 
     private lateinit var recyclerView: EmptyRecyclerView
     var mDeviceList = ArrayList<CHSesame2>()
@@ -131,7 +132,7 @@ class RegisterDevicesFG : Fragment() {
                                     registerSSM(sesame)
                                 } else {
                                     sesame.delegate = object : CHSesame2Delegate {
-                                        override  fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status,shadowStatus: CHSesame2ShadowStatus?) {
+                                        override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status, shadowStatus: CHSesame2ShadowStatus?) {
                                             if (status == CHSesame2Status.readyToRegister) {
                                                 registerSSM(sesame)
                                             }

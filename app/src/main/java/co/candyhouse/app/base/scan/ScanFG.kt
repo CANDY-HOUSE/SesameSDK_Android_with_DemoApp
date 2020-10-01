@@ -13,11 +13,7 @@ import androidx.navigation.fragment.findNavController
 import cn.bingoogolapple.qrcode.core.QRCodeView
 import cn.bingoogolapple.qrcode.zxing.ZXingView
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.friends.FriendsFG
-import co.candyhouse.sesame.server.CHAccountManager
-//import co.candyhouse.sesame.server.CHQrevent
 import co.candyhouse.app.R
-import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHDeviceManager
 import co.utils.L
 import pub.devrel.easypermissions.EasyPermissions

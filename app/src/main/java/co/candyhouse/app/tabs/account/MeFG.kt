@@ -50,65 +50,24 @@ class MeFG : BaseFG() {
         super.onViewCreated(view, savedInstanceState)
 //        L.d("hcia", "我 onViewCreated:")
 
-        signout_btn.setOnClickListener {
-            val alert = AlertView("", "", AlertStyle.IOS)
-            alert.addAction(AlertAction(getString(R.string.logout), AlertActionStyle.NEGATIVE) { action ->
-                AWSMobileClient.getInstance().signOut()
-//                CHAccountManager.logout()
-            })
-            alert.show(activity as AppCompatActivity)
-        }
         qrcode.setOnClickListener {
             MyQrcodeFG.mailStr = mail.text.toString()
             MyQrcodeFG.givenName = given_name.text.toString()
             MyQrcodeFG.familyName = family_name.text.toString()
             findNavController().navigate(R.id.action_register_to_myQrcodeFG)
         }
-        change_name_zone.setOnClickListener {
-            context?.inputNameAlert(getString(R.string.edit_name), family_name.text.toString(), given_name.text.toString()) {
-                confirmButtonWithDoubleEdit("OK") { name, top, down ->
-                    val awsAttributes = CognitoUserAttributes()
-                    awsAttributes.addAttribute("family_name", top)
-                    awsAttributes.addAttribute("given_name", down)
-                    AWSMobileClient.getInstance().updateUserAttributes(awsAttributes.attributes, object : Callback<List<UserCodeDeliveryDetails>> {
-                        override fun onResult(result: List<UserCodeDeliveryDetails>?) {
-                            SharedPreferencesUtils.given_name = down
-                            SharedPreferencesUtils.family_name = top
-//                            CHAccountManager.updateMyProfile(SharedPreferencesUtils.given_name.toString(), SharedPreferencesUtils.family_name.toString()) {}
-                            setName()
-                        }
 
-                        override fun onError(e: Exception?) {
-                            L.d("hcia", "e:" + e)
-                        }
-                    })
-                    dismiss()
-                }
-                cancelButton("Cancel")
-            }?.show()
-        }
-
-        setName()
 
         version.setText(BuildConfig.VERSION_NAME + "-" + BuildConfig.GIT_HASH + "-" + BuildConfig.BUILD_TYPE)
 
     }//end onViewCreated
 
-    //todo mvvm
-    fun setName() {
-        mail?.post {
-            mail.text = SharedPreferencesUtils.mail_id
-            family_name?.text = SharedPreferencesUtils.family_name
-            given_name?.text = SharedPreferencesUtils.given_name
-            head.setImageDrawable(avatatImagGenaroter(SharedPreferencesUtils.given_name))
-        }
-    }
 
     override fun onResume() {
         super.onResume()
 //        L.d("hcia", "我 onResume:")
 
-        if (MainActivity.nowTab == 2) {
+        if (MainActivity.nowTab == 1) {
             (activity as MainActivity).showMenu()
         }
     }

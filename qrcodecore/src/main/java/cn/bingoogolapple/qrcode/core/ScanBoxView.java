@@ -88,30 +88,30 @@ public class ScanBoxView extends View {
         mPaint.setAntiAlias(true);
         mMaskColor = Color.parseColor("#33FFFFFF");
         mCornerColor = Color.WHITE;
-        mCornerLength = BGAQRCodeUtil.dp2px(context, 20);
-        mCornerSize = BGAQRCodeUtil.dp2px(context, 3);
-        mScanLineSize = BGAQRCodeUtil.dp2px(context, 1);
+        mCornerLength = BGQRCodeUtil.dp2px(context, 20);
+        mCornerSize = BGQRCodeUtil.dp2px(context, 3);
+        mScanLineSize = BGQRCodeUtil.dp2px(context, 1);
         mScanLineColor = Color.WHITE;
-//        mTopOffset = BGAQRCodeUtil.dp2px(context, 90);
-        mRectWidth = BGAQRCodeUtil.dp2px(context, 230);
-        mBarcodeRectHeight = BGAQRCodeUtil.dp2px(context, 140);
+//        mTopOffset = BGQRCodeUtil.dp2px(context, 90);
+        mRectWidth = BGQRCodeUtil.dp2px(context, 230);
+        mBarcodeRectHeight = BGQRCodeUtil.dp2px(context, 140);
         mScanLineMargin = 0;
         mIsShowDefaultScanLineDrawable = false;
         mCustomScanLineDrawable = null;
         mScanLineBitmap = null;
-        mBorderSize = BGAQRCodeUtil.dp2px(context, 1);
+        mBorderSize = BGQRCodeUtil.dp2px(context, 1);
         mBorderColor = Color.WHITE;
         mAnimTime = 1000;
         mVerticalBias = -1;
         mCornerDisplayType = 1;
         mToolbarHeight = 0;
         mIsBarcode = false;
-        mMoveStepDistance = BGAQRCodeUtil.dp2px(context, 3);
+        mMoveStepDistance = BGQRCodeUtil.dp2px(context, 3);
         mTipText = null;
-        mTipTextSize = BGAQRCodeUtil.sp2px(context, 14);
+        mTipTextSize = BGQRCodeUtil.sp2px(context, 14);
         mTipTextColor = Color.WHITE;
         mIsTipTextBelowRect = false;
-        mTipTextMargin = BGAQRCodeUtil.dp2px(context, 20);
+        mTipTextMargin = BGQRCodeUtil.dp2px(context, 20);
         mIsShowTipTextAsSingleLine = false;
         mTipBackgroundColor = Color.parseColor("#00000000");
         mIsShowTipBackground = false;
@@ -121,7 +121,7 @@ public class ScanBoxView extends View {
         mTipPaint = new TextPaint();
         mTipPaint.setAntiAlias(true);
 
-        mTipBackgroundRadius = BGAQRCodeUtil.dp2px(context, 4);
+        mTipBackgroundRadius = BGQRCodeUtil.dp2px(context, 4);
 
         mIsOnlyDecodeScanBoxArea = false;
         mIsShowLocationPoint = false;
@@ -219,11 +219,11 @@ public class ScanBoxView extends View {
         }
         if (mOriginQRCodeGridScanLineBitmap == null) {
             mOriginQRCodeGridScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.qrcode_default_grid_scan_line);
-            mOriginQRCodeGridScanLineBitmap = BGAQRCodeUtil.makeTintBitmap(mOriginQRCodeGridScanLineBitmap, mScanLineColor);
+            mOriginQRCodeGridScanLineBitmap = BGQRCodeUtil.makeTintBitmap(mOriginQRCodeGridScanLineBitmap, mScanLineColor);
         }
-        mOriginBarCodeGridScanLineBitmap = BGAQRCodeUtil.adjustPhotoRotation(mOriginQRCodeGridScanLineBitmap, 90);
-        mOriginBarCodeGridScanLineBitmap = BGAQRCodeUtil.adjustPhotoRotation(mOriginBarCodeGridScanLineBitmap, 90);
-        mOriginBarCodeGridScanLineBitmap = BGAQRCodeUtil.adjustPhotoRotation(mOriginBarCodeGridScanLineBitmap, 90);
+        mOriginBarCodeGridScanLineBitmap = BGQRCodeUtil.adjustPhotoRotation(mOriginQRCodeGridScanLineBitmap, 90);
+        mOriginBarCodeGridScanLineBitmap = BGQRCodeUtil.adjustPhotoRotation(mOriginBarCodeGridScanLineBitmap, 90);
+        mOriginBarCodeGridScanLineBitmap = BGQRCodeUtil.adjustPhotoRotation(mOriginBarCodeGridScanLineBitmap, 90);
 
 
         if (mCustomScanLineDrawable != null) {
@@ -231,9 +231,9 @@ public class ScanBoxView extends View {
         }
         if (mOriginQRCodeScanLineBitmap == null) {
             mOriginQRCodeScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.qrcode_default_scan_line);
-            mOriginQRCodeScanLineBitmap = BGAQRCodeUtil.makeTintBitmap(mOriginQRCodeScanLineBitmap, mScanLineColor);
+            mOriginQRCodeScanLineBitmap = BGQRCodeUtil.makeTintBitmap(mOriginQRCodeScanLineBitmap, mScanLineColor);
         }
-        mOriginBarCodeScanLineBitmap = BGAQRCodeUtil.adjustPhotoRotation(mOriginQRCodeScanLineBitmap, 90);
+        mOriginBarCodeScanLineBitmap = BGQRCodeUtil.adjustPhotoRotation(mOriginQRCodeScanLineBitmap, 90);
 
         mTopOffset += mToolbarHeight;
         mHalfCornerSize = 1.0f * mCornerSize / 2;
@@ -597,7 +597,7 @@ public class ScanBoxView extends View {
 
         if (!TextUtils.isEmpty(mTipText)) {
             if (mIsShowTipTextAsSingleLine) {
-                mTipTextSl = new StaticLayout(mTipText, mTipPaint, BGAQRCodeUtil.getScreenResolution(getContext()).x, Layout.Alignment.ALIGN_CENTER, 1.0f, 0,
+                mTipTextSl = new StaticLayout(mTipText, mTipPaint, BGQRCodeUtil.getScreenResolution(getContext()).x, Layout.Alignment.ALIGN_CENTER, 1.0f, 0,
                         true);
             } else {
                 mTipTextSl = new StaticLayout(mTipText, mTipPaint, mRectWidth - 2 * mTipBackgroundRadius, Layout.Alignment.ALIGN_CENTER, 1.0f, 0, true);
@@ -605,7 +605,7 @@ public class ScanBoxView extends View {
         }
 
         if (mVerticalBias != -1) {
-            int screenHeight = BGAQRCodeUtil.getScreenResolution(getContext()).y - BGAQRCodeUtil.getStatusBarHeight(getContext());
+            int screenHeight = BGQRCodeUtil.getScreenResolution(getContext()).y - BGQRCodeUtil.getStatusBarHeight(getContext());
             if (mToolbarHeight == 0) {
                 mTopOffset =  + (int) ((screenHeight ) / mVerticalBias - mRectHeight / 2);
             } else {

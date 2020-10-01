@@ -17,7 +17,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil;
+import cn.bingoogolapple.qrcode.core.BGQRCodeUtil;
+
+import cn.bingoogolapple.qrcode.core.BGQRCodeUtil;
 
 /**
  * 作者:王浩 邮件:bingoogolapple@gmail.com
@@ -142,7 +144,7 @@ public class QRCodeDecoder {
      * @return 返回二维码图片里的内容 或 null
      */
     public static String syncDecodeQRCode(String picturePath) {
-        return syncDecodeQRCode(BGAQRCodeUtil.getDecodeAbleBitmap(picturePath));
+        return syncDecodeQRCode(BGQRCodeUtil.getDecodeAbleBitmap(picturePath));
     }
 
     /**

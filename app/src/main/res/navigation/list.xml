@@ -29,10 +29,13 @@
         <action
             android:id="@+id/action_deviceListPG_to_SSM2SetAngleFG"
             app:destination="@id/SSM2SetAngleFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_newWifiMD2FG"
+            app:destination="@id/newWifiMD2FG" />
     </fragment>
     <fragment
         android:id="@+id/register_list"
-        android:name="co.candyhouse.app.tabs.devices.RegisterDevicesFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.NewSesame2FG"
         android:label="fragment_register_list"
         tools:layout="@layout/fg_rg_device" />
     <fragment
@@ -88,6 +91,10 @@
         android:id="@+id/myKEYFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.MyKEYFG"
         android:label="myKEYFG" />
+    <fragment
+        android:id="@+id/newWifiMD2FG"
+        android:name="co.candyhouse.app.tabs.devices.wm2.NewWifiMD2FG"
+        android:label="NewWifiMD2FG" />
 </navigation>
 <!--    app:enterAnim="@anim/slide_in_right"-->
 <!--    app:exitAnim="@anim/slide_out_left"-->

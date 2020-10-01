@@ -19,10 +19,10 @@ import com.google.zxing.common.HybridBinarizer;
 
 import java.util.Map;
 
-import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil;
+//import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil;
 import cn.bingoogolapple.qrcode.core.BarcodeType;
 import cn.bingoogolapple.qrcode.core.QRCodeView;
-import cn.bingoogolapple.qrcode.core.ScanResult;
+import cn.bingoogolapple.qrcode.core.BGScanResult;
 
 public class ZXingView extends QRCodeView {
     private MultiFormatReader mMultiFormatReader;
@@ -71,12 +71,12 @@ public class ZXingView extends QRCodeView {
     }
 
     @Override
-    protected ScanResult processBitmapData(Bitmap bitmap) {
-        return new ScanResult(QRCodeDecoder.syncDecodeQRCode(bitmap));
+    protected BGScanResult processBitmapData(Bitmap bitmap) {
+        return new BGScanResult(QRCodeDecoder.syncDecodeQRCode(bitmap));
     }
 
     @Override
-    protected ScanResult processData(byte[] data, int width, int height, boolean isRetry) {
+    protected BGScanResult processData(byte[] data, int width, int height, boolean isRetry) {
         Result rawResult = null;
         Rect scanBoxAreaRect = null;
 
@@ -94,7 +94,7 @@ public class ZXingView extends QRCodeView {
             if (rawResult == null) {
                 rawResult = mMultiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(source)));
                 if (rawResult != null) {
-                    BGAQRCodeUtil.d("GlobalHistogramBinarizer 没识别到，HybridBinarizer 能识别到");
+//                    BGAQRCodeUtil.d("GlobalHistogramBinarizer 没识别到，HybridBinarizer 能识别到");
                 }
             }
         } catch (Exception e) {
@@ -128,7 +128,7 @@ public class ZXingView extends QRCodeView {
                 return null;
             }
         }
-        return new ScanResult(result);
+        return new BGScanResult(result);
     }
 
     private boolean isNeedAutoZoom(BarcodeFormat barcodeFormat) {

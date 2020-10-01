@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".BlueSesameControlActivity">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/statusbg">
+
+            <Button
+                android:id="@+id/right_icon"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/ic_icons_outlined_addoutline" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sesame_uuid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BleId" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/connectBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="connect"
+                android:textSize="10dp" />
+
+
+            <Button
+                android:id="@+id/disconnectBtn"
+                android:layout_width="wrap_content"
+
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/connectBtn"
+
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="disconnect"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/connectStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+
+                android:layout_centerVertical="true"
+
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="connectStatus"
+
+                android:textSize="10dp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+
+                android:padding="4dp"
+                android:text="register"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/resetSSM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/register"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="factory reset"
+                android:textSize="8dp" />
+
+
+            <Button
+                android:id="@+id/registerstatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="status"
+
+                android:textSize="10dp"
+
+                />
+
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/ap_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@color/clear"
+                android:padding="4dp"
+                android:text="ap"
+                android:textSize="14dp" />
+
+            <Button
+                android:id="@+id/net_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/ap_status"
+                android:background="@color/clear"
+                android:padding="4dp"
+                android:text="net"
+                android:textSize="14dp" />
+
+            <Button
+                android:id="@+id/iot_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/net_status"
+                android:background="@color/clear"
+                android:padding="4dp"
+                android:text="iot"
+                android:textSize="14dp" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/wifi_ssid_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@color/clear"
+
+                android:padding="4dp"
+                android:text="SSID"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/wifi_pass_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/wifi_ssid_txt"
+                android:background="@color/clear"
+                android:padding="4dp"
+                android:text="PassWord"
+                android:textSize="10dp" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/connectWifi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="connect Wifi"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/setSSID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/setPassword"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="ssid"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/setPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/round_cornor"
+                android:padding="4dp"
+                android:text="Password"
+                android:textSize="10dp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recy"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/wm2_keys_recy"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/lockBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_red"
+                android:padding="4dp"
+                android:text="lock"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+            <Button
+                android:id="@+id/unlockBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/lockBtn"
+                android:background="@drawable/round_blue"
+                android:text="unlock"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+
+            <Button
+                android:id="@+id/moveState"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="4dp"
+                android:layout_toLeftOf="@+id/lockState"
+                android:background="@color/clear"
+                android:text="move"
+                android:textSize="10dp"
+
+                />
+
+            <Button
+                android:id="@+id/lockState"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:background="@color/clear"
+                android:text="status"
+                android:textSize="10dp"
+
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/test_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/round_red"
+                android:padding="4dp"
+                android:text="test"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+</ScrollView>

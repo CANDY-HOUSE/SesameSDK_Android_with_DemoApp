@@ -48,7 +48,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="co.candyhouse.app.tabs.MainActivity"
+        <activity
+            android:name="co.candyhouse.app.tabs.MainActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
@@ -60,6 +61,12 @@
             <nav-graph android:value="@navigation/list" />
         </activity>
         <activity android:name="co.candyhouse.app.tabs.devices.ssm2.test.BlueSesameControlActivity" />
+        <activity android:name="co.candyhouse.app.tabs.devices.wm2.test.Wm2TestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name="co.candyhouse.app.tabs.devices.ssm2.setting.DfuService"
