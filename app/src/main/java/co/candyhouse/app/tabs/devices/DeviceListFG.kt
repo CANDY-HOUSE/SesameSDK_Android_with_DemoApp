@@ -93,9 +93,9 @@ class DeviceListFG : BaseFG() {
 
                                 override fun onBleDeviceStatusChanged(device: CHSesame2, status: CHSesame2Status, shadowStatus: CHSesame2ShadowStatus?) {
 //                                    L.d("hcia", "UI 收到status:" + status)
-                                    ssmView.setLockImage(device)
                                     sesame2Status?.post {
                                         ssmView.setLock(device)
+                                        ssmView.setLockImage(device)
                                         sesame2Status.text = status.toString()
                                         shadowStatusTxt.text = shadowStatus.toString()
                                         battery_percent.text = sesame.mechStatus?.getBatteryPrecentage().toString() + "%"

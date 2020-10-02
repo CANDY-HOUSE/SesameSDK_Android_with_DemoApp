@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -25,6 +26,9 @@ class Wm2TestActivity : AppCompatActivity(), CHWifiModule2Delegate {
 
     var mDeviceList = ArrayList<CHSesame2>()
     var mWM2keyList = ArrayList<CHSesame2>()
+
+    var ssid: String = ""
+    var password: String = ""
 
     companion object {
         @JvmField
@@ -51,8 +55,15 @@ class Wm2TestActivity : AppCompatActivity(), CHWifiModule2Delegate {
                     registerstatus.setText(if (wm2!!.isRegistered!!) "register" else "unregister")
                     connectBtn.setOnClickListener { wm2?.connect() {} }
                     disconnectBtn.setOnClickListener { wm2?.disconnect() {} }
-                    setSSID.setOnClickListener { wm2?.setWifiSSID("CANDY HOUSE") {} }
-                    setPassword.setOnClickListener { wm2?.setWifiPassword("55667788") {} }
+                    setSSID.setOnClickListener {
+                        ssid = findViewById<EditText>(R.id.ssid).text.toString()
+                        wm2?.setWifiSSID(ssid) {}
+                    }
+                    setPassword.setOnClickListener {
+                        password = findViewById<EditText>(R.id.password).text.toString()
+                        wm2?.setWifiPassword(password) {}
+                    }
+
                     connectWifi.setOnClickListener { wm2?.connectWifi { } }
 
                     test_btn.setOnClickListener { wm2?.testSSM { } }
