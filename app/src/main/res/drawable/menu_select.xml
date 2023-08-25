@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Inactive tab -->
+    <item android:drawable="@color/menu_bg" android:state_focused="false" android:state_pressed="false" android:state_selected="false"/>
+    <!-- Pressed tab -->
+    <item android:drawable="@color/hint" android:state_pressed="true"/>
+
+</selector>

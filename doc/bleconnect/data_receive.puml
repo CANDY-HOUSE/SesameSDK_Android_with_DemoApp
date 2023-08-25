@@ -1,0 +1,24 @@
+@startuml
+BleDevice --> gattRxBuffer  :response
+BleDevice --> gattRxBuffer  :response
+BleDevice --> gattRxBuffer  :response
+state gattRxBuffer{
+  parsingType --> gt0
+  parsingType --> 0
+  0-->waite
+ waite:next read response
+waite ->finish
+finish:receive finish
+}
+gt0 --> parseNotifyPayload
+finish --> parseNotifyPayload
+parseNotifyPayload:data Decrypted
+parseNotifyPayload-->onGattSesameResponse
+ onGattSesameResponse :  SSM2OpCode.response
+parseNotifyPayload-->onGattSesamePublish
+onGattSesamePublish:SSM2OpCode.publish
+onGattSesameResponse -->cmdCallBack
+onGattSesamePublish -->login
+
+
+@enduml

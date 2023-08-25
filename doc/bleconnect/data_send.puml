@@ -1,0 +1,22 @@
+@startuml
+APP --> sendCommand :command
+sendCommand : Preparing to send data
+
+sendCommand --> SesameBleTransmit :(payload,isEncryt,onResponse)
+SesameBleTransmit -->getChunk :intput(byte[])
+
+state getChunk{
+input.size --> part1 :gt19
+part1 --> part2
+
+part2 -->partN
+input.size --> fullData:le19 or eq19
+fullData:complete data
+}
+writeCharacteristic:Ble devices
+part1 --> writeCharacteristic
+part2 --> writeCharacteristic
+partN --> writeCharacteristic
+fullData --> writeCharacteristic
+
+@enduml

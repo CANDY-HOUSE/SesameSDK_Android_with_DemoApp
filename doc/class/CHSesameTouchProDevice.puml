@@ -1,0 +1,115 @@
+@startuml
+interface CHSesameOS3Publish {
+  +onGattSesamePublish()
+}
+
+class CHBaseDevice{
++disconnect()
++dropKey()
+-sesame2KeyData:CHDevice
+-CHDeviceStatus:CHDeviceStatus
+-deviceShadowStatus:CHDeviceStatus
+-mechStatus:CHSesameProtocolMechStatus
+-   productModel: CHProductModel
+- gattRxBuffer: SesameBleReceiver = SesameBleReceiver() 
+- gattTxBuffer: SesameBleTransmit? = null 
+- mSesameToken: ByteArray
+    - mCharacteristic: BluetoothGattCharacteristic? = null 
+    - delegate: CHDeviceStatusDelegate? = null
+    - deviceTimestamp:Long? = null
+    - loginTimestamp:Long? = null
+    - deviceId: UUID? = null
+    - isRegistered: Boolean = true
+    - rssi: Int? = 0
+    - mBluetoothGatt: BluetoothGatt? = null
+    - isNeedAuthFromServer: Boolean? = false
+}
+
+
+class CHSesameOS3 {
+    - cipher: SesameOS3BleCipher? = null
+    - cmdCallBack: MutableMap<UByte, SesameOS3ResponseCallback> = mutableMapOf()
+    - semaphore: Semaphore = Semaphore(1)
+- mBluetoothGattCallback: BluetoothGattCallback
+  +connect()
+  +transmit()
+  +sendCommand()
+  +getVersionTag()
+  +reset()
+  +updateFirmware()
+  +parceADV()
+  +onGattSesamePublish()
+}
+
+interface CHDevices{
+- mechStatus: CHSesameProtocolMechStatus?
+    - deviceTimestamp:Long?
+    - loginTimestamp:Long?
+    - delegate: CHDeviceStatusDelegate?
+    - deviceStatus: CHDeviceStatus
+    - deviceShadowStatus: CHDeviceStatus?
+    - rssi: Int?
+    - deviceId: UUID?
+    - isRegistered: Boolean
+    - productModel: CHProductModel
+         + disconnect(result: CHResult<CHEmpty>)
+    + getKey(): CHDevice 
+    + dropKey(result: CHResult<CHEmpty>)
+    + getVersionTag(result: CHResult<String>)
+    + register(result: CHResult<CHEmpty>)
+    + reset(result: CHResult<CHEmpty>)
+    + updateFirmware(onResponse: CHResult<BluetoothDevice>)
+    + createGuestKey(keyName: String, result: CHResult<CHDevice>) 
+    + getGuestKeys(result: CHResult<Array<CHGuestKeyCut>>)
+    + removeGuestKey(guestKeyId: String, result: CHResult<CHEmpty>) 
+    + updateGuestKey(guestKeyId: String, name: String, result: CHResult<CHEmpty>)
+    + setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) 
+    + getHistoryTag(): ByteArray? 
+    + getTimeSignature(): String 
+}
+
+class CHSesameTouchProDevice{
+
+}
+interface CHDeviceUtil{
+ - advertisement: CHadv?//廣播
+    - sesame2KeyData: CHDevice?//鑰匙的資料
+    - goIOT() {}//訂閱ＩＯＴ
+    - login(token: String? = null)
+}
+
+interface CHSesameTouchPro  {
+    + cards(result: CHResult<CHEmpty>)
+    + cardDelete(ID: String, result: CHResult<CHEmpty>)
+    + cardChange(ID: String, name: String, result: CHResult<CHEmpty>)
+    + cardModeGet(result: CHResult<Byte>)
+    + cardModeSet(mode: Byte, result: CHResult<CHEmpty>)
+    + fingerPrints(result: CHResult<CHEmpty>)
+    + fingerPrintDelete(ID: String, result: CHResult<CHEmpty>)
+    + fingerPrintsChange(ID: String, name: String, result: CHResult<CHEmpty>)
+    + fingerPrintModeGet(result: CHResult<Byte>)
+    + fingerPrintModeSet(mode: Byte, result: CHResult<CHEmpty>)
+    + keyBoardPassCode(result: CHResult<CHEmpty>)
+    + keyBoardPassCodeChange(ID: String, name: String, result: CHResult<CHEmpty>)
+    + keyBoardPassCodeDelete(ID: String, result: CHResult<CHEmpty>)
+    + keyBoardPassCodeModeGet(result: CHResult<Byte>)
+    + keyBoardPassCodeModeSet(mode: Byte, result: CHResult<CHEmpty>)
+
+}
+interface CHSesameConnector  {
+    var ssm2KeysMap: MutableMap<String, ByteArray>
+    + insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>)
+    + removeSesame(tag: String, result: CHResult<CHEmpty>)
+}
+CHSesameOS3Publish --> CHSesameOS3 :implements
+CHBaseDevice --> CHSesameOS3 :extends
+
+
+CHDevices -->CHSesameConnector:extends
+CHSesameConnector -->CHSesameTouchPro:extends
+CHSesameTouchPro -->CHSesameTouchProDevice:implements
+CHDeviceUtil -->CHSesameTouchProDevice:implements
+CHSesameOS3 -->CHSesameTouchProDevice:extends
+
+
+@enduml

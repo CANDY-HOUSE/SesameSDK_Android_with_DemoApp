@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp">
+
+        <ImageView
+            android:id="@+id/bl_img"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/bl_grey" />
+
+        <ImageView
+            android:id="@+id/wifi_img"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/bl_img"
+            android:src="@drawable/wifi_green" />
+
+
+        <RelativeLayout
+            android:id="@+id/battery_contain"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/wifi_img">
+
+            <ImageView
+                android:id="@+id/battery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:src="@drawable/bt0" />
+
+            <ProgressBar
+                android:id="@+id/btn_pecent"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="12dp"
+                android:layout_height="6.5dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="1.5dp"
+                android:layout_marginEnd="3dp"
+                android:max="100"
+                android:progress="100"
+                android:progressDrawable="@drawable/progress_blue">
+
+            </ProgressBar>
+        </RelativeLayout>
+
+
+        <TextView
+            android:id="@+id/battery_percent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/battery_contain"
+            android:gravity="center"
+            android:paddingBottom="1dp"
+            android:text="100%"
+            android:textSize="9dp" />
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+
+        android:layout_marginBottom="4dp"
+        android:layout_toStartOf="@+id/ssmView"
+
+        android:gravity="left"
+        android:lines="1"
+        app:autoSizeMaxTextSize="45dp"
+        app:autoSizeMinTextSize="14dp"
+        app:autoSizeTextType="uniform"
+        tools:text="name" />
+
+    <TextView
+        android:id="@+id/sub_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:textColor="@color/text_hint"
+        android:textSize="11dp"
+        tools:text="name" />
+
+    <TextView
+        android:id="@+id/sub_title_2"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_toEndOf="@+id/sub_title"
+        android:gravity="center"
+        android:text=""
+        android:textColor="@color/text_hint"
+        android:textSize="11dp"
+        android:visibility="gone" />
+
+
+    <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMCellView
+        android:id="@+id/ssmView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp" />
+</RelativeLayout>

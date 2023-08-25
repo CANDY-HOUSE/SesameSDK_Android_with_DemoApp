@@ -1,0 +1,79 @@
+@startwbs
+title APP
+
+
+* SesameApp
+
+/'------------------芝麻'/
+
+**  DeviceListFG
+
+*** SesameBikeSettingFG
+**** GuestKeyListFG
+**** AddMemberFG
+**** KeyQrCodeFG
+
+*** MainRoomFG
+**** SSM2SettingFG
+
+***** KeyQrCodeFG
+*** MainRoomSS5FG
+**** SSM5SettingFG
+*** SSM2SetAngleFG
+*** WM2SettingFG
+**** WM2ScanSSIDListFG
+**** WM2SelectLockerListFG
+**** KeyQrCodeFG
+*** SesameBot2SettingFG
+**** AddMemberFG
+**** KeyQrCodeFG
+**** GuestKeyListFG
+*** SSM2SettingFG
+**** SSM2SetAngleFG
+**** AddMemberFG
+***** ScanQRcodeFG
+**** KeyQrCodeFG
+**** GuestKeyListFG
+**** SSM2NoHandLockFG
+*** SesameOpenSensorSettingFG
+*** SesameTouchProSettingFG
+**** SesameKeyboardSelectLockerListFG
+**** SesameKeyboardCards
+**** SesameKeyboardFingerprint
+**** SesameKeyboardPassword
+**** KeyQrCodeFG
+**** AddMemberFG
+*** SSM5SettingFG
+**** AddMemberFG
+**** KeyQrCodeFG
+**** SSM2SetAngleFG
+**** SSM2NoHandLockFG
+
+
+/'------------------通讯录'/
+
+
+*** WM2SettingFG
+*** SSM2SetAngleFG
+*** FriendDetailFG
+**** FriendSelectLockerListFG
+
+
+/'------------------我的'/
+
+*** MyQrCodeFG
+*** LoginMailFG
+**** LoginVerifiCodeFG
+*** WM2SettingFG
+*** SSM2SettingFG
+*** SesameOpenSensorSettingFG
+*** SSM2SetAngleFG
+
+
+
+** 顶部固定项
+***  ScanNewDeviceFG
+
+
+
+@endwbs

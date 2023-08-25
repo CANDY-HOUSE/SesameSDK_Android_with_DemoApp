@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/list"
+    app:startDestination="@+id/deviceListPG">
+
+    <fragment
+        android:id="@+id/deviceListPG"
+        android:name="co.candyhouse.app.tabs.devices.DeviceListFG"
+        android:label="DeviceListFG"
+        tools:layout="@layout/fg_devicelist">
+        <action
+            android:id="@+id/to_regist"
+            app:destination="@id/register_list"
+            app:enterAnim="@anim/slide_in_bottom"
+            app:popExitAnim="@anim/slide_out_up" />
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_mainRoomFG"
+            app:destination="@id/mainRoomFG" />
+
+
+        <action
+            android:id="@+id/action_deviceListPG_to_mainRoomSS5FG"
+            app:destination="@id/mainRoomSS5FG" />
+
+        <action
+            android:id="@+id/action_to_SSM2SetAngleFG"
+            app:destination="@id/SSM2SetAngleFG" />
+        <action
+            android:id="@+id/to_WM2SettingFG"
+            app:destination="@id/WM2SettingFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_SesameBot2SettingFG"
+            app:destination="@id/SesameBot2SettingFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_sesameBikeSettingFG"
+            app:destination="@id/sesameBikeSettingFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_SSM2SettingFG"
+            app:destination="@id/SSM2SettingFG" />
+        <action
+            android:id="@+id/to_SesameOpenSensorSettingFG"
+            app:destination="@id/SesameOpenSensorSettingFG" />
+        <action
+            android:id="@+id/to_SesameTouchProSettingFG"
+            app:destination="@id/SesameKeyboardSettingFG" />
+        <action
+            android:id="@+id/to_Sesame5SettingFG"
+            app:destination="@id/SSM5SettingFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/SSM5SettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm5.setting.SSM5SettingFG"
+        android:label="SSM5SettingFG"
+        tools:layout="@layout/fg_setting_main">
+        <action
+            android:id="@+id/action_SettingFG_to_addMemberFG"
+            app:destination="@id/addMemberFG" />
+        <action
+            android:id="@+id/action_SesameSetting_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_SSM2SetAngleFG"
+            app:destination="@id/SSM2SetAngleFG"
+            app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_to_NoHandLockFG"
+            app:destination="@id/SSM2NoHandLockFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/SesameKeyboardSettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmtouchpro.setting.SesameTouchProSettingFG"
+        android:label="SesameKeyboardSettingFG"
+        tools:layout="@layout/fg_sesame_touchpro_setting">
+        <action
+            android:id="@+id/to_SesameKeyboardSelectLockerListFG"
+            app:destination="@id/SesameKeyboardSelectLockerListFG" />
+        <action
+            android:id="@+id/to_SesameKeyboardCards"
+            app:destination="@id/SesameKeyboardCards" />
+        <action
+            android:id="@+id/to_SesameKeyboardFingerprint"
+            app:destination="@id/SesameKeyboardFingerprint" />
+        <action
+            android:id="@+id/to_SesameKeyboardPassword"
+            app:destination="@id/SesameKeyboardPassword" />
+        <action
+            android:id="@+id/action_SesameSetting_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_SettingFG_to_addMemberFG"
+            app:destination="@id/addMemberFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/SesameOpenSensorSettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmtouchpro.setting.SesameOpenSensorNoBLESettingFG"
+        android:label="SesameButtonSettingFG"
+        tools:layout="@layout/fg_sesame_opensensor_noble_setting">
+    </fragment>
+    <fragment
+        android:id="@+id/register_list"
+        android:name="co.candyhouse.app.tabs.devices.ScanNewDeviceFG"
+        android:label="fragment_register_list"
+        tools:layout="@layout/fg_rg_device" />
+    <fragment
+        android:id="@+id/scanFG"
+        android:name="co.candyhouse.app.base.scan.ScanQRcodeFG"
+        android:label="ScanFG" />
+    <fragment
+        android:id="@+id/mainRoomFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.room.MainRoomFG"
+        android:label="MainRoomFG">
+        <action
+            android:id="@+id/action_mainRoomFG_to_SSM2SettingFG"
+            app:destination="@id/SSM2SettingFG" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainRoomSS5FG"
+        android:name="co.candyhouse.app.tabs.devices.ssm5.room.MainRoomSS5FG"
+        android:label="MainRoomSS5FG">
+        <action
+            android:id="@+id/action_mainRoomSS5FG_to_SSM5SettingFG"
+            app:destination="@id/SSM5SettingFG" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/SSM2SettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.SSM2SettingFG"
+        android:label="SSM2SettingFG">
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_SSM2SetAngleFG"
+            app:destination="@id/SSM2SetAngleFG"
+            app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_SettingFG_to_addMemberFG"
+            app:destination="@id/addMemberFG" />
+
+        <action
+            android:id="@+id/action_SesameSetting_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_guestKeyListFG"
+            app:destination="@id/guestKeyListFG" />
+        <action
+            android:id="@+id/action_to_NoHandLockFG"
+            app:destination="@id/SSM2NoHandLockFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/SSM2SetAngleFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
+        android:label="SSM2SetAngleFG" />
+    <fragment
+        android:id="@+id/addMemberFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.member.AddMemberFG"
+        android:label="AddMemberFG">
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/myKEYFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.KeyQrCodeFG"
+        android:label="myKEYFG" />
+    <fragment
+        android:id="@+id/WM2SettingFG"
+        android:name="co.candyhouse.app.tabs.devices.wm2.setting.WM2SettingFG"
+        android:label="WM2SettingFG"
+        tools:layout="@layout/fg_wm2_setting">
+        <action
+            android:id="@+id/action_WM2SettingFG_to_WM2ScanFG"
+            app:destination="@id/WM2ScanFG" />
+        <action
+            android:id="@+id/action_WM2SettingFG_to_WM2SelectLockerFG"
+            app:destination="@id/WM2SelectLockerFG" />
+
+        <action
+            android:id="@+id/action_SesameSetting_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/SesameBot2SettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmbot.setting.SesameBotSettingFG"
+        android:label="SesameBot2SettingFG"
+        tools:layout="@layout/fg_ssm_bot_setting">
+
+        <action
+            android:id="@+id/action_SesameSetting_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_SettingFG_to_addMemberFG"
+            app:destination="@id/addMemberFG" />
+        <action
+            android:id="@+id/action_SSM2SettingFG_to_guestKeyListFG"
+            app:destination="@id/guestKeyListFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/WM2ScanFG"
+        android:name="co.candyhouse.app.tabs.devices.wm2.setting.WM2ScanSSIDListFG"
+        android:label="WM2SettingFG"
+        tools:layout="@layout/fg_wm2_scan_list" />
+    <fragment
+        android:id="@+id/WM2SelectLockerFG"
+        android:name="co.candyhouse.app.tabs.devices.wm2.setting.WM2SelectLockerListFG"
+        android:label="WM2SettingFG"
+        tools:layout="@layout/fg_wm2_select_locker_list" />
+    <fragment
+        android:id="@+id/SesameOS3SelectLockerListFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmopensensor.setting.SesameOS3SelectLockerListFG"
+        android:label="SesameOS3SelectLockerListFG"
+        tools:layout="@layout/fg_wm2_select_locker_list" />
+    <fragment
+        android:id="@+id/SesameKeyboardSelectLockerListFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmtouchpro.setting.SSMTouchProSelectLockerListFG"
+        android:label="SesameKeyboardSelectLockerListFG"
+        tools:layout="@layout/fg_ssm_tp_select_locker_list" />
+    <fragment
+        android:id="@+id/SesameKeyboardPassword"
+        android:name="co.candyhouse.app.tabs.devices.ssmtouchpro.setting.SesameKeyboardPassCode"
+        android:label="SesameKeyboardPassword"
+        tools:layout="@layout/fg_ssm_tp_select_locker_list" />
+    <fragment
+        android:id="@+id/SesameKeyboardFingerprint"
+        android:name="co.candyhouse.app.tabs.devices.ssmtouchpro.setting.SSMTouchProFingerprint"
+        android:label="SesameKeyboardFingerprint"
+        tools:layout="@layout/fg_ssm_tp_select_locker_list" />
+    <fragment
+        android:id="@+id/SesameKeyboardCards"
+        android:name="co.candyhouse.app.tabs.devices.ssmtouchpro.setting.SesameKeyboardCards"
+        android:label="SesameKeyboardCards"
+        tools:layout="@layout/fg_ssm_tp_select_locker_list" />
+    <fragment
+        android:id="@+id/SesameConnectCards"
+        android:name="co.candyhouse.app.tabs.devices.ssmopensensor.setting.SesameConnectCards"
+        android:label="SesameConnectCards"
+        tools:layout="@layout/fg_sesame_ds_setting" />
+    <fragment
+        android:id="@+id/guestKeyListFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.GuestKeyListFG"
+        android:label="GuestKeyListFG">
+        <deepLink app:uri="android-app://example.google.app/settings_fragment_two" />
+    </fragment>
+    <fragment
+        android:id="@+id/sesameBikeSettingFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmbike.setting.SesameBikeSettingFG"
+        android:label="SesameBikeSettingFG">
+        <action
+            android:id="@+id/action_SettingFG_to_addMemberFG"
+            app:destination="@id/addMemberFG" />
+        <action
+            android:id="@+id/action_SesameSetting_to_myKEYFG"
+            app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_sesameBikeSettingFG_to_guestKeyListFG"
+            app:destination="@id/guestKeyListFG" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SSM2NoHandLockFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2NoHandLockFG"
+        android:label="SSM2NoHandLockFG" />
+
+</navigation>

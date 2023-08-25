@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="colorPrimary">#28aeb1</color>
+    <color name="colorPrimaryDark">#666666</color>
+    <color name="colorAccent">#28aeb1</color>
+    <color name="white">#fff</color>
+    <color name="hint">#28aeb1</color>
+    <color name="mask_black">#66000000</color>
+    <color name="black">#000000</color>
+    <color name="gray0">#eeeeee</color>
+    <color name="gray1">#cccccc</color>
+    <color name="gray2">#999999</color>
+    <color name="gray3">#666666</color>
+    <color name="gray4">#333333</color>
+    <color name="blue">#0000ff</color>
+    <color name="text_hint">#999999</color>
+    <color name="clear">#00000000</color>
+    <color name="title">#000000</color>
+    <color name="status_bg">#eeeeee</color>
+    <color name="status_bg_cover">#AAffffff</color>
+    <color name="menu_bg">#444444</color>
+
+    <color name="confirm_btn_bg_color">@color/colorPrimary</color>
+    <color name="confirm_btn_bg_pressed_color">@color/light_blue</color>
+
+    <color name="warning_btn_bg_color">#DD6B55</color>
+    <color name="warning_btn_bg_pressed_color">#CD5B55</color>
+
+    <color name="lightGray">#F5F5F5</color>
+    <color name="darkGray">#424242</color>
+    <color name="darkerGray">#424242</color>
+    <color name="green">#43A047</color>
+    <color name="red">#F44336</color>
+    <color name="lightWhite">#F5F5F5</color>
+    <color name="light_red">#db807c</color>
+    <color name="lock_red">#cc4a44</color>
+    <color name="dark_red">#993434</color>
+    <color name="unlock_blue">#28aeb1</color>
+    <color name="light_blue">#68c6c8</color>
+    <color name="no_grey">@color/gray1</color>
+    <color name="yellow_light">#fdea8e</color>
+    <color name="yellow_mid">#fce15e</color>
+    <color name="yellow_heavy">#d8bf55</color>
+
+
+</resources>

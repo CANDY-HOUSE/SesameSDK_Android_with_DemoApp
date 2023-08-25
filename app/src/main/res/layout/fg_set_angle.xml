@@ -1,0 +1,162 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray0"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/menu"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/status_bg">
+
+        <include
+            layout="@layout/back_sub"
+            android:layout_width="100dp"
+            android:layout_height="40dp" />
+
+        <TextView
+            android:id="@+id/titlec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:text="register page"
+            android:textColor="@color/title" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/menu">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/top_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="@string/please_configure"
+                    android:textColor="@color/text_hint" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/knob_zone"
+                android:layout_width="match_parent"
+                android:layout_height="370dp">
+
+                <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SesameView
+                    android:id="@+id/ssmView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true" />
+
+                <RelativeLayout
+                    android:id="@+id/btm_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="@string/please_complete"
+                        android:textColor="@color/text_hint" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/setlock_zone"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_below="@+id/knob_zone"
+                android:layout_marginTop="20dp"
+                android:background="@color/white">
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="50dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_icon_lock_uncheck" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:text="@string/set_lock_position"
+                    android:textSize="20dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/setunlock_zone"
+
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_below="@+id/setlock_zone"
+                android:layout_marginTop="1dp"
+                android:background="@color/white">
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="50dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_icon_unlock_uncheck" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:text="@string/set_unlock_position"
+                    android:textSize="20dp" />
+
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/magnet_zone"
+                android:layout_width="match_parent"
+                android:layout_height="53dp"
+                android:layout_below="@+id/setunlock_zone"
+                android:layout_marginTop="450dp"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:background="@color/white"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:text="@string/judge_the_sesame"
+                    android:textColor="@color/red"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

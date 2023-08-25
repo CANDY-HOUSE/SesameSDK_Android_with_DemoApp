@@ -1,0 +1,83 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/status_bg"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/menu"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <include
+            layout="@layout/back_sub"
+            android:layout_width="100dp"
+            android:layout_height="40dp" />
+        <!--        <TextView-->
+        <!--            android:text="tse1"-->
+        <!--            android:id="@+id/test_tmp"-->
+        <!--            android:gravity="center"-->
+        <!--            android:layout_centerInParent="true"-->
+        <!--            android:layout_width="100dp"-->
+        <!--            android:layout_height="100dp">-->
+        <!--        </TextView>-->
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/center_zone"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="220dp"
+            android:orientation="vertical">
+
+            <com.victorminerva.widget.edittext.AutofitEdittext
+                android:id="@+id/etInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:autofillHints="email"
+                android:background="@color/clear"
+                android:gravity="center"
+                android:hint="your@email.com"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:textSize="44dp"
+                tools:ignore="RtlHardcoded" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:background="@color/black" />
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="24dp"
+            android:background="@drawable/round_blue"
+            android:text="@string/login"
+            android:textColor="@color/white"
+            android:textSize="16sp">
+
+        </Button>
+    </LinearLayout>
+
+
+</LinearLayout>

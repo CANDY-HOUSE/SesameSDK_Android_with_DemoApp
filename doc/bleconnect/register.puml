@@ -1,0 +1,15 @@
+@startuml
+APP-->Device: connect Ble
+APP<--Device: response(14,random_code)
+
+APP->APP: 使用ECDH算法EccKey.getPubK()生成公钥、密钥\n(app_pub_key,app_pri_key)
+
+APP -> Device: send_command(1,app_pub_key,timestamp))
+Device --> APP: response_command(response,command,status,device_pub_key)
+
+APP->APP:使用ECDH算法EccKey.ecdh(device_pub_key)生成共享公钥->ecdhSecret(供AESCMAC使用)
+APP->APP:ecdhSecret 和random_code 作为AESCMAC算法的key、Message生成消息码。AesCmac(ecdhSecret,16).computeMac(random_code)->sessionAuth(供AESCCM使用)
+APP->APP:deviceSecret和random_code作为AESCCM的key、Message创建加密对象->cipher(对Ble数据传输加密解密)
+
+
+@enduml

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView   xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+<LinearLayout
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="310dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/bg_dialog"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:textStyle="bold"
+        android:id="@+id/tvTitle"
+        android:padding="22dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        tools:text="Titulo" />
+
+
+    <co.utils.materialtextfield.MaterialTextField
+
+        android:id="@+id/etInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/clear"
+        android:gravity="left|center_vertical"
+        android:inputType="text"
+        android:layout_marginRight="14dp"
+
+        android:paddingLeft="28dp"
+
+        android:textSize="16sp"
+        tools:hint="Ingresar algo" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:background="@color/black" />
+
+    <TextView
+        android:id="@+id/hint_top"
+        android:layout_marginTop="3dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:text="@string/last_name"
+        android:textColor="@color/text_hint"
+        android:textSize="12sp" />
+
+    <co.utils.materialtextfield.MaterialTextField
+        android:layout_marginTop="10dp"
+        android:id="@+id/etInput__2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/clear"
+        android:gravity="left|center_vertical"
+        android:inputType="text"
+        android:layout_marginRight="14dp"
+
+        android:paddingLeft="28dp"
+        android:textSize="16sp"
+        tools:hint="Ingresar algo" />
+
+    <View
+        android:id="@+id/hintl2"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:background="@color/black" />
+
+    <TextView
+        android:id="@+id/hint_second_tx"
+        android:layout_marginTop="3dp"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:text="@string/first_name"
+        android:textColor="@color/text_hint"
+        android:textSize="12sp" />
+
+    <View
+
+        android:layout_marginTop="28dp"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/gray0" />
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:textStyle="bold"
+
+            android:id="@+id/btnCancel"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:text="@string/cancel" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/gray0" />
+
+        <Button
+            android:id="@+id/btnConfirm"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            tools:text="OK" />
+
+    </LinearLayout>
+
+</LinearLayout>
+</ScrollView>

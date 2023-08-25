@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:orientation="horizontal">
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/sub_title"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="12dp"
+        android:drawableEnd="@drawable/ic_bluetooth"
+        android:drawablePadding="4dp"
+        android:gravity="center"
+        android:textColor="@color/hint"
+        android:textSize="16sp"
+        tools:text="name" />
+
+    <TextView
+        android:id="@+id/sub_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:textSize="30dp"
+        tools:text="Sesame" />
+
+    <TextView
+        android:id="@+id/title_txt"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginBottom="14dp"
+        android:gravity="center"
+        android:textColor="@color/text_hint"
+        android:textSize="11dp"
+        tools:text="11111111-1234-1234-111112341234" />
+
+    <TextView
+        android:id="@+id/subtitle_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/title_txt"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="12dp"
+        android:gravity="center"
+        android:lines="1"
+        android:textColor="@color/text_hint"
+        android:textSize="11dp"
+
+        tools:text="blestatus" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_alignParentBottom="true"
+        android:background="@color/gray1" />
+
+
+</RelativeLayout>

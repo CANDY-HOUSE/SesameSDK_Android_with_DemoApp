@@ -1,0 +1,6 @@
+@startuml
+
+APP -> Device:  send_command(autolock_second,unlock_angle,lock_angle,command)
+Device --> APP: response_command(response,command,status)
+Device --> APP: response_command(autolock_second,unlock_angle,lock_angle,command)
+@enduml

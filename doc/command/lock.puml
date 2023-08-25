@@ -1,0 +1,4 @@
+@startuml
+APP -> Device: send_command(82,historyTag))
+Device --> APP: response_command(response,command,status)
+@enduml

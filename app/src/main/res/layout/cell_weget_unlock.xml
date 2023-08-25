@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:id="@+id/sss"
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp">
+
+        <ImageView
+            android:id="@+id/bl_img"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/bl_green" />
+
+        <ImageView
+            android:id="@+id/wifi_img"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toRightOf="@+id/bl_img"
+            android:src="@drawable/wifi_green" />
+        <ImageView
+            android:id="@+id/hand_img"
+            android:layout_width="19dp"
+            android:layout_height="19dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toRightOf="@+id/wifi_img"
+            android:src="@drawable/ic_autounlock_active" />
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="5dp"
+        android:layout_toStartOf="@+id/toggle"
+        android:layout_toEndOf="@+id/sss"
+        android:lines="1"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:textColor="@color/gray3"
+        tools:text="name" />
+
+
+    <ImageView
+        android:id="@+id/toggle"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/icon_unlock" />
+</RelativeLayout>

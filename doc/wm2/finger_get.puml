@@ -1,0 +1,7 @@
+@startuml
+APP --> Device:  send_command(3,ssid_name)
+Device --> APP: response_command(7,3,status)
+
+
+
+@enduml

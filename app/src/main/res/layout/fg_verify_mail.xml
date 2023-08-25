@@ -1,0 +1,63 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/status_bg"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/menu"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <include
+            layout="@layout/back_sub"
+            android:layout_width="100dp"
+            android:layout_height="40dp" />
+
+    </RelativeLayout>
+
+
+
+    <TextView
+        android:layout_marginTop="120dp"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:text="@string/VerificationCode"
+        android:gravity="center"
+        android:textSize="48dp"
+        />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/etInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:background="@color/clear"
+                android:gravity="center"
+                android:hint="1234"
+                android:inputType="numberDecimal"
+                android:textSize="128dp"
+                tools:ignore="HardcodedText,RtlHardcoded" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:background="@color/black" />
+        </LinearLayout>
+
+
+
+
+</LinearLayout>

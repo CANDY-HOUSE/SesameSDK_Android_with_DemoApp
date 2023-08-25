@@ -1,0 +1,13 @@
+@startuml
+APP-->Device: connect Ble
+APP<--Device: response(14,random_code)
+
+APP->APP: 使用AesCmac(secretKey本地存储).computeMac(random_code)算法生成->sessionAuth
+APP->APP:sessionAuth和random_code作为AESCCM的key、Message创建加密对象->cipher(对Ble数据传输加密解密)
+
+APP -> Device: send_command(2,sessionAuth))
+Device --> APP: response_command(7,2,status,timestamp)
+
+
+
+@enduml

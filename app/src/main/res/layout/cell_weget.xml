@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/open_all"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:text="@string/WigetOpenAll"
+
+
+        android:background="@drawable/round_red_unlock_all"
+        android:textColor="@color/lock_red"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/close_all"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/round_blue_lock_all"
+        android:textColor="@color/unlock_blue"
+        android:text="@string/WigetCloseAll"
+        android:textSize="16sp" />
+
+
+</LinearLayout>

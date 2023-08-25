@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/back_zone"
+    android:layout_width="wrap_content"
+    android:layout_height="40dp">
+
+    <ImageView
+        android:id="@+id/back_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:paddingEnd="12dp"
+        android:rotation="180"
+        android:scaleType="center"
+        android:src="@drawable/ic_arrow" />
+
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/backTitle"
+        android:layout_width="wrap_content"
+        android:maxWidth="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/back_icon"
+        android:singleLine="true"
+        tools:text="1111-1111-111-1--111-111"
+        android:textColor="@color/title"
+        app:autoSizeTextType="uniform"
+
+        />
+</RelativeLayout>

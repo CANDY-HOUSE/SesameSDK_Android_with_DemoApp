@@ -1,0 +1,9 @@
+@startuml
+APP --> Device:  send_command(109)
+Device --> APP: response_command(7,109,status)
+Device -> APP:推送开始 response_command(8,112,status)
+Device -> APP:推送 response_command(8,110,status)
+Device -> APP:推送结束 response_command(8,111,status)
+
+
+@enduml

@@ -1,0 +1,64 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.1'
+    }
+}
+
+android {
+    compileSdkVersion 32
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 32
+    }
+    buildTypes {
+        debug {
+
+            buildConfigField("String", "testname", "\"test\"")
+
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+            buildConfigField("String", "testname", "\"test\"")
+
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/atomicfu.kotlin_module']
+        }
+    }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+    namespace 'co.candyhouse.sesame2'
+
+
+}
+// 配置 AAR 打包任务
+task createAar(type: Copy) {
+    from 'build/outputs/aar'
+    into projectDir
+    include('*.aar')
+}
+dependencies {
+    implementation "androidx.room:room-runtime:2.4.3"
+    kapt "androidx.room:room-compiler:2.4.3"
+    implementation "androidx.room:room-ktx:2.4.3"
+    implementation "androidx.room:room-rxjava2:2.4.3"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
+}
+
+
+apply from: './maven.gradle'

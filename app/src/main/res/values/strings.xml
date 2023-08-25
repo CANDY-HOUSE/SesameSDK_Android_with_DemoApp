@@ -1,0 +1,217 @@
+<resources>
+    <!--    todo:缺少add_ssm_hint by Open Sensor的屬性-->
+    <string name="launching_why_need_location_permission">On Android 6.0 and up, we need permission for accessing location to make Bluetooth work properly. Without that, this application will not be able to discover Sesames.</string>
+    <string name="app_name">Sesame</string>
+    <string name="select_an_avatar">Select an Avatar</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="new_password">New Password</string>
+    <string name="sign_up">Sign up</string>
+
+    <string name="wins">Wins</string>
+    <string name="done">Done</string>
+    <string name="title_about">About</string>
+    <string name="title_friends">Contacts</string>
+    <string name="title_registered">Registered</string>
+    <string name="title_me">Me</string>
+    <string name="title_list">Sesame</string>
+    <string name="title_detail">Profile</string>
+    <string name="cd_home">Home!!</string>
+    <string name="cd_list">List</string>
+    <string name="cd_form">Form</string>
+    <string name="logout">Log Out</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="qrhint">Scan this QR code with Sesame app to add me on your contact</string>
+    <string name="change_sesame_name">Change Sesame Name</string>
+    <string name="change_sesame_angle">Configure Angles</string>
+    <string name="ssm_update">SesameOS Update＆Restart</string>
+    <string name="autolock">Auto-lock timer</string>
+    <string name="ds_delay">delay</string>
+    <string name="ssm_delete">Delete this Sesame</string>
+    <string name="cancel">Cancel</string>
+    <string name="last_name">Last Name</string>
+    <string name="first_name">First Name</string>
+
+    <string name="delete_friend">Delete the Contact</string>
+    <string name="manual_operated">Movement in Thumbturn</string>
+    <string name="forget_password">Forgot password</string>
+    <string name="verification">Verification</string>
+    <string name="verification_code">Verification code</string>
+    <string name="re_send_verification_code">Re-send verification code</string>
+    <string name="send_verification_code">Send verification code</string>
+    <string name="set_lock_position">Set Lock Position</string>
+    <string name="set_unlock_position">Set Unlock Position</string>
+    <string name="second">later</string>
+    <string name="member">Member</string>
+    <string name="delete_member">Delete Member</string>
+    <string name="add_member">Add Member</string>
+    <string name="edit_name">Edit Name</string>
+    <string name="manua_lock">Manually Locked</string>
+    <string name="manua_unlock">Manually Unlocked</string>
+    <string name="please_configure">Please configure the locked/unlocked positions.</string>
+    <string name="please_complete">Please manually turn Sesame to fully locked/unlocked positions, and tap the buttons below to configure the locked/unlocked positions respectively.</string>
+    <string name="add_contacts">Add Contacts</string>
+    <string name="new_sesame">New Device</string>
+    <string name="scan_the_qr_code">Scan QR Code</string>
+    <string name="no_new_devices">Press ⊕ to register a new device, or scan the QR code to obtain access to an already registered device.</string>
+    <string name="no_scan_devices">Bluetooth devices not found</string>
+
+    <string name="onProgressChanged">onProgressChanged</string>
+    <string name="onDeviceDisconnected">onDeviceDisconnected</string>
+    <string name="onDeviceDisconnecting">onDeviceDisconnecting</string>
+    <string name="onDeviceConnected">onDeviceConnected</string>
+    <string name="onDfuProcessStarting">onDfuProcessStarting</string>
+    <string name="onDfuAborted">onDfuAborted</string>
+    <string name="onEnablingDfuMode">onEnablingDfuMode</string>
+    <string name="onDfuCompleted">onDfuCompleted</string>
+    <string name="onDeviceConnecting">onDeviceConnecting</string>
+    <string name="onFirmwareValidating">onFirmwareValidating</string>
+    <string name="onDfuProcessStarted">onDfuProcessStarted</string>
+    <string name="toastBleNotReadyForDFU">"Please get closer for Bluetooth to be connected, then try again"</string>
+
+    <string name="onError">onError</string>
+    <string name="too_close">The locked position and the unlocked position are too close😅</string>
+    <string name="transfer_owner">Transfer ownership to this member</string>
+
+    <string name="reset_the_sesame">Reset the Sesame and trash the key</string>
+    <string name="trash_key">Delete the Sesame</string>
+    <string name="share_key">Share the key of the Sesame</string>
+    <string name="share_management_view">Share Management View</string>
+
+    <string name="on">On</string>
+    <string name="Off">Off</string>
+    <string name="sec3">3 sec</string>
+    <string name="sec5">5 sec</string>
+    <string name="sec7">7 sec</string>
+    <string name="sec10">10 sec</string>
+    <string name="sec15">15 sec</string>
+    <string name="sec30">30 sec</string>
+    <string name="min1">1 min</string>
+    <string name="min2">2 min</string>
+    <string name="min5">5 min</string>
+    <string name="min10">10 min</string>
+    <string name="min15">15 min</string>
+    <string name="min30">30 min</string>
+    <string name="hr1">1 hr</string>
+    <string name="sesame_widget">Widget &amp; Auto Unlock</string>
+    <string name="owner">Owner</string>
+    <string name="manager">Manager</string>
+    <string name="guest">Guest</string>
+
+    <string name="WM2">WiFi Module</string>
+    <string name="Sesame">Sesame</string>
+    <string name="SesameBot">Sesame bot</string>
+    <string name="Sesame5">Sesame 5</string>
+    <string name="Sesame5pro">Sesame 5 Pro</string>
+    <string name="SesameBike">Sesame Bike</string>
+    <string name="SesameBike2">Sesame Bike2</string>
+    <string name="SesameOpenSensor">Open Sensor</string>
+    <string name="SSMTouchPro">Sesame Touch Pro</string>
+    <string name="SSMTouch">Sesame Touch</string>
+    <string name="BLEConnector">BLE Connector</string>
+    <string name="unLoginHistoryTag">Unlogin user</string>
+    <string name="empty_friend">No Contacts</string>
+    <string name="wm2_update">Update SesameOS</string>
+    <string name="wm2_pwk">WiFi Password</string>
+    <string name="wm2_pwk_hint">Please enter the WiFi password</string>
+    <string name="wm2_ssid">WiFi SSID</string>
+
+    <string name="shareSesameToFriends">Share devices…</string>
+
+    <string name="revoke">Revoke</string>
+    <string name="login">Log In/Sign up</string>
+    <string name="loginNeed">Please login.</string>
+    <string name="Notification">Notifications</string>
+    <string name="VerificationCode">Verification code sent to your email</string>
+    <string name="ResetWifiModule2">Reset the WifiModule and trash the key</string>
+
+    <string name="TrashTheWifiModule2Key">Delete the WiFi Module</string>
+    <string name="TrashTheOpenSensorKey">Delete the Open Sensor</string>
+
+    <string name="addSesameTo">Add Sesame to...</string>
+    <string name="wm2NetworkConnectionStatus">Internet Status</string>
+    <string name="modifyGuestKeyTag">Rename the Guest Key</string>
+
+    <string name="key_level">Role &amp; Permission</string>
+    <string name="Wm2WifiOK">WiFi Module is connected to network successfully</string>
+    <string name="BotModeNormal">Click then return</string>
+    <string name="BotModeReverse">Reversed</string>
+    <string name="BotModeCell">Make a circle</string>
+    <string name="PressModeCell">Release then return</string>
+
+    <string name="wm2_select_ssid">Select your WiFi network</string>
+
+    <string name="nfc_hint">Setup by tapping the NFC tag</string>
+    <string name="nfc_reset">Delete the NFC tag</string>
+
+    <string name="noble">Bluetooth is off</string>
+    <string name="NoBleSignal">Bluetooth signal not found, please get closer</string>
+
+    <string name="wm2_hint">Add Sesame to be connected within 5 meters of this WiFi Module:</string>
+    <string name="friend_keys_hint">The following device keys are shared with this contact:</string>
+    <string name="drop_hint">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button with a pin until the LED light turns off.</string>
+
+    <string name="historyLOCK">is locked</string>
+    <string name="historyUNLOCK">is unlocked</string>
+    <string name="historyMANUAL_LOCKED"> "is manually locked</string>
+    <string name="historyMANUAL_UNLOCKED">is manually unlocked</string>
+    <string name="historyAUTOLOCK_UPDATED">\'s Autolock setting is updated</string>
+    <string name="historyMECH_SETTING_UPDATED">\'s angle setting is updated</string>
+    <string name="historyAUTOLOCK">Autolock</string>
+
+    <string name="WigetToggle">Open Sesame</string>
+    <string name="WigetOpenAll">Lock All</string>
+    <string name="WigetCloseAll">Unlock All</string>
+
+    <string name="ssm_qr_hint">Key of the %1$s device</string>
+    <string name="wm2_ap_setting_error">SORRY🙏\n
+        Please double check your WiFi password, or put WiFi Module as close to the WiFi router as possible. \n\n
+        Then normally retry for a few times it will get connected successfully.🙏</string>
+
+
+    <string name="auto_mode">Auto Unlock</string>
+    <string name="sesame_autounlock_hint">1. Setup the red circle area. While your smartphone GPS going out and coming back into the red circle, your smartphone will automatically unlock the door via Bluetooth. \n
+        2. If your GPS is unstable, please extend the red area. You can adjust Sesame\'s location by tapping the map. \n
+        3. Restart your smartphone if Auto Unlock is not functional.</string>
+
+    <string name="Mode">Mode</string>
+
+
+    <string name="no_scan_devices_hint1">1. Are Bluetooth and Location Service permissions on Android are both enabled？</string>
+    <string name="no_scan_devices_hint2">2. Sometimes restarting the android phone can solve the problem.</string>
+    <string name="no_scan_devices_hint3">3. Is the unregistered device nearby？</string>
+    <string name="no_scan_devices_hint4">4. To reset the registered device, please press the reset button with a pin until the LED light turns off.</string>
+
+    <string name="ssm_qr_hint_1">Scan the QR code with Sesame app</string>
+    <string name="pull_fresh_hint">↓You can pull to refresh</string>
+    <string name="latest">(Latest)</string>
+
+    <string name="upload_keys_fail">You’re experiencing binding issues due to an unstable network. It’s possible to lose all paired Sesame devices if you pull to refresh or logout.</string>
+
+    <string name="TouchEmptyFingerHint">Approach the Sesame Touch device, tap the ⊕ icon, and place your finger on Sesame Touch to add a fingerprint.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
+    <string name="TouchEmptyNFCHint">Approach the Sesame Touch device, tap the ⊕ icon, and place your NFC card on Sesame Touch to add the NFC card.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
+    <string name="TouchEmptyPasscodeHint">Approach the Sesame Touch device, tap the ⊕ icon, enter the passcode and press the lock or unlock button to add the passcode.</string>
+    <string name="TouchProCardModify">Rename the NFC card🖊️</string>
+    <string name="TouchProCardDelete">Delete the NFC card</string>
+    <string name="nfcCard">Manage NFC cards</string>
+    <string name="fingerprint">Manage fingerprints</string>
+    <string name="passcodes">Manage passcodes</string>
+    <string name="add_ssm_hint_by_touch">Add Sesame to be connected within 1 meter of this %1$s:</string>
+    <string name="pleaseResetOpenSensor">Once you leave the settings page, restart after updating SesameOS, or disconnect the Bluetooth connection with your Android phone, the Open Sensor will automatically switch to power-saving mode. If you would update SesameOS or add a new Sesame, reset the Open Sesame sensor by pressing and holding the reset button with a thin stick for about 5 seconds until the LED turns off. Then, register again from the ⊕ button.</string>
+    <string name="default_card_name">NFC Card🖊️</string>
+    <string name="TouchProFingerModify">Rename the fingerprint🖊️</string>
+    <string name="TouchProFingerDelete">Delete the fingerprint</string>
+    <string name="TouchProPWDModify">Rename the passcode🖊️</string>
+    <string name="TouchProPWDDelete">Delete the passcode</string>
+    <string name="trash_device_key">Delete the %1$s</string>
+    <string name="reset_device_key">Reset and delete the %1$s</string>
+    <string name="default_passcode_name">Passcode🖊️</string>
+    <string name="default_fingerprint_name">Fingerprint🖊️</string>
+    <string name="judge_the_sesame">Horizontal calibration</string>
+    <string name="device_model">Model</string>
+    <string name="no_more"></string>
+<!--    <string name="load_fail">Failed to load data</string>-->
+    <string name="battary">Battery level</string>
+
+</resources>

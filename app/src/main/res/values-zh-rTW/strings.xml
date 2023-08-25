@@ -1,0 +1,236 @@
+<resources>
+<!--    todo:缺少add_ssm_hint by Open Sensor的屬性-->
+    <string name="launching_why_need_location_permission">
+        如果您使用的是 Android 6.0 或更高版本，為了讓藍牙正常運作，需要允許應用程式訪問位置資訊。否則，該應用程式將無法找到Sesame。</string>
+    <string name="app_name">芝麻</string>
+    <string name="select_an_avatar">選擇一個頭像</string>
+    <string name="name">名稱</string>
+    <string name="email">電子信箱</string>
+    <string name="new_password">設定新密碼</string>
+    <string name="sign_up">註冊</string>
+
+    <string name="wins">Wins</string>
+    <string name="done">完成</string>
+    <string name="title_about">關於</string>
+    <string name="title_friends">通訊錄</string>
+    <string name="title_registered">已註冊</string>
+    <string name="title_me">我</string>
+    <string name="title_list">芝麻</string>
+    <string name="title_detail">Profile</string>
+    <string name="cd_home">家!!</string>
+    <string name="cd_list">列表</string>
+    <string name="cd_form">Form</string>
+    <string name="logout">登出</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string> <!--?-->
+
+    <string name="qrhint">使用 芝麻app 掃描此QR code\n添加我為聯絡人</string>
+<!--    更新Ssm名稱用↓-->
+    <string name="change_sesame_name">編輯芝麻名</string>
+    <string name="change_sesame_angle">設定角度</string>
+    <string name="ssm_update">SesameOS的更新並重開機</string>
+    <string name="autolock">倒數自動上鎖</string>
+    <string name="ds_delay">延遲</string>
+    <string name="ssm_delete">刪除此芝麻</string>
+    <string name="cancel">取消</string>
+    <string name="last_name">姓</string>
+    <string name="first_name">名</string>
+
+    <string name="delete_friend">刪除聯絡人</string>
+    <string name="manual_operated">旋鈕有動靜</string>
+    <string name="forget_password">忘記密碼了嗎？</string>
+    <string name="verification">前往驗證</string>
+    <string name="verification_code">驗證碼</string>
+    <string name="send_verification_code">發送驗證碼</string>
+    <string name="re_send_verification_code">重發驗證碼</string>
+    <string name="set_lock_position">設置上鎖角度</string>
+    <string name="set_unlock_position">設置解鎖角度</string>
+    <string name="second">後</string>
+    <string name="member">成員</string>
+    <string name="delete_member">刪除成員</string>
+    <string name="add_member">添加成員</string>
+    <string name="edit_name">修改名稱</string>
+    <string name="manua_lock">手轉上鎖</string>
+    <string name="manua_unlock">手轉解鎖</string>
+
+    <string name="please_configure">請設置開鎖角度與關鎖角度</string>
+    <string name="please_complete">請手轉芝麻設備至 完全上鎖/完全解鎖 位置，\n
+    然後分別點擊下方按鈕設置 上鎖角度/解鎖角度</string>
+    <string name="add_contacts">添加聯絡人</string>
+    <string name="new_sesame">添加新設備</string>
+    <string name="scan_the_qr_code">掃描QR code</string>
+
+    <string name="no_new_devices">從⊕開始註冊新設備，或掃描QR碼獲取已註冊設備的使用權限</string> <!--?-->
+    <string name="no_scan_devices">附近沒有藍牙設備</string>
+
+    <string name="onProgressChanged">DFU模式變換中…</string>
+    <string name="onDeviceDisconnecting">DFU中斷連接中…</string>
+    <string name="onDeviceDisconnected">DFU未連接</string>
+    <string name="onDeviceConnected">DFU已連接</string>
+    <string name="onDfuProcessStarting">DFU初始化中…</string>
+    <string name="onDfuAborted">DFU遭中斷了</string>
+    <string name="onEnablingDfuMode">DFU啟動中…</string>
+    <string name="onDfuCompleted">DFU完成</string>
+    <string name="onDeviceConnecting">DFU連接中…</string>
+    <string name="onFirmwareValidating">DFU驗證中</string>
+    <string name="onDfuProcessStarted">DFU已啟動</string>
+    <string name="toastBleNotReadyForDFU">"請靠近讓藍牙連接後，再試一次"</string>
+
+    <string name="onError">DFU錯誤</string>
+    <string name="too_close">上鎖角度與解鎖角度太接近啦😅</string>
+    <string name="transfer_owner">轉讓擁有者給成員</string>
+
+    <string name="reset_the_sesame">重置芝麻設備並丟棄鑰匙</string>
+    <string name="trash_key">刪除芝麻鑰匙</string>
+    <string name="share_key">共享芝麻鑰匙</string>
+    <string name="share_management_view">共享此管理畫面</string>
+
+    <string name="on">開啟</string>
+    <string name="Off">關閉</string>
+    <string name="sec3">3 秒</string>
+    <string name="sec5">5 秒</string>
+    <string name="sec7">7 秒</string>
+    <string name="sec10">10 秒</string>
+    <string name="sec15">15 秒</string>
+    <string name="sec30">30 秒</string>
+    <string name="min1">1 分</string>
+    <string name="min2">2 分</string>
+    <string name="min5">5 分</string>
+    <string name="min10">10 分</string>
+    <string name="min15">15 分</string>
+    <string name="min30">30 分</string>
+    <string name="hr1">1 小時</string>
+    <string name="sesame_widget">Widget 與 自動解鎖</string>
+    <string name="owner">擁有者</string>
+    <string name="manager">管理員</string>
+    <string name="guest">訪客</string>
+
+    <string name="WM2">WiFi 模組</string>
+    <string name="Sesame">芝麻</string>
+    <string name="SesameBot">芝麻手指機器人</string>
+    <string name="Sesame5">芝麻5</string>
+    <string name="Sesame5pro">芝麻5 Pro</string>
+    <string name="SesameBike">芝麻單車鎖</string>
+    <string name="SesameBike2">芝麻單車鎖2</string>
+    <string name="SesameOpenSensor">開關傳感器</string>
+    <string name="SSMTouchPro">Sesame Touch Pro</string>
+    <string name="SSMTouch">Sesame Touch</string>
+    <string name="BLEConnector">BLE Connector</string>
+
+    <string name="unLoginHistoryTag">未登入用戶</string>
+
+    <string name="empty_friend">沒有聯絡人</string>
+    <string name="wm2_update">更新 SesameOS</string>
+    <string name="wm2_pwk">WiFi 密碼</string>
+    <string name="wm2_pwk_hint">請輸入 WiFi 密碼</string>
+    <string name="wm2_ssid">WiFi SSID</string>
+    <string name="shareSesameToFriends">共享設備...</string>
+    <string name="revoke">撤銷</string>
+    <string name="login">登入/註冊</string>
+    <string name="loginNeed">請登入。</string>
+    <string name="Notification">通知</string>
+    <string name="VerificationCode">已發到您信箱的驗證碼</string>
+    <string name="ResetWifiModule2">重置WiFi模組並丟棄鑰匙</string>
+    <string name="TrashTheWifiModule2Key">刪除 WiFi模組</string>
+    <string name="TrashTheOpenSensorKey">刪除 開關傳感器</string>
+
+    <string name="addSesameTo">添加芝麻設備至...</string>
+    <string name="wm2NetworkConnectionStatus">網路狀態</string>
+    <string name="modifyGuestKeyTag">變更訪客鑰匙名稱</string>
+
+    <string name="key_level">角色與權限</string>
+    <string name="Wm2WifiOK">WiFi模組已連接到網路</string>
+    <string name="BotModeNormal">下壓後歸位</string>
+    <string name="BotModeReverse">反向下壓後歸位</string>
+    <string name="BotModeCell">繞一圈</string>
+    <string name="PressModeCell">放開後歸位</string>
+
+    <string name="wm2_select_ssid">選擇您的WiFi網路</string>
+    <string name="nfc_hint">將手機靠近NFC標籤進行設置</string>
+    <string name="nfc_reset">刪除NFC標籤</string>
+<!--    <string name="no_scan_devices">Bluetooth devices not found</string>-->
+<!--    <string name="wm2_pwk_hint">Please enter the WiFi password</string>-->
+
+    <string name="noble">沒有藍牙訊號</string>
+    <string name="NoBleSignal">找不到藍牙訊號, 請靠近</string>
+
+    <string name="wm2_hint">添加距離此WiFi模塊 5公尺內要連接的芝麻設備：</string>
+    <string name="friend_keys_hint">以下設備鑰匙被共享給此聯絡人：</string>
+    <string
+        name="drop_hint"
+        >刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請用針戳復位鍵LED燈熄滅</string>
+
+    <string name="historyLOCK">上鎖</string>
+    <string name="historyUNLOCK">解鎖</string>
+    <string name="historyMANUAL_LOCKED">手轉上鎖</string>
+    <string name="historyMANUAL_UNLOCKED">手轉解鎖</string>
+    <string name="historyAUTOLOCK_UPDATED">自動上鎖設置被更新</string>
+    <string name="historyMECH_SETTING_UPDATED">角度設置被更新</string>
+    <string name="historyAUTOLOCK">自動上鎖</string>
+
+
+    <string name="WigetToggle">芝麻開門</string>
+    <string name="WigetOpenAll">全部上鎖</string>
+    <string name="WigetCloseAll">全部解鎖</string>
+
+    <string name="ssm_qr_hint"> %1$s 設備的鑰匙</string>
+
+    <string name="wm2_ap_setting_error">很抱歉🙏\n
+        請確認您的WiFi密碼，或把WiFi模組設置於盡量接近WiFi路由器的地方 \n\n
+        然後多試幾次，通常能成功連上線🙏</string>
+
+    <string name="auto_mode">全自動解鎖</string>
+    <string name="sesame_autounlock_hint">
+        1. 若欲啟用自動解鎖功能，必須將紅色圓圈調整至適當位置，使得當您的手機GPS訊號進出該圓圈時，即可透過藍牙與芝麻連線，自動完成解鎖程序。\n
+        2. 如果GPS訊號不穩定，請將紅色圓圈的範圍設置更廣，您可以點擊螢幕來設置芝麻的位置。\n
+        3. 如果手機無法正常啟動無鑰匙解鎖功能，請先重新啟動手機。</string>
+
+    <string name="Mode">模式</string>
+
+    <string
+        name="no_scan_devices_hint1"
+        >1. 您已經允許了手機的藍牙和位置權限嗎？</string>
+    <string
+        name="no_scan_devices_hint2"
+        >2. 附近是否有未註冊的設備？</string>
+    <string
+        name="no_scan_devices_hint3"
+        >3. 若要重置已註冊的設備，請用針戳長按重置按鈕直到LED燈熄滅</string>
+    <string
+        name="no_scan_devices_hint4"
+        >4. 有時候，重啟手機可以解決問題。</string>
+
+    <string name="ssm_qr_hint_1">用 芝麻app 掃描鑰匙QR code</string>
+    <string name="pull_fresh_hint">↓下拉可刷新</string>
+    <string name="latest">(最新)</string>
+
+    <string
+        name="upload_keys_fail"
+        >現在網路狀態不太穩定，下拉刷新或登出可能導致芝麻設備清單消失。</string>
+
+    <string name="TouchEmptyFingerHint">靠近Sesame Touch設備，點擊⊕圖標，將手指放在Sesame Touch上以添加指紋。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
+    <string name="TouchEmptyNFCHint">靠近Sesame Touch設備，點擊⊕圖標，將NFC卡放在Sesame Touch上以添加NFC卡。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
+    <string name="TouchEmptyPasscodeHint">靠近Sesame Touch設備，點擊⊕圖標，輸入數字密碼並以上鎖或解鎖按鈕添加數字密碼。</string>
+    <string name="TouchProCardModify">修改 NFC卡 的名稱🖊️</string>
+    <string name="TouchProCardDelete">刪除此 NFC卡</string>
+    <string name="nfcCard">管理NFC卡</string>
+    <string name="fingerprint">管理指紋</string>
+    <string name="passcodes">管理數字密碼</string>
+    <string name="add_ssm_hint_by_touch">添加距離此%1$s 一公尺內要連接的Sesame：</string> <!--?-->
+    <string name="pleaseResetOpenSensor">一旦您從設定頁面退出、SesameOS更新後的重開機、或是與手機藍牙連接斷開，開關傳感器將自動切換到省電模式。如果您想要更新SesameOS或添加新的Sesame，您需要用細棒按住開關傳感器的重置按鈕約5秒，直到LED燈熄滅為止進行重置。然後，您可以再次從⊕按鈕進行註冊。</string>
+    <string name="default_card_name">NFC卡🖊️</string>
+    <string name="TouchProFingerModify">修改此指紋名稱🖊️</string>
+    <string name="TouchProFingerDelete">刪除此指紋</string>
+    <string name="TouchProPWDModify">修改此數字密碼名稱🖊️</string>
+    <string name="TouchProPWDDelete">刪除此數字密碼</string>
+    <string name="trash_device_key">刪除此 %1$s</string>
+    <string name="reset_device_key">重置並刪除此 %1$s</string>
+    <string name="default_passcode_name">數字密碼🖊️</string>
+    <string name="default_fingerprint_name">指紋🖊️</string>
+    <string name="judge_the_sesame">水平校正</string>
+    <string name="device_model">機種</string>
+    <string name="no_more"></string>
+<!--    <string name="load_fail">加載數據失敗</string>-->
+
+    <string name="battary">電池電量</string>
+
+</resources>

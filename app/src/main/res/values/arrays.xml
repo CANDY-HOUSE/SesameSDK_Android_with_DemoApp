@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="no_hand_lock_settimg">
+        <item>0 m</item>
+        <item>500 m</item>
+    </array>
+</resources>

@@ -1,0 +1,43 @@
+
+# WM2ActionCode 枚举
+```svg
+internal enum class WM2ActionCode(val value: UByte) {
+CODE_NON(0U),
+REGISTER_WM2(1U),
+LOGIN_WM2(2U),
+UPDATE_WIFI_SSID(3U),
+UPDATE_WIFI_PASSWORD(4U),
+CONNECT_WIFI(5U),
+NETWORK_STATUS(6U),
+DELETE_SESAME(7U),
+ADD_SESAME(8U),
+INITIAL(13U),
+CCCD(14U),
+SESAME_KEYS(16U),
+RESET_WM2(18U),
+SCAN_WIFI_SSID(19U),
+OPEN_OTA_SERVER(126U),
+VERSION_TAG(127U),
+}
+
+```
+`WM2ActionCode`枚举定义了一系列的操作代码。
+
+## 成员
+
+- `CODE_NON`：无操作，值为0。
+- `REGISTER_WM2`：注册WM2，值为1。
+- `LOGIN_WM2`：登录WM2，值为2。
+- `UPDATE_WIFI_SSID`：更新Wifi SSID，值为3。
+- `UPDATE_WIFI_PASSWORD`：更新Wifi密码，值为4。
+- `CONNECT_WIFI`：连接Wifi，值为5。
+- `NETWORK_STATUS`：网络状态，值为6。
+- `DELETE_SESAME`：删除Sesame，值为7。
+- `ADD_SESAME`：添加Sesame，值为8。
+- `INITIAL`：初始操作，值为13。
+- `CCCD`：CCCD操作，值为14。
+- `SESAME_KEYS`：Sesame密钥，值为16。
+- `RESET_WM2`：重置WM2，值为18。
+- `SCAN_WIFI_SSID`：扫描Wifi SSID，值为19。
+- `OPEN_OTA_SERVER`：打开OTA服务器，值为126。
+- `VERSION_TAG`：版本标签，值为127。
