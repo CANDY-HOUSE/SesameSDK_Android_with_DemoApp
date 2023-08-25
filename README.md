@@ -1,4 +1,4 @@
-# SesameOS3 SDK for Android           	          [日本語はこちら](README_ja.md)
+# SesameSDK3.0 for Android           	          [日本語はこちら](README_ja.md)
 ## ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 官方网站](https://jp.candyhouse.co/)
 
 ##### Google Play Apk [下载地址](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
