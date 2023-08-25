@@ -1,10 +1,10 @@
-# SesameOS3 SDK for Android          [中文阅读](README.md)       
+# SesameOS3 SDK for Android          [中文看這裡](README.md)       
 
 ## ![CandyHouse](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CandyHouse 公式ウェブサイト](https://jp.candyhouse.co/)
 
 ##### Google Play Apk [ダウンロード](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
 ## プロジェクト概要
-#### SeSameOS3プロジェクトは、主にSesame 5、Sesame 5 Pro、Sesame Bike2、BLE Connector1、Open Sensor、Sesame Touch 1 Pro、Sesame Touch 1、WIFI Module2、Sesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1などのハードウェアデバイスをBluetooth接続することに焦点を当てています。このプロジェクトは、Androidモバイルアプリケーションを介してハードウェアをスマートに操作するのを支援します。
+####　Sesame 5、Sesame 5 Pro、Sesame Bike2、BLE Connector1、Open Sensor、Sesame Touch 1 Pro、Sesame Touch 1、WIFI Module2、Sesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1などのハードウェアデバイスをBluetooth接続することに焦点を当てています。このプロジェクトは、Androidモバイルアプリケーションを介してハードウェアをスマートに操作するのを支援します。
 ##  テックスタックとツール
 - [プログラミング言語 Kotlin](https://kotlinlang.org/)
 - [android studio](https://developer.android.com/studio)
