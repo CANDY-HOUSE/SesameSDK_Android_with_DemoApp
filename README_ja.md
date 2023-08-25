@@ -4,7 +4,7 @@
 
 ##### Google Play Apk [ダウンロード](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
 ## プロジェクト概要
-#### SeSameOS3プロジェクトは、主にSesame 5、Sesame 5 Pro、Sesame Bike2、BLE Connector1、Open Sensor、Sesame Touch 1 Pro、Sesame Touch 1、WIFI Module2などのハードウェアデバイスをBluetooth接続することに焦点を当てています。このプロジェクトは、Androidモバイルアプリケーションを介してハードウェアをスマートに操作するのを支援します。またSesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1も対応しております。
+#### SeSameOS3プロジェクトは、主にSesame 5、Sesame 5 Pro、Sesame Bike2、BLE Connector1、Open Sensor、Sesame Touch 1 Pro、Sesame Touch 1、WIFI Module2、Sesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1などのハードウェアデバイスをBluetooth接続することに焦点を当てています。このプロジェクトは、Androidモバイルアプリケーションを介してハードウェアをスマートに操作するのを支援します。
 ##  テックスタックとツール
 - [プログラミング言語 Kotlin](https://kotlinlang.org/)
 - [android studio](https://developer.android.com/studio)
