@@ -1,4 +1,4 @@
-# SesameOS3 SDK for Android           	          [日本語の読み方](README_ja.md)
+# SesameOS3 SDK for Android           	          [日本語はこちら](README_ja.md)
 ## ![CandyHouse](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CandyHouse 官方网站](https://jp.candyhouse.co/)
 
 ##### Google Play Apk [下载地址](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
@@ -6,7 +6,7 @@
 ## 项目概述
 #### SesameSDK 是一个简单、强大且免费的蓝牙/物联网（物联网）库，适用于 Android 应用程序。Sesame官方应用程序也是使用这个 SesameSDK 构建的，芝麻应用程序的所有功能都可以通过这个 SesameSDK 实现。SesameSDK 允许您：
 
-- 注册 Sesame 设备（Sesame 5、Sesame 5 pro、Sesame Bike2、Sesame BLE Connector1、Sesame open sensor、Sesame Touch 1 Pro、 Sesame Touch 1 、WIFI Module2）
+- 注册 Sesame 设备（Sesame 5、Sesame 5 pro、Sesame Bike2、BLE Connector1、Open Sensor1、Sesame Touch 1 Pro、 Sesame Touch 1 、Sesame Bot1、WIFI Module2、Sesame 4、Sesame 3、Sesame Bike1、）
 - 锁定和解锁
 
 - 获取历史记录
