@@ -1,30 +1,30 @@
 # SesameSDK3.0 for Android           	          [日本語はこちら](README_ja.md)
-## ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 官方网站](https://jp.candyhouse.co/)
+## ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
 
-##### Google Play Apk [下载地址](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
+##### Google Play Apk [ダウンロード](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
 ![img](./doc/img/SesameSDK_Swift.png)
-## 项目概述
-#### SesameSDK 是一个简单、强大且免费的蓝牙/物联网（物联网）库，适用于 Android 应用程序。Sesame官方应用程序也是使用这个 SesameSDK 构建的，芝麻应用程序的所有功能都可以通过这个 SesameSDK 实现。SesameSDK 允许您：
+## プロジェクト概要
+#### SesameSDKは、Androidアプリケーション向けの無料で、シンプル且つパワフルなBluetooth/ IoT（インターネット・オブ・シングス）ライブラリである。Sesameの公式アプリケーションはSesameSDKを使用して構築されており、すべての機能を実現できる。SesameSDKができること：
 
-- 注册 Sesame 设备（Sesame 5、Sesame 5 pro、Sesame Bike2、BLE Connector1、Open Sensor1、Sesame Touch 1 Pro、 Sesame Touch 1 、Sesame Bot1、WIFI Module2、Sesame 4、Sesame 3、Sesame Bike1、）
-- 锁定和解锁
+- Sesameデバイスの登録（Sesame 5、Sesame 5 pro、Sesame Bike2、BLE Connector1、Open Sensor1、Sesame Touch 1 Pro、 Sesame Touch 1 、Sesame Bot1、WIFI Module2、Sesame 4、Sesame 3、Sesame Bike1、）
+- ロックおよび解除
 
-- 获取历史记录
-- 更新 SesameOS3
-- SesameOS3设备的各种设置
-- 获取电池电量
-#### 本项目SesameOs3主要解决硬件设备Sesame 5、Sesame 5 pro、Sesame Bike2、Sesame BLE Connector1、Sesame open sensor、Sesame Touch 1 Pro、 Sesame Touch 1 、WIFI Module2等产品通过蓝牙连接。帮助用户通过安卓移动应用软件智能操作硬件。如果你的产品是Sesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1请下载[SesameSDK_Android_with_DemoApp](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp)
+- 履歴記録の取得
+- SesameOS3の更新
+- SesameOS3デバイスの各種設定
+- バッテリー残量の取得
+#### Sesame 5、Sesame 5 pro、Sesame Bike2、Sesame BLE Connector1、Sesame open sensor、Sesame Touch 1 Pro、 Sesame Touch 1 、WIFI Module2などの製品に対し、SesameOS3はBluetooth経由での接続を主に解決する。ユーザーがAndroidのモバイルアプリケーションソフトウェアを通じて製品を操作できる。Sesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1の場合は、[SesameSDK_Android_with_DemoApp](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp)をダウンロードしてください。
 
-##  技术栈和工具
-- [编程语言 Kotlin](https://kotlinlang.org/)
+##  テクノロジースタックとツール
+- [プログラミング言語 Kotlin](https://kotlinlang.org/)
 - [android studio](https://developer.android.com/studio)  
    
-### 1. 项目依赖
+### 1. プロジェクトの依存関係
 ```svg
 
    implementation project(':sesame-sdk')
 ```
-### 2. manifest.xml 注册权限
+### 2. manifest.xml 登録権限
 ```agsl
    
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -36,23 +36,23 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 ```
-### 3. application 初始化
+### 3. application 初期化
 ```agsl
    override fun onCreate() {
         super.onCreate()
            CHBleManager(this)
         }
 ```
-CHBleManager初始化会判断设备蓝牙是否正常、权限开启、蓝牙是否启动。一切正常开启蓝牙扫描
-蓝牙ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
+CHBleManagerの初期化は、デバイスのBluetoothが正常に動作しているか、権限がオープンされているか、Bluetoothが起動しているかを判断する。すべてが正常に動作しているなら、Bluetoothスキャンを開始する。
+Bluetooth ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
 ```agsl
  bluetoothAdapter.bluetoothLeScanner.startScan(
  mutableListOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(UUID.fromString("0000FD81-0000-1000-8000-00805f9b34fb"))).build()), ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanner)
 
 ```
-bleScanner 会将扫描到设备放入chDeviceMap 中
+bleScannerはスキャンしたデバイスをchDeviceMapに入れる。
 
-### 4. 添加新设备在ScanNewDeviceFG对象中,Adapter会拿到chDeviceMap过滤 (it.rssi!=null) 集合数据显示于列表中
+### 4. 新しいデバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはchDeviceMapからフィルタリングされた(it.rssi!=null)集合データをリストで表示する。
 ```svg
     private var mDeviceList = ArrayList<CHDevices>()
  CHBleManager.delegate = object : CHBleManagerDelegate {
@@ -70,7 +70,7 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
         }
     }
 ```
-### 5. 准备连接设备device 执行conect，onBleDeviceStatusChanged 监听device状态
+### 5. デバイスの接続を準備し、conectを実行し、onBleDeviceStatusChangedでデバイスの状態を監視する。
 ```agsl
             device.connect { }
             doRegisterDevice(device)
@@ -87,15 +87,15 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
    fun  doRegisterDevice(device: CHDevices){
        device.register {
        it.onSuccess {
-           //  注册成功
+           //  登録成功
        }
        it.onFailure {
-          //  注册失败
+          //  登録失敗
            }
        }
    }
 ```
-### 6. device.register回调注册成功失败指令，判断device 归属产品 model
+### 6. device.registerが登録成功か登録失敗のコマンドをコールバックし、deviceの所属製品modelを判断する。
 ```svg
                     (device as? CHWifiModule2)?.let {
                      
@@ -111,21 +111,21 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
                     }
 
 ```
-- [Sesame 5](doc/command/sesame5fun.md):该实例对象应用于Sesame5 、Sesame5 pro 产品
-- [Sesame Bike 2](doc/command/sesamebike2fun.md) : 该实例对象应用于 Sesame Bike 2 产品
-- [Sesame WiFi Module 2](doc/command/sesamewifimodule.md):该实例对象应用于 Sesame WiFi Module 2 产品
-- [Sesame touch pro](doc/command/sesametouchpro.md):该实例对象应用于 Sesame BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 产品
-- [Sesame Open Sensor 1](doc/command/sesame_open_sensor.md):该实例对象应用于  Sesame Open Sensor 1 产品
+- [Sesame 5](doc/command/sesame5fun.md):このインスタンスオブジェクトは、Sesame5、Sesame5 pro製品に適用される。
+- [Sesame Bike 2](doc/command/sesamebike2fun.md) : このインスタンスオブジェクトは、Sesame Bike 2 製品に適用される。
+- [Sesame WiFi Module 2](doc/command/sesamewifimodule.md):このインスタンスオブジェクトは、Sesame WiFi Module 2 製品に適用される。
+- [Sesame touch pro](doc/command/sesametouchpro.md):このインスタンスオブジェクトは、 Sesame BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 製品に適用される。
+- [Sesame Open Sensor 1](doc/command/sesame_open_sensor.md):このインスタンスオブジェクトは、Sesame Open Sensor 1 製品に適用される。
 - [Class对象](doc/class/allclass.md)
-### 循环图
+### フローチャート
 ![BleConnect](doc/bleprotocol/BleConnect.svg)
 
-### [项目结构](./doc/product_structure.md)
-### [项目框架](./doc/Sesame_framework.md)
-### [项目界面](./doc/APP_instroduce.md)
-###  [其他关联讲解](./doc/sesame_code.md)
-### [SDK使用条款](https://jp.candyhouse.co/pages/sesamesdk%E5%88%A9%E7%94%A8%E8%A6%8F%E7%B4%84)
- ### android相关知识
+### [プロジェクト構造](./doc/product_structure.md)
+### [プロジェクトフレームワーク](./doc/Sesame_framework.md)
+### [プロジェクトインターフェース](./doc/APP_instroduce.md)
+###  [その他の関連説明](./doc/sesame_code.md)
+### [SDK利用規約](https://jp.candyhouse.co/pages/sesamesdk%E5%88%A9%E7%94%A8%E8%A6%8F%E7%B4%84)
+ ### Android関連知識
 - [Android Ble](https://developer.android.com/guide/topics/connectivity/bluetooth-le?hl=zh-cn)
 - [Android Nfc](https://developer.android.com/guide/topics/connectivity/nfc?hl=zh-cn)
 - [Android jetpack](https://developer.android.com/jetpack?hl=zh-cn)
