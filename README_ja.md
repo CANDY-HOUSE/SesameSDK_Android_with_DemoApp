@@ -83,7 +83,7 @@ bleScanner はデバイスをスキャンして chDeviceMap に格納します�
            //  注册成功
        }
        it.onFailure {
-          //  注册失败
+          //  注册失败qwe
            }
        }
    }
