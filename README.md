@@ -93,7 +93,7 @@ bleScannerはスキャンしたデバイスをchDeviceMapに入れる。
        }
    }
 ```
-### 6. device.registerが登録成功か登録失敗のコマンドをコールバックし、deviceの所属製品modelを判断する。
+### 6. device.register登録コマンドの成功や失敗のコールバックによって、所属製品のdevice modelを判断できます。
 ```svg
                     (device as? CHWifiModule2)?.let {
                      
