@@ -48,9 +48,9 @@ Bluetooth ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
  mutableListOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(UUID.fromString("0000FD81-0000-1000-8000-00805f9b34fb"))).build()), ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanner)
 
 ```
-bleScannerはスキャンしたデバイスをchDeviceMapに入れる。
+bleScannerがスキャンしたデバイスをCHDeviceMapに入れる。
 
-### 4. 新しいデバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはchDeviceMapからフィルタリングされた(it.rssi!=null)集合データをリストで表示する。
+### 4. 新しいデバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはCHDeviceMapからフィルタリングされた(it.rssi!=null)データをリストで表示する。
 ```svg
     private var mDeviceList = ArrayList<CHDevices>()
  CHBleManager.delegate = object : CHBleManagerDelegate {
@@ -68,7 +68,7 @@ bleScannerはスキャンしたデバイスをchDeviceMapに入れる。
         }
     }
 ```
-### 5. デバイスの接続を準備し、conectを実行し、onBleDeviceStatusChangedでデバイスの状態を監視する。
+### 5. デバイスとの接続手順は、connectを実行し、onBleDeviceStatusChangedでデバイスの状態を監視すること。
 ```agsl
             device.connect { }
             doRegisterDevice(device)
