@@ -3,7 +3,7 @@
 
 ##### Google Play Store [Sesame app](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
 ![img](./doc/img/SesameSDK_Swift.png)
-## プロジェクト概要
+## 概要
 #### SesameSDKは、Androidアプリケーション向けの無料で、シンプル且つパワフルなBluetooth/ IoTライブラリです。Sesameの公式アプリケーションもこのSesameSDKを使用してすべての機能を構築し実現しております。SesameSDKでできること：
 
 - Sesameデバイスの登録（Sesame 5、Sesame 5 pro、Sesame Bike2、BLE Connector1、Open Sensor1、Sesame Touch 1 Pro、 Sesame Touch 1 、Sesame Bot1、WIFI Module2、Sesame 4、Sesame 3、Sesame Bike1、）
