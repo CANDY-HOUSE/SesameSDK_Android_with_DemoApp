@@ -14,16 +14,15 @@
 - バッテリー残量の取得
 
 
-##  テクノロジースタックとツール
+##  必要な言語とツール
 - [プログラミング言語 Kotlin](https://kotlinlang.org/)
 - [android studio](https://developer.android.com/studio)  
    
-### 1. プロジェクトの依存関係
+### 1. ライブラリーの依存
 ```svg
-
    implementation project(':sesame-sdk')
 ```
-### 2. manifest.xml 登録権限
+### 2. manifest.xml でAndroid権限を設定しましょう
 ```agsl
    
     <uses-permission android:name="android.permission.BLUETOOTH" />
