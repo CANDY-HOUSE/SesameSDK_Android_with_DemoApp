@@ -13,11 +13,10 @@
 - デバイスの各種設定
 - バッテリー残量の取得
 
-
 ##  必要な言語とツール
 - [プログラミング言語 Kotlin](https://kotlinlang.org/)
-- [android studio](https://developer.android.com/studio)  
-   
+- [Android Studio](https://developer.android.com/studio)  
+ 
 ### 1. ライブラリーの依存
 ```svg
    implementation project(':sesame-sdk')
