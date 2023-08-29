@@ -42,7 +42,7 @@
         }
 ```
 CHBleManagerの初期化は、端末のBluetoothが正常に動作しているか、端末から権限がもらっているか、Bluetoothが起動しているかを判断します。すべてが正常に動作している場合、Bluetoothスキャンが始まります。
-Bluetooth ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
+Bluetooth Service Uuid:0000FD81-0000-1000-8000-00805f9b34fb
 ```agsl
  bluetoothAdapter.bluetoothLeScanner.startScan(
  mutableListOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(UUID.fromString("0000FD81-0000-1000-8000-00805f9b34fb"))).build()), ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanner)
@@ -50,7 +50,7 @@ Bluetooth ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
 ```
 bleScannerがスキャンしたデバイスをCHDeviceMapに入れる。
 
-### 4. 新しいデバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはCHDeviceMapからフィルタリングされた(it.rssi!=null)データをリストで表示する。
+### 4. 新規デバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはCHDeviceMapからフィルタリングされた(it.rssi!=null)データをリストで表示します。
 ```svg
     private var mDeviceList = ArrayList<CHDevices>()
  CHBleManager.delegate = object : CHBleManagerDelegate {
