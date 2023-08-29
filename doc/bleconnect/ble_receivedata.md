@@ -1,5 +1,5 @@
 # Ble receive data
-### onCharacteristicChanged 接收Ble数据
+### onCharacteristicChanged Bleデータを受信する
 ```svg
 
   override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
@@ -15,10 +15,10 @@
 
         }
 ```
-### SesameBleReceiver对象 接收数据容器，当数据传输完整返回数据加密类型和字节数组
-- buffer:存放数据
-- segmentFlag:判断数据是第一条或仅此一条
-- parsingType:判断数据是结束
+### SesameBleReceiverオブジェクトは、データコンテナを受信し、データが完全に転送されると、データ暗号化タイプとバイト配列を返す。
+- buffer:データ保存
+- segmentFlag:データが最初のものであるか、唯一のものであるかを判断する
+- parsingType:データが終了したかを判断する
 ```svg
  internal class SesameBleReceiver {
         var buffer = byteArrayOf()
@@ -45,8 +45,8 @@
         }
 
 ```
-### parseNotifyPayload 函数主要判断数据是响应数据还是ble推送过来数据
-- palntext:解密后数据
+### parseNotifyPayload 関数は主に、データがレスポンスデータであるか、BLEからプッシュされたデータであるかを判断する。
+- palntext:復号化データ
 
 ```svg
 
@@ -61,8 +61,8 @@
             }
         }
 ```
-### onGattSesameResponse Ble数据接收处理
-- cmdCallBack:map对象，用来处理发送数据响应接收数据处理
+### onGattSesameResponse Bleデータ受信処理
+- cmdCallBack:Mapオブジェクト、送信データの応答と受信データの処理を行う
 ```
    private fun onGattSesameResponse(ssm2ResponsePayload: SSM3ResponsePayload) {
             cmdCallBack.get(ssm2ResponsePayload.cmdItCode)?.invoke(ssm2ResponsePayload)
@@ -70,5 +70,5 @@
 //            L.d("hcia", "[ss5] 🀄Command: <==:" + (ssm2ResponsePayload.cmdItCode) + " " + (ssm2ResponsePayload.cmdResultCode))
         }
 ```
-### 循环图
+### フローチャート
 ![send data](data_receive.svg)
