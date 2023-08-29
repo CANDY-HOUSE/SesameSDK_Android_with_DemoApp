@@ -41,7 +41,7 @@
            CHBleManager(this)
         }
 ```
-CHBleManagerの初期化は、デバイスのBluetoothが正常に動作しているか、権限がオープンされているか、Bluetoothが起動しているかを判断する。すべてが正常に動作しているなら、Bluetoothスキャンを開始する。
+CHBleManagerの初期化は、端末のBluetoothが正常に動作しているか、端末から権限がもらっているか、Bluetoothが起動しているかを判断します。すべてが正常に動作している場合、Bluetoothスキャンが始まります。
 Bluetooth ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
 ```agsl
  bluetoothAdapter.bluetoothLeScanner.startScan(
