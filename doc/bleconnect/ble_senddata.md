@@ -1,8 +1,8 @@
 # Ble send data 
-### 函数 sendCommand 封装BLE数据传输
-- payload:准备传递的信息
-- isEncryt:是否加密
-- onResponse:回调响应
+### sendCommand関数は、BLEデータ転送をカプセル化します。
+- payload:伝える情報の準備
+- isEncryt:暗号化検査
+- onResponse:コールバック応答
 ```svg
 fun sendCommand(payload: SesameOS3Payload, isEncryt: DeviceSegmentType = DeviceSegmentType.cipher, onResponse: SesameOS3ResponseCallback) {
         val tmp = cmdCallBack[payload.itemCode]
@@ -24,14 +24,14 @@ fun sendCommand(payload: SesameOS3Payload, isEncryt: DeviceSegmentType = DeviceS
         }
 
 ```
-### 枚举 DeviceSegmentType 判断传输接受数据是否存在加密
--  plain(1) : 数据没有加密
--  cipher(2)  : 数据存在加密
-### 函数 SesameBleTransmit 主要对bytes做数据分割 最大传输字节长度20
-- type:DeviceSegmentType类型
-- input:发送给ble设备字节数组
-- isStart:标记数据是否已传输完成，完成返回-1
-```代码示例
+### DeviceSegmentType の列挙を使用して、伝送されたデータが暗号化されているかどうかを判断します。
+-  plain(1) : データは暗号化されていない
+-  cipher(2)  : データは暗号化されている
+### SesameBleTransmit関数は主にbytesのデータ分割を行い、最大転送バイト数は20です。
+- type:DeviceSegmentTypeタイプ
+- input:BLEデバイスにバイト配列を送信する
+- isStart:データが完全に転送されたかどうかをマークし、完了した場合は-1を返す
+```コード例
   
 internal class SesameBleTransmit(var type: DeviceSegmentType, var input: ByteArray) {
     var isStart = 1
@@ -54,8 +54,8 @@ internal class SesameBleTransmit(var type: DeviceSegmentType, var input: ByteArr
 }
 
 ```
-### 函数 transmit 写入ble数据，最大20字节
-- semaphore:限制并发访问
+### 関数transmitは、最大20バイト数のBLEデータを書込みます。
+- semaphore:並行アクセスを制限する
 ```svg
   fun transmit() {
         mCharacteristic?.value = gattTxBuffer?.getChunk()
@@ -71,5 +71,5 @@ internal class SesameBleTransmit(var type: DeviceSegmentType, var input: ByteArr
         }
     }
 ```
-### 循环图
+### フローチャート
 ![send data](data_send.svg)

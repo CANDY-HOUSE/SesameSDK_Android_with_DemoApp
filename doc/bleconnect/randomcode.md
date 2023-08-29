@@ -1,23 +1,23 @@
-# RandomCode 获取随机Code讲解
-手机和Ble设备建立连接后并开启nofity，Ble设备回传 4Bytes random code
-#### 手机连接连接设备后开启notify,设备会回传4位随机码
+# RandomCode ランダムコードの取得に関する説明
+スマートフォンがBleデバイスに接続し、nofityを開始すると、Bleデバイスは4Bytes random code4を返します。
+#### スマートフォンがデバイスに接続し、notifyを開始すると、デバイスは4桁のランダムコードを返します。
 
-## 接收格式
+## 受信フォーマット
 | Byte |    5~2     | 1 | 0 |
 |:----:|:----------:|:----:|:----:|
 | Data | randomcode | command | response  |
-- command:指令14(固定)
-- response:响应0x08(固定)
-- randomcode:随机code
+- command:命令14(固定)
+- response:応答0x08(固定)
+- randomcode:ランダムcode
 
-## 循序图
+## フローチャート
 ![v](randomcode.svg)
 
 
 
 
 
-## android示例
+## android例
 ``` java
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
         if (receivePayload.cmdItCode == SesameItemCode.initial.value) {
