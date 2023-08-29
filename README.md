@@ -110,11 +110,11 @@ bleScannerはスキャンしたデバイスをchDeviceMapに入れる。
                     }
 
 ```
-- [Sesame 5](doc/command/sesame5fun.md):このインスタンスオブジェクトは、Sesame5、Sesame5 pro製品に適用される。
+- [Sesame 5](doc/command/sesame5fun.md):このインスタンスオブジェクトは、Sesame5、Sesame5 Pro製品に適用される。
 - [Sesame Bike 2](doc/command/sesamebike2fun.md) : このインスタンスオブジェクトは、Sesame Bike 2 製品に適用される。
-- [Sesame WiFi Module 2](doc/command/sesamewifimodule.md):このインスタンスオブジェクトは、Sesame WiFi Module 2 製品に適用される。
-- [Sesame touch pro](doc/command/sesametouchpro.md):このインスタンスオブジェクトは、 Sesame BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 製品に適用される。
-- [Sesame Open Sensor 1](doc/command/sesame_open_sensor.md):このインスタンスオブジェクトは、Sesame Open Sensor 1 製品に適用される。
+- [Sesame WiFi Module 2](doc/command/sesamewifimodule.md):このインスタンスオブジェクトは、WiFi Module 2 製品に適用される。
+- [Sesame touch pro](doc/command/sesametouchpro.md):このインスタンスオブジェクトは、 BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 製品に適用される。
+- [Sesame Open Sensor 1](doc/command/sesame_open_sensor.md):このインスタンスオブジェクトは、Open Sensor 1 製品に適用される。
 - [Class对象](doc/class/allclass.md)
 ### フローチャート
 ![BleConnect](doc/bleprotocol/BleConnect.svg)
