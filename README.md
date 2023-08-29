@@ -12,7 +12,7 @@
 - SesameOS3のアップデート
 - デバイスの各種設定
 - バッテリー残量の取得
-#### Sesame 5、Sesame 5 pro、Sesame Bike2、Sesame BLE Connector1、Sesame open sensor、Sesame Touch 1 Pro、 Sesame Touch 1 、WIFI Module2などの製品に対し、SesameOS3はBluetooth経由での接続を主に解決する。ユーザーがAndroidのモバイルアプリケーションソフトウェアを通じて製品を操作できる。Sesame Bot 1、Sesame 3、Sesame 4、Sesame Bike 1の場合は、[SesameSDK_Android_with_DemoApp](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp)をダウンロードしてください。
+
 
 ##  テクノロジースタックとツール
 - [プログラミング言語 Kotlin](https://kotlinlang.org/)
