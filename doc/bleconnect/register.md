@@ -1,14 +1,14 @@
-# register 注册连接Ble
+# register Bleを登録・接続します。
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  | 68~65|        4~1 |       0 |  
 |:------:|:----:|-----------:|--------:|
 | Data   |timestamp|  publicKeyA | command |
 
-- command:指令1(固定)
-- timestamp:手机当前时间戳
-- publicKeyA:由椭圆曲线（Elliptic Curve，EC）密钥对生成算法，属于非堆成加密算法
+- command:命令1(固定)
+- timestamp:現時点のスマートフォンのタイムスタンプ
+- publicKeyA:楕円曲線（Elliptic Curve，EC）鍵によってアルゴリズムの生成は、非対称暗号化アルゴリズムとなる。
 ```agsl
 
  internal fun getDeviceECCKey(): KeyPair {
@@ -21,26 +21,26 @@
     }
 ```
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |79~16|15~10 |9~3|    2 |   1   |     0      |  
 |:---:|:----:|:----:|:-----:|:----:|:-----:|:-----:|
 | Data | publicKeyS|mechSetting|mechStatus| status  | command |response   |
-- command:指令1(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)  状态0x09(已注册)走[login](login.md)流程
-- mechSetting:设备开关锁和开关锁角度
-- mechStatus:机器当前各类信息状态
-- publicKeyS:机器当前各类信息状态
+- command:命令1(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)  状態0x09(登録済み)[login](login.md)プロセスを進める
+- mechSetting:解錠・施錠・角度の設定
+- mechStatus:現在機械の状態
+- publicKeyS:現在機械の状態
 
-### 循序图
+### フローチャート
 ![icon](register.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
        override fun register(result: CHResult<CHEmpty>) {
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {

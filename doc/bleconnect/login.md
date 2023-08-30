@@ -1,31 +1,31 @@
-# login 登录讲解
+# login ログインに関する説明
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  |     4~1     |        0 |
 |:------:|:-----------:|---------:|
 | Data   | ccmkey 	 |  command |
 
-- ccmkey :由[RandomCode](RandomCode.md)获取
-- command:指令2(固定)
+- ccmkey :[RandomCode](RandomCode.md)による取得する
+- command:命令2(固定)
 
 
-### 接收格式
+### 受信フォーマット
 | Byte |6~3| 2 | 1 | 0 |  
 |-------|:------:|:------:|:------:|:------:|
 | Data | timestamp|status | command | response  |
-- command:指令2(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功) 
-- timestamp:时间戳
-### 循序图
+- command:命令2(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功) 
+- timestamp:タイムスタンプ
+### フローチャート
 ![login](login.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
      override fun login(token: String?) {
         deviceStatus = CHDeviceStatus.BleLogining

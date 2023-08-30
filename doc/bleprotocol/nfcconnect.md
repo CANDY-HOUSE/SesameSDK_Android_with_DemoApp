@@ -1,15 +1,15 @@
-# NFC连接讲解
-### NFC（近场通讯）连接通常涉及两个主要方面：NFC标签和NFC点对点连接。以下是关于如何在Android设备上使用这些功能的简要说明：
-#### NFC标签读写：
-- 读取NFC标签数据： 你可以使用Android的NFC API检测到附近的NFC标签，并读取标签上存储的数据。你可以注册一个NfcAdapter.ReaderCallback以在检测到标签时处理数据。
-- 写入NFC标签数据： 通过设置标签的NDEF（NFC数据交换格式）消息，你可以在标签上写入数据。这通常涉及创建一个NdefMessage，然后将其写入标签。
-#### NFC点对点连接：
+# NFC接続に関する説明
+### NFC（近距離無線通信）接続は通常、主にNFCタグとNFCピア・ツー・ピア接続を指します。以下は、これらの機能をAndroidデバイスでの使用方法について、簡単に説明します。
+#### NFCタグの読書き：
+- NFCタグデータの読取り：AndroidのNFC APIを使用して近くのNFCタグを検出し、タグに保存されているデータを読取ることができます。タグを検出した時にデータを処理するために、NfcAdapter.ReaderCallbackを登録します。
+- NFCタグデータの書込み：タグのNDEF（NFCデータ交換形式）メッセージを設定することで、タグにデータを書込むことができます。NdefMessageを作成し、タグに書込みます。
+#### NFCピア・ツー・ピア接続：
 
-- NFC Beam： NFC Beam允许两个支持NFC的Android设备通过NFC进行数据传输。你可以使用NfcAdapter的setNdefPushMessage方法来设置要共享的数据，然后通过将设备放在一起来触发数据传输。
-#### 处理NFC事件：
-在Activity中，可以通过重写onNewIntent方法来处理接收到的NFC意图（Intent）。这是当设备检测到NFC标签或另一个NFC设备时调用的方法
+- NFC Beam：NFC Beamは、NFC対応可能のAndroidデバイス2台がNFCによって、データを転送することができるようにします。NfcAdapterのsetNdefPushMessageを使用して共有するデータを設定し、デバイスを近づけることでデータ転送を開始できます。
+#### NFCイベントの処理：
+Activityにおいて、onNewIntentをオーバーライドすることで、受信したNFC Intentを処理します。デバイスがNFCタグや他のNFCデバイスを検出した時に呼び出されることです。
 
-### 下面是一个简单的示例，演示如何在Android中读取NFC标签数据：
+### 以下は、AndroidでNFCタグデータを読取ることを示す例です。
 
 ```agsl
 

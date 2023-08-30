@@ -1,33 +1,32 @@
-# timestamp 更新时间戳
+# timestamp タイムスタンプを更新します
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  | 4~1|       0 |  
 |:------:|:----:|--------:|
 | Data   | timestamp| command |
 
-- command:指令8(固定)
-- timestamp:手机当前时间戳
+- command:命令8(固定)
+- timestamp:現時点のスマートフォンのタイムスタンプ
 
 
-
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    2    |   1   |     0      |  
 |:---:|:-------:|:-----:|:---------:|
 | Data | status  | command |response   |
-- command:指令8(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)
+- command:命令8(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)
 
-### 循序图
+### フローチャート
 ![icon](timestamp.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
         override fun updateTime(result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

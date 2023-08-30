@@ -1,6 +1,6 @@
-SesameOs3 Ble 连接流程
+SesameOs3 Ble 接続プロセス
 ========
-### 1. manifest.xml 注册权限
+### 1. manifest.xml でAndroid権限を設定しましょう
 ```agsl
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -11,23 +11,23 @@ SesameOs3 Ble 连接流程
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 ```
-### 2. application 初始化 
+### 2. application 初期化 
 ```agsl
    override fun onCreate() {
         super.onCreate()
            CHBleManager(this)
         }
 ```
-CHBleManager初始化会判断设备蓝牙是否正常、权限开启、蓝牙是否启动。一切正常开启蓝牙扫描
-蓝牙ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
+CHBleManagerの初期化は、端末のBluetoothが正常に動作しているか、端末から権限をもらっているか、Bluetoothが起動しているかを判断します。すべてが正常に動作している場合、Bluetoothスキャンが始まります。
+Bluetooth ServiceUuid:0000FD81-0000-1000-8000-00805f9b34fb
 ```agsl
  bluetoothAdapter.bluetoothLeScanner.startScan(
  mutableListOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(UUID.fromString("0000FD81-0000-1000-8000-00805f9b34fb"))).build()), ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanner)
 
 ```
-bleScanner 会将扫描到设备放入chDeviceMap 中
+bleScannerがスキャンしたデバイスをCHDeviceMapに入れる。
 
-### 3. 添加新设备在ScanNewDeviceFG对象中,Adapter会拿到chDeviceMap过滤 (it.rssi!=null) 集合数据显示于列表中
+### 3. 新規デバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはCHDeviceMapからフィルタリングされた(it.rssi!=null)データをリストで表示します。
 ```svg
     private var mDeviceList = ArrayList<CHDevices>()
  CHBleManager.delegate = object : CHBleManagerDelegate {
@@ -36,8 +36,7 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
           //     L.d("devices size",devices.size.toString())
                 mDeviceList.clear()
                 mDeviceList.addAll(devices.filter { it.rssi != null }
-//                    .filter { it.rssi!! > -65 }///註冊列表只顯示距離近的
-                )
+//                    .filter { it.rssi!! > -65 }///登録リストが近くの項目のみを表示する註冊列表只顯示距離近的
                 mDeviceList.sortBy { it.getDistance() }
                 mDeviceList.firstOrNull()?.connect { }
                 leaderboard_list.post((leaderboard_list.adapter as GenericAdapter<*>)::notifyDataSetChanged)
@@ -45,7 +44,7 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
         }
     }
 ```
-### 4. 准备连接设备device 执行conect，onBleDeviceStatusChanged 监听device状态
+### 4. デバイスとの接続手順は、connectを実行し、onBleDeviceStatusChangedでデバイスの状態を監視すること。
 ```agsl
             device.connect { }
             doRegisterDevice(device)
@@ -62,15 +61,15 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
    fun  doRegisterDevice(device: CHDevices){
        device.register {
        it.onSuccess {
-           //  注册成功
+           //  登録成功
        }
        it.onFailure {
-          //  注册失败
+          //  登録失敗
            }
        }
    }
 ```
-### 5. device.register回调注册成功失败指令，判断device 归属产品 model 
+### 5. device.register登録コマンドの成功や失敗のコールバックによって、所属製品のdevice modelを判断できます。
 ```svg
                     (device as? CHWifiModule2)?.let {
                      
@@ -86,12 +85,12 @@ bleScanner 会将扫描到设备放入chDeviceMap 中
                     }
 
 ```
-- [Sesame 5](../command/sesame5fun.md):该实例对象应用于Sesame5 、Sesame5 pro 产品
-- [Sesame Bike 2](../command/sesamebike2fun.md) : 该实例对象应用于 Sesame Bike 2 产品
-- [Sesame WiFi Module 2](../command/sesamewifimodule.md):该实例对象应用于 Sesame WiFi Module 2 产品
-- [Sesame touch pro](../command/sesametouchpro.md):该实例对象应用于 Sesame BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 产品
-- [Sesame Open Sensor 1](../command/sesame_open_sensor.md):该实例对象应用于  Sesame Open Sensor 1 产品
+- [Sesame 5](../command/sesame5fun.md):このインスタンスオブジェクトは、Sesame5 、Sesame5 pro 製品に適用される。
+- [Sesame Bike 2](../command/sesamebike2fun.md) :このインスタンスオブジェクトは、Sesame Bike 2 製品に適用される。
+- [Sesame WiFi Module 2](../command/sesamewifimodule.md):このインスタンスオブジェクトは、Sesame WiFi Module 2 製品に適用される。
+- [Sesame touch pro](../command/sesametouchpro.md):このインスタンスオブジェクトは、Sesame BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 製品に適用される。
+- [Sesame Open Sensor 1](../command/sesame_open_sensor.md):このインスタンスオブジェクトは、Sesame Open Sensor 1 製品に適用される。
 
-### 循环图
+### フローチャート
 ![BleConnect](BleConnect.svg)
 
