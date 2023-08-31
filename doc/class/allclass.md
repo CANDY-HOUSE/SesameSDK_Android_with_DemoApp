@@ -1,69 +1,69 @@
-## enum 列表
-- [SSM2OpCode](SSM2OpCode.md) （SSM2操作码）
-- [SesameResultCode](SesameResultCode.md) （Sesame结果码）
-- [SesameItemCode](SesameItemCode.md) （Sesame项目码）
-- [Sesame2HistoryTypeEnum](Sesame2HistoryTypeEnum.md) （Sesame2历史类型枚举）
-- [DeviceSegmentType](DeviceSegmentType.md) （设备段类型）
-- [CHDeviceStatus](CHDeviceStatus.md) （设备状态）
-- [CHDeviceLoginStatus](CHDeviceLoginStatus.md) （CH设备登录状态）
-- [WM2ActionCode](WM2ActionCode.md) （WM2操作码）
+## enum リスト
+- [SSM2OpCode](SSM2OpCode.md) （SSM2の操作コード）
+- [SesameResultCode](SesameResultCode.md) （Sesameの結果コード）
+- [SesameItemCode](SesameItemCode.md) （Sesameのアイテムコード）
+- [Sesame2HistoryTypeEnum](Sesame2HistoryTypeEnum.md) （Sesame2の履歴タイプ列挙）
+- [DeviceSegmentType](DeviceSegmentType.md) （デバイスのセグメントタイプ）
+- [CHDeviceStatus](CHDeviceStatus.md) （デバイス状態）
+- [CHDeviceLoginStatus](CHDeviceLoginStatus.md) （CHデバイスのログイン状態）
+- [WM2ActionCode](WM2ActionCode.md) （WM2のアクションコード）
 
-## class 列表
-- [SSM3PublishPayload](SSM3PublishPayload.md) （SSM3发布负载）
-- [SesameNotifypayload](SesameNotifypayload.md) （Sesame通知负载）
-- [SSM2ResponsePayload](SSM2ResponsePayload.md) （SSM2响应负载）
-- [SSM3ResponsePayload](SSM3ResponsePayload.md) （SSM3响应负载）
-- [CHDeviceUtil](CHDeviceUtil.md) （设备工具）
-- [CHBaseDevice](CHBaseDevice.md) （基础设备）
-- [CHadv](CHadv.md) （对 ScanResult 处理）
-- [SesameBleReceiver](SesameBleReceiver.md) （Sesame蓝牙接收器）
-- [SesameBleTransmit](SesameBleTransmit.md) （Sesame蓝牙发射器）
-- [CHSesameBike2MechStatus](CHSesameBike2MechStatus.md) （SesameBike2机械状态）
-- [SesameOS3BleCipher](SesameOS3BleCipher.md) （SesameOS3蓝牙密码）
+## class リスト
+- [SSM3PublishPayload](SSM3PublishPayload.md) （SSM3の送信するデータ）
+- [SesameNotifypayload](SesameNotifypayload.md) （Sesameの通知するデータ）
+- [SSM2ResponsePayload](SSM2ResponsePayload.md) （SSM2の応答するデータ）
+- [SSM3ResponsePayload](SSM3ResponsePayload.md) （SSM3の応答するデータ）
+- [CHDeviceUtil](CHDeviceUtil.md) （デバイス・ユーティリティ）
+- [CHBaseDevice](CHBaseDevice.md) （基本デバイス）
+- [CHadv](CHadv.md) （ScanResultの処理）
+- [SesameBleReceiver](SesameBleReceiver.md) （Sesameのbluetoothレシーバー）
+- [SesameBleTransmit](SesameBleTransmit.md) （Sesameのbluetoothトランスミッター）
+- [CHSesameBike2MechStatus](CHSesameBike2MechStatus.md) （SesameBike2の機械状態）
+- [SesameOS3BleCipher](SesameOS3BleCipher.md) （SesameOS3のbluetoothパスワード）
 - [CHSesameOS3](CHSesameOS3.md) （SesameOS3）
-- [CHSesame5Device](CHSesame5Device.md) （Sesame5设备）
-- [CHSesameBike2Device](CHSesameBike2Device.md) （SesameBike2设备）
-- [CHSesameTouchProDevice](CHSesameTouchProDevice.md) （SesameTouchPro设备）
-- [CHWifiModule2Device](CHWifiModule2Device.md) （Wifi模块2设备）
-- [CHWifiModule2MechSettings](CHWifiModule2MechSettings.md) （Wifi模块2机械设置）
-- [CHWifiModule2NetWorkStatus](CHWifiModule2NetWorkStatus.md) （Wifi模块2网络状态）
-- [NSError](NSError.md) （错误）
-- [CHSesameBotMechSettings](CHSesameBotMechSettings.md) （SesameBot机械设置）
-- [CHSesameBotMechStatus](CHSesameBotMechStatus.md) （SesameBot机械状态）
-- [CHWifiModule2MechSettings](CHWifiModule2MechSettings.md) （Wifi module 2机械设置）
-- [CHWifiModule2NetWorkStatus](CHWifiModule2NetWorkStatus.md) （Wifi module 2网络状态）
-- [SesameOS3Payload](SesameOS3Payload.md) （SesameOS3负载）
-- [CHSesameTouchCard](CHSesameTouchCard.md) （Sesame触摸卡）
+- [CHSesame5Device](CHSesame5Device.md) （Sesame5デバイス）
+- [CHSesameBike2Device](CHSesameBike2Device.md) （SesameBike2デバイス）
+- [CHSesameTouchProDevice](CHSesameTouchProDevice.md) （SesameTouchProデバイス）
+- [CHWifiModule2Device](CHWifiModule2Device.md) （Wifiモジュール2デバイス）
+- [CHWifiModule2MechSettings](CHWifiModule2MechSettings.md) （Wifiモジュール2の機械設置）
+- [CHWifiModule2NetWorkStatus](CHWifiModule2NetWorkStatus.md) （Wifiモジュール2のネットワーク状態）
+- [NSError](NSError.md) （エラー）
+- [CHSesameBotMechSettings](CHSesameBotMechSettings.md) （SesameBotの機械設置）
+- [CHSesameBotMechStatus](CHSesameBotMechStatus.md) （SesameBotの機械状態）
+- [CHWifiModule2MechSettings](CHWifiModule2MechSettings.md) （Wifi module 2のの機械設置）
+- [CHWifiModule2NetWorkStatus](CHWifiModule2NetWorkStatus.md) （Wifi module 2のネットワーク状態）
+- [SesameOS3Payload](SesameOS3Payload.md) （SesameOS3のデータ）
+- [CHSesameTouchCard](CHSesameTouchCard.md) （Sesameのタッチカード）
 
-## interface 列表
-- [CHBaseAdv](CHBaseAdv.md) （基类设备）
-- [CHDeviceUtil](CHDeviceUtil.md) （设备工具）
-- [CHSesameOS3Publish](CHSesameOS3Publish.md) （SesameOS3发布）
-- [CHDevices](CHDevices.md) （设备）
+## interface リスト
+- [CHBaseAdv](CHBaseAdv.md) （デバイスの基本アドバタイジング）
+- [CHDeviceUtil](CHDeviceUtil.md) （デバイス・ユーティリティ）
+- [CHSesameOS3Publish](CHSesameOS3Publish.md) （SesameOS3の送信内容）
+- [CHDevices](CHDevices.md) （デバイス）
 - [CHWifiModule2](CHWifiModule2.md) （Wifi Module 2）
-- [CHDeviceStatusDelegate](CHDeviceStatusDelegate.md) （设备状态代理）
-- [CHSesameTouchProDelegate](CHSesameTouchProDelegate.md) （SesameTouchPro代理）
-- [CHSesameProtocolMechStatus](CHSesameProtocolMechStatus.md) （CHSesame协议机械状态）
-- [CHSesameConnector](CHSesameConnector.md) （Sesame连接器）
-- [CHSesameLock](CHSesameLock.md) （Sesame锁）
+- [CHDeviceStatusDelegate](CHDeviceStatusDelegate.md) （デバイス状態のDelegate）
+- [CHSesameTouchProDelegate](CHSesameTouchProDelegate.md) （SesameTouchProのDelegate）
+- [CHSesameProtocolMechStatus](CHSesameProtocolMechStatus.md) （CHSesameのプロトコルの機械状態）
+- [CHSesameConnector](CHSesameConnector.md) （Sesameコネクター）
+- [CHSesameLock](CHSesameLock.md) （Sesameロック）
 - [CHSesame2](CHSesame2.md) （Sesame2）
 - [CHSesame5](CHSesame5.md) （Sesame5）
-- [CHSesameBike](CHSesameBike.md) （Sesame自行车）
-- [CHSesameBike2](CHSesameBike2.md) （Sesame自行车2）
-- [CHSesameBot](CHSesameBot.md) （Sesame机器人）
-- [CHSesameSensorDelegate](CHSesameSensorDelegate.md) （Sesame传感器代理）
-- [CHSesameSensor](CHSesameSensor.md) （Sesame传感器）
-- [CHSesameTouchPro](CHSesameTouchPro.md) （Sesame触摸专业版）
-- [CHWifiModule2Delegate](CHWifiModule2Delegate.md) （Wifi module 2代理）
+- [CHSesameBike](CHSesameBike.md) （Sesameサイクル）
+- [CHSesameBike2](CHSesameBike2.md) （Sesameサイクル2）
+- [CHSesameBot](CHSesameBot.md) （Sesameボット）
+- [CHSesameSensorDelegate](CHSesameSensorDelegate.md) （Sesameセンサーの代理）
+- [CHSesameSensor](CHSesameSensor.md) （Sesameセンサー）
+- [CHSesameTouchPro](CHSesameTouchPro.md) （Sesameタッチプロー）
+- [CHWifiModule2Delegate](CHWifiModule2Delegate.md) （Wifi module 2の代理）
 
 
 
 
 
-## typealias 列表
+## typealias リスト
 1. internal typealias SesameOS3ResponseCallback = (result: SSM3ResponsePayload) -> Unit  
- - `SesameOS3ResponseCallback` 是一个内部类型别名，它定义了一个函数类型，这个函数接受一个 `SSM3ResponsePayload` 类型的 `result` 参数，并且不返回任何值。。
+ - `SesameOS3ResponseCallback`は、`SSM3ResponsePayload`型の`result`というパラメータを入力する関数タイプを定義し、データを返しません。
 2. typealias CHResult<T> = (Result<CHResultState<T>>) -> Unit
--  `CHResult<T>` 是一个类型别名，它定义了一个函数类型。这个函数接受一个 `Result<CHResultState<T>>` 类型的参数，并且不返回任何值。 在这个类型中，`Result` 是一个用来处理操作成功或失败的通用类，可以包含成功的值或一个异常。`CHResultState<T>` 是一个泛型类型，表示操作的结果状态。
+-  `CHResult<T>` は `Result<CHResultState<T>>` 型というパラメータを入力する関数タイプを定義し、データを返しません。この型では、`Result`は操作の成功または失敗を処理するための汎用クラスで、成功した値またはエラー値が表示可能です。`CHResultState<T>`は汎用クラスで、操作結果の状態を表示します。  
 
 
