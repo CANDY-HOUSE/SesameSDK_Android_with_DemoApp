@@ -41,8 +41,8 @@
 - [CHSesameOS3Publish](CHSesameOS3Publish.md) （SesameOS3の送信内容）
 - [CHDevices](CHDevices.md) （デバイス）
 - [CHWifiModule2](CHWifiModule2.md) （Wifi Module 2）
-- [CHDeviceStatusDelegate](CHDeviceStatusDelegate.md) （デバイス状態のプロキシ）
-- [CHSesameTouchProDelegate](CHSesameTouchProDelegate.md) （SesameTouchProのプロキシ）
+- [CHDeviceStatusDelegate](CHDeviceStatusDelegate.md) （デバイス状態のDelegate）
+- [CHSesameTouchProDelegate](CHSesameTouchProDelegate.md) （SesameTouchProのDelegate）
 - [CHSesameProtocolMechStatus](CHSesameProtocolMechStatus.md) （CHSesameのプロトコルの機械状態）
 - [CHSesameConnector](CHSesameConnector.md) （Sesameコネクター）
 - [CHSesameLock](CHSesameLock.md) （Sesameロック）
@@ -51,10 +51,10 @@
 - [CHSesameBike](CHSesameBike.md) （Sesameサイクル）
 - [CHSesameBike2](CHSesameBike2.md) （Sesameサイクル2）
 - [CHSesameBot](CHSesameBot.md) （Sesameボット）
-- [CHSesameSensorDelegate](CHSesameSensorDelegate.md) （Sesameセンサーのプロキシ）
+- [CHSesameSensorDelegate](CHSesameSensorDelegate.md) （Sesameセンサーの代理）
 - [CHSesameSensor](CHSesameSensor.md) （Sesameセンサー）
 - [CHSesameTouchPro](CHSesameTouchPro.md) （Sesameタッチプロー）
-- [CHWifiModule2Delegate](CHWifiModule2Delegate.md) （Wifi module 2のプロキシ）
+- [CHWifiModule2Delegate](CHWifiModule2Delegate.md) （Wifi module 2の代理）
 
 
 
@@ -62,8 +62,8 @@
 
 ## typealias リスト
 1. internal typealias SesameOS3ResponseCallback = (result: SSM3ResponsePayload) -> Unit  
- - `SesameOS3ResponseCallback`は、`SSM3ResponsePayload`型の`result`というパラメータをインプットする関数タイプを定義し、データを返しません。
+ - `SesameOS3ResponseCallback`は、`SSM3ResponsePayload`型の`result`というパラメータを入力する関数タイプを定義し、データを返しません。
 2. typealias CHResult<T> = (Result<CHResultState<T>>) -> Unit
--  `CHResult<T>` は `Result<CHResultState<T>>` 型というパラメータをインプットする関数タイプを定義し、データを返しません。この型では、`Result`は操作の成功または失敗を処理するための汎用クラスで、成功した値またはエラー値が表示可能です。`CHResultState<T>`はジェネリック型で、操作結果の状態を表します。  
+-  `CHResult<T>` は `Result<CHResultState<T>>` 型というパラメータを入力する関数タイプを定義し、データを返しません。この型では、`Result`は操作の成功または失敗を処理するための汎用クラスで、成功した値またはエラー値が表示可能です。`CHResultState<T>`は汎用クラスで、操作結果の状態を表示します。  
 
 
