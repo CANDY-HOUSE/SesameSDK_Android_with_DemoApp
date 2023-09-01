@@ -1,4 +1,4 @@
-# CHBaseDevice 类文档
+# CHBaseDevice クラス
 
 ```svg
 @SuppressLint("MissingPermission") internal open class CHBaseDevice {
@@ -28,31 +28,31 @@
 
 
 
-`CHBaseDevice` 是一个开放的内部类。
+`CHBaseDevice`は公開された内部クラスです。
 
-## 属性
+## プロパティ
 
-- `productModel`: 类型为 `CHProductModel`，产品模型。
-- `gattRxBuffer`: 类型为 `SesameBleReceiver`，蓝牙接收缓冲区。
-- `gattTxBuffer`: 类型为 `SesameBleTransmit?`，蓝牙传输缓冲区。
-- `mSesameToken`: 类型为 `ByteArray`，设备的Token。
-- `mCharacteristic`: 类型为 `BluetoothGattCharacteristic?`，用于发送数据。
-- `delegate`: 类型为 `CHDeviceStatusDelegate?`，设备状态代理。
-- `deviceTimestamp`: 类型为 `Long?`，设备时间戳。
-- `loginTimestamp`: 类型为 `Long?`，登录时间戳。
-- `deviceId`: 类型为 `UUID?`，设备ID。
-- `isRegistered`: 类型为 `Boolean`，是否注册。
-- `rssi`: 类型为 `Int?`，接收信号强度指示符。
-- `mBluetoothGatt`: 类型为 `BluetoothGatt?`，蓝牙Gatt。
-- `isNeedAuthFromServer`: 类型为 `Boolean?`，是否需要从服务器获取认证。
-- `mechStatus`: 类型为 `CHSesameProtocolMechStatus?`，机械状态。
-- `deviceShadowStatus`: 类型为 `CHDeviceStatus?`，设备阴影状态。
-- `deviceStatus`: 类型为 `CHDeviceStatus`，设备状态。
-- `sesame2KeyData`: 类型为 `CHDevice?`，设备密钥数据。
+- `productModel`: `CHProductModel`型で、製品モデルです。
+- `gattRxBuffer`: `SesameBleReceiver`型で、Bluetooth受信バッファです。
+- `gattTxBuffer`: `SesameBleTransmit?`型で、Bluetooth伝送バッファです。
+- `mSesameToken`: `ByteArray`型で、デバイスのTokenです。
+- `mCharacteristic`: `BluetoothGattCharacteristic?`型で、データ送信用です。
+- `delegate`: `CHDeviceStatusDelegate?`型で、デバイス状態のDelegateです。
+- `deviceTimestamp`: `Long?`型で、デバイスのタイムスタンプです。
+- `loginTimestamp`: `Long?`型で、ログインのタイムスタンプです。
+- `deviceId`: `UUID?`型で、デバイスIDです。
+- `isRegistered`:  `Boolean`型で、登録しているかどうかを判断します。
+- `rssi`: `Int?`型で、受信号強度の指示子です。
+- `mBluetoothGatt`: `BluetoothGatt?`型で、Bluetooth  Gattです。
+- `isNeedAuthFromServer`: `Boolean?`型で、サーバーから認証を取得する必要があるかを判断します。
+- `mechStatus`: `CHSesameProtocolMechStatus?`型で、機械状態です。
+- `deviceShadowStatus`: `CHDeviceStatus?`型で、デバイスのシャドウ状態です。
+- `deviceStatus`: `CHDeviceStatus`型で、デバイスの状態です。
+- `sesame2KeyData`: `CHDevice?`型で、デバイスのキーデータです。
 
-## 方法
+##  メソッド
 
-1. `dropKey(result: CHResult<CHEmpty>)`: 删除设备的密钥
-2. `disconnect(result: CHResult<CHEmpty>)`: 断开设备的连接
+1. `dropKey(result: CHResult<CHEmpty>)`: デバイスのキーを削除します。
+2. `disconnect(result: CHResult<CHEmpty>)`: デバイスの接続を切断します。
 
 

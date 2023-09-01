@@ -1,6 +1,6 @@
 
 
-# CHDeviceStatusDelegate 接口
+# CHDeviceStatusDelegate インターフェース
 ```svg
 interface CHDeviceStatusDelegate {
 
@@ -11,11 +11,11 @@ interface CHDeviceStatusDelegate {
 
 ```
 
-`CHDeviceStatusDelegate` 是一个设备状态代理接口，用于监控和响应设备状态的变化。
+`CHDeviceStatusDelegate` はデバイス状態の変化を監視と応答するためのデバイス状態の代理のインターフェースです。
 
-## 方法
+## メソッド
 
-- `fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {}` - 当 BLE 设备状态发生变化时被调用，传入参数为设备对象、新的设备状态和设备的阴影状态（如果有）。
-- `fun onMechStatus(device: CHDevices) {}` - 当设备的机械状态发生变化时被调用，传入参数为设备对象。
+- `fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {}` - BLEデバイスの状態が変化した時に呼び出され、デバイスオブジェクト、新しいデバイスの状態、およびデバイスのシャドウ状態（存在する場合）というパラメータがインプットされます。
+- `fun onMechStatus(device: CHDevices) {}` - デバイスの機械状態が変化した時に呼び出され、デバイスオブジェクトというパラメータがインプットされます。
 
 

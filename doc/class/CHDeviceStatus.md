@@ -1,4 +1,4 @@
-# CHDeviceStatus 枚举类
+# CHDeviceStatus 列挙型クラス
 
 ```svg
 
@@ -27,29 +27,29 @@ enum class CHDeviceStatus(val value: CHDeviceLoginStatus) {
 
 
 
-`CHDeviceStatus` 是一个枚举类，表示设备的状态。每个枚举常量都关联一个 `CHDeviceLoginStatus` 类型的值。
+`CHDeviceStatus`は、デバイスの状態を表す列挙型で、各列挙定数が `CHDeviceLoginStatus` 型の値と関連しています。
 
-以下是每个枚举常量的含义：
+以下は各列挙定数の意味です
 
-| 枚举常量 | 含义 | 关联的登录状态 |
+| 列挙定数 | 意味 | 関連するログイン状態 |
 | :----- | :----- | :----- |
-| `NoBleSignal` | 没有蓝牙信号 | `UnLogin` |
-| `ReceivedAdV` | 收到广告 | `UnLogin` |
-| `BleConnecting` | 正在连接蓝牙 | `UnLogin` |
-| `DiscoverServices` | 正在发现服务 | `UnLogin` |
-| `BleLogining` | 正在登录蓝牙 | `UnLogin` |
-| `Registering` | 正在注册 | `UnLogin` |
-| `ReadyToRegister` | 准备注册 | `UnLogin` |
-| `WaitingForAuth` | 等待授权 | `UnLogin` |
-| `NoSettings` | 没有设置 | `Login` |
-| `Reset` | 重置 | `UnLogin` |
-| `DfuMode` | 设备固件更新模式 | `UnLogin` |
-| `Busy` | 设备忙 | `UnLogin` |
-| `Locked` | 设备已锁定 | `Login` |
-| `Moved` | 设备已移动 | `Login` |
-| `Unlocked` | 设备已解锁 | `Login` |
-| `WaitApConnect` | 等待接入点连接 | `Login` |
-| `IotConnected` | IoT已连接 | `Login` |
-| `IotDisconnected` | IoT已断开连接 | `Login` |
+| `NoBleSignal` | Bluetooth信号がない | `UnLogin` |
+| `ReceivedAdV` | アドバタイジングを受信する | `UnLogin` |
+| `BleConnecting` | Bluetoothに接続している | `UnLogin` |
+| `DiscoverServices` | サービスを検出する | `UnLogin` |
+| `BleLogining` | Bluetoothをログインしている | `UnLogin` |
+| `Registering` | 登録している | `UnLogin` |
+| `ReadyToRegister` | 登録の準備をする | `UnLogin` |
+| `WaitingForAuth` | 承認を待っている | `UnLogin` |
+| `NoSettings` | 設置がない | `Login` |
+| `Reset` | リセット | `UnLogin` |
+| `DfuMode` | デバイスのファームウェアの更新モデル | `UnLogin` |
+| `Busy` | ビジー | `UnLogin` |
+| `Locked` | デバイスがロックされた| `Login` |
+| `Moved` | デバイスが移動された | `Login` |
+| `Unlocked` | デバイスのロックが解除された | `Login` |
+| `WaitApConnect` | アクセスポイントの接続を待つ | `Login` |
+| `IotConnected` | IoTが接続している | `Login` |
+| `IotDisconnected` | IoTの接続が切断されている | `Login` |
 
-注意，每个状态都与设备的登录状态 (`CHDeviceLoginStatus`) 关联，表示设备在该状态下的登录情况。
+各列挙定数はデバイスのログイン状態（`CHDeviceLoginStatus`）と関連しており、その状態でのデバイスのログイン状況を表していることにご注意ください。

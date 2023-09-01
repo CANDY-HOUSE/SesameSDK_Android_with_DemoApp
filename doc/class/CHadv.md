@@ -1,4 +1,4 @@
-# CHadv 类
+# CHadv クラス
 ```svg
 internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
 
@@ -21,23 +21,23 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
 ```
 
 
-`CHadv` 是一个内部类，实现了 `CHBaseAdv` 接口。
+`CHadv`は、`CHBaseAdv`インターフェースを実現できた内部クラスです。
 
-## 属性
+## プロパティ
 
-- `isConnecable`: 类型为 `Boolean?`，是否可连接，默认为 `true`。
-- `isRegistered`: 类型为 `Boolean`，是否已注册，由 `advBytes[2] and 1` 决定。
-- `adv_tag_b1`: 类型为 `Boolean`，广播标签，由 `advBytes[2] and 2` 决定。
-- `rssi`: 类型为 `Int`，接收信号强度指示符，由 `scanResult.rssi` 决定。
-- `device`: 类型为 `BluetoothDevice`，蓝牙设备，由 `scanResult.device` 决定。
-- `deviceName`: 类型为 `String?`，设备名称，由 `scanResult.scanRecord?.deviceName` 决定。
-- `productModel`: 类型为 `CHProductModel?`，产品模型，由 `CHProductModel.getByValue(advBytes.copyOfRange(0, 1).toBigLong().toInt())` 决定。
-- `deviceID`: 类型为 `UUID?`，设备ID。
+- `isConnecable`: `Boolean?`型で、接続可能かどうかを判断します。デフォルトは `true` です。
+- `isRegistered`: `Boolean`型で、登録しているかどうかを判断します。`advBytes[2] and 1` によって決まります。
+- `adv_tag_b1`: `Boolean`型で、アドバタイジングのタグです。`advBytes[2] and 2` によって決まります。
+- `rssi`: `Int`型で、受信号強度の指示子です。`scanResult.rssi` によって決まります。
+- `device`: `BluetoothDevice`型で，Bluetoothデバイスです。 `scanResult.device` によって決まります。
+- `deviceName`: `String?`型で、デバイス名です。 `scanResult.scanRecord?.deviceName` によって決まります。
+- `productModel`: `CHProductModel?`型で、製品モデルです。 `CHProductModel.getByValue(advBytes.copyOfRange(0, 1).toBigLong().toInt())` によって決まります。
+- `deviceID`:  `UUID?`型で、デバイスIDです。
 
-## 构造函数
+## コンストラクター
 
-- `CHadv(scanResult: ScanResult)`: 使用 `ScanResult` 对象创建 `CHadv` 实例。
+- `CHadv(scanResult: ScanResult)`: `ScanResult` オブジェクトを使用して`CHadv`のインスタンスを作成します。 
 
-## 私有属性
+## 非公開プロパティ
 
-- `advBytes`: 类型为 `ByteArray`，广播字节，由 `scanResult.scanRecord?.manufacturerSpecificData?.valueAt(0)!!` 决定。
+- `advBytes`: `ByteArray`型で、アドバタイジングのバイトです。`scanResult.scanRecord?.manufacturerSpecificData?.valueAt(0)!!` によって決まります。
