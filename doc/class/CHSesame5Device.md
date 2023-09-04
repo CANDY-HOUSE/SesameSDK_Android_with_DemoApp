@@ -3,7 +3,7 @@
 
 
  
-# CHSesame5Device 类
+# CHSesame5Device クラス
 ```svg
 internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     private var currentDeviceUUID: UUID? = null
@@ -71,32 +71,32 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
 
 
 ```
-`CHSesame5Device`类继承了`CHSesameOS3`类，并实现了`CHSesame5`和`CHDeviceUtil`接口。它代表了一个设备，预计是一个Sesame 5设备。
+`CHSesame5Device`クラスは、`CHSesameOS3`クラスを継承し、`CHSesame5`と`CHDeviceUtil`インタフェースを実装しています。Sesame 5デバイスを代表しているものと予想されます。
 
-## 属性
+## プロパティ
 
-- `currentDeviceUUID`：当前设备的UUID。
-- `historyCallback`：历史记录的回调函数。
-- `isHistory`：布尔变量，用于检查是否有历史记录。
-- `mechSetting`：设备机制的设置。
-- `advertisement`：设备广告数据。
-- `isConnectedByWM2`：布尔变量，用于检查是否通过WM2连接。
+- `currentDeviceUUID`：デバイスのUUID
+- `historyCallback`：履歴のコールバック関数
+- `isHistory`：履歴があるかどうかをチェックするブール変数
+- `mechSetting`：デバイス機械の設置
+- `advertisement`：デバイスのアドバタイジングデータ
+- `isConnectedByWM2`：WM2に接続しているかどうかをチェックするブール変数
 
-## 方法
+## メソッド
 
-- `goIOT`：处理IoT操作的函数。
-- `configureLockPosition`：配置锁定位置的函数。
-- `autolock`：自动锁定的函数。
-- `magnet`：处理磁性操作的函数。
-- `eventToHistory`：将事件转换为历史记录的函数。
-- `history`：获取历史记录的函数。
-- `toggle`：切换设备状态的函数。
-- `unlock`：解锁设备的函数。
-- `lock`：锁定设备的函数。
-- `register`：注册设备的函数。
-- `login`：登录设备的函数。
-- `readHistoryCommand`：读取历史命令的函数。
-- `onGattSesamePublish`：处理GATT Sesame发布的函数。
+- `goIOT`：IoT操作を処理する関数
+- `configureLockPosition`：ロックの位置を設定する関数
+- `autolock`：自動的にロックを施錠する関数
+- `magnet`：磁性処理を行う関数
+- `eventToHistory`：イベントを履歴記録に変換する関数
+- `history`：履歴を取得する関数
+- `toggle`：デバイス状態を切替える関数
+- `unlock`：デバイスのロックを解除する関数
+- `lock`：デバイスをロックする関数
+- `register`：デバイスを登録する関数
+- `login`：デバイスをログインする関数
+- `readHistoryCommand`：履歴コマンドを読取る関数
+- `onGattSesamePublish`：GATT Sesameの通知を処理する関数
 
 
 

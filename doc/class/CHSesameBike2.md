@@ -1,5 +1,5 @@
 
-# CHSesameBike2 接口
+# CHSesameBike2 インターフェイス
 ```svg
 
 interface CHSesameBike2 : CHSesameLock {
@@ -8,9 +8,9 @@ fun unlock(tag: ByteArray? = null, result: CHResult<CHEmpty>)
 }
 
 ```
-`CHSesameBike2` 是一个设备接口，继承自 `CHSesameLock` 接口。这个接口专门用来管理和操作 Sesame Bike2 锁设备。
+`CHSesameBike2` は`CHSesameLock` インターフェースを継承したデバイスインターフェースで、Sesame Bike2 ロックのデバイスの管理と操作を行います。
 
-## 方法
+## メソッド
 
-- `fun unlock(tag: ByteArray? = null, result: CHResult<CHEmpty>)` - 解锁设备。如果操作成功，则返回操作结果，否则返回错误信息。
+- `fun unlock(tag: ByteArray? = null, result: CHResult<CHEmpty>)` - デバイスのロックを解除します。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
 

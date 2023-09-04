@@ -15,11 +15,11 @@ fun getHistories(cursor: Long?, result: CHResult<Pair<List<CHSesame2History>, Lo
 }
 
 ```
-`CHSesame2`は`CHSesameLock`インターフェースを継承したデバイスインターフェースで、Sesame2 ロックのデバイスを管理と操作します。
+`CHSesame2`は`CHSesameLock`インターフェースを継承したデバイスインターフェースで、Sesame2 ロックのデバイスの管理と操作を行います。
 
 ## プロパティ
 
-- `mechSetting: CHSesame2MechSettings?` -  Sesame2 の機械設置を取得または設置します。
+- `mechSetting: CHSesame2MechSettings?` -  Sesame2 の機械設置の取得または設置を行います。
 
 ## メソッド
 

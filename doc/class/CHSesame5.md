@@ -1,5 +1,5 @@
 
-# CHSesame5 接口
+# CHSesame5 インターフェース
 
 ```svg
 
@@ -15,19 +15,18 @@ fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5Histo
 }
 ```
 
-`CHSesame5` 是一个设备接口，继承自 `CHSesameLock` 接口。它负责管理和操作 Sesame5 锁设备。
+`CHSesame5` は `CHSesameLock` インターフェースを継承したデバイスインターフェースで、Sesame5 ロックのデバイスの管理と操作を行います。
+## プロパティ
 
-## 属性
+- `mechSetting: CHSesame5MechSettings?` - Sesame5 の機械設置の取得または設置を行います。
 
-- `mechSetting: CHSesame5MechSettings?` - 获取或设置 Sesame5 的机械设置。
+## メソッド
 
-## 方法
-
-- `fun lock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)` - 锁定设备。如果操作成功，则返回操作结果，否则返回错误信息。
-- `fun unlock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)` - 解锁设备。如果操作成功，则返回操作结果，否则返回错误信息。
-- `fun toggle(historytag: ByteArray? = null, result: CHResult<CHEmpty>)` - 切换设备的锁定状态。如果操作成功，则返回操作结果，否则返回错误信息。
-- `fun magnet(result: CHResult<CHEmpty>)` - 对设备进行磁化操作。如果操作成功，则返回操作结果，否则返回错误信息。
-- `fun configureLockPosition(lockTarget: Short, unlockTarget: Short, result: CHResult<CHEmpty>)` - 配置锁的位置。如果操作成功，则返回操作结果，否则返回错误信息。
-- `fun autolock(delay: Int, result: CHResult<Int>)` - 设置自动锁定的延迟时间。如果操作成功，则返回操作结果，否则返回错误信息。
-- `fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5History>, Long?>>)` - 获取设备的历史记录。如果操作成功，则返回操作结果，否则返回错误信息。
+- `fun lock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)` - デバイスをロックします。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
+- `fun unlock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)` - デバイスのロックを解除します。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
+- `fun toggle(historytag: ByteArray? = null, result: CHResult<CHEmpty>)` - デバイスのロック状態を切替えます。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
+- `fun magnet(result: CHResult<CHEmpty>)` - デバイスに磁化処理を行います。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
+- `fun configureLockPosition(lockTarget: Short, unlockTarget: Short, result: CHResult<CHEmpty>)` - ロックの位置を設置します。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
+- `fun autolock(delay: Int, result: CHResult<Int>)` - 自動ロックの遅延時間を設定します。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
+- `fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5History>, Long?>>)` - デバイスの履歴記録を取得します。操作が成功した場合は操作結果を返し、それ以外の場合はエラーメッセージを返します。
 

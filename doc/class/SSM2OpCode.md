@@ -1,4 +1,4 @@
-# SSM2OpCode 枚举类
+# SSM2OpCode 列挙型
 ```svg
 internal enum class SSM2OpCode(val value: Byte) {
         create(0x01) 
@@ -15,30 +15,30 @@ internal enum class SSM2OpCode(val value: Byte) {
 
 ```
 
-`SSM2OpCode` 是一个内部枚举类。
+`SSM2OpCode`は、内部の列挙型です。
 
-## 枚举值
+## 列挙値
 
-- `create`: 值为 `0x01`，表示创建操作。
-- `read`: 值为 `0x02`，表示读取操作。
-- `update`: 值为 `0x03`，表示更新操作。
-- `delete`: 值为 `0x04`，表示删除操作。
-- `sync`: 值为 `0x05`，表示同步操作。
-- `async`: 值为 `0x06`，表示异步操作。
-- `response`: 值为 `0x07`，表示响应操作。
-- `publish`: 值为 `0x08`，表示发布操作。
-- `undefine`: 值为 `0x10`，表示未定义的操作。
+- `create`: 値が `0x01`で、作成操作を指します。
+- `read`: 値が  `0x02`で、読取り操作を指します。
+- `update`: 値が  `0x03`で、更新操作を指します。
+- `delete`: 値が  `0x04`で、削除操作を指します。
+- `sync`: 値が  `0x05`で、同期操作を指します。
+- `async`: 値が  `0x06`で、非同期操作を指します。
+- `response`: 値が  `0x07`で、応答操作を指します。
+- `publish`: 値が `0x08`で、送信操作を指します。
+- `undefine`: 値が  `0x10`で、未定義操作を指します。
 
-| SSM2OpCode | 指令名称 | 描述   |
+| SSM2OpCode | 命令名 | 説明   |
 | ------ | -------- | ------ |
-| 0x01   | create   | 创建   |
-| 0x02   | read     | 读取   |
+| 0x01   | create   | 作成  |
+| 0x02   | read     | 読取り   |
 | 0x03   | update   | 更新   |
-| 0x04   | delete   | 删除   |
-| 0x05   | sync     | 同步   |
-| 0x06   | async    | 异步   |
-| 0x07   | response | 响应   |
-| 0x08   | publish  | 推送   |
-| 0x10   | undefine | 未定义 |
+| 0x04   | delete   | 削除  |
+| 0x05   | sync     | 同期   |
+| 0x06   | async    | 非同期   |
+| 0x07   | response | 応答   |
+| 0x08   | publish  | 送信   |
+| 0x10   | undefine | 未定義 |
 
 

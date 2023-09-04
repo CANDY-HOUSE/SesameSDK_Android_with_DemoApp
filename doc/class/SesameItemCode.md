@@ -1,4 +1,4 @@
-# SesameItemCode  名称(指令)
+# SesameItemCode  命令名(コード)
 ```svg
 
 
@@ -70,72 +70,72 @@ internal enum class SesameItemCode(val value: UByte) {
 }
 
 ```
-`SesameItemCode` 是一个内部枚举类
+`SesameItemCode` は内部の列挙型です。
 
-## 枚举值
-这个枚举类包含了许多枚举项，对应不同的项目代码。每个枚举项都有一个 `UByte` 类型的值。
+## 列挙値
+この列挙型には、多くの列挙項目が含まれており、それぞれ異なるプロジェクトコードに対応しています。各列挙項目は `UByte` 型の値を持っています。
 
-以下是对 `SesameItemCode` 枚举类的详细列表：
+以下は `SesameItemCode` 列挙型の詳細なリストです。
 
-| 指令名称 | 指令值 | 描述 |
+| 命令名 | SesameItemCode | 説明 |
 | :---: | :---: | :-- |
-| none | 0u | 无 |
-| registration | 1u | 注册 |
-| login | 2u | 登录 |
-| user | 3u | 用户 |
-| history | 4u | 历史 |
-| versionTag | 5u | 版本标签 |
-| disconnectRebootNow | 6u | 立即断开重启 |
-| enableDFU | 7u | 启用DFU |
-| time | 8u | 时间 |
-| bleConnectionParam | 9u | 蓝牙连接参数 |
-| bleAdvParam | 10u | 蓝牙广播参数 |
-| autolock | 11u | 自动锁定 |
-| serverAdvKick | 12u | 服务器广告踢 |
-| ssmtoken | 13u | SSM令牌 |
-| initial | 14u | 初始的 |
+| none | 0u | なし |
+| registration | 1u | 登録 |
+| login | 2u | ログイン |
+| user | 3u | ユーザー |
+| history | 4u | 履歴 |
+| versionTag | 5u | バージョンタグ |
+| disconnectRebootNow | 6u | 直ちに切断して再起動する |
+| enableDFU | 7u | DFUを有効にする |
+| time | 8u | 時間 |
+| bleConnectionParam | 9u | Bluetoothの接続パラメータ |
+| bleAdvParam | 10u | Bluetoothのアドバタイジングパラメータ |
+| autolock | 11u | 自動ロック |
+| serverAdvKick | 12u | サーバーアドバタイジングキック |
+| ssmtoken | 13u | SSMトークン |
+| initial | 14u | 初期的 |
 | IRER | 15u | IRER |
-| timePhone | 16u | 时间手机 |
-| magnet | 17u | 磁铁 |
-| BLE_ADV_PARAM_GET | 18u | 获取蓝牙广播参数 |
-| SENSOR_INVERVAL | 19u | 传感器间隔 |
-| SENSOR_INVERVAL_GET | 20u | 获取传感器间隔 |
-| mechSetting | 80u | 机械设置 |
-| mechStatus | 81u | 机械状态 |
-| lock | 82u | 锁定 |
-| unlock | 83u | 解锁 |
-| moveTo | 84u | 移动到 |
-| driveDirection | 85u | 驱动方向 |
-| stop | 86u | 停止 |
-| detectDir | 87u | 检测方向 |
-| toggle | 88u | 切换 |
-| click | 89u | 点击 |
-| ADD_SESAME | 101u | 添加sesame |
+| timePhone | 16u | タイムフォン |
+| magnet | 17u | 磁石 |
+| BLE_ADV_PARAM_GET | 18u | Bluetoothのアドバタイジングパラメータを取得する |
+| SENSOR_INVERVAL | 19u | センサー間隔 |
+| SENSOR_INVERVAL_GET | 20u | センサー間隔を取得する |
+| mechSetting | 80u | 機械設置 |
+| mechStatus | 81u | 機械状態 |
+| lock | 82u | ロックする |
+| unlock | 83u | ロックを解除する |
+| moveTo | 84u | 移動する |
+| driveDirection | 85u | ドライブ方向 |
+| stop | 86u | ストップする |
+| detectDir | 87u | 検出方向 |
+| toggle | 88u | 切替える |
+| click | 89u | クリックする |
+| ADD_SESAME | 101u | sesameを添加する |
 | PUB_KEY_SESAME | 102u | 公钥sesame |
-| REMOVE_SESAME | 103u | 移除sesame |
-| Reset | 104u | 重置 |
-| NOTIFY_LOCK_DOWN | 106u | 通知锁定 |
-| SSM_OS3_CARD_CHANGE | 107u | SSM_OS3卡片更改 |
-| SSM_OS3_CARD_DELETE | 108u | SSM_OS3卡片删除 |
-| SSM_OS3_CARD_GET | 109u | 获取SSM_OS3卡片 |
-| SSM_OS3_CARD_NOTIFY | 110u | SSM_OS3卡片通知 |
-| SSM_OS3_CARD_LAST | 111u | 上一个SSM_OS3卡片 |
-| SSM_OS3_CARD_FIRST | 112u | 第一个SSM_OS3卡片 |
-| SSM_OS3_CARD_MODE_GET | 113u | 获取SSM_OS3卡片模式 |
-| SSM_OS3_CARD_MODE_SET | 114u | 设置SSM_OS3卡片模式 |
-| SSM_OS3_FINGERPRINT_CHANGE | 115u | SSM_OS3指纹更改 |
-| SSM_OS3_FINGERPRINT_DELETE | 116u | SSM_OS3指纹删除 |
-| SSM_OS3_FINGERPRINT_GET | 117u | 获取SSM_OS3指纹 |
-| SSM_OS3_FINGERPRINT_NOTIFY | 118u | SSM_OS3指纹通知 |
-| SSM_OS3_FINGERPRINT_LAST | 119u | 上一个SSM_OS3指纹 |
-| SSM_OS3_FINGERPRINT_FIRST | 120u | 第一个SSM_OS3指纹 |
-| SSM_OS3_FINGERPRINT_MODE_GET | 121u | 获取SSM_OS3指纹模式 |
-| SSM_OS3_FINGERPRINT_MODE_SET | 122u | 设置SSM_OS3指纹模式 |
-| SSM_OS3_PASSCODE_CHANGE | 123u | SSM_OS3密码更改 |
-| SSM_OS3_PASSCODE_DELETE | 124u | SSM_OS3密码删除 |
-| SSM_OS3_PASSCODE_GET | 125u | 获取SSM_OS3密码 |
-| SSM_OS3_PASSCODE_NOTIFY | 126u | SSM_OS3密码通知 |
-| SSM_OS3_PASSCODE_LAST | 127u | 上一个SSM_OS3密码 |
-| SSM_OS3_PASSCODE_FIRST | 128u | 第一个SSM_OS3密码 |
-| SSM_OS3_PASSCODE_MODE_GET | 129u | 获取SSM_OS3密码模式 |
-| SSM_OS3_PASSCODE_MODE_SET | 130u | 设置SSM_OS3密码模式 |
+| REMOVE_SESAME | 103u | sesameを削除する |
+| Reset | 104u | リセットする |
+| NOTIFY_LOCK_DOWN | 106u | ロックを通知する |
+| SSM_OS3_CARD_CHANGE | 107u | SSM_OS3のカードを変更する |
+| SSM_OS3_CARD_DELETE | 108u | SSM_OS3のカードを削除する |
+| SSM_OS3_CARD_GET | 109u | SSM_OS3のカードを取得する |
+| SSM_OS3_CARD_NOTIFY | 110u | SSM_OS3のカードを通知する |
+| SSM_OS3_CARD_LAST | 111u | 前のSSM_OS3のカード |
+| SSM_OS3_CARD_FIRST | 112u | 最初のSSM_OS3のカード |
+| SSM_OS3_CARD_MODE_GET | 113u | SSM_OS3のカードモデルを取得する |
+| SSM_OS3_CARD_MODE_SET | 114u | SM_OS3のカードモデルを設置する |
+| SSM_OS3_FINGERPRINT_CHANGE | 115u | SSM_OS3の指紋を変更する |
+| SSM_OS3_FINGERPRINT_DELETE | 116u | SSM_OS3の指紋を削除する |
+| SSM_OS3_FINGERPRINT_GET | 117u | SSM_OS3の指紋を取得する |
+| SSM_OS3_FINGERPRINT_NOTIFY | 118u | SSM_OS3の指紋を通知する |
+| SSM_OS3_FINGERPRINT_LAST | 119u | 前のSSM_OS3の指紋 |
+| SSM_OS3_FINGERPRINT_FIRST | 120u | 最初のSSM_OS3の指紋 |
+| SSM_OS3_FINGERPRINT_MODE_GET | 121u | SSM_OS3の指紋モデルを取得する |
+| SSM_OS3_FINGERPRINT_MODE_SET | 122u | SSM_OS3の指紋モデルを設置する |
+| SSM_OS3_PASSCODE_CHANGE | 123u | SSM_OS3のパスワードを変更する |
+| SSM_OS3_PASSCODE_DELETE | 124u | SSM_OS3のパスワードを削除する |
+| SSM_OS3_PASSCODE_GET | 125u | SSM_OS3のパスワードを取得する |
+| SSM_OS3_PASSCODE_NOTIFY | 126u | SSM_OS3のパスワードを通知する |
+| SSM_OS3_PASSCODE_LAST | 127u | 前のSSM_OS3のパスワード |
+| SSM_OS3_PASSCODE_FIRST | 128u | 最初のSSM_OS3のパスワード |
+| SSM_OS3_PASSCODE_MODE_GET | 129u | SSM_OS3のパスワードモデルを取得する |
+| SSM_OS3_PASSCODE_MODE_SET | 130u | SSM_OS3のパスワードモデルを設置する |
