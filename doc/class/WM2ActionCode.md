@@ -1,5 +1,5 @@
 
-# WM2ActionCode 枚举
+# WM2ActionCode 列挙型
 ```svg
 internal enum class WM2ActionCode(val value: UByte) {
 CODE_NON(0U),
@@ -21,23 +21,23 @@ VERSION_TAG(127U),
 }
 
 ```
-`WM2ActionCode`枚举定义了一系列的操作代码。
+`WM2ActionCode`列挙型は一連の操作コードを定義します。
 
-## 成员
+## メンバー
 
-- `CODE_NON`：无操作，值为0。
-- `REGISTER_WM2`：注册WM2，值为1。
-- `LOGIN_WM2`：登录WM2，值为2。
-- `UPDATE_WIFI_SSID`：更新Wifi SSID，值为3。
-- `UPDATE_WIFI_PASSWORD`：更新Wifi密码，值为4。
-- `CONNECT_WIFI`：连接Wifi，值为5。
-- `NETWORK_STATUS`：网络状态，值为6。
-- `DELETE_SESAME`：删除Sesame，值为7。
-- `ADD_SESAME`：添加Sesame，值为8。
-- `INITIAL`：初始操作，值为13。
-- `CCCD`：CCCD操作，值为14。
-- `SESAME_KEYS`：Sesame密钥，值为16。
-- `RESET_WM2`：重置WM2，值为18。
-- `SCAN_WIFI_SSID`：扫描Wifi SSID，值为19。
-- `OPEN_OTA_SERVER`：打开OTA服务器，值为126。
-- `VERSION_TAG`：版本标签，值为127。
+- `CODE_NON`：値が0で、操作なしです。
+- `REGISTER_WM2`：値が1で、WM2を登録します。
+- `LOGIN_WM2`：値が2で、WM2を登録します。
+- `UPDATE_WIFI_SSID`：値が3で、Wifi SSIDを更新します。
+- `UPDATE_WIFI_PASSWORD`：値が4で、Wifiのパスワードを更新します。
+- `CONNECT_WIFI`：値が5で、Wifiに接続します。
+- `NETWORK_STATUS`：値が6で、ネットワークの状態です。
+- `DELETE_SESAME`：値が7で、Sesameを削除します。
+- `ADD_SESAME`：値が8で、Sesameを添加します。
+- `INITIAL`：値が13で、初期的な操作です。
+- `CCCD`：値が14で、CCCDを操作します。
+- `SESAME_KEYS`：値が16で、Sesameのキーです。
+- `RESET_WM2`：値が18で、WM2をリセットします。
+- `SCAN_WIFI_SSID`：値が19で、Wifi SSIDをスキャンします。
+- `OPEN_OTA_SERVER`：値が126で、OTAのサーバーをオープンします。
+- `VERSION_TAG`：値が127で、バージョンタグです。

@@ -1,4 +1,4 @@
-# SesameItemCode  命令名(コード)
+# SesameItemCode  命令コード
 ```svg
 
 
@@ -90,9 +90,9 @@ internal enum class SesameItemCode(val value: UByte) {
 | time | 8u | 時間 |
 | bleConnectionParam | 9u | Bluetoothの接続パラメータ |
 | bleAdvParam | 10u | Bluetoothのアドバタイジングパラメータ |
-| autolock | 11u | 自動ロック |
+| autolock | 11u | 自動的にロックする |
 | serverAdvKick | 12u | サーバーアドバタイジングキック |
-| ssmtoken | 13u | SSMトークン |
+| ssmtoken | 13u | SSMのトークン |
 | initial | 14u | 初期的 |
 | IRER | 15u | IRER |
 | timePhone | 16u | タイムフォン |
@@ -111,7 +111,7 @@ internal enum class SesameItemCode(val value: UByte) {
 | toggle | 88u | 切替える |
 | click | 89u | クリックする |
 | ADD_SESAME | 101u | sesameを添加する |
-| PUB_KEY_SESAME | 102u | 公钥sesame |
+| PUB_KEY_SESAME | 102u | sesameの公開鍵 |
 | REMOVE_SESAME | 103u | sesameを削除する |
 | Reset | 104u | リセットする |
 | NOTIFY_LOCK_DOWN | 106u | ロックを通知する |

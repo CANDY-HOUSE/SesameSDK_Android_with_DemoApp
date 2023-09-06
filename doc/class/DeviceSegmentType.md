@@ -1,4 +1,4 @@
-# # DeviceSegmentType 枚举类
+# # DeviceSegmentType 列挙型
 
 ```svg
 internal enum class DeviceSegmentType(var value: Int) {
@@ -13,23 +13,23 @@ internal enum class DeviceSegmentType(var value: Int) {
 
 
 
-`DeviceSegmentType` 是一个内部枚举类。
+`DeviceSegmentType` は内部の列挙型です。
 
-## 枚举值
+## 列挙値
 
-这个枚举类包含了多个枚举项，表示设备段类型。每个枚举项都有一个 `Int` 类型的值。
+この列挙型には、多くの列挙項目が含まれており、それぞれ異なるデバイスのセグメントタイプに対応しています。各列挙項目は `Int` 型の値を持っています。
 
-以下是对 `DeviceSegmentType` 枚举类的详细列表：
+以下は`DeviceSegmentType` 列挙型の詳細なリストです。
 
-| 枚举值 | 值 | 描述 |
-|---|---|---|
-| plain | 1 | 明文 |
-| cipher | 2 | 密文 |
+| 命令名 | SegmentType | 説明 |
+|:---:|:---:|:---|
+| plain | 1 | 暗号化されていないデータ |
+| cipher | 2 | 暗号化されているデータ |
 
-## 伴生对象
+## 伴生オブジェクト
 
-`DeviceSegmentType` 枚举类有一个伴生对象，提供了以下功能：
+`DeviceSegmentType` 列挙型には、次の機能を提供する伴生オブジェクトがあります。
 
-- `values`：返回所有的枚举值。
-- `getByValue`：根据给定的值返回对应的枚举项。如果没有找到对应的枚举项，抛出异常。
+- `values`：すべての値を返します。
+- `getByValue`：指定された値によって対応の列挙項目を返します。対応の列挙項目が見つからない場合はエラーを返します。
 
