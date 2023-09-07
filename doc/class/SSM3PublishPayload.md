@@ -1,22 +1,22 @@
-## SSM3PublishPayload 类文档
+## SSM3PublishPayload クラス
 ```svg
 class SSM3PublishPayload(val data: ByteArray) {
     val cmdItCode = data[0].toUByte()
     val payload: ByteArray = data.drop(1).toByteArray()
 }
 ```
-### 描述
+### 説明
 
-`SSM3PublishPayload` 是一个Kotlin类，用于处理SSM3协议相关的 payload（负载）。在实例化这个类时，需要传入一个字节流数组（ByteArray）。
+`SSM3PublishPayload` は、SSM3プロトコルに関連するペイロード（データ）を処理するためのKotlinクラスです。このクラスをインスタンス化する際には、バイト配列（ByteArray）を引数として渡す必要があります。
 
-### 属性
+### プロパティ
 
-- `data`：类型为ByteArray的实例变量。此变量值需要在创建类实例时提供。
+- `data`：ByteArray型のインスタンス変数です。この変数の値は、クラスのインスタンスを作成する際に提供する必要があります。
 
-- `cmdItCode`：将被提供的 `data` 数组的第一个字节转换为 `UByte` （无符号字节）。
+- `cmdItCode`：提供された`data`配列の最初のバイトをUByte（符号なしバイト）に変換します。
 
-- `payload`：这是在 `cmdItCode` 之后剩余的 `data` 部分。使用 `data.drop(1)`生成一个新的数组，其中包括 `data` 中的所有元素，除了第一个。
+- `payload`：`cmdItCode`の後に残る`data`の部分です。`data.drop(1)`を使用して、最初の要素を除いたすべての要素が含まれる新しい配列を生成します。
 
-### 用法
+### 使い方
 
-要使用这个类，你需要实例化一个 `SSM3PublishPayload` 类并给它的构造方法提供一个字节流数组。这个数组的第一个字节会被转换成 `cmdItCode`，
+このクラスを使用するには、`SSM3PublishPayload`クラスのインスタンスを作成し、コンストラクタにバイト配列を渡す必要があります。この配列の最初のバイトは`cmdItCode`に変換されます。
