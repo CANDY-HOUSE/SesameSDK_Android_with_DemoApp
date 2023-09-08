@@ -50,6 +50,7 @@ internal enum class CHError(val value: NSError) {
     private var historyCallback: CHResult<Pair<List<CHSesame2History>, Long?>>? = null
 
     override fun goIOT() {
+//        L.d("hcia", "goIOT:" +this.deviceId)
 
     }
 
@@ -361,8 +362,38 @@ internal enum class CHError(val value: NSError) {
 
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf()), DeviceSegmentType.plain) { IRRes ->
             L.d("hcia", "IRER:" + IRRes.payload.toHexString())
+            val ER = IRRes.payload.drop(16).toByteArray().toHexString()
 
+            makeApiCall(resultRegister) {
 
+                L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
+                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, Os2Type.Sesame2))
+                deviceStatus = CHDeviceStatus.Registering
+
+                val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
+                val appPubKey = EccKey.getPubK().hexStringToByteArray()
+                val serverToken = registerSesame1.st.base64decodeByteArray()
+                val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
+                val ecdhSecret = EccKey.ecdh(sesamePublicKey)
+                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                val payload = sig1 + appPubKey + serverToken
+                val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
+
+                val sessionToken = serverToken + mSesameToken
+                val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
+                val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())!!
+                val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
+                cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
+                sendEncryptCommand(cmd, DeviceSegmentType.plain) {
+
+                    isRegistered = true
+                    mResultRegister = resultRegister
+                    val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", ownerKey.toHexString(), sesamePublicKey.toHexString())
+                    sesame2KeyData = candyDevice
+
+                    CHDB.CHSS2Model.insert(candyDevice) {}
+                }
+            }
 
         }
 
@@ -534,7 +565,7 @@ internal enum class CHError(val value: NSError) {
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 if (isInternetAvailable()) {
 //                    L.d("hcia", "deviceId.toString().uppercase():" + deviceId.toString().uppercase())
-
+                    //CHAccountManager.postSS2History(deviceId.toString().uppercase(), res.payload.toHexString()) {}
                 }
                 val recordId = res.payload.sliceArray(0..3).toBigLong().toInt()
                 var historyType = Sesame2HistoryTypeEnum.getByValue(res.payload[4]) ?: Sesame2HistoryTypeEnum.NONE

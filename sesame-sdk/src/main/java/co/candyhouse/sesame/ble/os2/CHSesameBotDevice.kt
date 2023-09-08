@@ -27,6 +27,7 @@ import co.candyhouse.sesame.open.*
 import co.candyhouse.sesame.open.device.*
 import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
 import co.candyhouse.sesame.open.CHBleManager.appContext
+
 import co.candyhouse.sesame.server.dto.*
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 
@@ -76,7 +77,6 @@ import kotlinx.coroutines.channels.Channel
 
 
     override fun goIOT() {
-
 
     }
 
@@ -447,8 +447,45 @@ import kotlinx.coroutines.channels.Channel
         }
         semaphore = Channel(capacity = 1)
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf()), DeviceSegmentType.plain) { IRRes ->
+            val ER = IRRes.payload.drop(16).toByteArray().toHexString()
+
+            //todo  確認註冊流程變更後執行
+            L.d("hcia", "[bot] ER:" + ER)
+            deviceStatus = CHDeviceStatus.Registering
+            makeApiCall(resultRegister) {
+                L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
+                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, Os2Type.Bot))
+                val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
+                val appPubKey = EccKey.getPubK().hexStringToByteArray()
+                val serverToken = registerSesame1.st.base64decodeByteArray()
+                val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
+                val ecdhSecret = EccKey.ecdh(sesamePublicKey)
+                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                val payload = sig1 + appPubKey + serverToken
+
+                val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
+                L.d("hcia", "註冊指令==>")
+
+                val sessionToken = serverToken + mSesameToken
+                val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
+                val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())
+                val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
+
+                cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
+                sendEncryptCommand(cmd, DeviceSegmentType.plain) { result ->
 
 
+                    val candyDevice = CHDevice(deviceId.toString(), CHProductModel.SesameBot1.deviceModel(), null, "0000", ownerKey!!.toHexString(), sesamePublicKey.toHexString())
+                    sesame2KeyData = candyDevice
+
+
+
+                    CHDB.CHSS2Model.insert(candyDevice) {
+                        resultRegister.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+                    }
+                    L.d("hcia", "<===我成功註冊按鈕手了 device_id::" + deviceId)
+                }
+            }
         }
     }
 
