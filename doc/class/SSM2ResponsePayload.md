@@ -1,4 +1,4 @@
-## SSM2ResponsePayload 类文档
+## SSM2ResponsePayload クラス
 ```svg
 internal class SSM2ResponsePayload(val data: ByteArray) {
     val cmdItCode: UByte = data[0].toUByte()// login
@@ -8,18 +8,18 @@ internal class SSM2ResponsePayload(val data: ByteArray) {
 }
 
 ```
-### 描述
+### 説明
 
-`SSM2ResponsePayload` 是一个Kotlin内部类，用于处理SSM2协议的响应载荷（payload）。在实例化此类时，需要传入一个字节流数组。
+`SSM2ResponsePayload`は、SSM2プロトコルの応答ペイロード（payload）を処理するためのKotlinの内部クラスです。このクラスをインスタンス化する際には、バイト配列を引数として渡す必要があります.
 
-### 属性
+### プロパティ
 
-- `data`: 一个 ByteArray 类型的实例变量。这个 `data` 变量应在创建类实例时提供。
+- `data`:バイト配列（ByteArray）型のインスタンス変数です。この`data`変数は、クラスのインスタンスを作成する際には、提供する必要があります。
 
-- `cmdItCode`: 将提供的 `data` 数组的第一个字节转换为 UByte 类型（无符号字节）。这通常表示登录操作。
+- `cmdItCode`: 提供された`data`配列の最初の要素をUByte型（符号なしバイト）に変換します。ログイン操作を示します。
 
-- `cmdOPCode`: 将提供的 `data` 数组的第二个字节转换为 UByte 类型。这通常表示同步操作。
+- `cmdOPCode`: 提供された`data`配列の2番目の要素をUByte型に変換します。同期操作を示します。
 
-- `cmdResultCode`: 将提供的 `data` 数组的第三个字节转换为 UByte 类型。这通常用来表示操作是否成功。
+- `cmdResultCode`: 提供された`data`配列の3番目の要素をUByte型に変換します。操作が成功したかどうかを示します。
 
-- `payload`: 这是在 `cmdResultCode` 之后 `data` 的剩余部分。通过 `data.drop(3)`
+- `payload`: `cmdResultCode`の後に`data`の残りの部分です.

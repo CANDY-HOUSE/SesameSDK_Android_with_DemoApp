@@ -7,7 +7,7 @@ internal class SesameNotifypayload(val data: ByteArray) {
 ```
 ### 説明
 
-`SesameNotifypayload`は`Sesame`の通知のペイロードを処理するためのKotlinの内部クラスです。このクラスのインスタンス化時には、バイト配列を渡す必要があります。
+`SesameNotifypayload`は`Sesame`の通知のペイロードを処理するためのKotlinの内部クラスです。このクラスのインスタンス化する際には、バイト配列を渡す必要があります。
 
 ### プロパティ
 
@@ -17,6 +17,6 @@ internal class SesameNotifypayload(val data: ByteArray) {
 
 - `payload`: `notifyOpCode`の後にある`data`の残りの部分です。`data.drop(1)`を使用すると、新しい配列が生成され、最初の要素以外のすべての要素が含まれます。
 
-### 使い方
+### 使用
 
 このクラスを使用するには、`SesameNotifyPayload`オブジェクトをインスタンス化し、そのコンストラクタにバイト配列を提供する必要があります。

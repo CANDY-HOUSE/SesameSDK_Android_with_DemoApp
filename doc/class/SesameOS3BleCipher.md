@@ -1,5 +1,5 @@
 
-# SesameOS3BleCipher 类
+# SesameOS3BleCipher クラス
 ```svg
 internal class SesameOS3BleCipher(val name: String, private var sessionKey: ByteArray, private var sault: ByteArray) {
     var encryptCounter: Long = 0.toLong()//int32 4byte-> 010000 小端
@@ -10,24 +10,24 @@ internal class SesameOS3BleCipher(val name: String, private var sessionKey: Byte
 }
 
 ```
-`SesameOS3BleCipher` 是一个内部类，它负责 Sesame OS3 Ble 设备的数据加密和解密。
+`SesameOS3BleCipher` は、Sesame OS3 Ble デバイスのデータの暗号化と復号化を担当する内部クラスです。
 
-## 成员变量
+## メンバー変数
 
-- `val name: String`: 设备的名称。
+- `val name: String`: デバイス名
 
-- `private var sessionKey: ByteArray`: 会话密钥。
+- `private var sessionKey: ByteArray`: セッションキー
 
-- `private var sault: ByteArray`: 加密和解密所使用的值。
+- `private var sault: ByteArray`: 暗号化と復号化に使用される値
 
-- `var encryptCounter: Long`: 加密计数器。
+- `var encryptCounter: Long`: 暗号化カウンター
 
-- `var decryptCounter: Long`: 解密计数器。
+- `var decryptCounter: Long`: 復号化カウンター
 
-## 方法
+## メソッド
 
-- `fun encrypt(plaintext: ByteArray): ByteArray`: 这个方法接受一个明文数据的字节数组，然后用会话密钥进行加密，并返回加密后的字节数组。
+- `fun encrypt(plaintext: ByteArray): ByteArray`: 平文データのバイト配列を受取り、セッションキーを使用して暗号化し、暗号化されたバイト配列を返します。
 
-- `fun decrypt(ciphertext: ByteArray): ByteArray`: 这个方法接受一个密文数据的字节数组，然后用会话密钥进行解密，并返回解密后的字节数组。
+- `fun decrypt(ciphertext: ByteArray): ByteArray`: 暗号文データのバイト配列を受取り、セッションキーを使用して復号化し、復号化されたバイト配列を返します。
 
-在加密和解密过程中，这个类使用了 "AES/CCM/NoPadding" 算法，以及 "BC" 提供者。在初始化 Cipher 对象时，使用了 GCM 参数规范（GCMParameterSpec），并且对每次加密和解密的数据都增加了额外的认证数据（AAD）。
+暗号化と復号化のプロセスにおいて、”AES/CCM/NoPadding“というアルゴリズムと、”BC“というプロバイダを使用しています。Cipherオブジェクトの初期化では、GCMParameterSpecを使用し、各暗号化と復号化のデータには追加の認証データ（AAD）が含まれています。

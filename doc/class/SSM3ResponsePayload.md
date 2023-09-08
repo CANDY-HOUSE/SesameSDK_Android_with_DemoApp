@@ -9,19 +9,19 @@ internal class SSM3ResponsePayload(val data: ByteArray) {
 ```
 
 
-### 描述
+### 説明
 
-`SSM3ResponsePayload` 是一个Kotlin内部类，用于处理SSM3协议的响应负载（payload）。在这个类的实例化过程中，需要传入一个字节流数组。
+`SSM3ResponsePayload` は、SSM3プロトコルの応答ペイロード（payload）を処理するためのKotlinの内部クラスです。このクラスをインスタンス化する際には、バイト配列を引数として渡す必要があります.
 
-### 属性
+### プロパティ
 
-- `data`: 类型为 ByteArray 的实例变量。在创建类实例时需要提供这个 `data` 变量。
+- `data`: バイト配列（ByteArray）型のインスタンス変数です。この`data`変数は、クラスのインスタンスを作成する際には、提供する必要があります。
 
-- `cmdItCode`: 将提供的 `data` 数组的第一个字节转换为 UByte（无符号字节）类型。
+- `cmdItCode`: 提供された`data`配列の最初の要素をUByte型（符号なしバイト）に変換します。
 
-- `cmdResultCode`: 将提供的 `data` 数组的第二个字节转换为 UByte 类型。这通常用来表示操作的结果码。
+- `cmdResultCode`: 提供された`data`配列の2番目の要素をUByte型に変換します。操作の結果コードを示します。
 
-- `payload`: 这是 `cmdResultCode` 之后的 `data` 的剩余部分。通过使用 `data.drop(2)` 生成一个新的数组，包含 `data` 中的所有元素，除了前两个。
+- `payload`: `cmdResultCode`の後に`data`の残りの部分です.这是 `cmdResultCode` 之后的 `data` 的剩余部分。`data.drop(2)` を使用して、最初の2つの要素を除いた、`data` のすべての要素を含む新しい配列を生成します。
 
 ### 使用
 

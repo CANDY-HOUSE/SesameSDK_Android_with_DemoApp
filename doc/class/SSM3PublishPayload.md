@@ -17,6 +17,6 @@ class SSM3PublishPayload(val data: ByteArray) {
 
 - `payload`：`cmdItCode`の後に残る`data`の部分です。`data.drop(1)`を使用して、最初の要素を除いたすべての要素が含まれる新しい配列を生成します。
 
-### 使い方
+### 使用
 
 このクラスを使用するには、`SSM3PublishPayload`クラスのインスタンスを作成し、コンストラクタにバイト配列を渡す必要があります。この配列の最初のバイトは`cmdItCode`に変換されます。

@@ -1,6 +1,6 @@
 
 
-# CHSesameOS3 类
+# CHSesameOS3 クラス
 ```svg
 
 internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
@@ -30,34 +30,34 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
 }
 
 ```
-`CHSesameOS3` 是一个开放的内部类，继承自 `CHBaseDevice`，并实现了 `CHSesameOS3Publish` 接口。
+`CHSesameOS3` は公開された内部クラスです。 `CHBaseDevice`を継承し、`CHSesameOS3Publish` インターフェースを実装しています。
 
-## 成员变量
+## メンバー変数
 
-- `var cipher: SesameOS3BleCipher?`: 用于加解密的实例。
+- `var cipher: SesameOS3BleCipher?`: 暗号化と復号化に使うインスタントです。
 
-- `var cmdCallBack: MutableMap<UByte, SesameOS3ResponseCallback>`: 用于存储回调函数的映射。
+- `var cmdCallBack: MutableMap<UByte, SesameOS3ResponseCallback>`: コールバック関数を格納するためのマッピングです。
 
-- `var semaphore: Semaphore`: 用于控制并发的信号量。
+- `var semaphore: Semaphore`: 並行制御に使用するセマフォです。
 
-## 方法
+## メソッド
 
-- `open fun connect(result: CHResult<CHEmpty>)`: 连接设备的方法。
+- `open fun connect(result: CHResult<CHEmpty>)`: デバイスに接続する方法です。
 
-- `private val mBluetoothGattCallback: BluetoothGattCallback`: Bluetooth GATT 回调函数。
+- `private val mBluetoothGattCallback: BluetoothGattCallback`: Bluetooth GATT のコールバック関数です。
 
-- `fun transmit()`: 传输数据。
+- `fun transmit()`: データを転送します。
 
-- `fun sendCommand(payload: SesameOS3Payload, isEncryt: DeviceSegmentType = DeviceSegmentType.cipher, onResponse: SesameOS3ResponseCallback)`: 发送命令。
+- `fun sendCommand(payload: SesameOS3Payload, isEncryt: DeviceSegmentType = DeviceSegmentType.cipher, onResponse: SesameOS3ResponseCallback)`: コマンドを送信します。
 
-- `open fun getVersionTag(result: CHResult<String>)`: 获取版本标签。
+- `open fun getVersionTag(result: CHResult<String>)`: バージョンのタグを取得します。
 
-- `open fun reset(result: CHResult<CHEmpty>)`: 重置设备。
+- `open fun reset(result: CHResult<CHEmpty>)`: デバイスをリセットします。
 
-- `open fun updateFirmware(onResponse: CHResult<BluetoothDevice>)`: 更新固件。
+- `open fun updateFirmware(onResponse: CHResult<BluetoothDevice>)`: ファームウェアを更新します。
 
-- `fun parceADV(value: CHadv?)`: 解析广播数据。
+- `fun parceADV(value: CHadv?)`: アドバタイジングのデータを解析します。
 
-- `override fun onGattSesamePublish(receivePayload: SSM3PublishPayload)`: 处理 GATT 发布消息。
+- `override fun onGattSesamePublish(receivePayload: SSM3PublishPayload)`: GATTが発行するメッセージを処理します。
 
-以上是 `CHSesameOS3` 类的基本描述，这个类为 Sesame OS3 设备提供了一套完整的操作和管理方法。
+以上は`CHSesameOS3`クラスの基本的な説明です。このクラスはSesame OS3デバイスに対して完全な操作と管理の方法を提供します。
