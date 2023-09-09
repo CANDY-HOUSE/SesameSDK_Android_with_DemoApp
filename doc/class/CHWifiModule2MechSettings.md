@@ -1,16 +1,16 @@
 
-# CHWifiModule2MechSettings 类
+# CHWifiModule2MechSettings クラス
 ```svg
 class CHWifiModule2MechSettings(var wifiSSID: String?, var wifiPassWord: String?)
 
 ```
-`CHWifiModule2MechSettings`类主要用于处理和管理Wifi module 2的机械设置。
+`CHWifiModule2MechSettings`クラスは、Wifiモジュール2の機械設定を処理および管理します。
 
-## 属性
+## プロパティ
 
-- `wifiSSID`：Wifi的SSID，String类型。
-- `wifiPassWord`：Wifi的密码，String类型。
+- `wifiSSID`：WifiのSSIDで、String型です。
+- `wifiPassWord`：Wifiのパスワードで、String型です。
 
-## 构造函数
+## コンストラクタ
 
-- `CHWifiModule2MechSettings(wifiSSID: String?, wifiPassWord: String?)`：构造函数接收两个参数，分别是Wifi的SSID和密码，用于初始化相应的属性。
+- `CHWifiModule2MechSettings(wifiSSID: String?, wifiPassWord: String?)`：コンストラクタは2つの引数、SSIDとパスワードを受取ります。これらの引数は関連するプロパティを初期化します。
