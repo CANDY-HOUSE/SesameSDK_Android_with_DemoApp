@@ -1,4 +1,4 @@
-# CHSesameOS3Publish 接口
+# CHSesameOS3Publish インターフェース
 
 ```svg
 interface CHSesameOS3Publish {
@@ -9,9 +9,9 @@ interface CHSesameOS3Publish {
 
 
 
-`CHSesameOS3Publish` 是一个接口。
+`CHSesameOS3Publish` はインターフェースです。
 
-## 方法
+## メソッド
 
-- `onGattSesamePublish(receivePayload: SSM3PublishPayload)`：这是一个需要被实现的方法，此方法接受一个 `SSM3PublishPayload` 类型的参数 `receivePayload`，用于处理接收到的发布负载。
+- `onGattSesamePublish(receivePayload: SSM3PublishPayload)`：このメソッドは実装する必要があります。`SSM3PublishPayload`型の引数`receivePayload`を受取り、受信したPublishPayloadを処理します。
 

@@ -1,4 +1,4 @@
-# CHWifiModule2 接口
+# CHWifiModule2 インターフェイス
 ```svg
 interface CHWifiModule2 : CHDevices {
     var ssm2KeysMap: MutableMap<String, String>
@@ -15,20 +15,20 @@ interface CHWifiModule2 : CHDevices {
 ```
 
 
-`CHWifiModule2` 是一个设备相关的接口，继承自 `CHDevices` 接口。除了 `CHDevices` 的基本操作外，还包含了对 WiFi 模块的一些操作。
+`CHWifiModule2`は、デバイスに関連するインターフェースであり、`CHDevices`インターフェースを継承しています。`CHDevices`の基本的な操作に加えて、WiFiモジュールに関連する操作も含まれています。
 
-## 属性
+## プロパティ
 
-- `ssm2KeysMap: MutableMap<String, String>` - Sesame2密钥映射
-- `mechSetting: CHWifiModule2MechSettings?` - WiFi模块的机械设置
+- `ssm2KeysMap: MutableMap<String, String>` - Sesame2のキーマップ
+- `mechSetting: CHWifiModule2MechSettings?` - WiFiモジュールの機械設置
 
-## 方法
+## メソッド
 
-- `fun scanWifiSSID(result: CHResult<CHEmpty>)` - 扫描WiFi SSID
-- `fun setWifiSSID(ssid: String, result: CHResult<CHEmpty>)` - 设置WiFi SSID
-- `fun setWifiPassword(password: String, result: CHResult<CHEmpty>)` - 设置WiFi密码
-- `fun connectWifi(result: CHResult<CHEmpty>)` - 连接到WiFi
-- `fun insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>)` - 插入Sesame设备
-- `fun removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>)` - 移除Sesame设备
+- `fun scanWifiSSID(result: CHResult<CHEmpty>)` - WiFi SSIDをスキャンします。
+- `fun setWifiSSID(ssid: String, result: CHResult<CHEmpty>)` - WiFi SSIDを設置します。
+- `fun setWifiPassword(password: String, result: CHResult<CHEmpty>)` - WiFiのパスワードを設置します。
+- `fun connectWifi(result: CHResult<CHEmpty>)` - WiFiに接続します。
+- `fun insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>)` - Sesameデバイスを挿入します。
+- `fun removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>)` - Sesameデバイスを削除します。
 
 
