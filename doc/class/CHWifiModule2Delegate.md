@@ -1,5 +1,5 @@
 
-# CHWifiModule2Delegate 接口
+# CHWifiModule2Delegate インターフェース
 
 ```
 interface CHWifiModule2Delegate : CHDeviceStatusDelegate {
@@ -10,18 +10,18 @@ fun onOTAProgress(device: CHWifiModule2, percent: Byte) {}
 fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {}
 }
 ```
-`CHWifiModule2Delegate` 是一个设备接口，继承自 `CHDeviceStatusDelegate` 接口。这个接口用于管理和操作 CHWifiModule2 设备。
+`CHWifiModule2Delegate` は`CHDeviceStatusDelegate` インターフェースを継承し、デバイスのインターフェースです。 CHWifiModule2 デバイスの管理と操作に特化しています。
 
-## 方法
+## メソッド
 
-- `fun onAPSettingChanged(device: CHWifiModule2, settings: CHWifiModule2MechSettings) {}` - 当 AP 设置变更时调用。
+- `fun onAPSettingChanged(device: CHWifiModule2, settings: CHWifiModule2MechSettings) {}` -  AP 設定が変更された時に呼び出されます。
 
-- `fun onNetWorkStatusChanged(device: CHWifiModule2, settings: CHWifiModule2NetWorkStatus) {}` - 当网络状态变更时调用（此方法已被注释掉）。
+- `fun onNetWorkStatusChanged(device: CHWifiModule2, settings: CHWifiModule2NetWorkStatus) {}` - ネットワークの状態が変更された時に呼び出されます（このメソッドはコメントアウトされています）。
 
-- `fun onSSM2KeysChanged(device: CHWifiModule2, ssm2keys: Map<String, String>) {}` - 当 SSM2Keys 变更时调用。
+- `fun onSSM2KeysChanged(device: CHWifiModule2, ssm2keys: Map<String, String>) {}` - SSM2Keysが変更された時に呼び出されます。
 
-- `fun onOTAProgress(device: CHWifiModule2, percent: Byte) {}` - 当 OTA 进度变更时调用。
+- `fun onOTAProgress(device: CHWifiModule2, percent: Byte) {}` - OTAの進捗状況が変更された時に呼び出されます。
 
-- `fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {}` - 当扫描到 Wifi SID 时调用。
+- `fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {}` - Wifi SID をスキャンした時に呼び出されます。
 
-以上是 `CHWifiModule2Delegate` 接口的基本描述，这个接口为 CHWifiModule2 设备提供了一套完整的操作和管理方法。
+以上は `CHWifiModule2Delegate` インタフェースについての基本的な説明です。CHWifiModule2デバイスに対して完全な操作と管理方法を提供します。

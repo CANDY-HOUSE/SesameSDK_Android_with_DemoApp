@@ -1,4 +1,4 @@
-# CHSesameProtocolMechStatus 接口
+# CHSesameProtocolMechStatus インターフェイス
 ```svg
 
 
@@ -25,21 +25,21 @@ interface CHSesameProtocolMechStatus {
 
 }
 ```
-`CHSesameProtocolMechStatus` 是一个设备机械状态协议接口，用于获取和处理设备的机械状态信息。
+`CHSesameProtocolMechStatus` はデバイスの機械状態プロトコルのインターフェースで、デバイスの機械状態情報を取得および処理します。
 
-## 属性
+## プロパティ
 
-- `position: Short` - 获取设备的位置，默认值为0。
-- `target: Short?` - 获取设备的目标位置，默认值为0。
-- `isBatteryCritical: Boolean` - 判断设备的电池是否处于临界状态，默认值为false。
-- `isInLockRange: Boolean` - 判断设备是否在锁定范围内，默认值为false。
-- `isInUnlockRange: Boolean` - 判断设备是否在解锁范围内，默认值为设备不在锁定范围内。
-- `isStop: Boolean?` - 判断设备是否停止，默认值为null。
-- `data: ByteArray` - 获取设备的数据。
+- `position: Short` - デバイスの位置を取得します。デフォルト値は0です。
+- `target: Short?` - デバイスの目標位置を取得します。デフォルト値は0です。
+- `isBatteryCritical: Boolean` - デバイスのバッテリーが臨界状態にあるかどうかを判断します。デフォルト値はfalseです。
+- `isInLockRange: Boolean` - デバイスがロック範囲内にあるかどうかを判断します。デフォルト値はfalseです。
+- `isInUnlockRange: Boolean` - デバイスがロック範囲内にあるかどうかを判断します。デフォルト値はロック範囲外です。
+- `isStop: Boolean?` - デバイスが停止しているかどうかを判断します。デフォルト値はnullです。
+- `data: ByteArray` - デバイスのデータを取得します。
 
-## 方法
+## メソッド
 
-- `fun getBatteryVoltage(): Float` - 获取设备的电池电压。
-- `fun getBatteryPrecentage(): Int` - 获取设备的电池电量百分比。该方法根据电池电压值计算电量百分比。
+- `fun getBatteryVoltage(): Float` - デバイスのバッテリー電圧を取得します。
+- `fun getBatteryPrecentage(): Int` - デバイスのバッテリー電圧に基づいて、電池の残量をパーセントで取得します。
 
 

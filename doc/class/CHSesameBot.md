@@ -1,5 +1,5 @@
 
-# CHSesameBot 接口
+# CHSesameBot インターフェース
 ```svg
 
 interface CHSesameBot : CHSesameLock {
@@ -11,20 +11,18 @@ fun unlock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)
 fun click(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)
 }
 ```
-`CHSesameBot` 是一个设备接口，继承自 `CHSesameLock` 接口。这个接口专门用来管理和操作 Sesame Bot 设备。
+`CHSesameBot` は、`CHSesameLock` インターフェースを継承したデバイスのインターフェースであり、Sesame Bot デバイスの管理と操作に特化します。
 
-## 属性
+## プロパティ
 
-- `var mechSetting: CHSesameBotMechSettings?` - 用于存储 Sesame Bot 的机械设置。
+- `var mechSetting: CHSesameBotMechSettings?` - Sesame Bot の機械設定を保存します。
 
-## 方法
+- `fun updateSetting(setting: CHSesameBotMechSettings, historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - Sesame Bot の設定を更新します。
 
-- `fun updateSetting(setting: CHSesameBotMechSettings, historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - 更新 Sesame Bot 的设置。
+- `fun toggle(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - Sesame Bot の状態を切り替えます。
 
-- `fun toggle(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - 切换 Sesame Bot 的状态。
+- `fun lock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - Sesame Botをロックします。
 
-- `fun lock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - 锁定 Sesame Bot。
+- `fun unlock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - Sesame Botのロックを解除します。
 
-- `fun unlock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - 解锁 Sesame Bot。
-
-- `fun click(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - 模拟点击 Sesame Bot。
+- `fun click(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - Sesame Botをクリックするシミュレーションを行います。

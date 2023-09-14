@@ -1,4 +1,4 @@
-# CHSesameConnector 接口
+# CHSesameConnector インターフェース
 ```svg
 
 
@@ -8,14 +8,14 @@ interface CHSesameConnector : CHDevices {
     fun removeSesame(tag: String, result: CHResult<CHEmpty>)
 }
 ```
-`CHSesameConnector` 是一个设备连接器接口，继承自 `CHDevices` 接口。它负责管理和操作 Sesame 设备。
+`CHSesameConnector` はデバイスコネクタのインターフェースで、`CHDevices`を継承しています。Sesameデバイスを管理および操作します。
 
-## 属性
+## プロパティ
 
-- `ssm2KeysMap: MutableMap<String, ByteArray>` - 存储 Sesame2 设备的密钥映射。
+- `ssm2KeysMap: MutableMap<String, ByteArray>` - Sesame2デバイスのキーのマッピングを保存します。
 
-## 方法
+## メソッド
 
-- `fun insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>)` - 插入一个 Sesame 设备，并返回操作结果。
-- `fun removeSesame(tag: String, result: CHResult<CHEmpty>)` - 根据给定的标签移除一个 Sesame 设备，并返回操作结果。
+- `fun insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>)` - Sesameデバイスを挿入し、操作結果を返します。
+- `fun removeSesame(tag: String, result: CHResult<CHEmpty>)` - 指定されたラベルに基づいてSesameデバイスを削除し、操作結果を返します。
 
