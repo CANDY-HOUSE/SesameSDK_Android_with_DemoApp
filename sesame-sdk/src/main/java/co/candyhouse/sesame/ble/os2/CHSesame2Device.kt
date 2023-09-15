@@ -367,7 +367,7 @@ internal enum class CHError(val value: NSError) {
             makeApiCall(resultRegister) {
 
                 L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, Os2Type.Sesame2))
+                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
                 deviceStatus = CHDeviceStatus.Registering
 
                 val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)

@@ -27,14 +27,8 @@ import java.security.spec.X509EncodedKeySpec
 import javax.crypto.KeyAgreement
 
 
-data class KeyQues(var ak: String, var n: String, var e: String, var t: Os2Type)
-enum class Os2Type(val type: Int) {
-    Bot(2),
-    Bike(0),
-    Sesame2(1);
+data class KeyQues(var ak: String, var n: String, var e: String)
 
-
-}
 
 data class KeyResp(
     var sig1: String,

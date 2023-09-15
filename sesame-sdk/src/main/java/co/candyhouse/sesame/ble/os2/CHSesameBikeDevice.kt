@@ -348,7 +348,7 @@ import kotlinx.coroutines.channels.Channel
 //        L.d("hcia", "註冊開始 ==>" + " adv deviceName:" + advertisement!!.deviceName + " mSesameToken:" + mSesameToken.toHexString())
             makeApiCall(resultRegister) {
                 L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, Os2Type.Bike))
+                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
                 deviceStatus = CHDeviceStatus.Registering
 
                 val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
