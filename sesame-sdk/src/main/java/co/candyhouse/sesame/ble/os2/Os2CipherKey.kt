@@ -5,13 +5,27 @@ import android.util.Base64
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.hexStringToByteArray
+
+
+import org.spongycastle.jce.ECNamedCurveTable
+import org.spongycastle.jce.interfaces.ECPrivateKey
+import org.spongycastle.jce.interfaces.ECPublicKey
+import org.spongycastle.jce.provider.BouncyCastleProvider
+import org.spongycastle.jce.spec.ECNamedCurveParameterSpec
+import org.spongycastle.jce.spec.ECPrivateKeySpec
+import org.spongycastle.jce.spec.ECPublicKeySpec
+import org.spongycastle.math.ec.ECPoint
+
+
+
+import java.math.BigInteger
 import java.security.Key
 import java.security.KeyFactory
 import java.security.SecureRandom
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
+import java.security.Security
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
+
 import javax.crypto.KeyAgreement
 
 
@@ -58,32 +72,45 @@ object Os2CipherUtils {
         "d11feca22492e98c015cf2493fbe044dc5e7e8f0b0b13ebced0116ad7e5c76c9cc92886e244f71c45870635f721cad084a6a4d72649b96a0d75e823039e366ad",
         "3041020100301306072a8648ce3d020106082a8648ce3d030107042730250201010420"
     )
+  fun getPublicKey(privateKeyHex: String?): Pair<ByteArray?,ECPrivateKey?> {
+        Security.insertProviderAt(BouncyCastleProvider(), 1)
+        try {
 
+
+            val privateKeyValue = BigInteger(privateKeyHex, 16)
+            val spec: ECNamedCurveParameterSpec = ECNamedCurveTable.getParameterSpec("prime256v1")
+            val privateKeySpec = ECPrivateKeySpec(privateKeyValue, spec)
+            val keyFactory: KeyFactory = KeyFactory.getInstance("EC", "SC")
+            val privateKey: ECPrivateKey =
+                keyFactory.generatePrivate(privateKeySpec) as ECPrivateKey
+            val w: ECPoint = spec.getG().multiply(privateKey.getD())
+            val publicKeySpec = ECPublicKeySpec(w, spec)
+            val publicKey: ECPublicKey = keyFactory.generatePublic(publicKeySpec) as ECPublicKey
+            val publicKeyBytes: ByteArray = publicKey.getQ().getEncoded(false).drop(1).toByteArray()
+            return   Pair(publicKeyBytes, privateKey)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(null, null)
+    }
     fun getRegisterKey(data: KeyQues): KeyResp {
+
 
         val keyBytes = "Sesame2_key_pair".toByteArray()
         val erBytes: ByteArray = data.e.hexStringToByteArray()
         val oneKey = AesCmac(keyBytes, 16).computeMac(erBytes) //2b0a26d1b0c341b7670c4fa7ae01edf5
-
         val twoKey = AesCmac(
             oneKey!!,
             16
         ).computeMac(erBytes)
-        val cmacKey =
-            pubkeys[3].hexStringToByteArray() + oneKey + twoKey!!;
+        val priKey=oneKey+twoKey!!
+       val pair=getPublicKey(priKey.toHexString())
+        var cutEccHeader = pair.first
 
-        var privateKey = ecdhSetPri(cmacKey)
-
-        var cutEccHeader = pubkeys[data.t.type]
-
-        var ecdh = ecdhShareKey(privateKey, serverKey.hexStringToByteArray())
+        var ecdh = ecdhShareKey(pair.second!!, serverKey.hexStringToByteArray())
         var secret = ecdh.take(16).toByteArray()
-        // 打印公钥
 
-        val secureRandom = SecureRandom()
-        val serverToken = ByteArray(4)
-        secureRandom.nextBytes(serverToken)
-        //  val serverToken=Base64.decode("XQDmrA==",Base64.DEFAULT)
+        val serverToken=Base64.decode("XQDmrA==",Base64.DEFAULT)
         val stString = serverToken.base64Encode()
         var decode = Base64.decode(data.n, Base64.DEFAULT)
         val sessionToken = serverToken + decode
@@ -93,7 +120,7 @@ object Os2CipherUtils {
         val sig1 = AesCmac(secret, 16).computeMac(msg)
 
         val sigString = sig1!!.slice(0..3).toByteArray().base64Encode()
-        val pubString = cutEccHeader.hexStringToByteArray().base64Encode()
+        val pubString = cutEccHeader!!.base64Encode()
 
 
         return KeyResp(sigString, stString, pubString)
