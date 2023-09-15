@@ -21,9 +21,7 @@ import org.spongycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.security.Key
 import java.security.KeyFactory
-import java.security.SecureRandom
 import java.security.Security
-import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 
 import javax.crypto.KeyAgreement
@@ -56,27 +54,14 @@ object Os2CipherUtils {
     }
 
 
-    /*生成私有key*/
-    fun ecdhSetPri(encodedKey: ByteArray): ECPrivateKey {
-        val pkcs8EncodedKeySpec = PKCS8EncodedKeySpec(encodedKey)
-        val keyFactory = KeyFactory.getInstance("EC")
-        return keyFactory.generatePrivate(pkcs8EncodedKeySpec) as ECPrivateKey
-    }
 
     const val serverKey =
         "04a040fcc7386b2a08304a3a2f0834df575c936794209729f0d42bd84218b35803932bea522200b2ebcbf17ab57c4509b4a3f1e268b2489eb3b75f7a765adbe181"
 
-    val pubkeys = arrayListOf(
-        "69e6f02c5b831aef659db90a77a1d777951a723ac5c049e913452e75e6ce1907c10f4b999e83319c50308265f9c8f5dcc2d28ca93e378f5a61ad92e961efa0d0",
-        "8b3d187e6f77eb1c00abf2e5fe443771f07bfe53234f8372154f80209210dd899052be6d731aaf65d0bdae419a6c99ea7fa1caed1821e0e2b12ce27c04f8933b",
-        "d11feca22492e98c015cf2493fbe044dc5e7e8f0b0b13ebced0116ad7e5c76c9cc92886e244f71c45870635f721cad084a6a4d72649b96a0d75e823039e366ad",
-        "3041020100301306072a8648ce3d020106082a8648ce3d030107042730250201010420"
-    )
+
   fun getPublicKey(privateKeyHex: String?): Pair<ByteArray?,ECPrivateKey?> {
         Security.insertProviderAt(BouncyCastleProvider(), 1)
         try {
-
-
             val privateKeyValue = BigInteger(privateKeyHex, 16)
             val spec: ECNamedCurveParameterSpec = ECNamedCurveTable.getParameterSpec("prime256v1")
             val privateKeySpec = ECPrivateKeySpec(privateKeyValue, spec)
