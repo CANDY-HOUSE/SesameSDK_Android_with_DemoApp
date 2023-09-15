@@ -1,5 +1,5 @@
 
-## SSM3ResponsePayload 类文档
+## SSM3ResponsePayload クラス
 ```svg
 internal class SSM3ResponsePayload(val data: ByteArray) {
     val cmdItCode: UByte = data[0].toUByte()

@@ -1,6 +1,6 @@
-#   CHSesameTouchProDevice  讲解
-## 实现类 
-### 接口
+#   CHSesameTouchProDevice  説明
+## 実装クラス 
+### インターフェース
 
 ```agsl
     fun cards(result: CHResult<CHEmpty>)
@@ -25,34 +25,34 @@
     fun insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>)
     fun removeSesame(tag: String, result: CHResult<CHEmpty>)
 ```
-### 接口功能字义
+### インターフェースの機能の定義
 
-####  [cards](../touch/card_get.md):获取卡片信息
-####  [cardDelete](../touch/card_delete.md):卡片删除
-####  [cardModeGet](../touch/card_model_get.md):获取卡片当前模式
-####  [cardModeSet](../touch/card_model_set.md):设置卡片当前模式
-####  [cardChange](../touch/card_change.md):修改卡片信息
-
-
-####  [fingerPrints](../touch/finger_get.md):获取指纹信息
-####  [fingerPrintModeGet](../touch/finger_mode_get.md):获取当前指纹信息
-####  [fingerPrintModeSet](../touch/finger_mode_set.md):设置指纹信息
-####  [fingerPrintDelete](../touch/finger_delete.md):删除指纹
-####  [fingerPrintsChange](../touch/finger_change.md):修改指纹信息
+####  [cards](../touch/card_get.md):カードの情報を取得する
+####  [cardDelete](../touch/card_delete.md):カードを削除する
+####  [cardModeGet](../touch/card_model_get.md):カードのモデルを取得する
+####  [cardModeSet](../touch/card_model_set.md):カードのモデルを設置する
+####  [cardChange](../touch/card_change.md):カードの情報を変更する
 
 
-####  [keyBoardPassCode](../touch/kbpc_get.md):获取密码锁
-####  [keyBoardPassCodeChange](../touch/kbpc_change.md):修改密码锁
-####  [keyBoardPassCodeDelete](../touch/kbpc_delete.md):删除密码锁
-####  [keyBoardPassCodeModeGet](../touch/kbpc_mode_get.md):获取密码锁模式
-####  [keyBoardPassCodeModeSet](../touch/kbpc_mode_set.md):设置密码锁模式
+####  [fingerPrints](../touch/finger_get.md):指紋情報を取得する
+####  [fingerPrintModeGet](../touch/finger_mode_get.md):指紋のモデルを取得する
+####  [fingerPrintModeSet](../touch/finger_mode_set.md):指紋のモデルを設置する
+####  [fingerPrintDelete](../touch/finger_delete.md):指紋を削除する
+####  [fingerPrintsChange](../touch/finger_change.md):指紋の情報を変更する
 
 
-####  [insertSesame](../touch/add_sesame.md):获取sesame
-####  [removeSesame](../touch/remove_sesame.md):删除sesame
+####  [keyBoardPassCode](../touch/kbpc_get.md):パスワードロックを取得する
+####  [keyBoardPassCodeChange](../touch/kbpc_change.md):パスワードロックを変更する
+####  [keyBoardPassCodeDelete](../touch/kbpc_delete.md):パスワードロックを削除する
+####  [keyBoardPassCodeModeGet](../touch/kbpc_mode_get.md):パスワードロックのモデルを取得する
+####  [keyBoardPassCodeModeSet](../touch/kbpc_mode_set.md):パスワードロックのモデルを設置する
 
 
-### 循环图
+####  [insertSesame](../touch/add_sesame.md):sesameを取得する
+####  [removeSesame](../touch/remove_sesame.md):sesameを削除する
+
+
+### フローチャート
 ![CHSesameTouchProDevice](../class/CHSesameTouchProDevice.svg)
 
 

@@ -1,31 +1,31 @@
-# History 历史记录
+# History 履歴
 
-### 发送格式
+### 送信フォーマット
 | Byte | 1 | 0 |
 |:------:|:------:|:------:|
 | Data | isPeek|  command |
-- command:指令4(固定)
-- isPeek:true(获取最新历史，不删除历史) 、false(获取过去历史，删除历史)
+- command:命令4(固定)
+- isPeek:true(最新の履歴を取得し、履歴を削除しない) 、false(過去の履歴を取得し、履歴を削除する)
 
-## 接收格式
+## 受信フォーマット
 | Byte | N~3 | 2 | 1 | 0 |
 |:------:|:------:|:------:|:------:|:------:|
 | Data | payload | status | command | response  |
-- command:指令4(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功) 状态0x05(没有历史记录) 
-- payload:见下方  payload
+- command:命令4(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功) 状態0x05(履歴なし) 
+- payload:下記を参考する  payload
 #### payload
 
 | Byte | N~16 | 15~9 | 8~5 | 4 | 3~0|
 |:------:|:------:|:------:|:------:|:------:|:------:|
 | Data | history | mech_status | ts | type | id |
 
-- history:历史记录
-- mech_status:机器状态
+- history:履歴
+- mech_status:機械状態
 - ts:timestamp
-- type:历史类型
-- id:第几章历史 
+- type:履歴タイプ
+- id:第何章の履歴 
 ##### history 
 
 | Byte | 32~1 | 0 |
@@ -33,10 +33,10 @@
 | Data | history_data | history_length |
 
 
-- history_length:历史记录长度
-- history_data:历史数据
+- history_length:履歴の長さ
+- history_data:履歴のデータ
 
-## 循序图
+## フローチャート
 ![v](history.svg)
 
 

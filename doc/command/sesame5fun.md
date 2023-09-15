@@ -1,6 +1,6 @@
-# Sesame5 功能指令
-## 实现类 CHSesame5Device 
-### 接口
+# Sesame5 機能命令
+## 実装クラス CHSesame5Device 
+### インターフェース
 <!-- 
 这是单行注释
 - # var mechSetting: CHSesame5MechSettings?
@@ -16,19 +16,19 @@ fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5Histo
 fun reset(result: CHResult<CHEmpty>)
 fun getVersionTag(result: CHResult<CHEmpty>)
 ```
-### 接口功能字义
-#### 1. [lock](lock.md):关锁 
-#### 2. [unlock](unlock.md):开锁 
-#### 3. toggle:开关锁切换
-#### 4. [magnet](magnet.md):角度校正 
-#### 5. [configureLockPosition](configureLockPosition.md):配置锁开关和锁位置 
-#### 6. [ autolock ](autolock.md):自动关锁
-- delay:延迟时长
-#### 7. [history](history.md):历史记录
-#### 8. [reset](reset.md):重置设备
-#### 9. [getVersionTag](ssm5version.md):获取版本号
+### インターフェースの機能の定義
+#### 1. [lock](lock.md):ロックする 
+#### 2. [unlock](unlock.md):ロックを解除する 
+#### 3. toggle:解錠・施錠を切り替える
+#### 4. [magnet](magnet.md):角度補正 
+#### 5. [configureLockPosition](configureLockPosition.md):ロックのスイッチ状態とロックの位置を取得する 
+#### 6. [ autolock ](autolock.md):オートロック
+- delay:遅延時間
+#### 7. [history](history.md):履歴
+#### 8. [reset](reset.md):リセット
+#### 9. [getVersionTag](ssm5version.md):バージョンのタグを取得する
 
-### 循环图
+### フローチャート
 ![CHSesame5Device](../class/CHSesame5Device.svg)
 
 
