@@ -18,6 +18,7 @@ import co.candyhouse.sesame.ble.os2.base.CHSesameOS2
 import co.candyhouse.sesame.ble.os2.base.SSM2Payload
 import co.candyhouse.sesame.ble.os2.base.SesameOS2BleCipher
 import co.candyhouse.sesame.ble.os2.base.SesameOS2ResponseCallback
+
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
 import co.candyhouse.sesame.db.CHDB
@@ -144,7 +145,6 @@ import kotlinx.coroutines.channels.Channel
 
         private fun parceNotifyPayload(palntext: ByteArray) {
             val ssm2notify = SesameNotifypayload(palntext)//1
-
             if (ssm2notify.notifyOpCode == SSM2OpCode.publish) {
                 val ssm2pubPayload = SSM3PublishPayload(ssm2notify.payload)
                 onGattSesamePublish(ssm2pubPayload)
@@ -164,7 +164,7 @@ import kotlinx.coroutines.channels.Channel
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
 //            L.d("hcia", "BluetoothGatt " + ":發現服務:")
-
+            L.d("parceNotifyPayload","onServicesDiscovered$status")
             for (service in gatt?.services!!) {
                 if (service.uuid == Sesame2Chracs.uuidService01) {
                     for (charc in service.characteristics) {
@@ -187,6 +187,7 @@ import kotlinx.coroutines.channels.Channel
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
+            L.d("parceNotifyPayload","onConnectionStateChange$newState")
             if (newState == BluetoothProfile.STATE_CONNECTED) {
 //                    L.d("hcia", "ssm " + ":連接狀態＋＋" + BleBaseType.GattConnectStateDec(newState) + " 狀態:" + BleBaseType.GattConnectStatusDec(status))
                 deviceStatus = CHDeviceStatus.DiscoverServices
@@ -213,7 +214,7 @@ import kotlinx.coroutines.channels.Channel
     }
 
     private fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
-
+        L.d("parceNotifyPayload",receivePayload.cmdItCode.toString())
 //        L.d("hcia", "receivePayload.cmdItCode:" + receivePayload.cmdItCode)
         if (receivePayload.cmdItCode == SesameItemCode.login.value) {
 
@@ -230,6 +231,8 @@ import kotlinx.coroutines.channels.Channel
         }
         if (receivePayload.cmdItCode == SesameItemCode.initial.value) {
             mSesameToken = receivePayload.payload
+            L.d("parceNotifyPayload","isNeedAuthFromServer:$isNeedAuthFromServer----isRegistered:$isRegistered")
+
             if (isRegistered) {
                 if (isNeedAuthFromServer == true) {
                     val userIdx = sesame2KeyData!!.keyIndex.hexStringToByteArray()
@@ -302,7 +305,6 @@ import kotlinx.coroutines.channels.Channel
         cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
         val cmd = SSM2Payload(SSM2OpCode.sync, SesameItemCode.login, loginPayload)
         sendPlainCommand(cmd) { ssm2ResponsePayload ->
-
 //            L.d("hcia", "下指令登入成功")
             if (ssm2ResponsePayload.cmdItCode == SesameItemCode.login.value && ssm2ResponsePayload.cmdResultCode == SesameResultCode.success.value) {
 
@@ -343,7 +345,41 @@ import kotlinx.coroutines.channels.Channel
         sendPlainCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf())) { IRRes ->
             val ER = IRRes.payload.drop(16).toByteArray().toHexString()
 
+//        L.d("hcia", "註冊開始 ==>" + " adv deviceName:" + advertisement!!.deviceName + " mSesameToken:" + mSesameToken.toHexString())
+            makeApiCall(resultRegister) {
+                L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
+                val registerSesame1 = CHServerAuth.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
+                deviceStatus = CHDeviceStatus.Registering
 
+                val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
+                val appPubKey = EccKey.getPubK().hexStringToByteArray()
+                val serverToken = registerSesame1.st.base64decodeByteArray()
+                val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
+                val ecdhSecret = EccKey.ecdh(sesamePublicKey)
+                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                val payload = sig1 + appPubKey + serverToken
+
+                val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
+                L.d("hcia", "註冊指令==>")
+                val sessionToken = serverToken + mSesameToken
+                val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
+                val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())
+                val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
+
+                cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
+                sendPlainCommand(cmd) { result ->
+                    L.d("parceNotifyPayload","result:"+result.cmdItCode.toString())
+                    val candyDevice = CHDevice(deviceId.toString(), CHProductModel.BiKeLock.deviceModel(),//sesame_2
+                        null, "0000", ownerKey!!.toHexString(), sesamePublicKey.toHexString())
+                    sesame2KeyData = candyDevice
+
+                    CHDB.CHSS2Model.insert(candyDevice) {
+                        resultRegister.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+
+                    }
+                    L.d("hcia", "<===我成功註冊腳車了 device_id::" + deviceId)
+                }
+            }
         }
     }
 
@@ -386,7 +422,6 @@ import kotlinx.coroutines.channels.Channel
     private fun sendPlainCommand(payload: SSM2Payload, onResponse: SesameOS2ResponseCallback) {
         CoroutineScope(IO).launch {
             semaphore.send(onResponse)
-
             sendCommand(SesameBleTransmit(DeviceSegmentType.plain, payload.toDataWithHeader()))
         }
     }
@@ -413,6 +448,8 @@ import kotlinx.coroutines.channels.Channel
             return
         }
         val data = gattTxBuffer?.getChunk() ?: return
+        L.d("parceNotifyPayload","transmit:${data.toHexString()}")
+
         mCharacteristic?.value = data
         mBluetoothGatt?.writeCharacteristic(mCharacteristic)
 //        L.d("hcia", "botWrite:" + botWrite)

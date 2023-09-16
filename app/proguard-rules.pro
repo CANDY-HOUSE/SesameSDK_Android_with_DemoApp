@@ -13,6 +13,7 @@
 -dontwarn kotlinx.**
 
 
+
 #  start http
 # Retrofit does reflection on method and parameter annotations.
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations

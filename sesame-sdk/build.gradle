@@ -54,10 +54,12 @@ task createAar(type: Copy) {
 }
 dependencies {
     implementation "androidx.room:room-runtime:2.4.3"
+
     kapt "androidx.room:room-compiler:2.4.3"
     implementation "androidx.room:room-ktx:2.4.3"
     implementation "androidx.room:room-rxjava2:2.4.3"
     implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
+
 }
 
 
