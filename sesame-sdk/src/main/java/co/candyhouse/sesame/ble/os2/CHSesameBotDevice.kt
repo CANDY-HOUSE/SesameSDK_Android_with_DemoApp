@@ -454,7 +454,7 @@ import kotlinx.coroutines.channels.Channel
             deviceStatus = CHDeviceStatus.Registering
             makeApiCall(resultRegister) {
                 L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-                val registerSesame1 = Os2CipherUtils.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
+                val registerSesame1 = CHServerAuth.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
                 val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
                 val appPubKey = EccKey.getPubK().hexStringToByteArray()
                 val serverToken = registerSesame1.st.base64decodeByteArray()

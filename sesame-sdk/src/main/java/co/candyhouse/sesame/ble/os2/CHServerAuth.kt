@@ -24,7 +24,7 @@ data class KeyResp(
     var pubkey: String
 )
 
-object Os2CipherUtils {
+object CHServerAuth {
     const val serverKey =
         "04a040fcc7386b2a08304a3a2f0834df575c936794209729f0d42bd84218b35803932bea522200b2ebcbf17ab57c4509b4a3f1e268b2489eb3b75f7a765adbe181"
 
