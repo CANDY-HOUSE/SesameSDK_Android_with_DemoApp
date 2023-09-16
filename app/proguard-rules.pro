@@ -11,7 +11,7 @@
 
 -dontwarn kotlin.**
 -dontwarn kotlinx.**
--keep class org.spongycastle.** { *; }
+
 
 
 #  start http
