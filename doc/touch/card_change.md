@@ -1,50 +1,49 @@
-# Card Change 讲解
-ssm_touch 加入新卡，会主动推送新卡ID和名称给手机
-app修改卡片名称发送107指令
-### 发送格式
+# Card Change 説明
+ssm_touch 新しいカードが追加されると、そのカードのIDと名前が自動的に携帯電話に送信されます。アプリはカードの名前を変更して命令107を送信します。
+### 送信フォーマット
 
 |  Byte  |      N~1 |       0 |
 |:------:|---------:|--------:|
 | Data   | payload	 | command |
 
-- command:指令107(固定)
-- payload:见payload表格  
-##### **payload如下**  
+- command:命令107(固定)
+- payload:payload表を参照する 
+##### **payload表**  
 
 |  Byte  |     card_name| card_name_length| card_id|     0 |
 |:------:|:---------:|:--------:|:--------:|:--------:|
 | Data   | card_name	 | card_name_length |card_id|card_id_length|
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    2 |   1   |     0      |
 |:---:|:----:|:----:|:-----:|
 | Data |  status  | command |response   |
-- command:指令107(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)
-### 推送信息
+- command:命令107(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)
+### プッシュ情報
 |  Byte  |   N~2    |    1    |    0     |
 |:------:|:--------:|:--------:|:--------:|
 | Data   | payload	 | command |response  |
-- command:指令107(固定)
-- response:响应0x08(固定)
-- payload:见payload表格
-##### **payload如下**
+- command:命令107(固定)
+- response:応答0x08(固定)
+- payload:payload表を参照する
+##### **payload表**
 
 |  Byte  |     card_name| card_name_length| card_id|     0 |
 |:------:|:---------:|:--------:|:--------:|:--------:|
 | Data   | card_name	 | card_name_length |card_id|card_id_length|
 
-### 循序图
+### フローチャート
 ![icon](card_change.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
   override fun cardChange(ID: String, name: String, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

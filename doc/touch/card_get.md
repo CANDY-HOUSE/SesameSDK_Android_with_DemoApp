@@ -1,60 +1,60 @@
-# Card Get 讲解
-手机发送109指令，获取当前卡片信息
-### 发送格式
+# Card Get 説明
+携帯電話で命令109を送信し、カードの情報を取得します。
+### 送信フォーマット
 
 |  Byte  |     16~1 |       0 |
 |:------:|---------:|--------:|
 | Data   | card_id	 | command |
 
-- command:指令109(固定)
-- card_id:卡片ID
+- command:命令109(固定)
+- card_id:カードID
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    2 |   1   |     0      |
 |:---:|:----:|:----:|:-----:|
 | Data |  status  | command |response   |
-- command:指令109(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)  
-### 推送格式-start
+- command:命令109(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)  
+### プッシュフォーマット-start
 | Byte  |       2 |   1   |  0   |
 |:---:|:-------:|:-----:|:----:|
 | Data |  status | command | push |
-- command:指令112(固定)
-- response:响应0x08(固定)
+- command:命令112(固定)
+- response:応答0x08(固定)
 - push:0x00(成功)
-### 推送格式
+### プッシュフォーマット
 | Byte  | N~   2 |   1   |  0   |
 |:---:|:------:|:-----:|:----:|
 | Data | payload | command | push |
-- command:指令110(固定)
-- push:响应0x08(固定)
-- payload:见 playload.
+- command:命令110(固定)
+- push:応答0x08(固定)
+- payload:playload表を参照する.
 
-##### **payload如下**
+##### **payload表**
 
 |  Byte  |     card_name| card_name_length| card_id|     0 |
 |:------:|:---------:|:--------:|:--------:|:--------:|
 | Data   | card_name     | card_name_length |card_id|card_id_length|
-### 推送格式-end
+### プッシュフォーマット-end
 | Byte  |       2 |   1   |     0      |
 |:---:|:-------:|:-----:|:----:|
 | Data |  status | command |push   |
-- command:指令111(固定)
-- response:响应0x08(固定)
+- command:命令111(固定)
+- response:応答0x08(固定)
 - push:0x00(成功)
 
-### 循序图
+### フローチャート
 ![icon](card_get.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
  override fun cards(result: CHResult<CHEmpty>) {
         if (checkBle(result)) return
