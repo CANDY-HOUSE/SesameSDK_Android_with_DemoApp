@@ -1,17 +1,17 @@
-SesameOs3 其他关联内容分享
+SesameOs3 その他の関連コンテンツの共有
 ===========
-<!-- 3. [选用框架相关示例](./bleproduct/meframeword.md) -->
+<!-- 3. [ファームウェア例](./bleproduct/meframeword.md) -->
 
-1. [固件升级](bleprotocol/firmwareUpgradation.md)
-2. [蓝牙连接](bleprotocol/BleConnect.md)
-3. [NFC连接](bleprotocol/nfcconnect.md)
-3. [Ble加密算法](./encryption/ble_encryption.md)
-3. [Ble注册](bleconnect/register.md)
-3. [Ble登录](bleconnect/login.md)
-3. [Ble获取随机Code](bleconnect/randomcode.md)
-3. [Ble发送数据](bleconnect/ble_receivedata.md)
-3. [Ble接收数据](bleconnect/ble_senddata.md)
-3. [更新时间戳](bleconnect/timestamp.md)
+1. [ファームウェアのアップグレード](bleprotocol/firmwareUpgradation.md)
+2. [Bluetooth　接続](bleprotocol/BleConnect.md)
+3. [NFC　接続](bleprotocol/nfcconnect.md)
+3. [Ble　暗号化アルゴリズム](./encryption/ble_encryption.md)
+3. [Ble　登録](bleconnect/register.md)
+3. [Ble　ログイン](bleconnect/login.md)
+3. [Ble　ランダムコードの取得](bleconnect/randomcode.md)
+3. [Ble　データの受信](bleconnect/ble_receivedata.md)
+3. [Ble　データの送信](bleconnect/ble_senddata.md)
+3. [タイムスタンプの更新](bleconnect/timestamp.md)
 
 
 

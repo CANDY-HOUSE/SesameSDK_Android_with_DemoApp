@@ -1,33 +1,33 @@
-# Remove Sesame 讲解
-app发送103指令，删除Sesame
-### 发送格式
+# Remove Sesame 説明
+app は命令103を送信し、Sesameを削除します。
+### 送信フォーマット
 
 |  Byte  |          16~1 |       0 |
 |:------:|--------------:|--------:|
 | Data   |  device_uuid	 | command |
 
-- command:指令103(固定)
-- device_uuid:设备唯一标识UUID
+- command:命令103(固定)
+- device_uuid:デバイスの唯一の識別子UUID
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    2 |   1   |     0      |  
 |:---:|:----:|:----:|:-----:|
 | Data |  status  | command |response   |
-- command:指令103(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)  
+- command:命令103(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)  
 
 
-### 循序图
+### フローチャート
 ![icon](remove_sesame.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
   override fun removeSesame(tag: String, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

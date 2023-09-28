@@ -1,37 +1,37 @@
-# KeyboardPassword Mode Set 讲解
-app 发送发送130指令，设置ssm_touch当前指纹状态
-### 发送格式
+# KeyboardPassword Mode Set 説明
+app は命令130を送信し、ssm_touchの暗証番号の状態を設置します。
+### 送信フォーマット
 
 |  Byte  |       1 |    0    |
 |:------:|--------:|:-------:|
 | Data   | pw_mode | command |
 
-- command:指令130(固定)
-- pw_mode:数字锁模式
+- command:命令130(固定)
+- pw_mode:暗証番号モード
 
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    3    | 2   |     1     |     0      |
 |:---:|:-------:|:------:|:----:|:---------:|
 | Data | pw_mode | status | command |response   |
-- command:指令130(固定)
-- response:响应0x07(固定)
+- command:命令130(固定)
+- response:応答0x07(固定)
     - status:0x00(成功)
-    - pw_mode:0x00->验证模式，0x01->新增模式
+    - pw_mode:0x00->認証モード，0x01->新規モード
 
 
 
-### 循序图
+### フローチャート
 ![icon](kbpc_model_set.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
   override fun keyBoardPassCodeModeSet(mode: Byte, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return
