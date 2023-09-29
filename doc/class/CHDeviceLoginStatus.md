@@ -1,4 +1,4 @@
-# CHDeviceLoginStatus 枚举类
+# CHDeviceLoginStatus 列挙型クラス
 ```svg
 
 enum class CHDeviceLoginStatus {
@@ -8,13 +8,13 @@ enum class CHDeviceLoginStatus {
 
 
 
-`CHDeviceLoginStatus` 是一个枚举类，表示设备的登录状态。该枚举包含两个枚举常量。
+`CHDeviceLoginStatus` は、デバイスのログイン状態を表す列挙型クラスです。この列挙型には、2つの列挙定数が含まれています。
 
-以下是每个枚举常量的含义：
+以下は2つの列挙定数の意味です。
 
-| 枚举常量 | 含义 |
+| 列挙定数 | 意味 |
 | :----- | :----- |
-| `Login` | 设备已登录 |
-| `UnLogin` | 设备未登录 |
+| `Login` | デバイスはログインしている。 |
+| `UnLogin` | デバイスはログインしていない。 |
 
-这个枚举类通常与设备的具体状态 (`CHDeviceStatus`) 关联，表示设备在某个特定状态下的登录情况。
+この列挙型クラスは通常、デバイスの具体的な状態（`CHDeviceStatus`）と関連しており、デバイスが特定の状態でのログイン状況を表します。

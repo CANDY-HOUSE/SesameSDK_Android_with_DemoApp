@@ -1,37 +1,37 @@
-# Finger Mode Set 讲解
-app 发送发送122指令，设置ssm_touch当前指纹状态
-### 发送格式
+# Finger Mode Set 説明
+app は命令122を送信し、ssm_touchの指紋状態を設置します。
+### 送信フォーマット
 
 |  Byte  |  1|    0    |
 |:------:|----:|:-------:|
 | Data   | finger_mode| command |
 
-- command:指令122(固定)
-- finger_mode:指纹模式
+- command:命令122(固定)
+- finger_mode:指纹モード
 
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |          3    | 2   |     1     |     0      |
 |:---:|:-----------:|:------:|:----:|:---------:|
 | Data | finger_mode | status | command |response   |
-- command:指令122(固定)
-- response:响应0x07(固定)
+- command:命令122(固定)
+- response:応答0x07(固定)
   - status:0x00(成功) 
-  - finger_mode:0x00->验证模式，0x01->新增模式 
+  - finger_mode:0x00->認証モード，0x01->新規モード 
 
 
 
-### 循序图
+### フローチャート
 ![icon](finger_model_set.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
    override fun fingerPrintModeSet(mode: Byte, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

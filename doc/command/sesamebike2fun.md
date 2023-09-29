@@ -1,6 +1,6 @@
-# Bike2 讲解
-## 实现类 CHSesameBike2Device
-### 接口
+# Bike2 説明
+## 実装クラス CHSesameBike2Device
+### インターフェース
 
 ```agsl
 fun unlock(tag: ByteArray? = null, result: CHResult<CHEmpty>)
@@ -8,11 +8,11 @@ fun reset(result: CHResult<CHEmpty>)
 fun getVersionTag(result: CHResult<CHEmpty>)
 
 ```
-### 接口功能字义
-- [unlock](unlock.md):开锁 
-- [reset](reset.md):重置设备
-- [getVersionTag](ssm5version.md):获取版本号
-### 循环图
+### インターフェースの機能の定義
+- [unlock](unlock.md):ロックを解除する 
+- [reset](reset.md):デバイスをリセットする
+- [getVersionTag](ssm5version.md):バージョンのタグを取得する
+### フローチャート
 ![CHSesameBike2Device](../class/CHSesameBike2Device.svg)
 
 

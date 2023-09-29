@@ -1,14 +1,14 @@
-# Insert Sesame 讲解
+# Insert Sesame  説明
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  | 32~17|         16~1 |       0 |
 |:------:|:----:|-------------:|--------:|
 | Data   |secretKey| device_uuid	 | command |
 
-- command:指令101(固定)
-- device_uuid:设备唯一标识UUID
-- secretKey:安全key
+- command:命令101(固定)
+- device_uuid:デバイス唯一の識別子UUID
+- secretKey:セキュリティkey
 ```agsl
 
  internal fun getDeviceECCKey(): KeyPair {
@@ -21,24 +21,24 @@
     }
 ```
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    2 |   1   |     0      |
 |:---:|:----:|:----:|:-----:|
 | Data |  status  | command |response   |
-- command:指令101(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)  
+- command:命令101(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)  
 
 
-### 循序图
+### フローチャート
 ![icon](add_sesame.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
  override fun insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

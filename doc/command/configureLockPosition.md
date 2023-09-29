@@ -1,6 +1,6 @@
-# configureLockPosition 获取锁开关和配置锁位置
+# configureLockPosition ロックのスイッチ状態とロックの位置を取得します
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  |      6~-5|    4~3     |2~1       |  0 |
 |:------:|:---------------:|:----------:|:----:|:----:|
@@ -10,24 +10,24 @@
 - autolock_second:自动关锁时间
 - unlock_angle:开锁角度
 - lock_angle:关锁角度
-### 接收格式
+### 受信フォーマット
 
 | Byte |    2    |   1   | 0 |  
 |:----:|:-------:|:-----:|:---:|
 | Data | status  | command | response  |
-- response:响应0x07(固定)
-- command:指令80(固定)
-- status:状态0x00(成功)
-### device->app 推送设定
+- response:応答0x07(固定)
+- command:命令80(固定)
+- status:状態0x00(成功)
+### device->app プッシュ通知の設定
 |  Byte  |      6~-5|    4~3     |2~1       |  0 |
 |:------:|:---------------:|:----------:|:----:|:----:|
 | Data   | autolock_second | lock_angle |lock|command|
 
-- 同发送格式一致
-### 循序图
+- 送信フォーマットと一致する 
+### フローチャート
 ![icon](configureLockPosition.svg)
 
-### android示例
+### android例
 ``` java
        override fun configureLockPosition(lockTarget: Short, unlockTarget: Short, result: CHResult<CHEmpty>) {
         val cmd = SesameOS3Payload(SesameItemCode.mechSetting.value, lockTarget.toReverseBytes() + unlockTarget.toReverseBytes())

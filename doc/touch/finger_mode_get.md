@@ -1,36 +1,36 @@
-# Finger Mode Get 讲解
-app 发送发送121指令，获取ssm_touch当前指纹状态
-### 发送格式
+# Finger Mode Get 説明
+app は命令121を送信し、ssm_touchの指紋状態を取得します。
+### 送信フォーマット
 
 |  Byte  |       0 |
 |:------:|-------:|
 | Data   |  command |
 
-- command:指令121(固定)
+- command:命令121(固定)
 
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |          3    | 2   |     1     |     0      |
 |:---:|:-----------:|:------:|:----:|:---------:|
 | Data | finger_mode | status | command |response   |
-- command:指令121(固定)
-- response:响应0x07(固定)
+- command:命令121(固定)
+- response:応答0x07(固定)
   - status:0x00(成功) 
-  - finger_mode:0x00->验证模式，0x01->新增模式 
+  - finger_mode:0x00->認証モード，0x01->新規モード 
 
 
 
-### 循序图
+### フローチャート
 ![icon](finger_mode_get.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
   override fun fingerPrintModeGet(result: CHResult<Byte>) {
         if (checkBle(result)) return

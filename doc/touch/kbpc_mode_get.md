@@ -1,36 +1,36 @@
-# KeyboardPassword  Mode Get 讲解
-app 发送发送129指令，获取ssm_touch当前数字锁状态
-### 发送格式
+# KeyboardPassword  Mode Get 説明
+app は命令129を送信し、ssm_touchの暗証番号の状態を取得します。
+### 送信フォーマット
 
 |  Byte  |       0 |
 |:------:|-------:|
 | Data   |  command |
 
-- command:指令129(固定)
+- command:命令129(固定)
 
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    3    | 2   |     1     |     0      |
 |:---:|:-------:|:------:|:----:|:---------:|
 | Data | pw_mode | status | command |response   |
-- command:指令129(固定)
-- response:响应0x07(固定)
+- command:命令129(固定)
+- response:応答0x07(固定)
     - status:0x00(成功)
-    - pw_mode:0x00->验证模式，0x01->新增模式
+    - pw_mode:0x00->認証モード，0x01->新規モード
 
 
 
-### 循序图
+### フローチャート
 ![icon](kbpc_mode_get.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
   override fun keyBoardPassCodeModeGet(result: CHResult<Byte>) {
         if (checkBle(result)) return

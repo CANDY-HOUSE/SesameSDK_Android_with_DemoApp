@@ -1,5 +1,5 @@
 
-# CHSesameSensor 接口
+# CHSesameSensor インターフェース
 ```svg
 
 interface CHSesameSensor : CHSesameLock, CHSesameConnector {
@@ -9,14 +9,14 @@ fun getCards(result: CHResult<ArrayList<String>>)
 }
 ```
 
-`CHSesameSensor` 是一个设备接口，继承自 `CHSesameLock` 和 `CHSesameConnector` 接口。这个接口专门用来管理和操作 Sesame Sensor 设备。
+`CHSesameSensor`は、`CHSesameLock`および`CHSesameConnector`インターフェースを継承したデバイスインターフェースです。Sesame Sensorデバイスの管理と操作に特化しています。
 
-## 方法
+## メソッド
 
-- `fun unlock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - 解锁 Sesame Sensor。
+- `fun unlock(historyTag: ByteArray? = null, result: CHResult<CHEmpty>)` - Sesame Sensorのロックを解除します。
 
-- `fun deleteCards(cardID: String, result: CHResult<CHEmpty>)` - 删除指定的卡片。
+- `fun deleteCards(cardID: String, result: CHResult<CHEmpty>)` - 指定されたカードを削除します。
 
-- `fun getCards(result: CHResult<ArrayList<String>>)` - 获取所有的卡片。
+- `fun getCards(result: CHResult<ArrayList<String>>)` - すべてのカードを取得します。
 
-以上是 `CHSesameSensor` 接口的基本描述，这个接口为 Sesame Sensor 设备提供了一套完整的操作和管理方法。
+上記は`CHSesameSensor`インターフェースについての基本的な説明です。Sesame Sensorデバイスに対して完全な操作と管理方法を提供します。

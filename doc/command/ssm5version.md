@@ -1,33 +1,33 @@
-# getVersionTag 获取版本信息
+# getVersionTag バージョンのタグを取得する
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  |    0    |  
 |:------:|:-------:|
 | Data   | command |
 
-- command:指令5(固定)
+- command:命令5(固定)
 
 
 
-### 接收格式
+### 受信フォーマット　　　　
 
 | Byte |    15~3    |   2    | 1 |     0      |  
 |:---:|:----------:|:------:|:---:|:---------:|
 | Data | versiontag | status | command |response   |
 - command:指令5(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)
+- response:応答0x07(固定)
+- status:状態0x00(成功)
 
-- versiontag:响应版本号字节
-### 循序图
+- versiontag:バージョンのタグを応答する
+### フローチャート
 ![icon](ssm5version.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
        override fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
         currentDeviceUUID = uuid

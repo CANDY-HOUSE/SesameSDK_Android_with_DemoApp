@@ -1,5 +1,5 @@
 
-# CHSesameBotMechStatus 类
+# CHSesameBotMechStatus クラス
 ```svg
 class CHSesameBotMechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
     private val battery = bytesToShort(data[0], data[1])
@@ -14,23 +14,23 @@ class CHSesameBotMechStatus(override val data: ByteArray) : CHSesameProtocolMech
 
 
 ```
-`CHSesameBotMechStatus`类主要用于处理和管理Sesame Bot的机械状态。
+`CHSesameBotMechStatus`クラスはSesame Botの機械状態を処理と管理します。
 
-## 属性
+## プロパティ
 
-- `data`：字节数组，ByteArray类型，存储有效载荷数据。
-- `battery`：电池状态，通过字节转换为短整型获得。
-- `motorStatus`：电机状态，从`data`数组的第5个元素获得。
-- `flags`：标志，从`data`数组的第8个元素转换为整型获得。
-- `isInLockRange`：是否在锁定范围内，Boolean类型，通过与2进行位与运算判断。
-- `isInUnlockRange`：是否在解锁范围内，Boolean类型，通过与4进行位与运算判断。
-- `isBatteryCritical`：电池是否严重，Boolean类型，通过与32进行位与运算判断。
-- `isStop`：是否停止，Boolean类型，通过与1进行位与运算并判断结果是否为0来确定。
+- `data`：バイトの配列を表します。ByteArray型で、有効なペイロードデータを保存します。
+- `battery`：バイトを短整数に変換することで取得するバッテリーの状態です。
+- `motorStatus`：`data`配列の5番目の要素から取得するモーターの状態です。
+- `flags`：`data`配列の8番目の要素を整数に変換することで取得するフラグです。
+- `isInLockRange`：Boolean型の変数で、2とのビットAND演算によって、ロック範囲内にあるかどうかを判断します。
+- `isInUnlockRange`：Boolean型の変数で、4とのビットAND演算によって、解錠範囲内にあるかどうかを判断します。
+- `isBatteryCritical`：Boolean型の変数で、32とのビットAND演算によって、バッテリーが深刻な状態かどうかを判断します。
+- `isStop`：Boolean型の変数で、1とのビットAND演算によって、結果が0であることで停止しているかどうかを判断します。
 
-## 方法
+## メソッド
 
-- `getBatteryVoltage()`：此方法用于获取电池电压，返回Float类型的电压值。电压等于电池状态的值乘以7.2，再除以1023。
+- `getBatteryVoltage()`：バッテリー電圧を取得し、Float型の電圧値を返します。電圧は、バッテリーの状態の値を7.2で乗算し、1023で除算することで計算されます。
 
-## 继承
+## 継承
 
-- `CHSesameProtocolMechStatus`：`CHSesameBotMechStatus`类继承了`CHSesameProtocolMechStatus`类，需要实现父类中的`data`属性和`getBatteryVoltage()`方法。
+- `CHSesameProtocolMechStatus`：`CHSesameBotMechStatus`クラスは`CHSesameProtocolMechStatus`クラスを継承し、親クラスの`data`というプロパティと`getBatteryVoltage()`というメソッドを実装します。

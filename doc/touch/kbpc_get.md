@@ -1,56 +1,56 @@
-# KeyboardPassword  Get 讲解
-手机发送125指令，获取ssm_touch密码
-### 发送格式
+# KeyboardPassword  Get 説明
+携帯電話で命令125を送信し、手机发送125指令，获取ssm_touchのパスワードを取得します。
+### 送信フォーマット
 
 |  Byte  |       0 |
 |:------:|-------:|
 | Data   |  command |
 
-- command:指令125(固定)
+- command:命令125(固定)
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |       2 |   1   |     0      |
 |:---:|:-------:|:-----:|:----:|
 | Data |  status | command |response   |
-- command:指令125(固定)
-- response:响应0x07(固定)
+- command:命令125(固定)
+- response:応答0x07(固定)
 - status:0x00(成功)
-### 推送格式-start
+### プッシュフォーマット-start
 | Byte  |       2 |   1   |  0   |
 |:---:|:-------:|:-----:|:----:|
 | Data |  status | command | push |
-- command:指令127(固定)
-- response:响应0x08(固定)
+- command:命令127(固定)
+- response:応答0x08(固定)
 - push:0x00(成功)
-### 推送格式
+### プッシュフォーマット
 | Byte  | N~   2 |   1   |  0   |
 |:---:|:------:|:-----:|:----:|
 | Data | payload | command | push |
-- command:指令125(固定)
-- push:响应0x08(固定)
-- payload:见 playload.
+- command:命令125(固定)
+- push:応答0x08(固定)
+- payload:playload表を参照する.
 
-##### **payload如下**
+##### **payload表**
 
 |  Byte  |     pw_name| pw_name_length| pw_id|     0 |
 |:------:|:---------:|:--------:|:--------:|:--------:|
 | Data   | pw_name     | pw_name_length |pw_id|pw_id_length|
-### 推送格式-end
+### プッシュフォーマット-end
 | Byte  |       2 |   1   |     0      |
 |:---:|:-------:|:-----:|:----:|
 | Data |  status | command |push   |
-- command:指令128(固定)
-- response:响应0x08(固定)
+- command:命令128(固定)
+- response:応答0x08(固定)
 - push:0x00(成功)
-### 循序图
+### フローチャート
 ![icon](kbpc_get.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
   override fun keyBoardPassCode(result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

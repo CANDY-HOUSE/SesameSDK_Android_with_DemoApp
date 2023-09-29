@@ -1,5 +1,5 @@
 
-# SesameOS3Payload 数据类
+# SesameOS3Payload データのクラス
 ```svg
 internal data class SesameOS3Payload(val itemCode: UByte, val data: ByteArray) {
     fun toDataWithHeader(): ByteArray {
@@ -9,13 +9,13 @@ internal data class SesameOS3Payload(val itemCode: UByte, val data: ByteArray) {
 
 
 ```
-`SesameOS3Payload`数据类主要用于处理和管理Sesame OS3的有效载荷数据。
+`SesameOS3Payload`データのクラスは、Sesame OS3 のペイロードデータを処理および管理します。
 
-## 属性
+## プロパティ
 
-- `itemCode`：项代码，UByte类型。
-- `data`：字节数组，ByteArray类型，存储有效载荷数据。
+- `itemCode`：UByte型です。
+- `data`：有効なペイロードデータを保存するByteArray型です。
 
-## 方法
+## メソッド
 
-- `toDataWithHeader()`：此方法将`itemCode`转换为Byte类型，并且将其作为头部与`data`连接成新的字节数组。这种方法主要用于在发送或存储有效载荷数据时，将其转换为适合的格式。
+- `toDataWithHeader()`：このメソッドは、`itemCode` を Byte 型に変換し、それをヘッダーとして `data` と連結して新しいバイト配列を生成します。このメソッドは、有効なペイロードデータを送信または保存する際に、適切な形式に変換します。

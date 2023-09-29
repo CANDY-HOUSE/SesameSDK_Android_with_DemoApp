@@ -1,27 +1,27 @@
-# Lock 关锁
+# Lock ロック
 
-### 发送格式
+### 送信フォーマット
 | Byte | 7 ~ 1 | 0 |
 |:----:|:----:|:----:|
 | Data | historyTag|  command |
-- command:指令82(固定)
-- historyTag:历史标签
+- command:命令82(固定)
+- historyTag:履歴のタグ
 
-### 接收格式
+### 受信フォーマット
 | Byte | 2 | 1 | 0 |
 |:----:|:----:|:----:|:----:|
 | Data | status | command | response  |
 - command:指令82(固定)
 - response:响应0x07(固定)
 - status:状态0x00(成功) 
-### 循序图
+### フローチャート
 ![v](lock.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
      override fun lock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
         if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {

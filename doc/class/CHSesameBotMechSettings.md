@@ -1,5 +1,5 @@
 
-# CHSesameBotMechSettings 数据类
+# CHSesameBotMechSettings データクラス
 ```svg
 
 data class CHSesameBotMechSettings(
@@ -17,18 +17,18 @@ byteArrayOf(0, 0, 0, 0, 0)
 }
 
 ```
-`CHSesameBotMechSettings`数据类主要用于存储和管理Sesame Bot机械设备的设置。
+`CHSesameBotMechSettings`データクラスはSesame Bot機器の設定を保存と管理します。
 
-## 属性
+## プロパティ
 
-- `userPrefDir`：用户偏好方向，Byte类型。
-- `lockSec`：锁定秒数，Byte类型。
-- `unlockSec`：解锁秒数，Byte类型。
-- `clickLockSec`：点击锁定秒数，Byte类型。
-- `clickHoldSec`：长按秒数，Byte类型。
-- `clickUnlockSec`：点击解锁秒数，Byte类型。
-- `buttonMode`：按钮模式，Byte类型。
+- `userPrefDir`：ユーザーの好みや優先する方向を表し、Byte型です。
+- `lockSec`：ロックの秒数を表します。Byte型です。
+- `unlockSec`：解錠の秒数を表します。Byte型です。
+- `clickLockSec`：ロックの秒数をクリックします。Byte型です。
+- `clickHoldSec`：秒数を長押しします。Byte型です。
+- `clickUnlockSec`：解錠の秒数をクリックします。Byte型です。
+- `buttonMode`：ボタンモードです。Byte型です。
 
-## 方法
+## メソッド
 
-- `data()`：此方法将所有的Byte类型属性组合为一个ByteArray，并在其后添加五个字节的0。此方法主要用于将设备设置转换为可以发送或存储的数据格式。
+- `data()`：指定されたすべてのByte型のプロパティを1つのByteArrayに結合し、その後に5バイトの0を追加するメソッドです。デバイスの設定を送信または保存可能なデータ形式に変換します。

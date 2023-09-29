@@ -1,7 +1,7 @@
 
 
 
-# CHSesameBike2Device 类
+# CHSesameBike2Device クラス
 ```svg
 internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil {
 
@@ -17,18 +17,18 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
 
 ```
 
-`CHSesameBike2Device`类继承了`CHSesameOS3`类，并实现了`CHSesameBike2`和`CHDeviceUtil`接口。它主要用于管理和控制自行车锁设备。
+`CHSesameBike2Device`クラスは、`CHSesameOS3`クラスを継承し、`CHSesameBike2`と`CHDeviceUtil`インタフェースを実装しています。主に自転車のロックの管理と制御に使用されます。
 
-## 属性
+## プロパティ
 
-- `advertisement`：设备广告数据。
+- `advertisement`：デバイスのアドバタイジングデータ
 
-## 方法
+## メソッド
 
-- `unlock(tag: ByteArray?, result: CHResult<CHEmpty>)`：解锁设备的函数。它接受一个字节数组标签和一个结果参数，并发送一个解锁命令到设备。
-- `register(result: CHResult<CHEmpty>)`：注册设备的函数。它接受一个结果参数，并发送一个注册命令到设备。在注册期间，它还会处理设备状态和机械状态的更改。
-- `login(token: String?)`：登录设备的函数。它接受一个令牌参数，并发送一个登录命令到设备。在登录期间，它还会处理设备状态的更改。
-- `onGattSesamePublish(receivePayload: SSM3PublishPayload)`：处理GATT Sesame发布的函数。它接受一个发布负载参数，并更新设备和机械状态。
+- `unlock(tag: ByteArray?, result: CHResult<CHEmpty>)`：デバイスのロックを解除する関数です。バイト配列のタグと結果のパラメータを受取り、デバイスに対してロック解除のコマンドを送信します。
+- `register(result: CHResult<CHEmpty>)`：デバイスを登録する関数です。結果のパラメータを受取り、デバイスに登録コマンドを送信します。登録中には、デバイスの状態や機械の状態の変更を処理します。
+- `login(token: String?)`：デバイスをログインする関数です。トークンのパラメータを受取り、デバイスにログインコマンドを送信します。ログイン中には、デバイスの状態の変更を処理します。
+- `onGattSesamePublish(receivePayload: SSM3PublishPayload)`：GATT Sesameの通知を処理する関数です。送信するデータのパラメータを受取り、デバイスと機械の状態を更新します。
 
 
 ![CHSesameBike2Device](CHSesameBike2Device.svg)

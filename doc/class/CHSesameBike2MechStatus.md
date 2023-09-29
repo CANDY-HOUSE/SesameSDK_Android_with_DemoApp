@@ -1,4 +1,4 @@
-# CHSesameBike2MechStatus 类
+# CHSesameBike2MechStatus クラス
 
 ```svg
 class CHSesameBike2MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
@@ -11,24 +11,24 @@ class CHSesameBike2MechStatus(override val data: ByteArray) : CHSesameProtocolMe
 
 ```
 
-`CHSesameBike2MechStatus` 类实现了 `CHSesameProtocolMechStatus` 接口，主要用于表示 Sesame Bike2 的机械状态。
+`CHSesameBike2MechStatus`クラスは、`CHSesameProtocolMechStatus`インターフェースを実装しており、主にesame Bike2の機械状態を表します。
 
-## 属性
+## プロパティ
 
-- `data: ByteArray` - 表示设备状态的字节数组。
-- `isInLockRange: Boolean` - 表示设备是否在锁定范围内。
-- `isStop: Boolean?` - 表示设备是否已经停止。
+- `data: ByteArray` - デバイスの状態を表すバイト配列です。
+- `isInLockRange: Boolean` - デバイスがロックの範囲内にあるかどうかを示す情報です。
+- `isStop: Boolean?` - デバイスが停止しているかどうかを示す情報です。
 
-## 方法
+## メソッド
 
-- `fun getBatteryVoltage(): Float` - 获取设备的电池电压。
+- `fun getBatteryVoltage(): Float` - デバイスのバッテリー電圧を取得します。
 
-## 私有属性
+## 非公開プロパティ
 
-- `battery: Short` - 表示设备的电池电量。
-- `flags: Int` - 表示设备的标志位。
+- `battery: Short` - デバイスのバッテリー残量を示します。
+- `flags: Int` - デバイスのフラグを示します。
 
-## 私有方法
+## 非公開メソッド
 
-- `bytesToShort(byte1: Byte, byte2: Byte): Short` - 将两个字节转换为一个短整数。
+- `bytesToShort(byte1: Byte, byte2: Byte): Short` - 2つのバイトをショート整数に変換します。
 

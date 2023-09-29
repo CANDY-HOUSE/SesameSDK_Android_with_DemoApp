@@ -59,30 +59,30 @@ internal class CHWifiModule2Device : CHSesameOS3(), CHWifiModule2, CHDeviceUtil 
 }
 
 ```
-`CHWifiModule2Device` 是一个内部类，继承自 `CHSesameOS3`，并实现了 `CHWifiModule2` 和 `CHDeviceUtil` 接口。它主要用于处理与Wi-Fi模块2设备相关的操作。
+`CHWifiModule2Device` は内部のクラスです。 `CHSesameOS3`を継承し、`CHWifiModule2`と `CHDeviceUtil` インターフェースを実装してます。主にWi-Fiモジュール2のデバイスに関連する操作を処理します。
 
-## 属性
+## プロパティ
 
-- `ssm2KeysMap`：一个`MutableMap`，用于存储键值对。
-- `mechSetting`：一个`CHWifiModule2MechSettings`对象，用于设置机械设定。
-- `advertisement`：一个`CHadv`对象，用于广告。
+- `ssm2KeysMap`：`MutableMap`は、キーと値のペアを保存するために使用される変更可能なマップです。一个`MutableMap`，用于存储键值对。
+- `mechSetting`：`CHWifiModule2MechSettings`オブジェクトで、機械設定を設置します。
+- `advertisement`：`CHadv`オブジェクトで、advertisement用です。
 
-## 方法
+## メソッド
 
-- `connect(result: CHResult<CHEmpty>)`：连接方法。
-- `register(result: CHResult<CHEmpty>)`：注册方法。
-- `login(token: String?)`：登录方法。
-- `scanWifiSSID(result: CHResult<CHEmpty>)`：扫描Wi-Fi SSID方法。
-- `setWifiSSID(ssid: String, result: CHResult<CHEmpty>)`：设置 Wi-Fi SSID方法。
-- `setWifiPassword(password: String, result: CHResult<CHEmpty>)`：设置Wi-Fi密码方法。
-- `connectWifi(result: CHResult<CHEmpty>)`：连接到Wi-Fi的方法。
-- `insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>)`：插入sesames方法。
-- `removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>)`：删除sesame方法。
-- `getVersionTag(result: CHResult<String>)`：获取版本标签的方法。
-- `reset(result: CHResult<CHEmpty>)`：重置方法。
-- `updateFirmware(onResponse: CHResult<BluetoothDevice>)`：更新固件的方法。
-- `mBluetoothGattCallback`：一个`BluetoothGattCallback`对象，用于处理蓝牙GATT回调。
-- `onGattWM2Publish(receivePayload: SSM3PublishPayload)`：处理 GATT WM2 发布的方法。
+- `connect(result: CHResult<CHEmpty>)`：接続方法です。
+- `register(result: CHResult<CHEmpty>)`：登録方法です。
+- `login(token: String?)`：ログインする方法です。
+- `scanWifiSSID(result: CHResult<CHEmpty>)`：Wi-Fi SSIDをスキャンする方法です。
+- `setWifiSSID(ssid: String, result: CHResult<CHEmpty>)`：Wi-Fi SSIDを設置する方法です。
+- `setWifiPassword(password: String, result: CHResult<CHEmpty>)`：Wi-Fiのパスワードを設置する方法です。
+- `connectWifi(result: CHResult<CHEmpty>)`：Wi-Fiに接続する方法です。
+- `insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>)`：sesamesを挿入する方法です。
+- `removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>)`：sesameを削除する方法です。
+- `getVersionTag(result: CHResult<String>)`：バージョンタグを取得する方法です。
+- `reset(result: CHResult<CHEmpty>)`：リセットする方法です。
+- `updateFirmware(onResponse: CHResult<BluetoothDevice>)`：ファームウェアを更新する方法です。
+- `mBluetoothGattCallback`：`BluetoothGattCallback`オブジェクトで、Bluetooth GATTのコールバックを処理します。
+- `onGattWM2Publish(receivePayload: SSM3PublishPayload)`：GATT WM2の発行を処理する方法です。
 
 
 ![CHWifiModule2Device](CHWifiModule2Device.svg)

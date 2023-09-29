@@ -1,5 +1,5 @@
 
-# CHSesameTouchPro 接口
+# CHSesameTouchPro インターフェース
 ```svg
 interface CHSesameTouchPro : CHSesameConnector {
 
@@ -23,44 +23,44 @@ interface CHSesameTouchPro : CHSesameConnector {
 
 }
 ```
-`CHSesameTouchPro` 是一个设备接口，继承自 `CHSesameConnector` 接口。这个接口专门用来管理和操作 Sesame Touch Pro 设备。
+`CHSesameTouchPro` は`CHSesameConnector`インターフェースを継承し、デバイスのインターフェースです。 Sesame Touch Proデバイスの管理と操作に特化しています。
 
-## 方法
+## メソッド
 
-### 卡片相关:
+### カード:
 
-- `fun cards(result: CHResult<CHEmpty>)` - 获取所有的卡片。
+- `fun cards(result: CHResult<CHEmpty>)` - すべてのカードを取得します。
 
-- `fun cardDelete(ID: String, result: CHResult<CHEmpty>)` - 删除指定的卡片。
+- `fun cardDelete(ID: String, result: CHResult<CHEmpty>)` - 指定されたカードを削除します。
 
-- `fun cardChange(ID: String, name: String, result: CHResult<CHEmpty>)` - 更改指定卡片的名字。
+- `fun cardChange(ID: String, name: String, result: CHResult<CHEmpty>)` - 指定されたカードの名称を変更します。
 
-- `fun cardModeGet(result: CHResult<Byte>)` - 获取卡片模式。
+- `fun cardModeGet(result: CHResult<Byte>)` - カードモデルを取得します。
 
-- `fun cardModeSet(mode: Byte, result: CHResult<CHEmpty>)` - 设置卡片模式。
+- `fun cardModeSet(mode: Byte, result: CHResult<CHEmpty>)` - カードモデルを設置します。
 
-### 指纹相关:
+### 指紋:
 
-- `fun fingerPrints(result: CHResult<CHEmpty>)` - 获取所有的指纹。
+- `fun fingerPrints(result: CHResult<CHEmpty>)` - すべての指紋を取得します。
 
-- `fun fingerPrintDelete(ID: String, result: CHResult<CHEmpty>)` - 删除指定的指纹。
+- `fun fingerPrintDelete(ID: String, result: CHResult<CHEmpty>)` - 指定された指紋を削除します。
 
-- `fun fingerPrintsChange(ID: String, name: String, result: CHResult<CHEmpty>)` - 更改指定指纹的名字。
+- `fun fingerPrintsChange(ID: String, name: String, result: CHResult<CHEmpty>)` - 指定された指紋の名称を変更します。
 
-- `fun fingerPrintModeGet(result: CHResult<Byte>)` - 获取指纹模式。
+- `fun fingerPrintModeGet(result: CHResult<Byte>)` - 指紋モデルを取得します。
 
-- `fun fingerPrintModeSet(mode: Byte, result: CHResult<CHEmpty>)` - 设置指纹模式。
+- `fun fingerPrintModeSet(mode: Byte, result: CHResult<CHEmpty>)` - 指紋モデルを設置します。
 
-### 密码相关:
+### パスワード:
 
-- `fun keyBoardPassCode(result: CHResult<CHEmpty>)` - 获取所有的密码。
+- `fun keyBoardPassCode(result: CHResult<CHEmpty>)` - すべてのパスワードを取得します。
 
-- `fun keyBoardPassCodeChange(ID: String, name: String, result: CHResult<CHEmpty>)` - 更改指定密码的名字。
+- `fun keyBoardPassCodeChange(ID: String, name: String, result: CHResult<CHEmpty>)` - 指定されたパスワードの名称を変更します。
 
-- `fun keyBoardPassCodeDelete(ID: String, result: CHResult<CHEmpty>)` - 删除指定的密码。
+- `fun keyBoardPassCodeDelete(ID: String, result: CHResult<CHEmpty>)` - 指定されたパスワードを削除します。
 
-- `fun keyBoardPassCodeModeGet(result: CHResult<Byte>)` - 获取密码模式。
+- `fun keyBoardPassCodeModeGet(result: CHResult<Byte>)` - パスワードモデルを取得します。
 
-- `fun keyBoardPassCodeModeSet(mode: Byte, result: CHResult<CHEmpty>)` - 设置密码模式。
+- `fun keyBoardPassCodeModeSet(mode: Byte, result: CHResult<CHEmpty>)` - パスワードモデルを設置します。
 
-以上是 `CHSesameTouchPro` 接口的基本描述，这个接口为 Sesame Touch Pro 设备提供了一套完整的操作和管理方法。
+以上は `CHSesameTouchPro`インタフェースについての基本的な説明です。Sesame Touch Proデバイスに対して完全な操作と管理方法を提供します。

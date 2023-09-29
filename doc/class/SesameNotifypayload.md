@@ -1,22 +1,22 @@
-## SesameNotifypayload 类文档
+## SesameNotifypayload クラス
 ```
 internal class SesameNotifypayload(val data: ByteArray) {
     val notifyOpCode: SSM2OpCode = SSM2OpCode.getByValue(data[0])
     val payload: ByteArray = data.drop(1).toByteArray()
 }
 ```
-### 描述
+### 説明
 
-`SesameNotifypayload`是一个Kotlin内部类，用于处理'Sesame'通知的负载（payload）。在实例化此类时，需要传入一个字节流数组。
+`SesameNotifypayload`は`Sesame`の通知のペイロードを処理するためのKotlinの内部クラスです。このクラスのインスタンス化する際には、バイト配列を渡す必要があります。
 
-### 属性
+### プロパティ
 
-- `data`: 一个 ByteArray 类型的实例变量。这个 `data` 变量应当在创建类实例时提供。
+- `data`:ByteArray型のインスタンス変数です。この`data`変数は、クラスのインスタンスを作成する際に提供する必要があります。 
 
-- `notifyOpCode`: 会将提供的`data`数组的第一个字节获取其值，传递给`SSM2OpCode.getByValue`函数，并将得到的结果作为`notifyOpCode`。
+- `notifyOpCode`: 提供された`data`配列の最初のバイトの値を取得し、`SSM2OpCode.getByValue`関数に渡して、その結果を`notifyOpCode`として設定します。
 
-- `payload`: 这是`notifyOpCode`后`data`的其余部分。通过`data.drop(1)`会生成一个新的数组，包括`data`的所有元素，除了第一个。
+- `payload`: `notifyOpCode`の後にある`data`の残りの部分です。`data.drop(1)`を使用すると、新しい配列が生成され、最初の要素以外のすべての要素が含まれます。
 
 ### 使用
 
-要使用这个类，你需要实例化一个`SesameNotifypayload`对象，并向其构造函数提供一个字节流数组。这个数组的第一个字节
+このクラスを使用するには、`SesameNotifyPayload`オブジェクトをインスタンス化し、そのコンストラクタにバイト配列を提供する必要があります。

@@ -1,4 +1,4 @@
-# SesameBleReceiver 类
+# SesameBleReceiver クラス
 
 ```svg
 
@@ -12,12 +12,12 @@ internal class SesameBleReceiver {
 
 
 
-`SesameBleReceiver` 是一个内部类。
+`SesameBleReceiver` は内部のクラスです。
 
-## 属性
+## プロパティ
 
-- `buffer`：一个字节数组，用于存储接收到的蓝牙数据。
+- `buffer`：受信したBluetoothデータを保存するために使用されるバイト配列です。
 
-## 方法
+## メソッド
 
-- `feed(input: ByteArray): Pair<DeviceSegmentType, ByteArray>?`：这个方法接受一个字节数组作为输入，然后返回一个包含 `DeviceSegmentType` 和字节数组的二元组。如果处理失败，返回 `null`。
+- `feed(input: ByteArray): Pair<DeviceSegmentType, ByteArray>?`：このメソッドは、バイト配列を受取り、`DeviceSegmentType`とバイト配列を含むペアの二重のタプルを返します。処理が失敗した場合は、nullを返します。

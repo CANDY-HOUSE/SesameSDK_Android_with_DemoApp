@@ -1,17 +1,17 @@
 
-# CHSesameSensorDelegate 接口
+# CHSesameSensorDelegate インターフェース
 ```svg
 interface CHSesameSensorDelegate : CHDeviceStatusDelegate {
 fun onSSM2KeysChanged(device: CHSesameConnector, ssm2keys: Map<String, ByteArray>) {}
 }
 
 ```
-`CHSesameSensorDelegate`接口主要用于处理和管理Sesame设备的传感器相关事件。
+`CHSesameSensorDelegate`インターフェースは、Sesameデバイスのセンサー関連イベントを処理および管理します。
 
-## 方法
+## メソッド
 
-- `onSSM2KeysChanged(device: CHSesameConnector, ssm2keys: Map<String, ByteArray>)`：当SSM2密钥发生变化时调用此方法。此方法接收两个参数，第一个参数是发生密钥变化的设备，第二个参数是新的SSM2密钥集合。默认实现为空。
+- `onSSM2KeysChanged(device: CHSesameConnector, ssm2keys: Map<String, ByteArray>)`：SSM2キーが変更された際に呼び出されます。このメソッドは2つのパラメータを受け取ります。1つ目のパラメータはキーの変更が発生したデバイスであり、2つ目のパラメータは新しいSSM2のキーセットです。デフォルト値は null です。
 
-## 继承
+## 継承
 
-- `CHDeviceStatusDelegate`：`CHSesameSensorDelegate`接口继承了`CHDeviceStatusDelegate`接口，需要实现父类中的所有方法。
+- `CHDeviceStatusDelegate`：`CHSesameSensorDelegate`インターフェースは`CHDeviceStatusDelegate`を継承し、親クラスの全てのメソッドを実装します。

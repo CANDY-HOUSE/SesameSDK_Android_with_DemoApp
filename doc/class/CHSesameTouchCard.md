@@ -1,5 +1,5 @@
 
-# CHSesameTouchCard 类
+# CHSesameTouchCard クラス
 ```svg
 class CHSesameTouchCard(data: ByteArray) {
 val cardType = data[0]
@@ -11,17 +11,17 @@ val cardName = String(data.sliceArray(nameIndex + 1..nameIndex + nameLength))
 }
 
 ```
-`CHSesameTouchCard`类主要用于处理和管理触摸卡的信息。这个类的构造函数接收一个ByteArray作为参数，该参数包含了触摸卡的相关数据。
+`CHSesameTouchCard`クラスは、タッチカードの情報を処理および管理します。このクラスのコンストラクタは、ByteArrayを引数として受取り、タッチカードの関連データを含みます。
 
-## 属性
+## プロパティ
 
-- `cardType`：卡片类型，由数据的第一个字节表示。
-- `idLength`：卡片ID的长度，由数据的第二个字节表示。
-- `cardID`：卡片ID，由数据的第三个字节开始，长度为`idLength`的一段数据表示，然后转换为十六进制字符串。
-- `nameIndex`：卡片名称数据的起始索引，由`idLength + 2`计算得出。
-- `nameLength`：卡片名称的长度，由数据的`nameIndex`字节表示。
-- `cardName`：卡片名称，由数据的`nameIndex + 1`开始，长度为`nameLength`的一段数据表示，然后转换为字符串。
+- `cardType`：カードタイプです。データの最初のバイトで表されます。
+- `idLength`：カードIDの長さです。データの2番目のバイトで表されます。
+- `cardID`：カードIDです。データの3番目のバイトから始まり、長さが`idLength`であるデータセグメントで表されて、16進数の文字列に変換されます。
+- `nameIndex`：カード名のデータの始点インデックスです。`idLength + 2`で計算されます。
+- `nameLength`：カード名の長さです。データの`nameIndex`バイトで表されます。
+- `cardName`：カード名です。データの`nameIndex + 1`バイトから始まり、長さが`nameLength`であるデータバイト列で表されて、文字列に変換されます。
 
-## 构造函数
+## コンストラクタ
 
-- `CHSesameTouchCard(data: ByteArray)`：构造函数接收一个ByteArray作为参数，该参数包含了触摸卡的相关数据。在构造函数中，将解析这些数据，并初始化相应的属性。
+- `CHSesameTouchCard(data: ByteArray)`：コンストラクタは、ByteArrayをパラメータとして受取り、パラメータにはタッチカードの関連データが含まれています。コンストラクタではデータを解析し、対応する属性を初期化します。

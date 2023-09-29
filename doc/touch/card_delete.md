@@ -1,34 +1,34 @@
-# Card Delete 讲解
+# Card Delete 説明
 
-### 发送格式
+### 送信フォーマット
 
 |  Byte  |     16~1 |       0 |
 |:------:|---------:|--------:|
 | Data   | card_id	 | command |
 
-- command:指令108(固定)
-- card_id:卡片ID
+- command:命令108(固定)
+- card_id:カードID
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |    2 |   1   |     0      |
 |:---:|:----:|:----:|:-----:|
 | Data |  status  | command |response   |
-- command:指令108(固定)
-- response:响应0x07(固定)
-- status:状态0x00(成功)  
+- command:命令108(固定)
+- response:応答0x07(固定)
+- status:状態0x00(成功)  
 
 
-### 循序图
+### フローチャート
 ![icon](card_delete.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
     override fun cardDelete(ID: String, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

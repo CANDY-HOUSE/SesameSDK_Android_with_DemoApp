@@ -1,37 +1,37 @@
-# Finger Delete 讲解
-app 发送发送116指令，删除ID指纹
-### 发送格式
+# Finger Delete 説明
+アプリから命令116を送信して、ID指紋を削除します。
+### 送信フォーマット
 
 |  Byte  | 1|    0     |
 |:------:|---:|:--------:|
 | Data   | finger_id|  command |
 
-- command:指令116(固定)
-- finger_id:指纹ID
+- command:命令116(固定)
+- finger_id:指紋ID
 
 
 
 
-### 接收格式
+### 受信フォーマット
 
 | Byte  |        2   |     1     |     0      |
 |:---:|:-----------:|:----:|:---------:|
 | Data |  status | command |response   |
-- command:指令116(固定)
-- response:响应0x07(固定)
+- command:命令116(固定)
+- response:応答0x07(固定)
     - status:0x00(成功)
 
 
 
 
-### 循序图
+### フローチャート
 ![icon](finger_delete.svg)
 
 
 
 
 
-### android示例
+### android例
 ``` java
  override fun fingerPrintDelete(ID: String, result: CHResult<CHEmpty>) {
         if (checkBle(result)) return

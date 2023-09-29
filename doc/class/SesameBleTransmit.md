@@ -1,4 +1,4 @@
-# SesameBleTransmit 类
+# SesameBleTransmit クラス
 
 ```svg
 
@@ -9,14 +9,14 @@ internal class SesameBleTransmit(var type: DeviceSegmentType, var input: ByteArr
 
 ```
 
-`SesameBleTransmit` 是一个内部类。
+`SesameBleTransmit` は内部のクラスです。
 
-## 属性
+## プロパティ
 
-- `type`：一个 `DeviceSegmentType` 枚举值，表示传输的数据类型。
-- `input`：一个字节数组，表示需要传输的数据。
-- `isStart`：一个整型值，用于标记数据传输的开始。初始值为 1，传输开始后设置为 0，传输结束后设置为 -1。
+- `type`：`DeviceSegmentType`の列挙型の値です。転送するデータのタイプを表します。
+- `input`：バイト配列です。転送する必要があるデータを表します。
+- `isStart`：データ転送の開始を示すために使用される整数値です。初期値は1であり、転送が開始されると0に設定され、転送が終了すると-1に設定されます。
 
-## 方法
+## メソッド
 
-- `getChunk(): ByteArray?`：此方法返回一个字节数组，表示一个数据块。如果 `isStart` 为 -1，表示数据已经全部传输完毕，此时返回 `null`。如果 `input` 的大小小于或等于 19，那么会一次性将所有数据进行传输，并将 `isStart` 设置为 -1。如果 `input` 的大小大于 19，那么会每次传输 19 个字节的数据，直到所有数据都被传输完毕。
+- `getChunk(): ByteArray?`：バイト配列を返し、データブロックを表します。`isStart`が-1の場合、データの転送が完了したことを示し、`null`を返します。また、`input`が19以下の場合、すべてのデータを一度に転送し、`isStart`を-1に設定します。`input`が19より大きい場合、19バイトずつデータを転送し、すべてのデータが転送されるまで繰り返します。

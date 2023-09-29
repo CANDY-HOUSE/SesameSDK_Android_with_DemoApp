@@ -1,4 +1,4 @@
-# CHBaseAdv 接口
+# CHBaseAdv インターフェース
 ```svg
 
 internal interface CHBaseAdv {
@@ -14,15 +14,15 @@ internal interface CHBaseAdv {
 ```
 
 
-`CHBaseAdv` 是一个内部接口。
+`CHBaseAdv` は内部インターフェースです。
 
-## 属性
+## プロパティ
 
-- `rssi`: 类型为 `Int?`，接收信号强度指示符。
-- `isRegistered`: 类型为 `Boolean`，是否已注册。
-- `adv_tag_b1`: 类型为 `Boolean`，广播标签。
-- `deviceID`: 类型为 `UUID?`，设备ID。
-- `device`: 类型为 `BluetoothDevice`，蓝牙设备。
-- `deviceName`: 类型为 `String?`，设备名称。
-- `productModel`: 类型为 `CHProductModel?`，产品模型。
-- `isConnecable`: 类型为 `Boolean?`，是否可连接。
+- `rssi`: `Int?`型で、受信号強度の指示子です。
+- `isRegistered`: `Boolean`型で、登録しているかどうかを判断します。
+- `adv_tag_b1`: `Boolean`型で、アドバタイジングのタグです。
+- `deviceID`: `UUID?`型で、デバイスIDです。
+- `device`: `BluetoothDevice`型で，Bluetoothデバイスです。
+- `deviceName`: `String?`型で、デバイス名です。 
+- `productModel`: `CHProductModel?`型で、製品モデルです。
+- `isConnecable`: `Boolean?`型で、接続可能かどうかを判断します。

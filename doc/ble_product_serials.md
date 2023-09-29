@@ -1,4 +1,4 @@
-Ble产品代码示例讲解列表
+Bleプロジェクトのコード例に関する説明一覧
 ========
 <!--
 ### 7. [Sesame Bot 1](./bleproductserials/sesameblot.md) 
