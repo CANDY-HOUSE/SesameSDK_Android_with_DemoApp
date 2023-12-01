@@ -1,10 +1,10 @@
 # SesameSDK3.0 for Android
 ## ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
 
-##### Google Play Store [Sesame app](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
-![img](./doc/img/SesameSDK_Swift.png)
+##### Sesame app on <img src="https://img.shields.io/badge/Play Store-34A853?logo=googleplay&logoColor=white"/>[https://play.google.com/store/apps/details?id=co.candyhouse.sesame2](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
+![img](./doc/img/SesameSDK_20231201.png)
 ## 概要
-#### SesameSDKは、Androidアプリケーション向けの無料で、シンプル且つパワフルなBluetooth/ IoTライブラリです。Sesameの公式アプリケーションもこのSesameSDKを使用してすべての機能を構築し実現しております。SesameSDKでできること：
+#### SesameSDKは、Androidアプリケーション向けの無料で、シンプル且つパワフルなBluetooth/ AIoTライブラリです。Sesameの公式アプリケーションもこのSesameSDKを使用してすべての機能を構築し実現しております。SesameSDKでできること：
 
 - Sesameデバイスの登録（Sesame 5、Sesame 5 pro、Sesame Bike2、BLE Connector1、Open Sensor1、Sesame Touch 1 Pro、 Sesame Touch 1 、Sesame Bot1、WIFI Module2、Sesame 4、Sesame 3、Sesame Bike1、）
 - 施錠、解除、作動させるなど
@@ -13,9 +13,12 @@
 - デバイスの各種設定
 - バッテリー残量の取得
 
-##  必要な言語とツール
-- [プログラミング言語 Kotlin](https://kotlinlang.org/)
-- [Android Studio](https://developer.android.com/studio)  
+##  Requirements
+<img src="https://img.shields.io/badge/Kotlin-1.4-7F52FF" />.  
+<img src="https://img.shields.io/badge/Bluetooth-4.0LE +-0082FC" />  
+<img src="https://img.shields.io/badge/Android-5.0 +-3DDC84" />  
+<img src="https://img.shields.io/badge/Android Studio-2022 +-3DDC84" />  
+
  
 ### 1. ライブラリーの依存
 ```svg
