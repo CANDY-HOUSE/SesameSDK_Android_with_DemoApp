@@ -1,8 +1,11 @@
-# SesameSDK3.0 for Android
-## ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
-
-##### Sesame app on <img src="https://img.shields.io/badge/Play Store-34A853?logo=googleplay&logoColor=white"/>[https://play.google.com/store/apps/details?id=co.candyhouse.sesame2](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
 ![img](./doc/img/SesameSDK_20231201.png)
+# SesameSDK3.0 for Android
+
+- Sesame app on <img src="https://img.shields.io/badge/Play Store-34A853?logo=googleplay&logoColor=white"/> [https://play.google.com/store/apps/details?id=co.candyhouse.sesame2/](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2/)
+- Sesame app on <img src="https://img.shields.io/badge/Google Drive-1A73E8?logo=googledrive&logoColor=white"/> [https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/](https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/)
+- ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
+
+
 ## 概要
 #### SesameSDKは、Androidアプリケーション向けの無料で、シンプル且つパワフルなBluetooth/ AIoTライブラリです。Sesameの公式アプリケーションもこのSesameSDKを使用してすべての機能を構築し実現しております。SesameSDKでできること：
 
