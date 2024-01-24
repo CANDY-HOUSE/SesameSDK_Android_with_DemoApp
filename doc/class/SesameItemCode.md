@@ -23,8 +23,6 @@ internal enum class SesameItemCode(val value: UByte) {
     timePhone(16u),
     magnet(17u),
     BLE_ADV_PARAM_GET(18u),
-    SENSOR_INVERVAL(19u), 
-    SENSOR_INVERVAL_GET(20u),
     mechSetting(80u),
     mechStatus(81u),
     lock(82u),
