@@ -127,7 +127,6 @@ bleScannerがスキャンしたデバイスをCHDeviceMapに入れる。
 ### [プロジェクトフレームワーク](./doc/Sesame_framework.md)
 ### [プロジェクトインターフェース](./doc/APP_instroduce.md)
 ###  [その他の関連説明](./doc/sesame_code.md)
-### [SDK利用規約](https://jp.candyhouse.co/pages/sesamesdk%E5%88%A9%E7%94%A8%E8%A6%8F%E7%B4%84)
  ### Android関連知識
 - [Android Ble](https://developer.android.com/guide/topics/connectivity/bluetooth-le?hl=zh-cn)
 - [Android Nfc](https://developer.android.com/guide/topics/connectivity/nfc?hl=zh-cn)
