@@ -1,4 +1,4 @@
-![img](./doc/img/SesameSDK_20231201.png)
+![SesameSDK](https://github.com/CANDY-HOUSE/.github/blob/main/profile/images/SesameSDK.png?raw=true)
 # SesameSDK3.0 for Android
 
 - Sesame app on <img src="https://img.shields.io/badge/Play Store-34A853?logo=googleplay&logoColor=white"/> [https://play.google.com/store/apps/details?id=co.candyhouse.sesame2](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
