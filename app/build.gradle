@@ -22,16 +22,6 @@ android {
             storePassword "$passStore"
             keyPassword "$passKey"
             keyAlias "$ssmKeyAlias"
-
-            // 处理 CI 环境中的签名文件
-            if (System.getenv("CI") == "true") {
-                println("用CI环境进行签名...")
-                // CI 环境中跳过签名配置检查，因为签名将由 GitHub Actions 处理
-                storeFile = null
-                storePassword = null
-                keyPassword = null
-                keyAlias = null
-            }
         }
     }
 
@@ -85,10 +75,7 @@ android {
                     'proguard-rules.pro'
             buildConfigField("String", "ch_user_server", "\"https://example.mobile.com/prod\"")
             buildConfigField("String", "testname", "\"test\"")
-            if (signingConfigs.release.storeFile != null) {
-                println("用本地环境进行签名...")
-                signingConfig signingConfigs.release
-            }
+            signingConfig signingConfigs.release
             ndk {
                 debugSymbolLevel 'FULL'
             }
@@ -96,12 +83,6 @@ android {
                 mappingFileUploadEnabled true
             }
         }
-
-        ci {
-            initWith release
-            matchingFallbacks = ['release']
-        }
-
     }
 
     // CI环境中重写versionCode
