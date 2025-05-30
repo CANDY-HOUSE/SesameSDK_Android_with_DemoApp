@@ -1,0 +1,30 @@
+# this is an auto generated file. This will be overwritten
+subscription OnCreateAnyUserDevices($subUUID: String) {
+  onCreateAnyUserDevices(subUUID: $subUUID) {
+    deviceUUID
+    subUUID
+    deviceModel
+    keyIndex
+    keyLevel
+    secretKey
+    sesame2PublicKey
+    deviceName
+  }
+}
+subscription OnDeleteAnyUserDevices($subUUID: String) {
+  onDeleteAnyUserDevices(subUUID: $subUUID) {
+    deviceUUID
+    subUUID
+    deviceModel
+    keyIndex
+    keyLevel
+    secretKey
+    sesame2PublicKey
+    deviceName
+  }
+}
+subscription OnCreateFriend($subUUID: String) {
+  onCreateFriend(subUUID: $subUUID) {
+    subUUID
+  }
+}

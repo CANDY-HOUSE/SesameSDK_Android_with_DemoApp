@@ -2,8 +2,10 @@ package co.candyhouse.sesame.open.device
 
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.utils.*
-import java.util.*
+import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.bytesToShort
+import co.candyhouse.sesame.utils.toReverseBytes
+import java.util.Date
 interface CHSesame2 : CHSesameLock { // CHProductModel.SS2,CHProductModel.SS4
     var mechSetting: CHSesame2MechSettings?
     fun lock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
@@ -43,7 +45,10 @@ class CHSesame2MechStatus(override val data: ByteArray) : CHSesameProtocolMechSt
 
     fun ss5Adapter(): ByteArray {
         val bat = (bytesToShort(data[0], data[1]).toInt() * 3600 / 1023).toShort()
+        L.d("hub3_ss5", "bat: $bat")
         val position = (bytesToShort(data[4], data[5]).toInt() * 360 / 1024).toShort()
+        L.d("hub3_ss5", "position: $position")
+
         return bat.toReverseBytes() + data.sliceArray(2..3) + position.toReverseBytes() + data.sliceArray(7..7)
     }
 }

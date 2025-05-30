@@ -96,13 +96,13 @@
                         android:layout_marginLeft="17dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
-                        android:text="@string/change_sesame_name"
+                        android:text="@string/edit_name"
                         android:textColor="@color/black"
                         android:textSize="17dp" />
 
                     <TextView
                         android:id="@+id/name_txt"
-                        android:layout_width="200dp"
+                        android:layout_width="260dp"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
@@ -189,7 +189,7 @@
 
                     <TextView
                         android:id="@+id/device_model"
-                        android:layout_width="200dp"
+                        android:layout_width="260dp"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
@@ -213,8 +213,6 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
-                    android:id="@+id/rlRole"
-
                     android:background="@color/white">
 
                     <TextView
@@ -332,22 +330,43 @@
                     android:layout_height="53dp"
                     android:background="@color/white">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_centerVertical="true"
-                        android:layout_marginStart="17dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/Notification"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:orientation="vertical"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="17dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/Notification"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="17dp"
+
+                            android:id="@+id/tvSysNotifyMsg"
+                            android:gravity="center_vertical"
+                            android:text="@string/android_notifica_permis_on"
+                            android:textColor="@color/tv_color_red_gray"
+                            android:textSize="11dp" />
+                    </LinearLayout>
+
+
 
 
                     <Switch
                         android:id="@+id/noti_switch"
                         android:layout_width="wrap_content"
-                        android:layout_height="25dp"
+                        android:layout_height="match_parent"
+                        android:paddingVertical="14dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginRight="12dp" />
@@ -359,6 +378,76 @@
                         android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
                 </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/opsensor_zone"
+                    android:layout_width="match_parent"
+                    android:layout_height="53dp"
+                    android:background="@color/white">
+
+                    <TextView
+                        android:id="@+id/opslock_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/white"
+                        android:gravity="center_vertical"
+                        android:text="@string/OpenSensor_on"
+                        android:textColor="@color/black"
+                        android:textSize="17dp" />
+
+                    <LinearLayout
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp"
+                        android:gravity="end|center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/opslock_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            tools:text="1 s"
+                            android:textColor="@color/text_hint"
+                            android:textSize="17dp" />
+
+                        <TextView
+                            android:id="@+id/ops_second_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/second"
+                            android:textColor="@color/text_hint"
+                            android:textSize="17dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/gray0" />
+                </RelativeLayout>
+
+                <com.weigan.loopview.LoopView
+                    android:id="@+id/opslock_wheelview"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:focusable="true"
+                    android:visibility="gone"
+
+                    app:awv_initialPosition="0"
+                    app:awv_textsize="13" />
 
                 <RelativeLayout
                     android:id="@+id/auto_lock_zone"
@@ -435,9 +524,6 @@
 
                     app:awv_initialPosition="0"
                     app:awv_textsize="13" />
-
-
-
 
                 <RelativeLayout
                     android:id="@+id/dfu_zone"
@@ -586,7 +672,7 @@
                     android:id="@+id/nfc_zone"
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
-                   android:layout_marginTop="20dp"
+                    android:layout_marginTop="500dp"
                     android:background="@color/white">
 
                     <TextView
@@ -625,19 +711,39 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
+                    android:id="@+id/widget_rl"
                     android:background="@color/white">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="17dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/sesame_widget"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_centerVertical="true"
+                        android:orientation="vertical"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="17dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/sesame_widget"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="17dp"
+                            android:id="@+id/tvSysNotifyWidget"
+                            android:gravity="center_vertical"
+
+
+                            android:text="@string/android_notifica_permis_on"
+                            android:textColor="@color/tv_color_red_gray"
+                            android:textSize="11dp" />
+                    </LinearLayout>
 
                     <Switch
                         android:id="@+id/widget_switch"
@@ -683,12 +789,12 @@
                         android:layout_centerVertical="true"
                         android:layout_marginStart="17dp"
                         android:background="@color/white"
-                        android:drawableRight="@drawable/ic_arrow_gray"
+                        android:drawableEnd="@drawable/ic_arrow_gray"
                         android:gravity="center_vertical"
-                        android:paddingRight="12dp"
+                        android:paddingEnd="12dp"
                         android:textColor="@color/text_hint"
 
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <View
                         android:layout_width="match_parent"

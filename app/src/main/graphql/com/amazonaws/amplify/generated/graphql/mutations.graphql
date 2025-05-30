@@ -1,0 +1,30 @@
+# this is an auto generated file. This will be overwritten
+mutation CreateUserDevices($input: CreateUserDevicesInput!) {
+  createUserDevices(input: $input) {
+    deviceUUID
+    subUUID
+    deviceModel
+    keyIndex
+    keyLevel
+    secretKey
+    sesame2PublicKey
+    deviceName
+  }
+}
+mutation DeleteUserDevices($input: DeleteUserDevicesInput!) {
+  deleteUserDevices(input: $input) {
+    deviceUUID
+    subUUID
+    deviceModel
+    keyIndex
+    keyLevel
+    secretKey
+    sesame2PublicKey
+    deviceName
+  }
+}
+mutation CreateFriend($input: createFriendInput!) {
+  createFriend(input: $input) {
+    subUUID
+  }
+}

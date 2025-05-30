@@ -37,42 +37,42 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
 
     //  Setting vars
 
-    var defaultHintColor = Color.parseColor("#7C8894")
+    private var defaultHintColor = Color.parseColor("#7C8894")
         set(value) {
             field = value
             setHintTextColor(value)
         }
-    var activeHintColor = Color.parseColor("#019CDE")
-    var defaultUnderlineColor = Color.parseColor("#D0D4D5")
+    private var activeHintColor = Color.parseColor("#019CDE")
+    private var defaultUnderlineColor = Color.parseColor("#D0D4D5")
         set(value) {
             field = value
             underlineBackgroundPaint.color = value
         }
-    var activeUnderlineColor = Color.parseColor("#019CDE")
+    private var activeUnderlineColor = Color.parseColor("#019CDE")
         set(value) {
             field = value
             underlineForegroundPaint.color = value
         }
-    var cursorDrawableColor = Color.parseColor("#019CDE")
+    private var cursorDrawableColor = Color.parseColor("#019CDE")
         set(value) {
             field = value
             setCursorColor(value)
             highlightColor = setColorAlpha(0.2f, value)
             setSelectionHandleColor(value)
         }
-    var rightButtonColor = Color.parseColor("#7B8590")
+    private var rightButtonColor = Color.parseColor("#7B8590")
         set(value) {
             field = value
             rightIconPaint.colorFilter = PorterDuffColorFilter(value, PorterDuff.Mode.SRC_IN)
         }
-    var errorColor = Color.parseColor("#F24E4E")
+    private var errorColor = Color.parseColor("#F24E4E")
         set(value) {
             field = value
             errorPaint.color = value
             errorPaint.colorFilter = PorterDuffColorFilter(value, PorterDuff.Mode.SRC_IN)
         }
-    var isClearEnabled = true
-    var isLight = false
+    private var isClearEnabled = true
+    private var isLight = false
         set(value) {
             if (field == value) return
             if (value) {
@@ -92,7 +92,7 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
             }
             field = value
         }
-    var rightIcon: Drawable? = null
+    private var rightIcon: Drawable? = null
         set(value) {
             field = value
             val rightButtonIcon = when {
@@ -115,7 +115,7 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
                 )
             }
         }
-    var togglePasswordVisibility: Boolean = false
+    private var togglePasswordVisibility: Boolean = false
         set(value) {
             field = value
             if (value) {
@@ -286,7 +286,7 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
             animateUnderline(false)
             isFocusPending = false
         }
-        if (rightIcon != null || (hasFocus() && text!!.isNotEmpty() && rightButton != null && (isClearEnabled || togglePasswordVisibility))) {
+    /*    if (rightIcon != null || (hasFocus() && text!!.isNotEmpty() && rightButton != null && (isClearEnabled || togglePasswordVisibility))) {
             val leftOffset = if (isRTL()) {
                 rightButtonSpacing + scrollX
             } else {
@@ -298,7 +298,7 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
                 (staticUnderline!!.top - rightButtonSize + underlineHeight) / 2,
                 rightIconPaint
             )
-        }
+        }*/
         if (!errorText.isNullOrEmpty()) {
             errorPaint.alpha = (errorSpaceFraction * 255f).toInt()
             errorPaint.getTextBounds(errorText, 0, errorText!!.length, errorTextRect)
@@ -604,6 +604,7 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
         } catch (ignored: Exception) {}
     }
 
+    @SuppressLint("SoonBlockedPrivateApi")
     private fun setCursorColor(@ColorInt color: Int) {
         try {
             var field = TextView::class.java.getDeclaredField("mCursorDrawableRes")
@@ -636,7 +637,7 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
         return Color.argb(opacity, red, green, blue)
     }
 
-    private fun drawableToBitmap(drawable: Drawable): Bitmap? {
+    private fun drawableToBitmap(drawable: Drawable): Bitmap {
         val bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
             Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         } else {

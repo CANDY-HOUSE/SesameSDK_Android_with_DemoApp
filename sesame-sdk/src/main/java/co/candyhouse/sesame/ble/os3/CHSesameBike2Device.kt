@@ -3,9 +3,6 @@ package co.candyhouse.sesame.ble.os3
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import co.candyhouse.sesame.ble.*
-import co.candyhouse.sesame.ble.CHDeviceUtil
-import co.candyhouse.sesame.ble.SesameItemCode
-import co.candyhouse.sesame.ble.checkBle
 import co.candyhouse.sesame.ble.os3.base.CHSesameOS3
 import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
@@ -14,6 +11,7 @@ import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.*
 import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
 import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.*
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
@@ -27,11 +25,44 @@ import java.util.*
             parceADV(value)
         }
 
+
+    /** 聯網處理 */
+    var isConnectedByWM2: Boolean = false
+    override fun goIOT() {
+        CHIotManager.subscribeSesame2Shadow(this) { result ->
+            result.onSuccess { resource ->
+                L.d("hcia", "[bike2][iot]")
+                L.d("hcia", "\uD83E\uDD5D [bike2]ss5_shadow裡存的hub3列表:" + resource.data.state.reported.wm2s)
+                resource.data.state.reported.wm2s?.let { wm2s ->
+                    L.d("hcia", "[bike2]wm2s:$wm2s")
+                    isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
+                }
+
+                if (isConnectedByWM2) {
+                    resource.data.state.reported.mechst?.let { mechShadow ->
+                        mechStatus = CHSesameBike2MechStatus(mechShadow.hexStringToByteArray().sliceArray(0..2))
+                        L.d("hcia", "[bike2]mechStatus isInUnlockRange: " + mechStatus!!.isInUnlockRange.toString())
+                    }
+
+                    deviceShadowStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+                } else {
+                    deviceShadowStatus = null
+                }
+
+            }
+        }
+
+    }
+
     /** 指令發送  */
     override fun unlock(tag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (checkBle(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, byteArrayOf()), DeviceSegmentType.cipher) {
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+        if (deviceStatus.value == CHDeviceLoginStatus.Login&&isBleAvailable(result)) {
+            sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, byteArrayOf()), DeviceSegmentType.cipher) {
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            }
+        } else {
+            CHAccountManager.cmdSesame(SesameItemCode.unlock, this, byteArrayOf(), result)
+
         }
     }
 
@@ -42,6 +73,7 @@ import java.util.*
         }
         makeApiCall(result) {
             val serverSecret = mSesameToken.toHexString()
+            CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret))
             deviceStatus = CHDeviceStatus.Registering
             sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
                 /** 根據設備狀態特殊處理 */
@@ -64,8 +96,6 @@ import java.util.*
         } else {
             AesCmac(sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(mSesameToken)
         }
-        L.d("login","isNeedAuthFromServer:$isNeedAuthFromServer--${mSesameToken.toHexString()}--sessionAuth:${sessionAuth}---${sesame2KeyData!!.secretKey.hexStringToByteArray().toHexString()}")
-
         cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
     }

@@ -18,6 +18,8 @@ internal var httpScope = CoroutineScope(IO)
 @Database(entities = [CHDevice::class], version = 29, exportSchema = false)
 internal abstract class CHDB : RoomDatabase() {
     object CHSS2Model : BaseModel<CHDevice>(getDatabase().ss2dao()) {
+
+
         fun getDevice(deviceID: String, onResponse: HttpResponseCallback<CHDevice>) = httpScope.launch {
 //                    L.d("hcia", "有沒有匹配上啊？ deviceID:" + deviceID)
 //            val tmpdev = CHSS2Model.mDao.getAll()
@@ -26,7 +28,7 @@ internal abstract class CHDB : RoomDatabase() {
 //            L.d("hcia", "匹配上 ! tmpdev:" + tmp.first().profile?.name + " nickname:" + tmp.first().nickname)
                 onResponse.invoke(Result.success(tmp.first()))
             } else {
-              L.d("hcia", "!!!沒有匹配上啊 deviceID:" + deviceID)
+                L.d("hcia", "!!!沒有匹配上啊 deviceID:" + deviceID)
                 onResponse.invoke(Result.failure(CHError.NotfoundError.value))
             }
         }
@@ -39,8 +41,29 @@ internal abstract class CHDB : RoomDatabase() {
         }
     }
 
-    abstract fun ss2dao(): CHSS2Dao
+//    object CHWM2Model : BaseModel<CHWm2RoomData>(getDatabase().wm2dao()) {
+//        fun getDevice(deviceID: String, onResponse: HttpResponseCallback<CHDevice>) = httpScope.launch {
+//            //        L.d("hcia", "有沒有匹配上啊？ deviceID:" + deviceID)
+////            val tmpdev = CHSS2Model.mDao.getAll()
+//            val tmp = CHSS2Model.mDao.getAll().filter { it.deviceUUID == deviceID }
+//            if (tmp.count() != 0) {
+////            L.d("hcia", "匹配上 ! tmpdev:" + tmp.first().profile?.name + " nickname:" + tmp.first().nickname)
+//                onResponse.invoke(Result.success(tmp.first()))
+//            } else {
+////            L.d("hcia", "!!!沒有匹配上啊 deviceID:" + deviceID)
+//            }
+//        }
+//
+//        fun delete(device: CHDevice, onResponse: HttpResponseCallback<Any>) {
+//            mExecutor.execute {
+//                CHSS2Model.mDao.delete(device)
+//                onResponse.invoke(Result.success(""))
+//            }
+//        }
+//    }
 
+    abstract fun ss2dao(): CHSS2Dao
+//    abstract fun wm2dao(): CHWM2Dao
 
 
     companion object {
@@ -63,6 +86,22 @@ internal abstract class CHDB : RoomDatabase() {
     }
 }
 
+//object MIGRATION_29_30 : Migration(29, 30) {
+//    override fun migrate(database: SupportSQLiteDatabase) {
+//
+//        database.execSQL(
+//                "CREATE TABLE CHWm2RoomData (deviceUUID TEXT NOT NULL , deviceModel TEXT NOT NULL, secretKey TEXT NOT NULL, PRIMARY KEY(deviceUUID))");
+//    }
+//}
+
+//@Dao
+//interface CHWM2Dao : BaseDao<CHWm2RoomData> {
+//    @Query("delete from CHWm2RoomData")
+//    override fun deleteAll()
+//
+//    @Query("SELECT * from CHWm2RoomData")
+//    override fun getAll(): List<CHWm2RoomData>
+//}
 
 @Dao
 interface CHSS2Dao : BaseDao<CHDevice> {

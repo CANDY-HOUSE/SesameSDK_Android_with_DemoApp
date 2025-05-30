@@ -1,0 +1,6 @@
+# this is an auto generated file. This will be overwritten
+query GetTest($ssb: String) {
+  getTest(ssb: $ssb) {
+    subUUID
+  }
+}

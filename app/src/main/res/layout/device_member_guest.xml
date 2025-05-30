@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="90dp"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal">
+
     <TextView
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
@@ -13,44 +14,42 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:lines="1"
-        tools:text="subtitle"
         android:textSize="12sp"
-        app:autoSizeTextType="uniform" />
+        app:autoSizeTextType="uniform"
+        tools:text="subtitle" />
+
     <View
         android:id="@+id/cell_back"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        >
-
-    </View>
+        android:layout_centerVertical="true" />
 
     <ImageView
         android:id="@+id/man_img"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:background="@drawable/round_light_gray"
         android:padding="5dp"
-        android:src="@mipmap/ic_launcher_round">
-
-    </ImageView>
+        android:src="@mipmap/ic_launcher_round" />
 
     <TextView
         android:id="@+id/title"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="2dp"
+        android:ellipsize="end"
         android:gravity="center"
-        tools:text="titlssssssse"
         android:lines="1"
-        app:autoSizeMinTextSize="8dp"
-        app:autoSizeMaxTextSize="19dp"
+        android:textSize="13sp"
+        app:autoSizeMaxTextSize="13sp"
+        app:autoSizeMinTextSize="5sp"
+        app:autoSizeStepGranularity="1sp"
         app:autoSizeTextType="uniform"
-        />
+        tools:text="title" />
 
 </RelativeLayout>

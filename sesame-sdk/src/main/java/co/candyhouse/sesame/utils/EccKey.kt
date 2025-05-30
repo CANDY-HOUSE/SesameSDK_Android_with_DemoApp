@@ -36,7 +36,7 @@ internal object EccKey {
     internal fun getDeviceECCKey(): KeyPair {
         keyPairA?.let { return it }
         val keyGen = KeyPairGenerator.getInstance("EC")
-        keyGen.initialize(ECGenParameterSpec("secp256r1")) //prime256v1 == secp256r1 == NIST P-256  secp256r1 是基于椭圆曲线 y² = x³ - 3x + b
+        keyGen.initialize(ECGenParameterSpec("secp256r1")) //prime256v1 == secp256r1 == NIST P-256
         val newKeyPairA = keyGen.generateKeyPair()
         keyPairA = newKeyPairA
         return newKeyPairA

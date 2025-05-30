@@ -3,6 +3,7 @@ package co.utils.recycle
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
+import kotlin.math.max
 
 
 class MyLayoutManager : RecyclerView.LayoutManager() {
@@ -28,7 +29,7 @@ class MyLayoutManager : RecyclerView.LayoutManager() {
             if (curLineWidth <= sumWidth) { //不需要换行
                 layoutDecorated(view, curLineWidth - width, curLineTop, curLineWidth, curLineTop + height)
                 //比较当前行多有item的最大高度
-                lastLineMaxHeight = Math.max(lastLineMaxHeight, height)
+                lastLineMaxHeight = max(lastLineMaxHeight, height)
             } else { //换行
                 curLineWidth = width
                 if (lastLineMaxHeight == 0) {

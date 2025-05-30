@@ -3,16 +3,17 @@ package co.utils
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Base64
+import com.google.android.gms.location.LocationServices
 import java.nio.charset.StandardCharsets
 import java.util.*
-
+import co.candyhouse.server.CHResult
+import co.candyhouse.server.CHResultState
 import android.location.Location
 import androidx.core.app.ActivityCompat
 import android.Manifest
-import co.candyhouse.sesame.open.CHResultState
-
-typealias HttpResponseCallback<T> = (Result<T>) -> Unit
-typealias CHResult<T> = (Result<CHResultState<T>>) -> Unit
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.Task
 
 internal fun String.base64decodeHex(): String {
     val data = Base64.decode(this, Base64.DEFAULT)
@@ -20,6 +21,9 @@ internal fun String.base64decodeHex(): String {
 }
 
 internal fun String.noHashtoUUID(): UUID? {
+    if (this.length != 32) {
+        throw IllegalArgumentException("Input string must be 32 characters long")
+    }
     val input = this
     val tmp = input.length - 1
     val testid = input.substring(0..7) + "-" + input.substring(8..11) + "-" + input.substring(12..15) + "-" + input.substring(16..19) + "-" + input.substring(20..tmp)
@@ -43,7 +47,7 @@ internal fun String.hexStringToIntStr(): String {
     for ((index, value) in this.withIndex()) {
         println("the element at $index is $value")
         if (index % 2 == 1) {
-            tmp = tmp + value
+            tmp += value
         }
     }
     return tmp
@@ -54,9 +58,13 @@ fun getLastKnownLocation(contex: Context, onResponse: CHResult<Location?>) {
     if (!islocationOK) {
         return
     }
-
+    LocationServices.getFusedLocationProviderClient(contex).getCurrentLocation(PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token).addOnCompleteListener { task: Task<Location> ->
+        if (task.isSuccessful && task.result != null) {
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(task.result)))
+        }
+    }
 }
-data class CHUser(var sub: String, val email: String, var nickname: String?, var keyLevel: Int?, var gtag: String?)
+
 fun convertStringToColor(text: String): String {
     return String.format("#FF%06X", 0xFFFFFF and text.hashCode())
 }

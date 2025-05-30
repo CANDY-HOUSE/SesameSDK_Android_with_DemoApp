@@ -3,8 +3,9 @@ package co.utils.alerts
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import android.widget.TextView
 import co.candyhouse.app.R
-import kotlinx.android.synthetic.main.alert_check.*
 
 
 class CheckAlert(context: Context) : BaseAlert(context) {
@@ -20,15 +21,16 @@ class CheckAlert(context: Context) : BaseAlert(context) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         with(mAlertView) {
 
             titleText?.let {
-                tvTitle.text = it
-                tvTitle.visibility = View.VISIBLE
+                findViewById<TextView>(R.id.tvTitle).text = it
+                findViewById<TextView>(R.id.tvTitle).visibility = View.VISIBLE
             }
             contentText?.let {
-                subTitle.text = it
-                subTitle.visibility = View.VISIBLE
+                findViewById<TextView>(R.id.subTitle)    .text = it
+                findViewById<TextView>(R.id.subTitle)   .visibility = View.VISIBLE
             }
 
         }
@@ -37,8 +39,9 @@ class CheckAlert(context: Context) : BaseAlert(context) {
     }
 
     fun update() {
-        btnCancel.visibility = View.VISIBLE
-        btnCancel.setOnClickListener {
+
+        findViewById<Button>(R.id.btnCancel).visibility = View.VISIBLE
+        findViewById<Button>(R.id.btnCancel).setOnClickListener {
             this@CheckAlert.dismiss()
 //                mOnCancel?.invoke(this@CheckAlert) ?: this@CheckAlert.dismiss()
         }

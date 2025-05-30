@@ -19,7 +19,6 @@ package com.skydoves.balloon
 import android.widget.TextView
 
 /** applies text form attributes to a TextView instance. */
-@Suppress("unused")
 internal fun TextView.applyTextForm(textForm: TextForm) {
   text = textForm.text
   textSize = textForm.textSize

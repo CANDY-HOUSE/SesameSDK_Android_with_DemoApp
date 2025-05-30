@@ -16,7 +16,11 @@
 -keepattributes *Annotation*
 
 # Class names are needed in reflection
+-keepnames class com.amazonaws.**
+-keepnames class com.amazon.**
 
+# Request handlers defined in request.handlers
+-keep class com.amazonaws.services.**.*Handler
 
 # The following are referenced but aren't required to run
 -dontwarn com.fasterxml.jackson.**
@@ -26,7 +30,8 @@
 -dontwarn org.apache.http.**
 
 # The SDK has several references of Apache HTTP client
-
+-dontwarn com.amazonaws.http.**
+-dontwarn com.amazonaws.metrics.**
 -dontwarn kotlin.**
 -dontwarn kotlinx.**
 
@@ -37,9 +42,6 @@
 -keep public class co.candyhouse.sesame.db.** { *; }
 -keep public class co.candyhouse.sesame.server.dto.** { *; }
 
-#-assumenosideeffects class co.candyhouse.sesame.utils.L {
-#*;
-#}
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
   public static void checkExpressionValueIsNotNull(java.lang.Object, java.lang.String);
   public static void checkFieldIsNotNull(java.lang.Object, java.lang.String);
@@ -54,11 +56,7 @@
   public static void throwUninitializedPropertyAccessException(java.lang.String);
 }
 
--assumenosideeffects class android.util.Log {
-    public static boolean isLoggable(java.lang.String,int);
-    public static int v(...);
-    public static int i(...);
-    public static int w(...);
-    public static int d(...);
-   public static int e(...);
-}
+-keep class co.candyhouse.sesame.ble.CHBaseDevice { *; }
+-keep class co.candyhouse.sesame.open.device.CHDeviceStatus { *; }
+-keep interface co.candyhouse.sesame.open.device.CHDevices { *; }
+-keep class co.candyhouse.sesame.** { *; }

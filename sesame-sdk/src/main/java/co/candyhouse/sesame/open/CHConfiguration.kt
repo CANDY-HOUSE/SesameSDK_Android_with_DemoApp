@@ -2,8 +2,8 @@ package co.candyhouse.sesame.open
 
 
 object CHConfiguration {
-    var CLIENT_ID: String? = "1111111111111111122222131313213"
-
+    const val CLIENT_ID: String = "YOUR_CLIENT_ID"
+    const val API_KEY: String = "YOUR_API_KEY"
 }
 
 
