@@ -2,7 +2,7 @@
 # SesameSDK3.0 for Android
 
 - Sesame app on <img src="https://img.shields.io/badge/Play Store-34A853?logo=googleplay&logoColor=white"/> [https://play.google.com/store/apps/details?id=co.candyhouse.sesame2](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
-- Sesame app on <img src="https://img.shields.io/badge/Google Drive-1A73E8?logo=googledrive&logoColor=white"/> [https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/](https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/)
+- Sesame app on <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"/> [https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases](https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/)
 - ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
 
 
@@ -16,12 +16,23 @@
 - デバイスの各種設定
 - バッテリー残量の取得
 
+## Disclaimer
+
+Please read our [DISCLAIMER](DISCLAIMER.md) before using this software.
+
 ##  Requirements
 <img src="https://img.shields.io/badge/Kotlin-1.4-7F52FF" />.  
 <img src="https://img.shields.io/badge/Bluetooth-4.0LE +-0082FC" />  
 <img src="https://img.shields.io/badge/Android-5.0 +-3DDC84" />  
 <img src="https://img.shields.io/badge/Android Studio-2022 +-3DDC84" />  
 
+## 設定方法
+
+本デモはAWS・Firebaseサービスを使用します。以下の手順で設定してください：
+
+1. プロジェクト全体で「YOUR_」を検索
+2. 見つかったパラメータをご自身の情報に置き換え
+3. すべての置き換えが完了後、デモを実行
  
 ### 1. ライブラリーの依存
 ```svg
