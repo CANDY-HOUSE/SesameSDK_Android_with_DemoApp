@@ -251,6 +251,7 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
     fun switchModel(isClose: Boolean) {
         if (isClose) {
             isRegisterMode = false
+            viewModel.getCHHub3().unsubscribeLearnData()
             viewModel.getCHHub3().irModeSet(MODEL_CONTROL.toByte()) {
                 it.onSuccess {
                     handleActionOnMainThread {
@@ -373,9 +374,6 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
                 L.d(gTag, "onIRModeReceive: $mode")
                 bind.topTitle.imgRight.isSelected = mode != MODEL_CONTROL
                 isRegisterMode = mode != MODEL_CONTROL
-                if (!isRegisterMode) {
-                    viewModel.getCHHub3().unsubscribeLearnData()
-                }
             }
 
             override fun onIRCodeReceiveStart(device: CHHub3) {
