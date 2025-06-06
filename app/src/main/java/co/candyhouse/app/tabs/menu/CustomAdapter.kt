@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package co.candyhouse.app.tabs.menu
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import kotlinx.android.synthetic.main.item_custom.view.*
 
-
-class CustomAdapter(private val delegate: CustomViewHolder.Delegate) : RecyclerView.Adapter<CustomAdapter.CustomViewHolder>() {
+class CustomAdapter(private val delegate: CustomViewHolder.Delegate) :
+    RecyclerView.Adapter<CustomAdapter.CustomViewHolder>() {
 
     private val customItems = mutableListOf<BarMenuItem>()
 
@@ -36,12 +37,19 @@ class CustomAdapter(private val delegate: CustomViewHolder.Delegate) : RecyclerV
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val customItem = this.customItems[position]
         holder.itemView.run {
-            item_custom_icon.setImageDrawable(customItem.icon)
-            item_custom_title.text = customItem.title
-            setOnClickListener { delegate.onCustomItemClick(customItem) }
+            holder.itemView.findViewById<ImageView>(R.id.item_custom_icon)
+                .setImageDrawable(customItem.icon)
+            holder.itemView.findViewById<TextView>(R.id.item_custom_title).text = customItem.title
+
+            setOnClickListener {
+                if (holder.itemView.isAttachedToWindow) {
+                    delegate.onCustomItemClick(customItem)
+                }
+            }
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun addCustomItem(customList: List<BarMenuItem>) {
         this.customItems.clear()
         this.customItems.addAll(customList)
@@ -51,9 +59,9 @@ class CustomAdapter(private val delegate: CustomViewHolder.Delegate) : RecyclerV
     override fun getItemCount() = this.customItems.size
 
     class CustomViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
         interface Delegate {
             fun onCustomItemClick(customItem: BarMenuItem)
         }
     }
+
 }

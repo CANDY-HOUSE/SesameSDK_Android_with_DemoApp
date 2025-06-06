@@ -37,7 +37,7 @@ abstract class BaseAlert(context: Context) : Dialog(context, R.style.AppTheme_Fl
             override fun onAnimationStart(p0: Animation?) {}
         })
 
-        mAlertView.viewTreeObserver.addOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener {
+        mAlertView.viewTreeObserver.addOnGlobalLayoutListener {
             val rect = Rect()
             window!!.decorView.getWindowVisibleDisplayFrame(rect)
             val screenHeight = window!!.decorView.height
@@ -51,7 +51,7 @@ abstract class BaseAlert(context: Context) : Dialog(context, R.style.AppTheme_Fl
             } else {
                 mAlertView.scrollTo(0, 0)
             }
-        })
+        }
 
     }
 

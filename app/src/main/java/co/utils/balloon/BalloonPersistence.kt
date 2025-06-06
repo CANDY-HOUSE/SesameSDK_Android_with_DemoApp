@@ -28,12 +28,12 @@ internal class BalloonPersistence {
   }
 
   /** gets show-up times from the preference. */
-  fun getTimes(name: String): Int {
+  private fun getTimes(name: String): Int {
     return sharedPreferenceManager.getInt(getPersistName(name), 0)
   }
 
   /** puts show-up times to the preference. */
-  fun putTimes(name: String, times: Int) {
+  private fun putTimes(name: String, times: Int) {
     sharedPreferenceManager.edit().putInt(getPersistName(name), times).apply()
   }
 

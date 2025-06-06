@@ -1,10 +1,28 @@
 package co.candyhouse.app.tabs.devices.ssm2
 
+import android.graphics.Color
+import android.text.Layout
+import android.text.SpannableStringBuilder
+import android.text.style.AlignmentSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import androidx.fragment.app.Fragment
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.device.CHSesameBot
+import co.candyhouse.sesame.open.device.CHSesameBot2
+import co.candyhouse.sesame.open.device.CHSesameLock
+import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
+import co.candyhouse.sesame.open.device.OpenSensorData
+import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.pow
 
 fun ssm5UIParser(device: CHSesameBot): Int {
@@ -41,9 +59,91 @@ fun ssm5UIParser(device: CHSesameBot): Int {
 
 }
 
+fun ssm5UIParser(device: CHSesameBot2): Int {
+
+
+//    L.d("hcia", "[ssm5UIParser bot2!]deviceShadowStatus:" + device.deviceShadowStatus + " deviceStatus:" + device.deviceStatus)
+    if (device.deviceShadowStatus != null) {
+        if (device.deviceShadowStatus == CHDeviceStatus.Locked) {
+            return R.drawable.swtich_locked
+        }
+        if (device.deviceShadowStatus == CHDeviceStatus.Unlocked) {
+            return R.drawable.swtich_unlocked
+        }
+        if (device.deviceShadowStatus == CHDeviceStatus.Moved) {
+            return R.drawable.swtich_unlocked
+        }
+    }
+
+
+    return when (device.deviceStatus) {
+        CHDeviceStatus.DfuMode -> R.drawable.swtich_no_ble
+        CHDeviceStatus.NoBleSignal -> R.drawable.swtich_no_ble
+        CHDeviceStatus.ReceivedAdV -> R.drawable.swtich_receive_ble
+        CHDeviceStatus.BleConnecting -> R.drawable.swtich_receive_ble
+        CHDeviceStatus.DiscoverServices -> R.drawable.swtich_waitgatt
+        CHDeviceStatus.BleLogining -> R.drawable.swtich_logining
+        CHDeviceStatus.ReadyToRegister -> R.drawable.swtich_no_ble
+        CHDeviceStatus.Locked -> R.drawable.swtich_locked
+        CHDeviceStatus.Unlocked -> R.drawable.swtich_unlocked
+        CHDeviceStatus.Reset -> R.drawable.swtich_no_ble
+        CHDeviceStatus.Registering -> R.drawable.swtich_logining
+        CHDeviceStatus.WaitingForAuth -> R.drawable.icon_waitgatt
+        else -> R.drawable.ic_icons_outlined_setting
+    }
+
+}
+
+fun parseOpensensorState(mechStatus: CHSesameOpenSensorMechStatus?): SpannableStringBuilder? {
+    mechStatus?.data?.let { data ->
+        try {
+            val state = OpenSensorData.fromByteArray(data)
+            val status = state.Status
+            val statusLen = if (null == status || status.isEmpty()) 0 else status.length
+            val timeStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                .format(Date(state.TimeStamp))
+            val (dateString, timeString) = timeStr.split(" ")
+            return SpannableStringBuilder().apply {
+                append("$status\n$dateString\n$timeString")
+                setSpan(
+                    AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
+                    0,
+                    length,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                setSpan(
+                    StyleSpan(android.graphics.Typeface.BOLD),
+                    0,
+                    statusLen,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                setSpan(
+                    RelativeSizeSpan(20f / 17f), // 20sp relative to 17sp
+                    0,
+                    statusLen,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                setSpan(
+                    ForegroundColorSpan(Color.parseColor("#E4E3E3")),
+                    0,
+                    length,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    return null
+}
+
 fun ssm5UIParser(device: CHDevices): Int {
+//    L.d("ssm5UIParser",device.getNickname()+"---"+device.deviceId+"---"+device.deviceShadowStatus+"-----"+device.deviceStatus)
 
     if (device is CHSesameBot) {
+        return ssm5UIParser(device)
+    }
+    if (device is CHSesameBot2) {
         return ssm5UIParser(device)
     }
 //    L.d("hcia", "ssm5UIParser deviceShadowStatus:" + device.deviceShadowStatus + " deviceStatus:" + device.deviceStatus)
@@ -59,6 +159,9 @@ fun ssm5UIParser(device: CHDevices): Int {
                 return R.drawable.icon_unlock
             }
         }
+    }
+    if (device.productModel == CHProductModel.SSMOpenSensor) {
+        return R.drawable.icon_opensensor
     }
 
     return when (device.deviceStatus) {
@@ -170,6 +273,15 @@ fun CHDevices.getRank(): Int {
 
 fun CHDevices.uiPriority(): Int { // 利用 * -1 排序。數字越大排越上方
     return -1 * when (productModel) {
+        CHProductModel.SSMFaceProAI -> 22
+        CHProductModel.SS6Pro -> 21
+        CHProductModel.SSMFacePro -> 19
+        CHProductModel.SSMFace -> 18
+        CHProductModel.SesameBot2 -> 17
+        CHProductModel.SS5US -> 16
+        CHProductModel.RemoteNano -> 15
+        CHProductModel.Remote -> 14
+        CHProductModel.Hub3 -> 13
         CHProductModel.BLEConnector -> 11
         CHProductModel.BiKeLock2 -> 10
         CHProductModel.SSMTouch -> 9
@@ -204,7 +316,15 @@ fun CHDevices.setNickname(name: String) {
 }
 
 fun CHDevices.getNickname(): String {
-    return SharedPreferencesUtils.preferences.getString(this.deviceId.toString(), productModel.modelName()) ?: productModel.modelName()
+    try {
+        SharedPreferencesUtils.preferences
+        val deviceIdString = this.deviceId?.toString() ?: return productModel.modelName()
+        return SharedPreferencesUtils.preferences.getString(deviceIdString, productModel.modelName()) ?: productModel.modelName()
+    }catch (e:NullPointerException){
+        e.printStackTrace()
+    }
+   return ""
+
 }
 fun CHDevices.setTestLoginCount(name: Int) {
     SharedPreferencesUtils.preferences.edit().putInt("testloginct" +this.deviceId.toString(), name).apply()
@@ -214,25 +334,36 @@ fun CHDevices.getTestLoginCount(): Int {
     return SharedPreferencesUtils.preferences.getInt("testloginct" +this.deviceId.toString(),0)
 }
 
+
 fun CHDevices.getDistance(): Int {
-    return (10.0.pow(((0 - (rssi?.toDouble() ?: 0.0) - 62.0) / 20.0)) * 100).toInt()
+    val rssiValue = rssi?.toDouble() ?: return Int.MAX_VALUE
+    return (10.0.pow(((0 - rssiValue - 62.0) / 20.0)) * 100).toInt()
 }
 
 fun CHDevices.getFirZip(): Int {
-    //        L.d("hcia", "productModel:" + productModel)
+       L.d("hcia", "productModel:$productModel")
     return when (productModel) {
         CHProductModel.SS2 -> R.raw.sesame_221_0_8c080c
         CHProductModel.SS4 -> R.raw.sesame_421_4_50ce5b
-        CHProductModel.SS5 -> R.raw.sesame5_30_5_aaac8b
-        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_aaac8b
+        CHProductModel.SS5 -> R.raw.sesame5_30_5_26c21d
+        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_26c21d
         CHProductModel.WM2 -> 0
         CHProductModel.SesameBot1 -> R.raw.sesamebot1_21_2_369eb9
         CHProductModel.BiKeLock -> R.raw.sesamebike1_21_3_d7162a
-        CHProductModel.BiKeLock2 -> R.raw.sesamebike2_30_6_4835a6
-        CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_dcd308
-        CHProductModel.SSMTouchPro -> R.raw.sesametouch1pro_30_9_77a483
-        CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_77a483
-        CHProductModel.BLEConnector -> R.raw.bleconnector_30_11_3a61be
+        CHProductModel.BiKeLock2 -> R.raw.sesamebike2_30_6_f826b5
+        CHProductModel.SSMTouchPro -> R.raw.sesametouch1pro_30_9_c9c196
+        CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_c9c196
+        CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_26c21d
+        CHProductModel.BLEConnector -> R.raw.bleconnector_30_11_43712c
+        CHProductModel.Remote -> R.raw.remote_30_14_26c21d
+        CHProductModel.RemoteNano -> R.raw.remoten_30_15_26c21d
+        CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_f826b5
+        CHProductModel.SS5US -> R.raw.sesame5us_30_16_26c21d
+        CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_0ea68f
+        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_6f2470
+        CHProductModel.SSMFace -> R.raw.sesameface1_30_19_0ea68f
+        CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_5d4cb1
+        else ->0
     }
 
 //    fun findDFU(zipStart: String): Int {
@@ -275,5 +406,14 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMTouchPro -> MainActivity.activity!!.getString(R.string.SSMTouchPro)
         CHProductModel.SSMTouch -> MainActivity.activity!!.getString(R.string.SSMTouch)
         CHProductModel.BLEConnector -> MainActivity.activity!!.getString(R.string.BLEConnector)
+        CHProductModel.Hub3 -> MainActivity.activity!!.getString(R.string.Hub3)
+        CHProductModel.Remote -> MainActivity.activity!!.getString(R.string.CHRemote)
+        CHProductModel.RemoteNano -> MainActivity.activity!!.getString(R.string.CHRemoteNano)
+        CHProductModel.SS5US -> MainActivity.activity!!.getString(R.string.Sesame5us)
+        CHProductModel.SesameBot2 -> MainActivity.activity!!.getString(R.string.SesameBot2)
+        CHProductModel.SSMFace -> MainActivity.activity!!.getString(R.string.SSMFace)
+        CHProductModel.SSMFacePro -> MainActivity.activity!!.getString(R.string.SSMFacePro)
+        CHProductModel.SSMFaceProAI -> MainActivity.activity!!.getString(R.string.SSMFaceProAI)
+        CHProductModel.SS6Pro -> MainActivity.activity!!.getString(R.string.Sesame6Pro)
     }
 }

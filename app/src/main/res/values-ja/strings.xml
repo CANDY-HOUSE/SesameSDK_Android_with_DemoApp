@@ -7,26 +7,43 @@
     <string name="email">Eメール</string>
     <string name="new_password">新しいパスワード</string>
     <string name="sign_up">登録</string>
+    <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="wins">Wins</string>
     <string name="done">Done</string>
     <string name="title_about">About</string>
+    <string name="Sesame5us">セサミ 5 北米北欧版</string>
     <string name="title_registered">Registered</string>
     <string name="title_me">自分</string>
+    <string name="pleaseemail">相手のメールアドレスを入力してください</string>
     <string name="title_list">セサミ</string>
     <string name="title_detail">Profile</string>
     <string name="cd_home">Home!!</string>
     <string name="cd_list">List</string>
+    <string name="default_face_name">顔 🖊️</string>
+    <string name="default_palm_name">手のひら静脈🖊️</string>
+    <string name="facial">顔</string>
+    <string name="DelFace">顔の削除</string>
+    <string name="matterMsg">Matterペアリングモードに入りました。15分以内にペアリングを完了してください。失敗した場合は、このページに再度アクセスしてMatterペアリングモードを再起動してください</string>
+    <string name="qrcodeNotSupport">このQRコードは対応していません</string>
+    <string name="sesamefaceMsg">%1$sに近づきBluetooth接続し、⊕ をタップして顔を登録。登録後 X をタップ。</string>
+    <string name="sesamepalmMsg">%1$sに近づきBluetooth接続し、⊕ をタップして手のひら静脈を登録。登録後 X をタップ。</string>
+    <string name="hub3_hint_ir">このHub3から5メートル以内の赤外線デバイスを追加してください：</string>
+    <string name="addFail">追加に失敗しました</string>
+    <string name="cameraError">カメラエラーError</string>
     <string name="cd_form">Form</string>
+    <string name="forever">永遠</string>
+    <string name="delete_account">アカウントを削除する</string>
+    <string name="clickaction">⊕をクリックし動作を追加してください。\n秒数を「永遠」に設定し実行された場合、他の台本へ切替えて実行しない限り、SesameBot2は止まりません。\nモーター正逆回転スピードに公差があり、押す時間が戻すより少し長くするようお願い。</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="logout">ログアウト</string>
     <string name="title_friends">連絡先</string>
     <string name="change_sesame_name">セサミの名前を変更</string>
     <string name="qrhint">セサミアプリでQRコードをスキャンして連絡先へ追加してください</string>
     <string name="change_sesame_angle">角度の設定</string>
-    <string name="ssm_update">SesameOSの更新と再起動</string>
+    <string name="ssm_update">SesameOS更新と再起動</string>
     <string name="autolock">タイマー式のオートロック</string>
     <string name="ds_delay">delay</string>
-    <string name="ssm_delete">セサミを削除</string>
+    <string name="ssm_delete">削除</string>
     <string name="cancel">キャンセル</string>
     <string name="last_name">姓</string>
     <string name="first_name">名</string>
@@ -65,6 +82,7 @@
     <string name="onFirmwareValidating">DFU認証中</string>
     <string name="onDfuProcessStarted">"DFUスタート "</string>
     <string name="toastBleNotReadyForDFU">"近づいてBluetoothで接続できてから、再度お行いくださいませ"</string>
+    <string name="BleTooManyConnections">"Androidと接続しているBluetoothが多すぎてうまく機能していないため、AndroidのBluetoothをオフにし、再度オンにしてください"</string>
 
     <string name="onError">DFUエラー</string>
     <string name="too_close">施錠の位置と解錠の位置が近すぎます😅</string>
@@ -73,10 +91,16 @@
     <string name="trash_key">このセサミを削除する</string>
     <string name="share_key">このセサミの鍵をシェア</string>
     <string name="share_management_view">この管理画面をシェア</string>
-
-
     <string name="on">オン</string>
     <string name="Off">オフ</string>
+    <string name="immediately">すぐに</string>
+    <string name="second2">秒</string>
+    <string name="choosetime">秒数を選択</string>
+    <string name="timePrompt">秒数を選択してください</string>
+    <string name="scriptPrompt">動作スクリプトを選択</string>
+    <string name="sec1">1 秒</string>
+    <string name="sec2">2 秒</string>
+    <string name="sec4">4 秒</string>
     <string name="sec3">3 秒</string>
     <string name="sec5">5 秒</string>
     <string name="sec7">7 秒</string>
@@ -85,6 +109,8 @@
     <string name="sec30">30 秒</string>
     <string name="min1">1 分</string>
     <string name="min2">2 分</string>
+    <string name="min3">3 分</string>
+    <string name="min4">4 分</string>
     <string name="min5">5 分</string>
     <string name="min10">10 分</string>
     <string name="min15">15 分</string>
@@ -95,33 +121,45 @@
     <string name="manager">マネジャー</string>
     <string name="guest">ゲスト</string>
 
-    <string name="WM2">WiFi モジュール</string>
+    <string name="WM2">WiFiモジュール</string>
     <string name="Sesame">セサミ</string>
     <string name="SesameBot">セサミ ボット</string>
     <string name="Sesame5">セサミ 5</string>
+    <string name="SesameBot2">セサミ ボット 2</string>
     <string name="Sesame5pro">セサミ 5 Pro</string>
-
     <string name="SesameBike">セサミ サイクル</string>
     <string name="SesameBike2">セサミ サイクル 2</string>
     <string name="SesameOpenSensor">オープンセンサー</string>
     <string name="SSMTouchPro">セサミタッチ Pro</string>
     <string name="SSMTouch">セサミタッチ</string>
     <string name="BLEConnector">BLE Connector</string>
-    
+    <string name="Hub3">ハブ3</string>
+    <string name="CHRemote">リモート</string>
+    <string name="CHRemoteNano">リモート nano</string>
+    <string name="SSMFacePro">セサミフェイス Pro</string>
+    <string name="SSMFaceProAI">セサミフェイス Pro AI</string>
+    <string name="SSMFace">セサミフェイス</string>
+    <string name="Sesame6Pro">セサミ 6 Pro</string>
+
     <string name="unLoginHistoryTag">未登録利用者</string>
     <string name="empty_friend">連絡先なし</string>
-    <string name="wm2_update">SesameOSをアップデート</string>
+    <string name="wm2_update">OS更新と再起動</string>
     <string name="wm2_pwk">WiFi パスワード</string>
     <string name="wm2_pwk_hint">WiFi環境のパスワードをご入力ください</string>
+    <string name="hub3_ir_title">IR Control</string>
     <string name="wm2_ssid">WiFi SSID</string>
     <string name="shareSesameToFriends">デバイスをシェア…</string>
     <string name="revoke">鍵を取り消す</string>
     <string name="login">ログイン/登録</string>
     <string name="loginNeed">ログインをお願い。</string>
     <string name="Notification">通知</string>
+    <string name="OpenSensor_on">オープンセンサーで施錠</string>
+    <string name="remoteNanoTriggerSettingHint">誤作動防止の為の長押して作動させる時間</string>
     <string name="VerificationCode">メールで届いた認証コード</string>
     <string name="ResetWifiModule2">このWiFiモジュールを初期化、そして鍵を捨てる</string>
+    <string name="ResetHub3">このHub3を初期化、そして鍵を捨てる</string>
     <string name="TrashTheWifiModule2Key">このWiFiモジュールを削除する</string>
+    <string name="TrashTheHub3Module2Key">このHub3を削除する</string>
     <string name="TrashTheOpenSensorKey">このOpen Sensorを削除する</string>
     <string name="modifyGuestKeyTag">ゲストキー名の変更</string>
 
@@ -129,6 +167,7 @@
     <string name="addSesameTo">セサミを追加…</string>
     <string name="wm2NetworkConnectionStatus">ネット接続状態</string>
     <string name="key_level">役割と権限</string>
+    <string name="click_script">台本</string>
     <string name="Wm2WifiOK">WiFiモジュールがネットに接続できました</string>
     <string name="BotModeNormal">押して戻る</string>
     <string name="BotModeReverse">Reversed</string>
@@ -145,8 +184,10 @@
     <string name="NoBleSignal">Bluetooth信号見つからず、近づいてください</string>
 
     <string name="wm2_hint">このWiFiモジュールと5メートル以内に接続するセサミを追加してください：</string>
+    <string name="hub3_hint">このHub3と5メートル以内に接続するセサミを追加してください：</string>
     <string name="friend_keys_hint">この連絡先にシェアされているデバイスの鍵：</string>
     <string name="drop_hint">%1$sを削除しても%1$sは初期化またリセットされません。%1$sを初期化またリセットするには、細い棒でリセットボタンをLED点灯が消えるまで長押ししてください。</string>
+    <string name="drop_hint_press">%1$sを削除しても%1sを削除してもsは初期化またリセットされません。%1$sを初期化またリセットするには、リセットボタンをLED点灯が消えるまで長押ししてください</string>
 
 
     <string name="historyLOCK">が施錠されました</string>
@@ -185,30 +226,81 @@
 
     <string name="upload_keys_fail">ネットワーク接続の不安定によりデバイスのペアリングが失敗した場合、画面のリフレッシュもしくはアカウントのログアウト・再ログインをするとデバイスが消失するリスクがございます。</string>
 
-    <string name="TouchEmptyFingerHint">Sesame Touchデバイスに近づき、⊕ アイコンを押し、Sesame Touchに指をかざして指紋を追加してください。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
-    <string name="TouchEmptyNFCHint">Sesame Touchデバイスに近づき、⊕ アイコンを押し、Sesame TouchにICカードをかざしてICカードを追加してください。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
-    <string name="TouchEmptyPasscodeHint">Sesame Touchデバイスに近づき、⊕ アイコンを押し、Sesame Touchに暗証番号を入力して施錠また解錠ボタンで追加してください。</string>
-    <string name="TouchProCardModify">ICカードの名前変更🖊️</string>
+    <string name="TouchEmptyFingerHint">S%1$sデバイスに近づき、⊕ アイコンを押し、%2$sに指をかざして指紋を追加してください。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
+    <string name="TouchEmptyFingerHintFace">Sesame Faceデバイスに近づき、⊕ アイコンを押し、Sesame Faceに指をかざして指紋を追加してください。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
+    <string name="TouchEmptyNFCHint">%1$sデバイスに近づき、⊕ アイコンを押し、%2$sにICカードをかざしてICカードを追加してください。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
+    <string name="TouchEmptyNFCFaceHint">Sesame Faceデバイスに近づき、⊕ アイコンを押し、Sesame FaceにICカードをかざしてICカードを追加してください。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
+    <string name="TouchEmptyPasscodeHint">%1$sデバイスに近づき、⊕ アイコンを押し、%1$sに暗証番号を入力して施錠また解錠ボタンで追加してください。</string>
+    <string name="HUB3EmptyIRCodeHint">ハブ 3に近づき⊕アイコンをタップして、リモコンをハブ 3に向け、リモコンのボタンを押して赤外線信号を送信します。</string>
+
+    <string name="TouchProCardRename">ICカードの名前変更🖊️</string>
+    <string name="TouchProFaceRename">顔の名前変更🖊️</string>
+    <string name="TouchProCardModify">Modify the NFC card number🖊️</string>
+    <string name="TouchProCardMove">Move to …</string>
     <string name="TouchProCardDelete">ICカードの削除</string>
+    <string name="ssm_add_to_matter_as_doorlock">Add this Sesame to Matter as DoorLock</string>
+    <string name="ssm_add_to_matter_as_switch">Add this Sesame to Matter as switch</string>
+
+    <string name="door_lock">ドア鍵</string>
+    <string name="on_off_switch">スイッチ</string>
+
+    <string name="TouchProCardAdd">Add NFC card</string>
+
     <string name="nfcCard">ICカードの管理</string>
     <string name="fingerprint">指紋の管理</string>
     <string name="passcodes">暗証番号の管理</string>
+    <string name="faces">顔認識の管理</string>
     <string name="add_ssm_hint_by_touch">この%1$sと1メートル以内に接続するセサミを追加してください：</string>
-    <string name="pleaseResetOpenSensor">設定ページから一度退出した場合、SesameOSを更新後に再起動した場合、またはスマートフォンとのBluetooth接続が切れた場合、オープンセンサーは省エネモードに自動的に切り替わります。SesameOSをアップデートしたい、または新たにセサミを追加したい場合は、細い棒でオープンセンサーのリセットボタンを約5秒間長押しし、LEDが消灯するまでリセットを行ってください。その後、再度⊕ボタンから登録を行ってください。</string>
+    <string name="pleaseResetOpenSensor">設定ページから一度退出した場合、SesameOSを更新後に再起動した場合、またはスマートフォンとのBluetooth接続が切れた場合、%1$sは省エネモードに自動的に切り替わります。SesameOSをアップデートしたい、または新たにセサミを追加したい場合は、細い棒で%1$sのリセットボタンを約5秒間長押しし、LEDが消灯するまでリセットを行ってください。その後、再度⊕ボタンから登録を行ってください。</string>
     <string name="default_card_name">ICカード🖊️</string>
     <string name="TouchProFingerModify">指紋の名前変更🖊️</string>
     <string name="TouchProFingerDelete">指紋の削除</string>
-    <string name="TouchProPWDModify">暗証番号の名前変更🖊️</string>
+    <string name="TouchProPWDRename">暗証番号の名前変更🖊️</string>
+    <string name="TouchProPWDModify">Modify the passcode value🖊️</string>
+    <string name="TouchProPWDAdd">Add Passcode</string>
+    <string name="MatterSettings">Matter Settings</string>
+    <string name="SkipMatterSettings">Matterの設定をスキップ</string>
+    <string name="OpenMatterPairingWindow">Open MATTER Pairing Window</string>
+
     <string name="TouchProPWDDelete">暗証番号の削除</string>
     <string name="trash_device_key">この%1$sを削除する</string>
     <string name="reset_device_key">この%1$sを初期化して削除する</string>
     <string name="default_passcode_name">暗証番号🖊️</string>
     <string name="default_fingerprint_name">指紋🖊️</string>
+    <string name="default_ircode_name">IRcode🖊️</string>
+    <string name="HUB3IRCodeRename">Rename the IR code🖊️</string>
+    <string name="HUB3IRCodeEmit">Emit the IR code🖊️</string>
+    <string name="HUB3IRCodeDel"> IR コードを削除</string>
+    <string name="TouchProPalmRename">手のひら静脈名を変更🖊️</string>
+    <string name="DelPalm">手のひら静脈を削除</string>
+
     <string name="judge_the_sesame">水平の調整</string>
     <string name="device_model">機種</string>
-    <string name="no_more"></string>
-<!--    <string name="load_fail">データ読込失敗</string>-->
+    <string name="no_more" />
+    <!--    <string name="load_fail">データ読込失敗</string>-->
     <string name="battary">電池残量</string>
+    <string name="open_sensor_status">スイッチの状態</string>
+    <string name="open_sensor_last_update_time">Update Time</string>
+
+    <string name="android_notifica_permis_on">Androidの通知権限を取得済み</string>
+    <string name="android_notifica_permis_off">Androidの通知権限がありません(ここをクリック)</string>
+    <string name="facepalm">手のひら静脈の管理</string>
+    <string name="addOpenSensorToHub3">このスイッチセンサーをHub3にバインドする…</string>
+    <string name="hub3_addSesameTo">赤外線データを追加...</string>
+    <string name="login_fg_input_mail_warn">正しいメールアドレスを入力してください</string>
+
+    <string name="hub3_details">詳細</string>
+
+    <string name="sesame_widget_notification">タップしてロック解除ウィジェットを起動</string>
+    <string name="delete_failed_tips">削除に失敗しました。再試行してください</string>
+
+    <string name="key">鍵</string>
+    <string name="share">シェア</string>
+
+    <string name="distance">距離</string>
+    <string name="brightness">明るさ</string>
+    <string name="radar">レーダーの\n探知距離</string>
+    <string name="radar_distance_description">レーダーがシステムを睡眠状態から起こす距離です。\n人通りの多い場所では、 短めに設定することで電池消費を抑えられます。\n人通りの少ない場所では、最長に設定すると非常に快適にご利用いただけます。</string>
 
 </resources>
 

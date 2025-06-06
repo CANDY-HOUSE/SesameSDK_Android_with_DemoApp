@@ -1,17 +1,19 @@
 package co.candyhouse.sesame.utils
 
 import android.util.Base64
-
+import com.amazonaws.regions.Regions
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Random
+import java.util.UUID
 import kotlin.experimental.and
 
+public fun String.getClientRegion(): Regions {
+    return Regions.fromName(this.split(":").first())
+}
 
 
-
-
-internal fun String.base64decodeByteArray(): ByteArray {
+fun String.base64decodeByteArray(): ByteArray {
     return Base64.decode(this, Base64.DEFAULT)
 }
 
@@ -44,7 +46,7 @@ internal fun String.noHashtoUUID(): UUID? {
 }
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
-fun ByteArray.HexLog() = joinToString("") { " %02X".format(it) } + " [" + this.size+ "bytes]"
+fun ByteArray.HexLog() = joinToString("") { " %02X".format(it) } + " [" + this.size + "bytes]"
 
 internal fun ByteArray.base64Encode(): String {
     val ss = Base64.encode(this.clone(), Base64.DEFAULT)
@@ -54,7 +56,7 @@ internal fun ByteArray.base64Encode(): String {
 
 
 internal fun String.hexStringToByteArray() =
-    ByteArray(this.length / 2) { this.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+        ByteArray(this.length / 2) { this.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
 
 internal var fixheader = "3059301306072a8648ce3d020106082a8648ce3d03010703420004"
 
@@ -71,8 +73,8 @@ internal fun ByteArray.toBigLong(): Long {
 
 internal fun ByteArray.toCutedHistag(): ByteArray? {
     val tagcount = this[0]
-//    L.d("hcia", "this:" + this.toHexString())
-//    L.d("hcia", "tagcount.toInt():" + tagcount.toInt())
+    L.d("hcia", "this:" + this.toHexString())
+    L.d("hcia", "tagcount.toInt():" + tagcount.toInt())
     if (tagcount.toInt() == 0) {
         return null
     } else {
@@ -89,12 +91,14 @@ internal fun ByteArray.toInt(): Int {
     return result
 }
 
-
 internal fun bytesToShort(byte1: Byte, byte2: Byte): Short {
 
     return (((byte2.toInt() and 0xFF) shl 8) or (byte1.toInt() and 0xFF)).toShort()
 }
 
+fun bytesToUShort(byte1: Byte, byte2: Byte): UShort {
+    return ((byte2.toInt() shl 8) or (byte1.toInt() and 0xFF)).toUShort()
+}
 
 internal fun Short.toReverseBytes(): ByteArray {
     val buffer: ByteBuffer = ByteBuffer.allocate(2)
@@ -146,5 +150,22 @@ internal fun Long.toUInt24ByteArray(): ByteArray {
     bytes[1] = ((tmp ushr 16) and 0xFFFF).toByte()
     bytes[0] = ((tmp ushr 24) and 0xFFFF).toByte()
     return bytes.reversedArray()
+}
+
+fun String.uuidToBytes(): ByteArray {
+    val bytes = ByteArray(16)
+    var byteIndex = 0
+    var charIndex = 0
+
+    while (charIndex < length) {
+        if (this[charIndex] != '-') {
+            bytes[byteIndex++] = ((this[charIndex].digitToInt(16) shl 4) +
+                    this[charIndex + 1].digitToInt(16)).toByte()
+            charIndex += 2
+        } else {
+            charIndex++
+        }
+    }
+    return bytes
 }
 

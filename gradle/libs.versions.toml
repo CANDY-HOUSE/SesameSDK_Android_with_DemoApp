@@ -1,0 +1,125 @@
+[versions]
+agp = "8.10.1"
+appcompat = "1.7.0"
+appcompatVersion = "1.6.0-alpha05"
+autoresizeedittext = "0.1.0"
+awsAndroidSdkApigatewayCore = "2.77.0"
+awsAndroidSdkMobileClient = "2.77.0"
+core = "3.3.3"
+coreKtxVersion = "1.8.0"
+dfu = "2.5.0"
+easypermissions = "3.0.0"
+firebaseBom = "33.4.0"
+indicatorseekbar = "2.1.2"
+kotlin = "2.0.20"
+coreKtx = "1.13.1"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+kotlinBom = "1.8.0"
+kotlinxCoroutinesAndroid = "1.7.3"
+kotlinxCoroutinesAndroidVersion = "1.6.2"
+lifecycleExtensions = "2.2.0"
+lifecycleRuntimeKtx = "2.8.6"
+activityCompose = "1.9.2"
+composeBom = "2024.04.01"
+lifecycleRuntimeKtxVersion = "2.5.1"
+lifecycleViewmodelKtx = "2.8.6"
+loopview = "0.2.2"
+material = "1.12.0"
+navigationCompose = "2.5.1"
+navigationFragmentKtx = "2.5.1"
+navigationRuntimeKtx = "2.8.9"
+navigationRuntimeKtxVersion = "2.5.1"
+navigationUiKtx = "2.5.1"
+playServicesLocation = "21.3.0"
+playServicesMaps = "19.0.0"
+preferenceKtx = "1.2.1"
+roomRuntime = "2.6.1"
+rxjava = "2.2.9"
+stickyheaders = "0.7.10"
+swiperefreshlayout = "1.1.0"
+tyrusStandaloneClient = "2.2.0"
+wheelpicker = "v1.0.0"
+workRuntime = "2.9.1"
+firebaseCrashlyticsGradle = "2.9.5"
+googleServices = "4.4.2"
+ksp = "2.0.20-1.0.24"
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-appcompat-v160alpha05 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-ktx-v180 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+androidx-lifecycle-compiler = { module = "androidx.lifecycle:lifecycle-compiler", version.ref = "lifecycleRuntimeKtxVersion" }
+androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
+androidx-lifecycle-runtime-ktx-v251 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
+androidx-lifecycle-viewmodel-ktx-v286 = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-compose-v251 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-fragment-ktx-v251 = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-runtime-ktx = { module = "androidx.navigation:navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-runtime-ktx-v251 = { module = "androidx.navigation:navigation-runtime-ktx", version.ref = "navigationRuntimeKtxVersion" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-ui-ktx-v251 = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }
+androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-rxjava2 = { module = "androidx.room:room-rxjava2", version.ref = "roomRuntime" }
+androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
+autoresizeedittext = { module = "com.github.victorminerva:AutoResizeEditText", version.ref = "autoresizeedittext" }
+aws-android-sdk-apigateway-core = { module = "com.amazonaws:aws-android-sdk-apigateway-core", version.ref = "awsAndroidSdkApigatewayCore" }
+aws-android-sdk-iot = { module = "com.amazonaws:aws-android-sdk-iot", version.ref = "awsAndroidSdkMobileClient" }
+aws-android-sdk-mobile-client = { module = "com.amazonaws:aws-android-sdk-mobile-client", version.ref = "awsAndroidSdkMobileClient" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
+dfu = { module = "no.nordicsemi.android:dfu", version.ref = "dfu" }
+easypermissions = { module = "pub.devrel:easypermissions", version.ref = "easypermissions" }
+firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
+indicatorseekbar = { module = "com.github.warkiz.widget:indicatorseekbar", version.ref = "indicatorseekbar" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlinBom" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-android-v162 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroidVersion" }
+loopview = { module = "com.weigan:loopView", version.ref = "loopview" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
+stickyheaders = { module = "org.zakariya.stickyheaders:stickyheaders", version.ref = "stickyheaders" }
+tyrus-standalone-client = { module = "org.glassfish.tyrus.bundles:tyrus-standalone-client", version.ref = "tyrusStandaloneClient" }
+wheelpicker = { module = "com.github.open-android:WheelPicker", version.ref = "wheelpicker" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+
+android-library = { id = "com.android.library", version.ref = "agp" }
+firebase-crashlytics-gradle = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsGradle" }
+
+
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+
+
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

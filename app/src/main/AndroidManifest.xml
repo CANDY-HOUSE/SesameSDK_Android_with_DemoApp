@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT " />
-
+    <!--申请权限-->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INSTALL_SHORTCUT" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="Manifest.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
 
     <permission
         android:name="com.example.broadcast.permission"
         android:protectionLevel="normal" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--声明需要硬件支持（true必须，false非必须）-->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+
+    <!--应用注册-->
     <application
-        android:name="co.candyhouse.app.CandyHouseApp"
-        android:allowBackup="true"
+        android:name=".CandyHouseApp"
+        android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@drawable/app_icon"
         android:label="@string/Sesame"
@@ -30,29 +45,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="@string/app_name" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/small_icon" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/unlock_blue" />
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:label">
 
+        <!--注册声明主界面-->
         <activity
-            android:name="co.candyhouse.app.tabs.MainActivity"
+            android:name=".tabs.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity">
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
-            <meta-data
-                android:name="android.nfc.action.TECH_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
-
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
             </intent-filter>
@@ -68,12 +72,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
 
             <nav-graph android:value="@navigation/devices_ng" />
         </activity>
 
+        <!--注册服务-->
         <service
-            android:name="co.candyhouse.app.tabs.devices.ssm2.setting.DfuService"
+            android:name=".tabs.devices.ssm2.setting.DfuService"
             android:exported="true"
             android:label="nRF Toolbox DFU Proxy">
             <intent-filter>
@@ -81,6 +89,31 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+        <service
+            android:name="co.receiver.widget.SesameForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+        <service
+            android:name="co.receiver.widget.MessagingIntentService"
+            android:exported="false" />
+        <service
+            android:name="co.receiver.SesameFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!--注册广播-->
+        <receiver
+            android:name="co.receiver.widget.SesameReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="co.candyhouse.sesame2.START_FOREGROUND_SERVICE" />
+            </intent-filter>
+        </receiver>
+
+        <!--注册内容提供者-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}"
@@ -91,15 +124,19 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <service
-            android:name="co.receiver.widget.SesameForegroundService"
-            android:exported="false"
-            android:foregroundServiceType="location" />
-        <service
-            android:name="co.receiver.widget.MessagingIntentService"
-            android:exported="false" />
-
-
+        <!--注册元数据-->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${GOOGLE_MAPS_API_KEY}" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/app_name" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/small_icon" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/unlock_blue" />
     </application>
 
 </manifest>

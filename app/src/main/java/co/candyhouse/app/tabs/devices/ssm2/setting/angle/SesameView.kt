@@ -11,14 +11,13 @@ import co.candyhouse.app.R
 import co.candyhouse.sesame.open.device.CHSesame2
 import co.candyhouse.sesame.open.device.CHSesame5
 import co.candyhouse.sesame.open.device.CHSesameBike2
-import co.utils.L
 import kotlin.math.cos
 import kotlin.math.sin
 import android.util.DisplayMetrics as DisplayMetrics
 
 class SesameView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
-    private var ssmImg: Bitmap
+    private var ssmImg: Bitmap = ContextCompat.getDrawable(context, R.drawable.img_knob_3x)!!.toBitmap()
     private var lockImg: Bitmap
     private var unlockImg: Bitmap
     private var midx: Float? = null
@@ -27,14 +26,13 @@ class SesameView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private var lockAngle: Float = 0f
     private var unlockAngle: Float = 0f
 
-    var ssmWidth: Int = 0
-    var ssmMargin: Int = 0
-    var lockWidth: Int = 0
-    var lockMargin: Int = 0
-    var lockCenter: Float = 0f
+    private var ssmWidth: Int = 0
+    private var ssmMargin: Int = 0
+    private var lockWidth: Int = 0
+    private var lockMargin: Int = 0
+    private var lockCenter: Float = 0f
 
     init {
-        ssmImg = ContextCompat.getDrawable(context, R.drawable.img_knob_3x)!!.toBitmap()
         lockImg = ContextCompat.getDrawable(context, R.drawable.ic_icon_lock_uncheck)!!.toBitmap()
         unlockImg = ContextCompat.getDrawable(context, R.drawable.ic_icon_unlock_uncheck)!!.toBitmap()
     }
@@ -80,15 +78,17 @@ class SesameView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         if (ssm.mechSetting == null) {
             return
         }
+        post {
+            ssm.mechSetting?.unlockPosition
+            val degree = ssm.mechStatus!!.position.toFloat()
+            val lockDegree = ssm.mechSetting!!.lockPosition.toFloat()
+            val unlockDegree = ssm.mechSetting!!.unlockPosition.toFloat()
+            angle = degree % 360
+            lockAngle = lockDegree % 360
+            unlockAngle = unlockDegree % 360
+            invalidate()
+        }
 
-        ssm.mechSetting?.unlockPosition
-        val degree = ssm.mechStatus!!.position.toFloat()
-        val lockDegree = ssm.mechSetting!!.lockPosition.toFloat()
-        val unlockDegree = ssm.mechSetting!!.unlockPosition.toFloat()
-        angle = degree % 360
-        lockAngle = lockDegree % 360
-        unlockAngle = unlockDegree % 360
-        invalidate()
     }
 
     fun setLock(ssm: CHSesame5) {
@@ -96,15 +96,17 @@ class SesameView @JvmOverloads constructor(context: Context, attrs: AttributeSet
 //        if (ssm.mechSetting == null) {
 //            return
 //        }
+        post {
+            ssm.mechSetting?.unlockPosition
+            val degree = (ssm.mechStatus?.position ?: 0).toFloat()
+            val lockDegree = (ssm.mechSetting?.lockPosition ?: 0).toFloat()
+            val unlockDegree = (ssm.mechSetting?.unlockPosition ?: 0).toFloat()
+            angle = degree % 360
+            lockAngle = lockDegree % 360
+            unlockAngle = unlockDegree % 360
+            invalidate()
+        }
 
-        ssm.mechSetting?.unlockPosition
-        val degree = (ssm.mechStatus?.position ?: 0).toFloat()
-        val lockDegree = (ssm.mechSetting?.lockPosition ?: 0).toFloat()
-        val unlockDegree = (ssm.mechSetting?.unlockPosition ?: 0).toFloat()
-        angle = degree % 360
-        lockAngle = lockDegree % 360
-        unlockAngle = unlockDegree % 360
-        invalidate()
     }
 
 
