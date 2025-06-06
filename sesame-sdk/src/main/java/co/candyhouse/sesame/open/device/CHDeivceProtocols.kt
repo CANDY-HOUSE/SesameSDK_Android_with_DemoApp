@@ -149,7 +149,7 @@ enum class CHProductModel {
     },
     SSMFacePro {
         override fun productType() = 18
-        override fun deviceModel() = "sesame_face_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModel() = "sesame_face_Pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1 Pro"
         override fun deviceFactory() = CHSesameFaceProDevice()
     },
