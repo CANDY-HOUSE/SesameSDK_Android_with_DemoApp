@@ -30,6 +30,7 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
         CHProductModel.BiKeLock2,
         CHProductModel.SSMFace,
         CHProductModel.SSMFacePro,
+        CHProductModel.SSMFaceProAI,
         // CHProductModel.SSMOpenSensor
     )
 
@@ -60,7 +61,7 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
                                 }
                                 itemView.setOnClickListener {
                                     // L.d("harry", "locker type: " + locker.productModel)
-                                    if ((locker.productModel == CHProductModel.SSMFace) || (locker.productModel == CHProductModel.SSMTouchPro) || (locker.productModel == CHProductModel.SSMTouch) || (locker.productModel == CHProductModel.SSMFacePro)) {
+                                    if ((locker.productModel == CHProductModel.SSMFace) || (locker.productModel == CHProductModel.SSMTouchPro) || (locker.productModel == CHProductModel.SSMTouch) || (locker.productModel == CHProductModel.SSMFacePro) || (locker.productModel == CHProductModel.SSMFaceProAI) ) {
                                         (mDeviceModel.ssmLockLiveData.value!! as CHHub3).insertSesame(locker, locker.getNickname(), MatterProductModel.None) {
                                             it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }
                                         }

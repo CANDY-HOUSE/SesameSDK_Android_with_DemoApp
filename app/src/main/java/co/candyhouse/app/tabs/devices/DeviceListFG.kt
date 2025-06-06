@@ -191,6 +191,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.SesameBot2 -> safeNavigate(R.id.to_SesameBot2SettingFG)
             CHProductModel.SSMFace -> safeNavigate(R.id.to_SesameTouchProSettingFG)
             CHProductModel.SSMFacePro -> safeNavigate(R.id.to_SesameTouchProSettingFG)
+            CHProductModel.SSMFaceProAI -> safeNavigate(R.id.to_SesameTouchProSettingFG)
         }
     }
 
