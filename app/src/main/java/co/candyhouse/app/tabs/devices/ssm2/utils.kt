@@ -273,6 +273,7 @@ fun CHDevices.getRank(): Int {
 
 fun CHDevices.uiPriority(): Int { // 利用 * -1 排序。數字越大排越上方
     return -1 * when (productModel) {
+        CHProductModel.SSMFaceProAI -> 22
         CHProductModel.SS6Pro -> 21
         CHProductModel.SSMFacePro -> 19
         CHProductModel.SSMFace -> 18
@@ -359,6 +360,7 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_f826b5
         CHProductModel.SS5US -> R.raw.sesame5us_30_16_26c21d
         CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_0ea68f
+        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_6f2470
         CHProductModel.SSMFace -> R.raw.sesameface1_30_19_0ea68f
         CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_5d4cb1
         else ->0
@@ -411,6 +413,7 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SesameBot2 -> MainActivity.activity!!.getString(R.string.SesameBot2)
         CHProductModel.SSMFace -> MainActivity.activity!!.getString(R.string.SSMFace)
         CHProductModel.SSMFacePro -> MainActivity.activity!!.getString(R.string.SSMFacePro)
+        CHProductModel.SSMFaceProAI -> MainActivity.activity!!.getString(R.string.SSMFaceProAI)
         CHProductModel.SS6Pro -> MainActivity.activity!!.getString(R.string.Sesame6Pro)
     }
 }

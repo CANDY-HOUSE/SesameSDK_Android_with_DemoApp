@@ -149,7 +149,7 @@ enum class CHProductModel {
     },
     SSMFacePro {
         override fun productType() = 18
-        override fun deviceModel() = "sesame_face_Pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModel() = "sesame_face_pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1 Pro"
         override fun deviceFactory() = CHSesameFaceProDevice()
     },
@@ -161,9 +161,15 @@ enum class CHProductModel {
     },
     SS6Pro {
         override fun productType() = 21
-        override fun deviceModel() = "sesame_6_Pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModel() = "sesame_6_pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame 6 Pro"
         override fun deviceFactory() = CHSesame5Device()
+    },
+    SSMFaceProAI {
+        override fun productType() = 22
+        override fun deviceModel() = "sesame_face_pro_ai" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 1 Pro AI"
+        override fun deviceFactory() = CHSesameFaceProDevice()
     };
 
     abstract fun productType(): Int
@@ -369,7 +375,7 @@ interface CHSesameProtocolMechStatus {
     fun getBatteryPrecentage(): Int {
         val voltage = getBatteryVoltage()
         /*
-        *    修正电池电量显示不准的问题。（仅限***芯片的ADC）
+        *    修正电池电量显示不准的问题。（仅限昂瑞微芯片的ADC）
         *
         *    1、 在刷卡机上，用万用表实测电源电压为6V时，芯片读到的单节电池ADC值乘以2后，为5850mV。
         *    2、 调整固件里的采样次数和GPIO的开关时机，实测对这个误差无影响。
