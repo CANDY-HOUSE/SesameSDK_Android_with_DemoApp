@@ -1,7 +1,6 @@
 package co.candyhouse.app.tabs.devices.ssm5.room
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import android.widget.TextView
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.sesame.open.device.CHSesame5History
-import co.utils.L
 import co.utils.toHexString
 import org.zakariya.stickyheaders.SectioningAdapter
 import java.text.SimpleDateFormat
@@ -52,7 +50,7 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
         (viewHolder as HeaderViewHolder).textView.text = mGroupHistData[sectionIndex].first
     }
 
-    override fun onCreateItemViewHolder(parent: ViewGroup, itemType: Int): SectioningAdapter.ItemViewHolder? {
+    override fun onCreateItemViewHolder(parent: ViewGroup, itemType: Int): SectioningAdapter.ItemViewHolder {
         return ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_simple_item, parent, false))
     }
 
@@ -85,6 +83,8 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
                 is CHSesame5History.ManualUnlocked -> R.drawable.ic_history_unlock
                 is CHSesame5History.BLEUnlock -> R.drawable.ic_history_unlock
                 is CHSesame5History.WM2Unlock -> R.drawable.ic_history_unlock
+                is CHSesame5History.WEBLock -> R.drawable.ic_history_lock
+                is CHSesame5History.WEBUnlock -> R.drawable.ic_history_unlock
                 else -> R.drawable.ic_ap_alert
             })
             right_img.setImageResource(when (history) {
@@ -95,6 +95,8 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
                 is CHSesame5History.AutoLock -> R.drawable.ic_auto
                 is CHSesame5History.BLELock -> R.drawable.ic_bluetooth_grey
                 is CHSesame5History.BLEUnlock -> R.drawable.ic_bluetooth_grey
+                is CHSesame5History.WEBLock -> R.drawable.svg_pc
+                is CHSesame5History.WEBUnlock -> R.drawable.svg_pc
                 else -> R.drawable.ic_ap_alert
             })
         }

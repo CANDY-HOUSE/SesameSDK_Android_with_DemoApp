@@ -1,45 +1,76 @@
 package co.candyhouse.sesame.ble.os3
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
-import android.preference.PreferenceManager
-import co.candyhouse.sesame.ble.*
+import co.candyhouse.sesame.ble.CHDeviceUtil
+import co.candyhouse.sesame.ble.CHadv
+import co.candyhouse.sesame.ble.DeviceSegmentType
+import co.candyhouse.sesame.ble.SSM3PublishPayload
+import co.candyhouse.sesame.ble.Sesame2HistoryTypeEnum
+import co.candyhouse.sesame.ble.SesameItemCode
+import co.candyhouse.sesame.ble.SesameResultCode
+import co.candyhouse.sesame.ble.isBleAvailable
 import co.candyhouse.sesame.ble.os3.base.CHSesameOS3
 import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.db.model.createHistagV2
-import co.candyhouse.sesame.db.model.hisTagC
-import co.candyhouse.sesame.open.*
+import co.candyhouse.sesame.db.model.historyTagBLE
+import co.candyhouse.sesame.db.model.historyTagIOT
+import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
-import co.candyhouse.sesame.open.device.*
-import co.candyhouse.sesame.server.dto.*
-import co.candyhouse.sesame.utils.*
+import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHSesame2MechStatus
+import co.candyhouse.sesame.open.device.CHSesame5
+import co.candyhouse.sesame.open.device.CHSesame5History
+import co.candyhouse.sesame.open.device.CHSesame5MechSettings
+import co.candyhouse.sesame.open.device.CHSesame5MechStatus
+import co.candyhouse.sesame.open.device.CHSesame5OpsSettings
+import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.open.isInternetAvailable
+import co.candyhouse.sesame.server.CHIotManager
+import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.EccKey
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
-import co.candyhouse.sesame2.BuildConfig
-import java.util.*
+import co.candyhouse.sesame.utils.base64decodeByteArray
+import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.toBigLong
+import co.candyhouse.sesame.utils.toHexString
+import co.candyhouse.sesame.utils.toReverseBytes
+import co.candyhouse.sesame.utils.toUInt32ByteArray
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
+import java.util.UUID
 import kotlin.math.abs
 
-@SuppressLint("MissingPermission") internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
+@SuppressLint("MissingPermission")
+internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     private var currentDeviceUUID: UUID? = null
+    private lateinit var HistoryTagWithUUID: ByteArray
+
     /** 其他功能: history  */
     private var historyCallback: CHResult<Pair<List<CHSesame5History>, Long?>>? = null
     var isHistory: Boolean = false
         set(value) {
             if (deviceStatus.value == CHDeviceLoginStatus.Login) {
 //                if (field != value) {
-                    field = value
+                field = value
 //                    L.d("hcia", "[ss5] isHistory!!:" + isHistory)
-                    if (field) {
-                        readHistoryCommand()
-                    }
+                if (field) {
+                    readHistoryCommand()
+                }
 //                }
             }
         }
 
     /** 設備設定 */
     override var mechSetting: CHSesame5MechSettings? = null
+
+    override var opsSetting: CHSesame5OpsSettings? = null
 
     /** 設備廣播: 不同設備廣播可以帶不同傳輸訊息 */
     override var advertisement: CHadv? = null
@@ -49,7 +80,7 @@ import kotlin.math.abs
             value?.let {
                 /** 保留廣播通訊 */
 //                isHistory = it.adv_tag_b1
-                if(it.deviceID == currentDeviceUUID){
+                if (it.deviceID == currentDeviceUUID) {
                     isHistory = it.adv_tag_b1
                 }
             }
@@ -59,7 +90,33 @@ import kotlin.math.abs
     /** 聯網處理 */
     var isConnectedByWM2: Boolean = false
     override fun goIOT() {
+        L.d("hcia", "[ss5]goIOT:" + deviceId)
+        CHIotManager.subscribeSesame2Shadow(this) { result ->
+            result.onSuccess { resource ->
+                L.d("hcia", "[ss5][iot]")
+                L.d("hcia", "\uD83E\uDD5D [ss5]ss5_shadow裡存的hub3列表:" + resource.data.state.reported.wm2s)
+                resource.data.state.reported.wm2s?.let { wm2s ->
+                    L.d("hcia", "[ss5]wm2s:" + wm2s)
+                    isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
+                }
 
+                if (isConnectedByWM2) {
+                    resource.data.state.reported.mechst?.let { mechShadow ->
+                        // 【ID1001300】【Android】【app】Android app 蓝牙与 AWSIoT 都有设备状态时, 优先显示蓝牙状态（有时 AWSIoT 的角度开关锁状态是错的, 期望 UI 优先显示 Bluetooth的角度开关锁状态）
+                        val res: CHResult<CHEmpty> = { }
+                        if (!isBleAvailable(res)) {
+                            L.d("harry", "蓝牙不可用， 使用 iot 的状态。")
+                            mechStatus = CHSesame5MechStatus(CHSesame2MechStatus(mechShadow.hexStringToByteArray()).ss5Adapter())
+                        }
+                        L.d("hub3_ss5", "mechStatus: " + (mechStatus as CHSesame5MechStatus).position)
+                    }
+                    deviceShadowStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+                } else {
+                    deviceShadowStatus = null
+                }
+
+            }
+        }
 
     }
 
@@ -78,15 +135,23 @@ import kotlin.math.abs
     }
 
     override fun autolock(delay: Int, result: CHResult<Int>) {
-        if (checkBle(result)) return
+        if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.autolock.value, delay.toShort().toReverseBytes()), DeviceSegmentType.cipher) { res ->
             mechSetting?.autoLockSecond = delay.toShort()
             result.invoke(Result.success(CHResultState.CHResultStateBLE(delay)))
         }
     }
 
+    override fun opSensorControl(isEnable: Int, result: CHResult<Int>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.OPS_CONTROL.value, isEnable.toShort().toReverseBytes()), DeviceSegmentType.cipher) { res ->
+            opsSetting?.opsLockSecond = isEnable.toUShort()
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(isEnable)))
+        }
+    }
+
     override fun magnet(result: CHResult<CHEmpty>) {
-        if (checkBle(result)) return
+        if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.magnet.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
@@ -107,26 +172,29 @@ import kotlin.math.abs
         }
     }
 
-//    override fun history(cursor: Long?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
-    override fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
+    //    override fun history(cursor: Long?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
+    override fun history(cursor: Long?, uuid: UUID, subUUID: String?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
         currentDeviceUUID = uuid
         historyCallback = result
+        CHAccountManager.getHistory(this, cursor, subUUID) {
 
-        CHAccountManager.getHistory(this, cursor) {
+            L.d("historyType", "uuid:${uuid}")
             it.onSuccess {
                 val chHistorysToUI = ArrayList<CHSesame5History>()
 //                L.d("hcia", "it.data:" + it.data)
+
                 it.data.histories.forEach {
+                    L.d("harry", "【服务器给的】history:${it}")
                     val historyType = Sesame2HistoryTypeEnum.getByValue(it.type)
                     val ts = it.timeStamp
                     val recordID = it.recordID
                     val histag = it.historyTag?.base64decodeByteArray()
+                    L.d("history", "tag:${histag?.toHexString()}---${it}")
                     val params = it.parameter?.base64decodeByteArray()
                     var mechStatus: CHSesame5MechStatus? = null
                     if (params != null) {
                         mechStatus = CHSesame5MechStatus(params)
                     }
-
                     val tmphis = eventToHistory(historyType, ts, recordID, mechStatus, histag)
                     if (tmphis != null) {
                         chHistorysToUI.add(tmphis)
@@ -135,58 +203,91 @@ import kotlin.math.abs
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(Pair(chHistorysToUI.toList(), it.data.cursor))))
             }
             it.onFailure {
+
+                L.d("historyType", "uuid:${uuid} fial")
                 L.d("hcia", "it:" + it)
                 result.invoke(Result.failure(it))
             }
-        } //end getHistory
+        } // end getHistory
     }
 
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.hisTagC(historytag), result)
-        } else {
+        if (deviceStatus.value == CHDeviceLoginStatus.Login && isBleAvailable(result)) {
             if (deviceStatus == CHDeviceStatus.Locked) {
                 unlock(historytag, result)
             } else {
                 lock(historytag, result)
             }
+        } else {
+            sesame2KeyData?.apply {
+                CHAccountManager.cmdSesame(SesameItemCode.toggle, this@CHSesame5Device, this.historyTagIOT(historytag), result)
+            }
         }
     }
 
+    private fun uuidToByteArray(uuid: UUID): ByteArray {
+        val bb = ByteBuffer.wrap(ByteArray(16))
+        bb.putLong(uuid.mostSignificantBits)
+        bb.putLong(uuid.leastSignificantBits)
+        return bb.array()
+    }
+
+    private fun buildHistoryTagWithUUID(): ByteArray? {
+        // 将UUID转换为ByteArray
+        val uuidByteArray = deviceId?.let { uuidToByteArray(it) }
+        HistoryTagWithUUID = ByteArrayOutputStream().apply {
+            write(uuidByteArray)
+        }.toByteArray()
+        L.d("history", HistoryTagWithUUID.toHexString())
+        return HistoryTagWithUUID
+    }
+
     override fun unlock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historytag), result)
-        } else {
-            if (checkBle(result)) return
-//        L.d("hcia", "[ss5][unlock] historyTag:" + sesame2KeyData!!.createHistagV2(historyTag).toHexString())
-            sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, sesame2KeyData!!.createHistagV2(historytag)), DeviceSegmentType.cipher) { res ->
-                if (res.cmdResultCode == SesameResultCode.success.value) {
-                    result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-                } else {
-                    result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
-                }
+        if (historytag == null) {
+            buildHistoryTagWithUUID()
+        }
+        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && deviceShadowStatus != null) {
+            CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            return
+        }
+        if (!isBleAvailable(result)) {
+            CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            return
+        }
+        sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, sesame2KeyData!!.historyTagBLE(historytag)), DeviceSegmentType.cipher) { res ->
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } else {
+                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
         }
     }
 
     override fun lock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.hisTagC(historytag), result)
-        } else {
-            if (checkBle(result)) return
-//        L.d("hcia", "[ss5][lock] historyTag:" + sesame2KeyData!!.createHistagV2(historyTag).toHexString())
-            sendCommand(SesameOS3Payload(SesameItemCode.lock.value, sesame2KeyData!!.createHistagV2(historytag)), DeviceSegmentType.cipher) { res ->
-                if (res.cmdResultCode == SesameResultCode.success.value) {
-                    result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-                } else {
-                    result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
-                }
+        if (historytag == null) {
+            buildHistoryTagWithUUID()
+        }
+        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && deviceShadowStatus != null) {
+            CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            return
+        }
+        if (!isBleAvailable(result)) {
+            CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            return
+        }
+        sendCommand(SesameOS3Payload(SesameItemCode.lock.value, sesame2KeyData!!.historyTagBLE(historytag)), DeviceSegmentType.cipher) { res ->
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } else {
+                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
         }
+
 
     }
 
     override fun register(result: CHResult<CHEmpty>) {
+        L.d("harry", "[ss5][register]:$deviceId")
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
             return
@@ -196,6 +297,7 @@ import kotlin.math.abs
         L.d("hcia", "register:!!")
         makeApiCall(result) {
             val serverSecret = mSesameToken.toHexString()
+            CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(advertisement!!.productModel!!.productType().toString(), serverSecret))
             sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
                 mechStatus = CHSesame5MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..6))
                 mechSetting = CHSesame5MechSettings(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..12))
@@ -206,9 +308,7 @@ import kotlin.math.abs
                 val deviceSecret = ecdhSecretPre16.toHexString()
                 val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
                 sesame2KeyData = candyDevice
-
                 val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
-
                 cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
                 CHDB.CHSS2Model.insert(candyDevice) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
@@ -227,9 +327,6 @@ import kotlin.math.abs
         } else {
             AesCmac(sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(mSesameToken)
         }
-        L.d("login","isNeedAuthFromServer:$isNeedAuthFromServer--${mSesameToken.toHexString()}--sessionAuth:${sessionAuth}---${sesame2KeyData!!.secretKey.hexStringToByteArray()}")
-
-
         cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth!!.sliceArray(0..3)), DeviceSegmentType.plain) { loginPayload ->
             val systemTime = loginPayload.payload.sliceArray(0..3).toBigLong()
@@ -239,70 +336,44 @@ import kotlin.math.abs
 
 //            L.d("hcia", "[ss5][login][timeMinus:$timeMinus]")
 
-            if (PreferenceManager.getDefaultSharedPreferences(CHBleManager.appContext).getString("nickname", "")?.contains(BuildConfig.testname) == true) {
-                deviceTimestamp = systemTime
-                loginTimestamp = currentTimestamp
-            } else {
-                if (abs(timeMinus) > 3) {
-                    L.d("hcia", "[ss5][login][timeMinus:$timeMinus]!!")
-                    sendCommand(SesameOS3Payload(SesameItemCode.time.value, System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.cipher) {}
-                }
+
+            if (abs(timeMinus) > 3) {
+                L.d("hcia", "[ss5][login][timeMinus:$timeMinus]!!")
+                sendCommand(SesameOS3Payload(SesameItemCode.time.value, System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.cipher) {}
             }
         }
     }
 
+    private var isReadHistoryCommandRunning: Boolean = false
     private fun readHistoryCommand() {
-//        L.d("hcia", "[ss5][his][read] isHistory:" + isHistory)
+        if (isReadHistoryCommandRunning) {
+            L.d("hcia", "[ss5][his][read] readHistoryCommand is already running")
+            return
+        }
         val isConnectNET = isInternetAvailable()
-        sendCommand(SesameOS3Payload(SesameItemCode.history.value, if (isConnectNET) byteArrayOf(0x01) else byteArrayOf(0x00)), DeviceSegmentType.cipher) { res ->
-//            L.d("hcia", "[ss5][his][ResultCode]:" + res.cmdResultCode)
-            if (res.cmdResultCode == SesameResultCode.notFound.value) {
-                isHistory = false
-            }
+        sendCommand(SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)), DeviceSegmentType.cipher) { res -> // 01: 从设备读取最旧的历史记录
+            L.d("hcia", "[ss5][his][ResultCode]:" + res.cmdResultCode)
+            val hisPaylaod = res.payload
             if (res.cmdResultCode == SesameResultCode.success.value) {
-
-                val recordId = res.payload.sliceArray(0..3).toBigLong().toInt()
-                var historyType = Sesame2HistoryTypeEnum.getByValue(res.payload[4]) ?: Sesame2HistoryTypeEnum.NONE
-                val newTime = res.payload.sliceArray(5..8).toBigLong() //4
-                val mechStatus = CHSesame5MechStatus(res.payload.sliceArray(9..15))
-                var historyContent = res.payload.sliceArray(16..res.payload.count() - 1)
-
-//                L.d("hcia", "historyType:" + historyType)
-                if (historyType == Sesame2HistoryTypeEnum.BLE_LOCK) {
-                    val tagcount = historyContent[0] % 30
-                    val historyOpType = historyContent[0] / 30
-                    if (historyOpType == 1) {
-                        historyType = Sesame2HistoryTypeEnum.WM2_LOCK
+                // 改为 uuid 格式的 hisTag， APP不再兼容旧固件的历史记录， 若有客诉历史记录问题， 请升级锁的固件。
+                if (isConnectNET && !isConnectedByWM2) {
+                    CHAccountManager.postSS5History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
+                        // 成功上传历史记录到云端后， 通过蓝牙删除这条历史记录， SS5固件会在它的Flash里删除掉这条历史记录。
+                        val recordId = hisPaylaod.sliceArray(0..3)
+                        it.onSuccess {
+                            L.d("hcia", "[+]SSM2_ITEM_CODE_HISTORY_DELETE: ${recordId.toBigLong().toInt()}")
+                            sendCommand(SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId), DeviceSegmentType.cipher) { res ->
+                                L.d("hcia", "[-]SSM2_ITEM_CODE_HISTORY_DELETE: ${res.cmdResultCode}")
+                            }
+                        }
+                        it.onFailure { exception ->
+                            L.d("hcia", "[ss5][history]postSS5History: $exception")
+                        }
                     }
-                    if (historyOpType == 2) {
-                        historyType = Sesame2HistoryTypeEnum.WEB_LOCK
-                    }
-                    historyContent[0] = tagcount.toByte()
-                    historyContent = historyContent.toCutedHistag()!!
                 }
-                if (historyType == Sesame2HistoryTypeEnum.BLE_UNLOCK) {
-                    val tagcount = historyContent[0] % 30
-                    val historyOpType = historyContent[0] / 30
-                    if (historyOpType == 1) {
-                        historyType = Sesame2HistoryTypeEnum.WM2_UNLOCK
-                    }
-                    if (historyOpType == 2) {
-                        historyType = Sesame2HistoryTypeEnum.WEB_UNLOCK
-                    }
-                    historyContent[0] = tagcount.toByte()
-                    historyContent = historyContent.toCutedHistag()!!
-                }
-
-//                L.d("hcia", "historyType:" + historyType + " historyContent:" + historyContent.toHexString())
-//                L.d("hcia", "[ss5][history]recordId:" + recordId + " historyType:" + historyType)
-                val chHistorysToUI = listOf(eventToHistory(historyType, newTime * 1000, recordId, mechStatus, historyContent)!!)
-                historyCallback?.invoke(Result.success(CHResultState.CHResultStateBLE(Pair(chHistorysToUI, null))))
-                if (isConnectNET) {
-
-                }
-
             }
-
+            isReadHistoryCommandRunning = false
+            L.d("harry", "readHistoryCommand end !!!")
         }
     }
 
@@ -310,14 +381,20 @@ import kotlin.math.abs
 
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
         super.onGattSesamePublish(receivePayload)
-//        L.d("hcia", "[ss5] " + receivePayload.cmdItCode)
+//        L.d("switch", "[ss5] " + receivePayload.cmdItCode)
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
             mechStatus = CHSesame5MechStatus(receivePayload.payload)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-            readHistoryCommand()
+
+//            L.d("readHistoryCommand", "mechStatus " + "${deviceStatus}")
+//            readHistoryCommand()
         }
         if (receivePayload.cmdItCode == SesameItemCode.mechSetting.value) {
             mechSetting = CHSesame5MechSettings(receivePayload.payload)
+        }
+        if (receivePayload.cmdItCode == SesameItemCode.OPS_CONTROL.value) {
+            opsSetting = CHSesame5OpsSettings(receivePayload.payload)
+            L.d("switch", "[ss5][opsSecond]:" + opsSetting!!.opsLockSecond)
         }
     }
 

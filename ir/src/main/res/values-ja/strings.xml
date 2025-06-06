@@ -1,0 +1,117 @@
+<resources>
+    <string name="nofindmode">モデルが見つかりませんか？ワンクリックマッチング</string>
+    <string name="finddevicemsg">スマートフォンをHub3に近づけ、開始をタップしてからリモコンを機器に向けてボタンを押してください。システムが最適なリモコンを自動的に見つけます</string>
+    <string name="start">開始</string>
+    <string name="ir_set_controller_name">リモコン名を設定</string>
+    <string name="cancel">キャンセル</string>
+    <string name="ir_delete">削除</string>
+    <string name="ir_send_success">送信成功</string>
+    <string name="ir_edit_limit">約6文字</string>
+    <string name="ir_modify_key_name">ボタン名を変更</string>
+
+    <!-- Power Status -->
+    <string name="ir_remote_power_on">オン</string>
+    <string name="ir_remote_power_off">オフ</string>
+
+    <!-- Temperature -->
+    <string name="air_conditioner_temperature">温度</string>
+
+    <!-- Mode -->
+    <string name="air_conditioner_model_auto_01">自動モード</string>
+    <string name="air_conditioner_model_cold_02">冷房モード</string>
+    <string name="air_conditioner_model_dry_03">除湿モード</string>
+    <string name="air_conditioner_model_wind_04">送風モード</string>
+    <string name="air_conditioner_model_hot_05">暖房モード</string>
+
+    <!-- Wind Vertical -->
+    <string name="air_conditioner_wind_vertical_v1">上向き</string>
+    <string name="air_conditioner_wind_vertical_v2">中央</string>
+    <string name="air_conditioner_wind_vertical_v3">下向き</string>
+
+    <!-- Wind Horizontal -->
+    <string name="air_conditioner_wind_horizontal_auto">自動スイング</string>
+    <string name="air_conditioner_wind_horizontal_stop">スイング停止</string>
+
+    <!-- Wind Speed -->
+    <string name="air_conditioner_wind_speed_auto">自動風量</string>
+    <string name="air_conditioner_wind_speed_v1">弱風</string>
+    <string name="air_conditioner_wind_speed_v2">中風</string>
+    <string name="air_conditioner_wind_speed_v3">強風</string>
+    <string name="ir_device_info_empty">デバイス情報が空です</string>
+    <string name="key_unsupported">キーが適応中です</string>
+    <string name="ir_study">学習🖋️</string>
+    <string name="ir_ble_connect_fail">Bluetooth接続に失敗しました</string>
+    <string name="ir_diy_empty">⊕アイコンをタップして学習モードに入り、リモコンをHub3に向けてボタンを押すと、新しいリモコンキーを追加できます</string>
+    <string name="network_retry">通信エラーが発生しました。タップして再試行してください</string>
+    <string name="ir_change_fail">変更に失敗しました</string>
+    <string name="ir_delete_fail">キーの削除に失敗しました</string>
+    <string name="ir_ble_noable">Bluetoothがオフ</string>
+    <string name="ir_no_code">キーリストがありません。Hub3設定画面から入り、キーを追加してください</string>
+    <string name="ir_long_click_edit">長押しして編集🖋️</string>
+    <string name="ir_click_send">クリックして発射🚀</string>
+    <string name="ir_ble_invalid">Hub3の詳細画面に戻り、Bluetooth自動接続を開始してください。</string>
+    <string name="air_conditioner_temperature_refuse_change">現在のモードでは温度調節に対応していません</string>
+    <string name="ir_company_notice">お探しのブランドのリモコン型番が見つかりませんか？類似の型番名で検索してみてください。</string>
+    <string name="ir_company_search_control_hint">リモコン機種を検索</string>
+    <string name="ir_match_key">グループ%1$dのボタン%2$dをマッチング中（全%3$dグループ、各グループ7ボタン）</string>
+    <string name="air_match_responded">反応あり、マッチングを続行</string>
+    <string name="air_match_no_respond_turn_next">反応なし、次のグループへ</string>
+    <string name="ir_match_tips">スタートボタンをクリックして、エアコンの自動マッチングを開始してください。</string>
+    <string name="air_match_finished">反応あり、リモコンを追加</string>
+    <string name="air_match_success">リモコンの追加に成功しました</string>
+    <string name="air_match_add_failed">デバイスの追加に失敗しました</string>
+    <string name="air_match_end">最後のデータグループです</string>
+    <string name="air_match_no_respond">反応なし</string>
+    <string name="air_company_control">リモコンモデル</string>
+    <string name="air_company_brand">エアコンブランド</string>
+    <string name="ir_company_search_brand_hint">エアコンブランドを検索</string>
+    <string name="air_match_item_tips">リスト内のハイライトされたボタンをクリックしてください</string>
+    <string name="air_match_introduction">下のリストの強調表示されたボタンを押して、デバイスの反応を確認してください</string>
+    <string name="air_control_match">エアコンを操作できない？リモコンを自動マッチング</string>
+    <string name="ir_save">保存</string>
+    <string name="ir_confirm_controller_name">リモコン名を確認してください</string>
+
+    <string name="tv_remote_mute">ミュート</string>
+    <string name="tv_remote_back">戻る</string>
+    <string name="tv_remote_up">上</string>
+    <string name="tv_remote_menu">メニュー</string>
+    <string name="tv_remote_left">左</string>
+    <string name="tv_remote_ok">決定</string>
+    <string name="tv_remote_right">右</string>
+    <string name="tv_remote_volume_up">音量+</string>
+    <string name="tv_remote_down">下</string>
+    <string name="tv_remote_channel_up">チャンネル+</string>
+    <string name="tv_remote_volume_down">音量-</string>
+    <string name="tv_remote_home">ホーム</string>
+    <string name="tv_remote_channel_down">チャンネル-</string>
+
+    <string name="ir_mode">モード</string>
+    <string name="light_mode_normal">標準モード</string>
+    <string name="light_mode_reading">読書モード</string>
+    <string name="light_mode_working">作業モード</string>
+    <string name="light_mode_evening">夜間モード</string>
+    <string name="light_brightness_up">明るさ+</string>
+    <string name="light_brightness_down">明るさ-</string>
+    <string name="light_color_temp_up">色温度+</string>
+    <string name="light_color_temp_down">色温度-</string>
+    <string name="ir_remote_power">電源</string>
+    <string name="ir_support_info">HXD</string>
+
+    <string-array name="strs_device">
+        <item>エアコン</item>
+        <item>給湯器</item>
+        <item>空気清浄機</item>
+        <item>テレビ</item>
+        <item>IPTV</item>
+        <item>セットトップボックス</item>
+        <item>ディスクプレーヤー</item>
+        <item>扇風機</item>
+        <item>プロジェクター</item>
+        <item>リモコンライト</item>
+        <item>デジタルカメラ</item>
+        <item>サウンドシステム</item>
+        <item>ロボット掃除機</item>
+        <item>任意学習</item>
+    </string-array>
+
+</resources>

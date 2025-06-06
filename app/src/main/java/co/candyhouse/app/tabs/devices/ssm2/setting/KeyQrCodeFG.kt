@@ -9,37 +9,40 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
-
+import cn.bingoogolapple.qrcode.core.BGQRCodeUtil
+import cn.bingoogolapple.qrcode.zxing.QRCodeEncoder
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.databinding.FgMySsmkeyBinding
+import co.candyhouse.app.databinding.GuestkeyListBinding
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.device.CHDevices
-import co.utils.L
+import co.candyhouse.sesame.utils.L
 import co.utils.base64Encode
 import co.utils.hexStringToByteArray
 import co.utils.toHexString
-import kotlinx.android.synthetic.main.fg_my_ssmkey.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
+class KeyQrCodeFG : BaseDeviceFG<FgMySsmkeyBinding>() {
+    override fun getViewBinder()= FgMySsmkeyBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val targetDevice: CHDevices = mDeviceModel.ssmLockLiveData.value!!
-        key_id.text = targetDevice.getNickname()
+      bind.keyId  .text = targetDevice.getNickname()
 
-        sub_title.text = getString(R.string.ssm_qr_hint,targetDevice.productModel.modelName())
-        key_id.text = targetDevice.getNickname()
+        bind.   subTitle.text = getString(R.string.ssm_qr_hint,targetDevice.productModel.modelName())
+        bind.    keyId.text = targetDevice.getNickname()
 
         if (targetDevice.getLevel() == -1) {
             L.d("hcia", "something wrong device qrcdoe generate!")
@@ -63,7 +66,7 @@ class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
 
     private fun setKey(targetDevice: CHDevices, candyDevice: CHDevice) {
         L.d("hcia", "getNickname():" + targetDevice.getNickname())
-        L.d("hcia", "candyDevice:" + candyDevice)
+        L.d("hcia", "candyDevice:$candyDevice")
         L.d("hcia", "productType:" + byteArrayOf(targetDevice.productModel.productType().toByte()).toHexString())
         L.d("hcia", "secretKey:" + candyDevice.secretKey)
         L.d("hcia", "sesame2PublicKey:" + candyDevice.sesame2PublicKey)
@@ -71,7 +74,7 @@ class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
         L.d("hcia", "andyDevice.deviceUUID:" + candyDevice.deviceUUID.uppercase())
         L.d("hcia", "nohashdeviceUUID:" + candyDevice.deviceUUID.replace("-", ""))
         val keydata = byteArrayOf(targetDevice.productModel.productType().toByte()).toHexString() + candyDevice.secretKey + candyDevice.sesame2PublicKey + candyDevice.keyIndex + candyDevice.deviceUUID.replace("-", "")
-        L.d("hcia", "keydata:" + keydata)
+        L.d("hcia", "keydata:$keydata")
         val littleKey = keydata.hexStringToByteArray().base64Encode()
         val keyURI = Uri.Builder().apply {
             scheme("ssm")
@@ -84,7 +87,21 @@ class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
         context?.let {
             val mIcon = BitmapFactory.decodeResource(it.resources, R.mipmap.ic_launcher_round)
 //        L.d("hcia", "🧵 keyURI:" + keyURI)
+            QRCodeEncoder.syncEncodeQRCode(keyURI.toString(), BGQRCodeUtil.dp2px(context, 300f), Color.BLACK, mIcon).apply {
+            bind.qrCodeImg    .setImageBitmap(this)
+                bind.shareZone.setOnClickListener {
 
+                    view?.let {
+                        it.isDrawingCacheEnabled = true
+                        it.buildDrawingCache(true)
+                        val bitmap = it.drawingCache
+                        shareImage(bitmap, targetDevice)
+                        it.destroyDrawingCache()
+                    }
+
+
+                }
+            }
         }
 
     }
@@ -97,12 +114,12 @@ class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
             if (!dir.exists()) {
                 dir.mkdirs()
             }
-            L.d("hcia", "dir:" + dir)
+            L.d("hcia", "dir:$dir")
             val img = File(dir, targetDevice.getNickname() + ".png")
             if (img.exists()) {
                 img.delete()
             }
-            L.d("hcia", "img:" + img)
+            L.d("hcia", "img:$img")
             val outStream: OutputStream = FileOutputStream(img)
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
             outStream.flush()
@@ -111,7 +128,7 @@ class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
             L.d("hcia", "Uri.fromFile(img):" + Uri.fromFile(img))
             val share = Intent(Intent.ACTION_SEND)
             val uri: Uri = FileProvider.getUriForFile(requireActivity(), BuildConfig.APPLICATION_ID, img)
-            L.d("hcia", "uri:" + uri)
+            L.d("hcia", "uri:$uri")
 
             share.type = "image/*"
             share.putExtra(Intent.EXTRA_TEXT, "candy house")
@@ -122,7 +139,7 @@ class KeyQrCodeFG : BaseDeviceFG(R.layout.fg_my_ssmkey) {
 
 
         } catch (e: Exception) {
-            L.d("hcia", "e:" + e)
+            L.d("hcia", "e:$e")
             Toast.makeText(activity, "Something Went Wrong, Please Try Again!2", Toast.LENGTH_SHORT).show()
         }
     }

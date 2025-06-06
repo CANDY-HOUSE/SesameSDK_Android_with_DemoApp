@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
+    android:layout_height="wrap_content"
+    android:minHeight="120dp"
     android:orientation="horizontal">
 
     <RelativeLayout
+        android:id="@+id/rlview1"
         android:layout_width="wrap_content"
         android:layout_height="16dp"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="12dp">
 
         <ImageView
             android:id="@+id/bl_img"
             android:layout_width="14dp"
             android:layout_height="14dp"
-            android:layout_marginEnd="10dp"
             android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
             android:src="@drawable/bl_green" />
 
         <ImageView
@@ -31,7 +31,6 @@
             android:layout_marginEnd="10dp"
             android:layout_toRightOf="@+id/bl_img"
             android:src="@drawable/wifi_green" />
-
 
         <RelativeLayout
             android:id="@+id/battery_contain"
@@ -57,11 +56,8 @@
                 android:layout_marginRight="3dp"
                 android:max="100"
                 android:progress="100"
-                android:progressDrawable="@drawable/progress_blue">
-
-            </ProgressBar>
+                android:progressDrawable="@drawable/progress_blue" />
         </RelativeLayout>
-
 
         <TextView
             android:id="@+id/battery_percent"
@@ -77,56 +73,102 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="4dp"
-        android:gravity="left"
-        android:lines="1"
-        app:autoSizeMaxTextSize="45dp"
-        app:autoSizeMinTextSize="14dp"
-        app:autoSizeTextType="uniform"
-        tools:text="name" />
-
-    <TextView
-        android:id="@+id/sub_title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/title"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="2dp"
-        android:gravity="center"
-        android:textColor="@color/text_hint"
-        android:textSize="11dp"
-        tools:text="name" />
+        android:layout_marginLeft="26dp"
+        android:layout_marginTop="30dp"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/sub_title_2"
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:lines="1"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            tools:text="name" />
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/sub_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text=""
+                android:textColor="@color/text_hint"
+                android:textSize="11dp" />
+
+            <TextView
+                android:id="@+id/sub_title_2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text=""
+                android:textColor="@color/text_hint"
+                android:textSize="11dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/flView1"
+        android:layout_width="100dp"
+        android:layout_height="26dp"
+        android:layout_marginTop="30dp"
+        android:paddingVertical="4dp"
+        android:paddingLeft="8dp">
+
+        <ImageView
+            android:id="@+id/imageArrow"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/svg_arrow_down" />
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/llview1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ssmContainer"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/adp_bot_item_view" />
+
+    <RelativeLayout
+        android:id="@+id/ssmContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/title"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="2dp"
-        android:layout_toRightOf="@+id/sub_title"
-        android:gravity="center"
-        android:text=""
-        android:textColor="@color/text_hint"
-        android:textSize="11dp"
-        android:visibility="gone" />
-
-
-    <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeCellView
-        android:id="@+id/ssmView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="16dp" />
+        android:layout_marginRight="16dp">
+
+        <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeCellView
+            android:id="@+id/ssmView"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/centerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ryView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 </RelativeLayout>

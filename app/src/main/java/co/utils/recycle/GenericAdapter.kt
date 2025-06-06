@@ -1,26 +1,33 @@
 package co.utils.recycle
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import co.utils.L
-import java.util.*
+import co.candyhouse.sesame.utils.L
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import java.util.Collections
 
+abstract class GenericAdapter<T>(private var listItems: MutableList<T> = mutableListOf()) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter {
 
-abstract class GenericAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>, ItemTouchHelperAdapter {
-
-    var listItems: List<T>
-
-    constructor(listItems: List<T>) {
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateList(listItems: MutableList<T> = mutableListOf()) {
         this.listItems = listItems
+        notifyDataSetChanged()
     }
 
-    constructor() {
-        listItems = emptyList()
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateList(listItems: MutableList<T> = mutableListOf(), position: Int) {
+        this.listItems = listItems
+        if (position != -1) {
+            notifyItemChanged(position)
+        } else {
+            notifyDataSetChanged()
+        }
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -28,7 +35,9 @@ abstract class GenericAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as Binder<T>).bind(listItems[position], position)
+        if (position >= 0 && position < listItems.size) {
+            (holder as Binder<T>).bind(listItems[position], position)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -47,12 +56,17 @@ abstract class GenericAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>
         fun bind(data: T, pos: Int)
     }
 
-
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        L.d("GenericAdapter", "onItemMove: from $fromPosition to $toPosition")
+
+        if (fromPosition < 0 || fromPosition >= listItems.size || toPosition < 0 || toPosition >= listItems.size) {
+            return
+        }
         Collections.swap(listItems, fromPosition, toPosition)
         notifyItemMoved(fromPosition, toPosition)
     }
 
+    open fun removeItem(adapterPosition: Int) {}
 }
 
 interface ItemTouchHelperAdapter {
@@ -60,19 +74,26 @@ interface ItemTouchHelperAdapter {
     fun onItemMoveFinished() {}
 }
 
-class SimpleItemTouchHelperCallback(private val adapter: ItemTouchHelperAdapter) : ItemTouchHelper.Callback() {
+class SimpleItemTouchHelperCallback(private val adapter: ItemTouchHelperAdapter) :
+    ItemTouchHelper.Callback() {
 
-    override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
         val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
         val swipeFlags = 0 // 不处理滑动事件
         return makeMovementFlags(dragFlags, swipeFlags)
     }
 
-    override fun onMove(recyclerView: RecyclerView, source: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+    override fun onMove(
+        recyclerView: RecyclerView,
+        source: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
         adapter.onItemMove(source.adapterPosition, target.adapterPosition)
         return true
     }
-
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         // 不处理滑动事件
@@ -86,11 +107,24 @@ class SimpleItemTouchHelperCallback(private val adapter: ItemTouchHelperAdapter)
         return false
     }
 
-    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-        super.clearView(recyclerView, viewHolder)
-//        L.d("hcia", "clearView!!!:" )
-        adapter.onItemMoveFinished()
-    }
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
 
+        try {
+            // 当拖拽或滑动动作结束时，actionState 会变为 ACTION_STATE_IDLE
+            // 此时 viewHolder 通常为 null，因为没有 item 被选中
+            if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
+                // 拖拽结束，通知适配器
+                adapter.onItemMoveFinished()
+            }
+        } catch (e: Exception) {
+            L.d("sf", "SimpleItemTouchHelperCallback:onSelectedChanged Exception=${e.message}")
+
+            FirebaseCrashlytics.getInstance().apply {
+                log("SimpleItemTouchHelperCallback:onSelectedChanged Exception")
+                recordException(e)
+            }
+        }
+    }
 
 }

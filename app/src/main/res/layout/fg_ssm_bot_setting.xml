@@ -91,7 +91,7 @@
                     android:layout_marginLeft="17dp"
                     android:background="@color/white"
                     android:gravity="center_vertical"
-                    android:text="@string/change_sesame_name"
+                    android:text="@string/edit_name"
                     android:textColor="@color/black"
                     android:textSize="17dp" />
 
@@ -206,7 +206,7 @@
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
- android:id="@+id/rlRole"
+
                 android:layout_height="53dp"
                 android:background="@color/white">
 
@@ -245,12 +245,6 @@
                     android:background="@color/gray0" />
             </RelativeLayout>
 
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginLeft="16dp"
-                android:background="@color/gray0" />
 
             <RelativeLayout
                 android:id="@+id/change_mode_zone"
@@ -374,7 +368,7 @@
             <RelativeLayout
                 android:id="@+id/nfc_zone"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="53dp"
 
                 android:background="@color/white">
 
@@ -401,23 +395,48 @@
                     android:text="@string/nfc_hint"
                     android:textColor="@color/text_hint" />
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="16dp"
+                    android:background="@color/gray0" />
+
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
+                android:id="@+id/widget_rl"
                 android:background="@color/white">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="17dp"
-                    android:background="@color/white"
-                    android:gravity="center_vertical"
-                    android:text="@string/sesame_widget"
-                    android:textColor="@color/black"
-                    android:textSize="17dp" />
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/white"
+                        android:gravity="center_vertical"
+                        android:text="@string/sesame_widget"
+                        android:textColor="@color/black"
+                        android:textSize="17dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="17dp"
+                        android:id="@+id/tvSysNotifyWidget"
+                        android:gravity="center_vertical"
+                        android:text="@string/android_notifica_permis_on"
+                        android:textColor="@color/tv_color_red_gray"
+                        android:textSize="11dp" />
+                </LinearLayout>
 
 
                 <Switch
@@ -455,7 +474,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                tools:text="@string/drop_hint"
+                tools:text="@string/drop_hint_press"
                 android:textColor="@color/text_hint" />
             <RelativeLayout
                 android:id="@+id/reset_zone"

@@ -4,8 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.TextView
 import co.candyhouse.app.R
-import kotlinx.android.synthetic.main.alert_selector.view.*
 
 class SelectorAlert(context: Context) : BaseAlert(context) {
 
@@ -21,14 +22,14 @@ class SelectorAlert(context: Context) : BaseAlert(context) {
         with(mAlertView) {
 
             titleText?.let {
-                tvTitle.text = it
-                tvTitle.visibility = View.VISIBLE
+                findViewById<TextView>(R.id.tvTitle).text = it
+                findViewById<TextView>(R.id.tvTitle).visibility = View.VISIBLE
             }
 
-            listview.adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, itemList)
+            findViewById<ListView>(R.id.listview)  .adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, itemList)
 
             onItemClick?.let {
-                listview.setOnItemClickListener { _, _, i, _ ->
+                findViewById<ListView>(R.id.listview) .setOnItemClickListener { _, _, i, _ ->
                     onItemClick!!.invoke(i)
                     this@SelectorAlert.dismiss()
                 }

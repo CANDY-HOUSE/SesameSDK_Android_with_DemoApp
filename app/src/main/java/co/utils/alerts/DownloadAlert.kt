@@ -5,8 +5,10 @@ import android.animation.AnimatorSet
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import co.candyhouse.app.R
-import kotlinx.android.synthetic.main.alert_download.view.*
 
 
 class DownloadAlert(context: Context) : BaseAlert(context) {
@@ -21,16 +23,18 @@ class DownloadAlert(context: Context) : BaseAlert(context) {
         with(mAlertView) {
 
             titleText?.let {
-                tvTitle.text = it
-                tvTitle.visibility = View.VISIBLE
+
+                findViewById<TextView>(R.id.tvTitle).text = it
+                findViewById<TextView>(R.id.tvTitle).visibility = View.VISIBLE
             }
 
 
 
-            progressBar.isIndeterminate = true
+            findViewById<ProgressBar>(R.id.progressBar).isIndeterminate = true
+
 
             val set = AnimatorInflater.loadAnimator(context, R.animator.cloud_dowload) as AnimatorSet
-            set.setTarget(ivArrow)
+            set.setTarget(findViewById<ImageView>(R.id.ivArrow))
             set.start()
 
         }
@@ -39,21 +43,22 @@ class DownloadAlert(context: Context) : BaseAlert(context) {
 
     fun updateProgress(progress: Int, total: Int) {
         with(mAlertView) {
-            progressBar.isIndeterminate = false
-            progressBar.progress = progress
-            progressBar.max = total
-            tvPercentProgress.text = "${(progress * 100) / total}%"
-            tvStatusProgress.text = "$progress/$total"
+            findViewById<ProgressBar>(R.id.progressBar).isIndeterminate = false
+            findViewById<ProgressBar>(R.id.progressBar).progress = progress
+            findViewById<ProgressBar>(R.id.progressBar).max = total
+
+            findViewById<TextView>(R.id.tvPercentProgress).text = "${(progress * 100) / total}%"
+            findViewById<TextView>(R.id.tvStatusProgress)   .text = "$progress/$total"
         }
     }
 
     private fun reset() {
         with(mAlertView) {
-            progressBar.isIndeterminate = true
-            progressBar.progress = 0
-            progressBar.max = 0
-            tvPercentProgress.text = ""
-            tvStatusProgress.text = ""
+            findViewById<ProgressBar>(R.id.progressBar).isIndeterminate = true
+            findViewById<ProgressBar>(R.id.progressBar).progress = 0
+            findViewById<ProgressBar>(R.id.progressBar).max = 0
+            findViewById<TextView>(R.id.tvPercentProgress).text = ""
+            findViewById<TextView>(R.id.tvStatusProgress).text = ""
         }
     }
 
