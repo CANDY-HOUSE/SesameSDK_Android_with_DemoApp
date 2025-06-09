@@ -8,7 +8,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 
-internal  class AesCmac(key: ByteArray, tagSizeInBytes: Int) : Mac {
+internal final class AesCmac(key: ByteArray, tagSizeInBytes: Int) : Mac {
     val MIN_TAG_SIZE_IN_BYTES = 10
     private var keySpec: SecretKey? = null
     private var tagSizeInBytes = 0
@@ -28,8 +28,6 @@ internal  class AesCmac(key: ByteArray, tagSizeInBytes: Int) : Mac {
         this.tagSizeInBytes = tagSizeInBytes
         generateSubKeys()
     }
-
-
 
     private fun instance(): Cipher? {
         return EngineFactory.CIPHER.getInstance("AES/ECB/NoPadding")

@@ -38,7 +38,6 @@ internal class SesameBleTransmit(var type: DeviceSegmentType, var input: ByteArr
     var isStart = 1
     internal fun getChunk(): ByteArray? {
         if (isStart == -1) {
-
             return null
         } else if (input.size <= 19) {
             val segmentHeader = ((type.value shl 1) or isStart).toByte()

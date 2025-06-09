@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <string-array name="strs_robot_type">
+            <item>TOMEFON(TOMEFON)-TF-S880</item>
+            <item>TOMEFON(TOMEFON)-TF-S850</item>
+            <item>TOMEFON(TOMEFON)-TF-S450</item>
+            <item>TOMEFON(TOMEFON)-TF-S750</item>
+            <item>Haier(Haier)-T330</item>
+            <item>Haier(Haier)-T330-T</item>
+            <item>Haier(Haier)-J3000PLUS</item>
+            <item>Haier(Haier)-T320PLUS</item>
+            <item>Haier(Haier)-T321PLUS</item>
+            <item>Haier(Haier)-T322PLUS</item>
+            <item>Haier(Haier)-T325PLUS</item>
+            <item>Haier(Haier)-T520</item>
+            <item>Midea(Midea)-R3-L081C</item>
+            <item>Philips(Philips)-FC8810</item>
+            <item>Philips(Philips)-FC8820</item>
+            <item>Ecovacs(Ecovacs)-CR120</item>
+            <item>Ecovacs(Ecovacs)-CEN250</item>
+            <item>Ecovacs(Ecovacs)-CEN540</item>
+            <item>Proscenic(Proscenic)-P1</item>
+            
+
+    </string-array>
+</resources>

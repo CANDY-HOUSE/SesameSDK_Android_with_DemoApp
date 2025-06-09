@@ -7,20 +7,30 @@
     <string name="email">Email</string>
     <string name="new_password">New Password</string>
     <string name="sign_up">Sign up</string>
-
+    <string name="second2">second</string>
+    <string name="choosetime">selection period</string>
+    <string name="timePrompt">Please select time</string>
+    <string name="scriptPrompt">Select script</string>
+    <string name="dfu_status_error_msg">Error occurred</string>
     <string name="wins">Wins</string>
+    <string name="default_face_name">Face🖊️</string>
+    <string name="default_palm_name">Palm Veins🖊️</string>
     <string name="done">Done</string>
     <string name="title_about">About</string>
     <string name="title_friends">Contacts</string>
     <string name="title_registered">Registered</string>
     <string name="title_me">Me</string>
     <string name="title_list">Sesame</string>
+    <string name="facial">facial</string>
     <string name="title_detail">Profile</string>
     <string name="cd_home">Home!!</string>
     <string name="cd_list">List</string>
     <string name="cd_form">Form</string>
     <string name="logout">Log Out</string>
+    <string name="delete_account">Delete account</string>
+    <string name="forever">forever</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hub3_hint_ir">Add infrared devices within 5 meters of this Hub3:</string>
 
     <string name="qrhint">Scan this QR code with Sesame app to add me on your contact</string>
     <string name="change_sesame_name">Change Sesame Name</string>
@@ -28,7 +38,15 @@
     <string name="ssm_update">SesameOS Update＆Restart</string>
     <string name="autolock">Auto-lock timer</string>
     <string name="ds_delay">delay</string>
-    <string name="ssm_delete">Delete this Sesame</string>
+    <string name="ssm_delete">Delete</string>
+
+    <string name="ssm_add_to_matter_as_doorlock">Add this Sesame to Matter as DoorLock</string>
+    <string name="ssm_add_to_matter_as_switch">Add this Sesame to Matter as switch</string>
+
+
+    <string name="door_lock">Door Lock</string>
+    <string name="on_off_switch">Switch</string>
+
     <string name="cancel">Cancel</string>
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
@@ -69,6 +87,7 @@
     <string name="onFirmwareValidating">onFirmwareValidating</string>
     <string name="onDfuProcessStarted">onDfuProcessStarted</string>
     <string name="toastBleNotReadyForDFU">"Please get closer for Bluetooth to be connected, then try again"</string>
+    <string name="BleTooManyConnections">"android has too many Bluetooth connections and is not functioning well. Please turn off and then turn on android's Bluetooth."</string>
 
     <string name="onError">onError</string>
     <string name="too_close">The locked position and the unlocked position are too close😅</string>
@@ -81,7 +100,11 @@
 
     <string name="on">On</string>
     <string name="Off">Off</string>
+    <string name="immediately">Immediately</string>
     <string name="sec3">3 sec</string>
+    <string name="sec1">1 sec</string>
+    <string name="sec2">2 sec</string>
+    <string name="sec4">4 sec</string>
     <string name="sec5">5 sec</string>
     <string name="sec7">7 sec</string>
     <string name="sec10">10 sec</string>
@@ -89,6 +112,8 @@
     <string name="sec30">30 sec</string>
     <string name="min1">1 min</string>
     <string name="min2">2 min</string>
+    <string name="min3">3 min</string>
+    <string name="min4">4 min</string>
     <string name="min5">5 min</string>
     <string name="min10">10 min</string>
     <string name="min15">15 min</string>
@@ -103,6 +128,8 @@
     <string name="Sesame">Sesame</string>
     <string name="SesameBot">Sesame bot</string>
     <string name="Sesame5">Sesame 5</string>
+    <string name="Sesame5us">Sesame 5 Global</string>
+    <string name="SesameBot2">Sesame bot 2</string>
     <string name="Sesame5pro">Sesame 5 Pro</string>
     <string name="SesameBike">Sesame Bike</string>
     <string name="SesameBike2">Sesame Bike2</string>
@@ -110,11 +137,20 @@
     <string name="SSMTouchPro">Sesame Touch Pro</string>
     <string name="SSMTouch">Sesame Touch</string>
     <string name="BLEConnector">BLE Connector</string>
+    <string name="Hub3">Hub3</string>
+    <string name="CHRemote">Remote</string>
+    <string name="CHRemoteNano">Remote nano</string>
+    <string name="SSMFacePro">Sesame Face Pro</string>
+    <string name="SSMFaceProAI">Sesame Face Pro AI</string>
+    <string name="SSMFace">Sesame Face</string>
+    <string name="Sesame6Pro">Sesame 6 Pro</string>
+
     <string name="unLoginHistoryTag">Unlogin user</string>
     <string name="empty_friend">No Contacts</string>
-    <string name="wm2_update">Update SesameOS</string>
+    <string name="wm2_update">Software Update＆Restart</string>
     <string name="wm2_pwk">WiFi Password</string>
     <string name="wm2_pwk_hint">Please enter the WiFi password</string>
+    <string name="hub3_ir_title">IR Control</string>
     <string name="wm2_ssid">WiFi SSID</string>
 
     <string name="shareSesameToFriends">Share devices…</string>
@@ -123,17 +159,25 @@
     <string name="login">Log In/Sign up</string>
     <string name="loginNeed">Please login.</string>
     <string name="Notification">Notifications</string>
+    <string name="OpenSensor_on">Lock with Open Sensor</string>
+    <string name="remoteNanoTriggerSettingHint">Long press time to avoid mis-operation</string>
     <string name="VerificationCode">Verification code sent to your email</string>
-    <string name="ResetWifiModule2">Reset the WifiModule and trash the key</string>
+    <string name="ResetWifiModule2">Reset the WiFi Module and trash the key</string>
+    <string name="ResetHub3">Reset the Hub3 and trash the key</string>
 
     <string name="TrashTheWifiModule2Key">Delete the WiFi Module</string>
+    <string name="TrashTheHub3Module2Key">Delete the Hub3</string>
     <string name="TrashTheOpenSensorKey">Delete the Open Sensor</string>
-
-    <string name="addSesameTo">Add Sesame to...</string>
+    <string name="qrcodeNotSupport">This QR code does not support</string>
+    <string name="addFail">Add Failed</string>
+    <string name="cameraError">Camera Error</string>
+    <string name="addSesameTo">Add Sesame to…</string>
+    <string name="addOpenSensorToHub3">Add This Open Sensor to Hub3 …</string>
     <string name="wm2NetworkConnectionStatus">Internet Status</string>
     <string name="modifyGuestKeyTag">Rename the Guest Key</string>
 
     <string name="key_level">Role &amp; Permission</string>
+    <string name="click_script">Script</string>
     <string name="Wm2WifiOK">WiFi Module is connected to network successfully</string>
     <string name="BotModeNormal">Click then return</string>
     <string name="BotModeReverse">Reversed</string>
@@ -149,8 +193,10 @@
     <string name="NoBleSignal">Bluetooth signal not found, please get closer</string>
 
     <string name="wm2_hint">Add Sesame to be connected within 5 meters of this WiFi Module:</string>
+    <string name="hub3_hint">Add Sesame to be connected within 5 meters of this Hub3 :</string>
     <string name="friend_keys_hint">The following device keys are shared with this contact:</string>
     <string name="drop_hint">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button with a pin until the LED light turns off.</string>
+    <string name="drop_hint_press">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button the LED light turns off.</string>
 
     <string name="historyLOCK">is locked</string>
     <string name="historyUNLOCK">is unlocked</string>
@@ -189,29 +235,80 @@
 
     <string name="upload_keys_fail">You’re experiencing binding issues due to an unstable network. It’s possible to lose all paired Sesame devices if you pull to refresh or logout.</string>
 
-    <string name="TouchEmptyFingerHint">Approach the Sesame Touch device, tap the ⊕ icon, and place your finger on Sesame Touch to add a fingerprint.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
-    <string name="TouchEmptyNFCHint">Approach the Sesame Touch device, tap the ⊕ icon, and place your NFC card on Sesame Touch to add the NFC card.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
-    <string name="TouchEmptyPasscodeHint">Approach the Sesame Touch device, tap the ⊕ icon, enter the passcode and press the lock or unlock button to add the passcode.</string>
-    <string name="TouchProCardModify">Rename the NFC card🖊️</string>
+    <string name="TouchEmptyFingerHint">Approach the %1$s device, tap the ⊕ icon, and place your finger on %2$s to add a fingerprint.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
+    <string name="TouchEmptyFingerHintFace">Approach the Sesame Face device, tap the ⊕ icon, and place your finger on Sesame Face to add a fingerprint.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
+    <string name="TouchEmptyNFCHint">Approach the  %1$s device, tap the ⊕ icon, and place your NFC card on  %2$s to add the NFC card.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
+    <string name="TouchEmptyNFCFaceHint">Approach the Sesame Face device, tap the ⊕ icon, and place your NFC card on Sesame Face to add the NFC card.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
+    <string name="TouchEmptyPasscodeHint">Approach the %1$s device, tap the ⊕ icon, enter the passcode and press the lock or unlock button to add the passcode.</string>
+    <string name="HUB3EmptyIRCodeHint">Approach the HUB3 device, tap the ⊕ icon, point the IR control at HUB3, press a button of the IR control to enter the IR Code.</string>
+    <string name="TouchProCardRename">Rename the NFC card🖊️</string>
+    <string name="TouchProFaceRename">Rename the Face🖊️</string>
+    <string name="TouchProPalmRename">Rename the Palm Veins🖊️</string>
+    <string name="TouchProCardModify">Modify the NFC card number🖊️</string>
+    <string name="TouchProCardMove">Move to ...</string>
     <string name="TouchProCardDelete">Delete the NFC card</string>
+    <string name="TouchProCardAdd">Add NFC card</string>
     <string name="nfcCard">Manage NFC cards</string>
     <string name="fingerprint">Manage fingerprints</string>
+    <string name="clickaction">Click ⊕ to add actions.\nIf the duration is \"forever\" and executed, SesameBot2 will never stop until switched to another script and executed.\nMotor speed varies. Make press time longer than release slightly.</string>
     <string name="passcodes">Manage passcodes</string>
+    <string name="faces">Manage Faces</string>
     <string name="add_ssm_hint_by_touch">Add Sesame to be connected within 1 meter of this %1$s:</string>
-    <string name="pleaseResetOpenSensor">Once you leave the settings page, restart after updating SesameOS, or disconnect the Bluetooth connection with your Android phone, the Open Sensor will automatically switch to power-saving mode. If you would update SesameOS or add a new Sesame, reset the Open Sesame sensor by pressing and holding the reset button with a thin stick for about 5 seconds until the LED turns off. Then, register again from the ⊕ button.</string>
+    <string name="pleaseResetOpenSensor">Once you leave the settings page, restart after updating SesameOS, or disconnect the Bluetooth connection with your Android phone, the %1$s will automatically switch to power-saving mode. If you would update SesameOS or add a new Sesame, reset the %1$s by pressing and holding the reset button with a thin stick for about 5 seconds until the LED turns off. Then, register again from the ⊕ button.</string>
     <string name="default_card_name">NFC Card🖊️</string>
     <string name="TouchProFingerModify">Rename the fingerprint🖊️</string>
     <string name="TouchProFingerDelete">Delete the fingerprint</string>
-    <string name="TouchProPWDModify">Rename the passcode🖊️</string>
+    <string name="DelFace">Delete the Face</string>
+    <string name="DelPalm">Delete the Palm Veins</string>
+
+    <string name="sesamefaceMsg">Approach %1$s and tap ⊕. Show your Face then tap X.</string>
+    <string name="sesamepalmMsg">Approach %1$s and tap ⊕. Show Palm Veins then tap X.</string>
+
+    <string name="TouchProPWDRename">Rename the passcode🖊️</string>
+    <string name="TouchProPWDModify">Modify the passcode value🖊️</string>
     <string name="TouchProPWDDelete">Delete the passcode</string>
+    <string name="TouchProPWDAdd">Add Passcode</string>
+    <string name="MatterSettings">Matter Settings</string>
+    <string name="SkipMatterSettings">Skip Matter Settings</string>
+    <string name="OpenMatterPairingWindow">Open MATTER Pairing Window</string>
     <string name="trash_device_key">Delete the %1$s</string>
     <string name="reset_device_key">Reset and delete the %1$s</string>
     <string name="default_passcode_name">Passcode🖊️</string>
     <string name="default_fingerprint_name">Fingerprint🖊️</string>
+    <string name="default_ircode_name">IRcode🖊️</string>
+    <string name="HUB3IRCodeRename">Rename the IR code🖊️</string>
+    <string name="HUB3IRCodeEmit">Emit the IR code🖊️</string>
+    <string name="HUB3IRCodeDel">Delete the IR code</string>
+
     <string name="judge_the_sesame">Horizontal calibration</string>
     <string name="device_model">Model</string>
-    <string name="no_more"></string>
+    <string name="no_more" />
 <!--    <string name="load_fail">Failed to load data</string>-->
     <string name="battary">Battery level</string>
+    <string name="open_sensor_status">Status</string>
+    <string name="open_sensor_last_update_time">Update Time</string>
+    <string name="android_notifica_permis_on">Android notification permissions granted</string>
+    <string name="android_notifica_permis_off">Android notification permissions NOT granted(Tap here)</string>
+
+    <string name="pleaseemail">Please enter the recipient\'s email address</string>
+
+    <string name="matterMsg">Matter pairing mode activated. Please complete pairing within fifteen  minutes. If unsuccessful, please re-enter this page to reactivate Matter pairing mode.</string>
+
+    <string name="facepalm">Manage Palm Veins</string>
+    <string name="hub3_addSesameTo">Add infrared data...</string>
+    <string name="login_fg_input_mail_warn">Please enter a valid email address</string>
+
+    <string name="hub3_details">Details</string>
+
+    <string name="sesame_widget_notification">Tap to start unlock widget!</string>
+    <string name="delete_failed_tips">Failed to delete. Please try again</string>
+
+    <string name="key">Key</string>
+    <string name="share">Share</string>
+
+    <string name="distance">Distance</string>
+    <string name="brightness">Brightness</string>
+    <string name="radar">Radar Detection\nDistance</string>
+    <string name="radar_distance_description">This is the distance at which the radar wakes the system from sleep mode.\nIn high-traffic areas, shorter distance saves battery life.\nIn low-traffic areas, maximum distance ensures the best experience.</string>
 
 </resources>

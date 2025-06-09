@@ -1,69 +1,100 @@
 package co.candyhouse.sesame.open
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.view.View
+import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.utils.L
-import kotlin.collections.ArrayList
+import java.util.Locale
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
-
+@SuppressLint("StaticFieldLeak")
 object CHDeviceManager {
-    init {
 
-//        CHAccountManager
+    lateinit var app: Context
+
+    var isRefresh = AtomicBoolean(false)
+    var isScroll = AtomicBoolean(false)
+
+    val listDevices = mutableListOf<CHDevices>()
+    var lockStates = mutableMapOf<String, LockDeviceState>()
+
+    init {
+        CHIotManager
+    }
+
+    fun vibrateDevice(context: Context) {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            } else {
+                vibrator.vibrate(100)
+            }
+        }
+    }
+
+    fun vibrateDevice(view: View?) {
+        view?.context?.let { vibrateDevice(it) }
     }
 
     fun getCandyDevices(result: CHResult<List<CHDevices>>) {
-        CHDB.CHSS2Model.getAllDB {
-            it.onSuccess {
-//                L.d("hcia", "🎃 it.size:" + it.size)
-
-                result.invoke(Result.success(CHResultState.CHResultStateBLE(it.filter { CHProductModel.getByModel(it.deviceModel) != null }.map { keyData ->
-
-//                    L.d("hcia", "keyData:" + keyData)
+        CHDB.CHSS2Model.getAllDB { it ->
+            it.onSuccess { chDevices ->
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(chDevices.filter {
+                    CHProductModel.getByModel(
+                        it.deviceModel
+                    ) != null
+                }.map { keyData ->
                     val model = keyData.deviceModel
-                    val productmodel = CHProductModel.getByModel(model)!!
-                    
-                    CHBleManager.chDeviceMap.getOrPut(keyData.deviceUUID) { productmodel.deviceFactory() }.apply {
-                        (this as CHDeviceUtil)
-//                        L.d("hcia", "🎃 this:" + this)
-//                        L.d("hcia", "🎃1  keyData:" + (this as CHDevicesUtil).sesame2KeyData)
-//                        L.d("hcia", "🎃2  keyData:" + keyData)
-//                        L.d("hcia", "🎃3+ (this.sesame2KeyData == keyData):" + (this.sesame2KeyData == keyData))
-//                        L.d("hcia", "🎃3- (this.sesame2KeyData e= keyData):" + (this.sesame2KeyData?.equals(keyData) ))
-                        this.sesame2KeyData?.apply {
+                    val productModel = CHProductModel.getByModel(model)!!
 
+                    CHBleManager.chDeviceMap.getOrPut(keyData.deviceUUID) { productModel.deviceFactory() }
+                        .apply {
+                            (this as CHDeviceUtil)
+                            this.productModel = productModel;
+                            if (this.sesame2KeyData == null) {
+                                this.sesame2KeyData = keyData
+                            } else {
+                                this.sesame2KeyData =
+                                    keyData.copy(historyTag = this.sesame2KeyData?.historyTag)
+                            }
                         }
-
-                        this.productModel = productmodel;
-                        if (this.sesame2KeyData == null) {
-                            this.sesame2KeyData = keyData
-                        } else {
-                            this.sesame2KeyData = keyData.copy(historyTag = this.sesame2KeyData?.historyTag)
-                        }
-
-                    }
                 })))
             }
             it.onFailure { error ->
                 result.invoke(Result.failure(error))
             }
-
         }
     }
 
+    private fun isValidUUID(uuid: String): Boolean {
+        return try {
+            UUID.fromString(uuid)
+            true
+        } catch (e: IllegalArgumentException) {
+            false
+        }
+    }
 
     fun receiveCHDeviceKeys(vararg devicesKeys: CHDevice, result: CHResult<ArrayList<CHDevices>>) {
-//        L.d("hcia", "CHDevice 收鑰匙多多")
-        val receiveCHDevices: ArrayList<CHDevices> = arrayListOf<CHDevices>()
-        val ssmIDs: ArrayList<String> = ArrayList<String>()
-        devicesKeys.forEach {
+        val receiveCHDevices: ArrayList<CHDevices> = arrayListOf()
+        val ssmIDs: ArrayList<String> = ArrayList()
+        devicesKeys.forEach { it ->
             val candyDevice = it.copy()
             candyDevice.deviceUUID = candyDevice.deviceUUID.lowercase()
             ssmIDs.add(candyDevice.deviceUUID)
-//            L.d("hcia", "收鑰匙 candyDevice.historyTag:" + candyDevice.historyTag?.toHexString())
 
             CHDB.CHSS2Model.insert(candyDevice) {
                 it.onSuccess {
@@ -72,22 +103,25 @@ object CHDeviceManager {
             }
         }
 
-        CHDB.CHSS2Model.getAllDB {
+        CHDB.CHSS2Model.getAllDB { it ->
             it.onSuccess {
                 it.forEach { keyData ->
-                    CHProductModel.getByModel(keyData.deviceModel)?.let { model ->
-                        val tmpCHdevice = CHBleManager.chDeviceMap.getOrPut(keyData.deviceUUID.toLowerCase(), { model.deviceFactory() })
-                        tmpCHdevice as CHDeviceUtil
-                        tmpCHdevice.sesame2KeyData = keyData
-                        if (ssmIDs.contains(tmpCHdevice.deviceId.toString())) {
-                            receiveCHDevices.add(tmpCHdevice)
+                    L.d("hcia", "uuid:" + isValidUUID(keyData.deviceUUID) + "---keyData" + keyData)
+
+                    if (isValidUUID(keyData.deviceUUID)) {
+                        CHProductModel.getByModel(keyData.deviceModel)?.let { model ->
+                            val cDevice = CHBleManager.chDeviceMap.getOrPut(
+                                keyData.deviceUUID.lowercase(Locale.getDefault())
+                            ) { model.deviceFactory() }
+                            cDevice as CHDeviceUtil
+                            cDevice.sesame2KeyData = keyData
+                            if (ssmIDs.contains(cDevice.deviceId.toString())) {
+                                receiveCHDevices.add(cDevice)
+                            }
                         }
                     }
-
                 }
-//                L.d("🔑", "寫入db")
                 result.invoke(Result.success(CHResultState.CHResultStateCache(receiveCHDevices)))
-
             }
             it.onFailure {
                 result.invoke(Result.failure(it))
@@ -96,14 +130,16 @@ object CHDeviceManager {
     }
 
     fun receiveCHDeviceKeys(devicesKeys: List<CHDevice>, result: CHResult<ArrayList<CHDevices>>) {
-//        L.d("hcia", "CHDevice 收鑰匙多多")
-        val receiveCHDevices: ArrayList<CHDevices> = arrayListOf<CHDevices>()
-        val ssmIDs: ArrayList<String> = ArrayList<String>()
-        devicesKeys.forEach {
+        val receiveCHDevices: ArrayList<CHDevices> = arrayListOf()
+        val ssmIDs: ArrayList<String> = ArrayList()
+        L.d("receiveCHDeviceKeys", "插入" + devicesKeys.size)
+        CHDB.CHSS2Model.clearAll()
+        devicesKeys.forEach { it ->
+            L.d("receiveCHDeviceKeys", "插入$it")
             val candyDevice = it.copy()
-            candyDevice.deviceUUID = candyDevice.deviceUUID.toLowerCase()
+            candyDevice.deviceUUID = candyDevice.deviceUUID.lowercase(Locale.getDefault())
+
             ssmIDs.add(candyDevice.deviceUUID)
-//            L.d("hcia", "收鑰匙 candyDevice.historyTag:" + candyDevice.historyTag?.toHexString())
             CHDB.CHSS2Model.insert(candyDevice) {
                 it.onSuccess {
 //                    L.d("hcia", "收鑰匙 寫入ＤＢ  candyDevice.historyTag:" + candyDevice.historyTag)
@@ -111,20 +147,28 @@ object CHDeviceManager {
             }
         }
 
-        CHDB.CHSS2Model.getAllDB {
+        CHDB.CHSS2Model.getAllDB { it ->
             it.onSuccess {
                 it.forEach { keyData ->
                     CHProductModel.getByModel(keyData.deviceModel)?.let { model ->
-                        val tmpCHdevice = CHBleManager.chDeviceMap.getOrPut(keyData.deviceUUID.toLowerCase(), { model.deviceFactory() })
-                        tmpCHdevice as CHDeviceUtil
-                        tmpCHdevice.sesame2KeyData = keyData
-                        if (ssmIDs.contains(tmpCHdevice.deviceId.toString())) {
-                            receiveCHDevices.add(tmpCHdevice)
+                        val tmpCDevice = CHBleManager.chDeviceMap.getOrPut(
+                            keyData.deviceUUID.lowercase(Locale.getDefault())
+                        ) { model.deviceFactory() }
+
+                        if (tmpCDevice is CHDeviceUtil) {
+                            tmpCDevice.productModel = model
+                            if (tmpCDevice.sesame2KeyData == null) {
+                                tmpCDevice.sesame2KeyData = keyData
+                            } else {
+                                tmpCDevice.sesame2KeyData =
+                                    keyData.copy(historyTag = tmpCDevice.sesame2KeyData?.historyTag)
+                            }
+                            if (ssmIDs.contains(tmpCDevice.deviceId.toString())) {
+                                receiveCHDevices.add(tmpCDevice)
+                            }
                         }
                     }
-
                 }
-//                L.d("🔑", "寫入db")
                 result.invoke(Result.success(CHResultState.CHResultStateCache(receiveCHDevices)))
             }
             it.onFailure {
@@ -132,9 +176,6 @@ object CHDeviceManager {
             }
         }
     }
-
-
 }
 
-
-
+data class LockDeviceState(var state: Int, var position: Float?, var time: Long = 0L)

@@ -4,12 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.view.inputmethod.InputMethodManager
+import android.widget.Button
+import android.widget.TextView
+
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.MainActivity.Companion.activity
-import kotlinx.android.synthetic.main.alert_standard.*
+
 import co.utils.alerts.ext.AlertType
 import co.utils.alerts.ext.InputType
+import co.utils.materialtextfield.MaterialTextField
 
 class StandardAlert(context: Context, val type: AlertType) : BaseAlert(context) {
 
@@ -19,6 +21,8 @@ class StandardAlert(context: Context, val type: AlertType) : BaseAlert(context) 
     var topHinText: String? = null
     var secondHinText: String? = null
     var inputType = InputType.Text
+    var hintText:String?=null
+    var hintColor:Int?=null
 
     private var cancelText: String? = null
     private var confirmText: String? = null
@@ -35,29 +39,42 @@ class StandardAlert(context: Context, val type: AlertType) : BaseAlert(context) 
 
         update()
 
+
         when (type) {
-            AlertType.Normal -> btnConfirm.setBackgroundResource(R.drawable.bg_btn_confirm)
-            AlertType.Warning -> btnConfirm.setBackgroundResource(R.drawable.bg_btn_warning)
+            AlertType.Normal -> findViewById<Button>(R.id.btnConfirm).setBackgroundResource(R.drawable.bg_btn_confirm)
+            AlertType.Warning -> findViewById<Button>(R.id.btnConfirm).setBackgroundResource(R.drawable.bg_btn_warning)
             AlertType.InputText -> {
-                etInput.setText(lastName)
-                etInput.inputType = inputType.value
-                etInput__2.visibility = View.GONE
-                hintl2.visibility = View.GONE
-                hint_second_tx.visibility = View.GONE
-                hint_top.text = topHinText
+                hintText?.apply {
+
+
+                    findViewById<MaterialTextField>(R.id.etInput) .hint = this
+                }
+                hintColor?.apply {
+                    findViewById<MaterialTextField>(R.id.etInput).setHintTextColor(this)
+
+                }
+                lastName?.apply {
+                    findViewById<MaterialTextField>(R.id.etInput).setText(this)
+                }
+
+                findViewById<MaterialTextField>(R.id.etInput).inputType = inputType.value
+                findViewById<MaterialTextField>(R.id.etInput__2)     .visibility = View.GONE
+                findViewById<View>(R.id.hintl2)      .visibility = View.GONE
+                findViewById<TextView>(R.id.hint_second_tx)       .visibility = View.GONE
+                findViewById<TextView>(R.id.hint_top)       .text = topHinText
 //                hint_top.visibility = View.GONE
             }
             AlertType.TwoEdit -> {
 //                etInput.hint = hintText
-                etInput.setText(lastName)
-                etInput__2.setText(firstName)
+                findViewById<MaterialTextField>(R.id.etInput).setText(lastName)
+                findViewById<MaterialTextField>(R.id.etInput__2)    .setText(firstName)
 
-                etInput.inputType = inputType.value
-                etInput__2.inputType = inputType.value
-                etInput.visibility = View.VISIBLE
-                etInput__2.visibility = View.VISIBLE
-                hint_top.text = topHinText
-                hint_second_tx.text = secondHinText
+                findViewById<MaterialTextField>(R.id.etInput).inputType = inputType.value
+                findViewById<MaterialTextField>(R.id.etInput__2) .inputType = inputType.value
+                findViewById<MaterialTextField>(R.id.etInput).visibility = View.VISIBLE
+                findViewById<MaterialTextField>(R.id.etInput__2) .visibility = View.VISIBLE
+                findViewById<TextView>(R.id.hint_top).text = topHinText
+                findViewById<TextView>(R.id.hint_second_tx)     .text = secondHinText
 
             }
             else -> {}
@@ -66,16 +83,11 @@ class StandardAlert(context: Context, val type: AlertType) : BaseAlert(context) 
 
     }
 
-    override fun onCreatePanelView(featureId: Int): View? {
-        return super.onCreatePanelView(featureId)
-
-    }
-
     fun update() {
 
         titleText?.let {
-            tvTitle.text = it
-            tvTitle.visibility = View.VISIBLE
+            findViewById<TextView>(R.id.tvTitle)      .text = it
+            findViewById<TextView>(R.id.tvTitle) .visibility = View.VISIBLE
         }
 
 //        contentText?.let {
@@ -83,35 +95,38 @@ class StandardAlert(context: Context, val type: AlertType) : BaseAlert(context) 
 
         cancelText?.let {
 //            btnCancel.text = it
-            btnCancel.visibility = View.VISIBLE
-            btnCancel.setOnClickListener {
+            findViewById<Button>(R.id.btnCancel)        .visibility = View.VISIBLE
+            findViewById<Button>(R.id.btnCancel).setOnClickListener {
                 mOnCancel?.invoke(this@StandardAlert) ?: this@StandardAlert.dismiss()
             }
         }
 
         confirmText?.let {
-            btnConfirm.text = it
-            btnConfirm.visibility = View.VISIBLE
-            btnConfirm.setOnClickListener {
+            findViewById<Button>(R.id.btnConfirm)         .text = it
+            findViewById<Button>(R.id.btnConfirm) .visibility = View.VISIBLE
+            findViewById<Button>(R.id.btnConfirm) .setOnClickListener {
 //                L.d("hcia", "type:" + type)
                 when (type) {
                     AlertType.TwoEdit -> {
 
-                        if (etInput.text.isNullOrBlank() || etInput__2.text.isNullOrBlank()) {
+                        if (    findViewById<MaterialTextField>(R.id.etInput).text.isNullOrBlank()
+                                ||    findViewById<MaterialTextField>(R.id.etInput__2) .text.isNullOrBlank()) {
                             val shake = AnimationUtils.loadAnimation(context, R.anim.shake)
-                            etInput.startAnimation(shake)
+                            findViewById<MaterialTextField>(R.id.etInput)        .startAnimation(shake)
                         } else {
-                            mOnConfirmWithDoubleEdit?.invoke(this@StandardAlert, etInput.text.toString(), etInput__2.text.toString())
+                            mOnConfirmWithDoubleEdit?.invoke(this@StandardAlert,
+                                    findViewById<MaterialTextField>(R.id.etInput) .text.toString(),
+                                    findViewById<MaterialTextField>(R.id.etInput__2)         .text.toString())
                         }
                     }
                     else -> {
 
                         mOnConfirm?.invoke(this@StandardAlert) ?: mOnConfirmWithText?.let {
-                            if (etInput.text.isNullOrBlank()) {
+                            if (findViewById<MaterialTextField>(R.id.etInput).text.isNullOrBlank()) {
                                 val shake = AnimationUtils.loadAnimation(context, R.anim.shake)
-                                etInput.startAnimation(shake)
+                                findViewById<MaterialTextField>(R.id.etInput).startAnimation(shake)
                             } else {
-                                mOnConfirmWithText?.invoke(this@StandardAlert, etInput.text.toString())
+                                mOnConfirmWithText?.invoke(this@StandardAlert, findViewById<MaterialTextField>(R.id.etInput).text.toString())
                                 mOnConfirmWithText = null
                             }
                         } ?: this@StandardAlert.dismiss()

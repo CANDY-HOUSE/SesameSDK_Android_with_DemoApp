@@ -1,0 +1,38 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    id 'kotlin-parcelize'
+}
+
+android {
+    namespace 'candyhouse.sesameos.ir'
+
+    compileSdk rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdk rootProject.ext.minSdkVersion
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation project(':sesame-sdk')
+
+    implementation platform(libs.kotlin.bom)
+
+    //崩溃日志收集
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.crashlytics.ktx
+}

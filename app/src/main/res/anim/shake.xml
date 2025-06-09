@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <translate xmlns:android="http://schemas.android.com/apk/res/android"
-           android:duration="30"
+           android:duration="80"
            android:fromXDelta="-10"
            android:interpolator="@android:anim/linear_interpolator"
            android:repeatCount="5"

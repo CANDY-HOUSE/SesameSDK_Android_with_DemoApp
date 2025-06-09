@@ -25,17 +25,10 @@
         android:layout_toEndOf="@+id/avatar"
         android:gravity="center"
         android:text="123"
+        android:textColor="@color/black"
         android:textSize="16sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_alignStart="@+id/title"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="0dp"
-        android:background="@color/gray1">
 
-    </View>
 
 
 </RelativeLayout>

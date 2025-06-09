@@ -1,66 +1,94 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
-    }
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
-    compileSdkVersion 32
+    namespace 'co.candyhouse.sesame2'
+
+    compileSdk rootProject.ext.compileSdkVersion
+
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 32
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+
+        // AWS Gateway 配置
+        buildConfigField("String", "API_GATEWAY_CLIENT_ID", "\"${rootProject.ext['aws.apigateway.clientId']}\"")
+        buildConfigField("String", "API_GATEWAY_API_KEY", "\"${rootProject.ext['aws.apigateway.apiKey']}\"")
+
+        // AWS IoT 配置
+        buildConfigField("String", "AWS_IOT_ENDPOINT", "\"${rootProject.ext['aws.iot.endpoint']}\"")
     }
+
     buildTypes {
         debug {
-
-            buildConfigField("String", "testname", "\"test\"")
-
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+            buildConfigField("String", "chjpserver", "\"${rootProject.ext['candyhouse.sesame.sdk.api.dev']}\"")
         }
+
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
-            buildConfigField("String", "testname", "\"test\"")
-
+            buildConfigField("String", "chjpserver", "\"${rootProject.ext['candyhouse.sesame.sdk.api.prod']}\"")
         }
     }
+
     packagingOptions {
         resources {
             excludes += ['META-INF/atomicfu.kotlin_module']
         }
     }
+
     lint {
         abortOnError false
         checkReleaseBuilds false
     }
-    namespace 'co.candyhouse.sesame2'
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ["-Xjvm-default=all"]
+
+    }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
 }
-// 配置 AAR 打包任务
-task createAar(type: Copy) {
-    from 'build/outputs/aar'
-    into projectDir
-    include('*.aar')
-}
+
 dependencies {
-    implementation "androidx.room:room-runtime:2.4.3"
+    api libs.aws.android.sdk.apigateway.core
+    api(libs.aws.android.sdk.mobile.client) { transitive = true }
+    implementation libs.aws.android.sdk.iot
 
-    kapt "androidx.room:room-compiler:2.4.3"
-    implementation "androidx.room:room-ktx:2.4.3"
-    implementation "androidx.room:room-rxjava2:2.4.3"
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
+    ksp libs.androidx.room.compiler
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    implementation libs.androidx.room.rxjava2
 
+    api libs.androidx.appcompat
+
+    api libs.androidx.lifecycle.runtime.ktx
+    api libs.androidx.lifecycle.extensions
+    api libs.androidx.lifecycle.viewmodel.ktx.v286
+
+    api libs.kotlinx.coroutines.android
+    implementation libs.tyrus.standalone.client
+
+    api libs.androidx.navigation.fragment.ktx
+    api libs.androidx.navigation.ui.ktx
+    api libs.androidx.navigation.compose
+
+    api libs.rxjava
 }
-
-
-apply from: './maven.gradle'

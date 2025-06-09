@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:background="@color/gray0"
         android:orientation="vertical"
+        android:id="@+id/llview"
         android:paddingBottom="40dp">
 
         <RelativeLayout
@@ -91,7 +92,7 @@
                     android:layout_marginLeft="17dp"
                     android:background="@color/white"
                     android:gravity="center_vertical"
-                    android:text="@string/change_sesame_name"
+                    android:text="@string/edit_name"
                     android:textColor="@color/black"
                     android:textSize="17dp" />
 
@@ -207,7 +208,6 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
-                android:id="@+id/rlRole"
                 android:background="@color/white">
 
                 <TextView
@@ -216,6 +216,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="17dp"
                     android:background="@color/white"
+                    android:id="@+id/tvRole"
                     android:gravity="center_vertical"
                     android:text="@string/key_level"
                     android:textColor="@color/black"
@@ -245,6 +246,61 @@
                     android:background="@color/gray0" />
             </RelativeLayout>
 
+            <RelativeLayout
+                android:id="@+id/click_script_zone"
+                android:layout_width="match_parent"
+                android:layout_height="53dp"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="17dp"
+                    android:background="@color/white"
+                    android:gravity="center_vertical"
+                    android:text="@string/click_script"
+                    android:textColor="@color/black"
+                    android:textSize="17dp" />
+
+                <TextView
+                    android:id="@+id/script_id_txt"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:layout_marginRight="1dp"
+                    android:gravity="center"
+                    android:paddingRight="17dp"
+                    android:textColor="@color/text_hint"
+                    android:textSize="18sp"
+                    tools:text="Script: 0" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="17dp"
+                    android:background="@color/gray0" />
+
+                <ImageView
+                    android:id="@+id/ic_arrow_gray"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:paddingHorizontal="12dp"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_arrow_gray" />
+
+            </RelativeLayout>
+            <com.weigan.loopview.LoopView
+                android:id="@+id/wheelview"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:focusable="true"
+                android:visibility="gone"
+                app:awv_initialPosition="0"
+                app:awv_textsize="13" />
             <RelativeLayout
                 android:id="@+id/dfu_zone"
                 android:layout_width="match_parent"
@@ -357,7 +413,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/text_hint"
-                tools:text="@string/drop_hint" />
+                tools:text="@string/drop_hint_press" />
 
             <RelativeLayout
                 android:id="@+id/reset_zone"
@@ -387,7 +443,7 @@
                 android:id="@+id/nfc_zone"
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="500dp"
                 android:background="@color/white">
 
                 <TextView
@@ -425,18 +481,36 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
+                android:id="@+id/widget_rl"
                 android:background="@color/white">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="17dp"
-                    android:background="@color/white"
-                    android:gravity="center_vertical"
-                    android:text="@string/sesame_widget"
-                    android:textColor="@color/black"
-                    android:textSize="17dp" />
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/white"
+                        android:gravity="center_vertical"
+                        android:text="@string/sesame_widget"
+                        android:textColor="@color/black"
+                        android:textSize="17dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="17dp"
+                        android:id="@+id/tvSysNotifyWidget"
+                        android:gravity="center_vertical"
+                        android:text="@string/android_notifica_permis_on"
+                        android:textColor="@color/tv_color_red_gray"
+                        android:textSize="11dp" />
+                </LinearLayout>
 
 
                 <Switch

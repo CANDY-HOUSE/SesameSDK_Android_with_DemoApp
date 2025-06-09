@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/MatchMatch"
+    android:background="@color/black">
+
+    <cn.bingoogolapple.qrcode.zxing.ZXingView
+        android:id="@+id/zxingview"
+        style="@style/MatchMatch"
+        android:visibility="gone"
+        app:qrcv_animTime="1000"
+        app:qrcv_barCodeTipText=""
+        app:qrcv_barcodeRectHeight="120dp"
+        app:qrcv_borderColor="@color/gray0"
+        app:qrcv_borderSize="0.5dp"
+        app:qrcv_cornerColor="@color/hint"
+        app:qrcv_cornerDisplayType="center"
+        app:qrcv_cornerLength="20dp"
+        app:qrcv_cornerSize="3dp"
+        app:qrcv_isAutoZoom="true"
+        app:qrcv_isBarcode="false"
+        app:qrcv_isOnlyDecodeScanBoxArea="false"
+        app:qrcv_isScanLineReverse="false"
+        app:qrcv_isShowDefaultGridScanLineDrawable="false"
+        app:qrcv_isShowDefaultScanLineDrawable="true"
+        app:qrcv_isShowLocationPoint="true"
+        app:qrcv_isShowTipBackground="false"
+        app:qrcv_isShowTipTextAsSingleLine="true"
+        app:qrcv_isTipTextBelowRect="true"
+        app:qrcv_maskColor="@color/mask_black"
+        app:qrcv_qrCodeTipText="@string/scan_the_qr_code"
+        app:qrcv_rectWidth="240dp"
+        app:qrcv_scanLineColor="@color/hint"
+        app:qrcv_scanLineMargin="0dp"
+        app:qrcv_scanLineSize="0.5dp"
+        app:qrcv_tipTextColor="@android:color/white"
+        app:qrcv_tipTextMargin="24dp"
+        app:qrcv_tipTextSize="14sp"
+        app:qrcv_toolbarHeight="0dp"
+        app:qrcv_topOffset="0dp"
+        app:qrcv_verticalBias="2" />
+
+    <ImageView
+        android:id="@+id/back_zone"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentRight="true"
+        android:padding="22dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_icons_filled_close_white" />
+
+
+    <ImageView
+        android:id="@+id/load_img"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="110dp"
+        android:padding="22dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_icons_filled_album" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="78dp">
+
+        <ProgressBar
+            android:id="@+id/proBar"
+            style="?android:progressBarStyle"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#ffffff"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/imgRestart"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:src="@drawable/svg_restart"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</RelativeLayout>
+
+

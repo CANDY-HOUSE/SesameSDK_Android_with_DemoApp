@@ -1,0 +1,155 @@
+{
+  "controls": [
+    {
+      "id": 1,
+      "type": "POWER_STATUS_ON",
+      "titleIndex": 0,
+      "titles": [
+        "ir_remote_power_on",
+        "ir_remote_power_on"
+      ],
+      "icons": [
+        "icon_ir_remote_power_on",
+        "icon_ir_remote_power_off"
+      ],
+      "defaultValue": "",
+      "operateCode": "49153"
+    },
+    {
+      "id": 2,
+      "type": "TEMPERATURE_VALUE",
+      "titleIndex": 1,
+      "titles": [
+      ],
+      "icons": [
+      ],
+      "defaultValue": "28",
+      "operateCode": "0"
+    },
+    {
+      "id": 3,
+      "type": "POWER_STATUS_OFF",
+      "titleIndex": 2,
+      "titles": [
+        "ir_remote_power_off",
+        "ir_remote_power_off"
+      ],
+      "icons": [
+        "icon_ir_remote_power_off",
+        "icon_ir_remote_power_on"
+      ],
+      "defaultValue": "",
+      "operateCode": "49153"
+    },
+    {
+      "id": 4,
+      "type": "TEMP_CONTROL_ADD",
+      "titleIndex": 3,
+      "titles": [
+        "air_conditioner_temperature"
+      ],
+      "icons": [
+        "icon_air_conditioner_temperature_add"
+      ],
+      "defaultValue": "",
+      "operateCode": "49163"
+    },
+    {
+      "id": 5,
+      "type": "MODE",
+      "titleIndex": 4,
+      "titles": [
+        "air_conditioner_model_auto_01",
+        "air_conditioner_model_cold_02",
+        "air_conditioner_model_dry_03",
+        "air_conditioner_model_wind_04",
+        "air_conditioner_model_hot_05"
+      ],
+      "icons": [
+        "icon_air_conditioner_model_auto_01",
+        "icon_air_conditioner_model_cold_02",
+        "icon_air_conditioner_model_dry_03",
+        "icon_air_conditioner_model_wind_04",
+        "icon_air_conditioner_model_hot_05"
+      ],
+      "defaultValue": "A",
+      "operateCode": "49161"
+    },
+    {
+      "id": 6,
+      "type": "TEMP_CONTROL_REDUCE",
+      "titleIndex": 5,
+      "titles": [
+        "air_conditioner_temperature"
+      ],
+      "icons": [
+        "icon_air_conditioner_temperature_reduce"
+      ],
+      "defaultValue": "",
+      "operateCode": "49162"
+    },
+    {
+      "id": 7,
+      "type": "FAN_SPEED",
+      "titleIndex": 6,
+      "titles": [
+        "air_conditioner_wind_speed_auto",
+        "air_conditioner_wind_speed_v1",
+        "air_conditioner_wind_speed_v2",
+        "air_conditioner_wind_speed_v3"
+      ],
+      "icons": [
+        "icon_air_conditioner_wind_speed_auto",
+        "icon_air_conditioner_wind_speed_v1",
+        "icon_air_conditioner_wind_speed_v2",
+        "icon_air_conditioner_wind_speed_v3"
+      ],
+      "defaultValue": "",
+      "operateCode": "49157"
+    },
+    {
+      "id": 8,
+      "type": "SWING_VERTICAL",
+      "titleIndex": 7,
+      "titles": [
+        "air_conditioner_wind_vertical_v1",
+        "air_conditioner_wind_vertical_v2",
+        "air_conditioner_wind_vertical_v3"
+      ],
+      "icons": [
+        "icon_air_conditioner_wind_vertical_v1",
+        "icon_air_conditioner_wind_vertical_v2",
+        "icon_air_conditioner_wind_vertical_v3"
+      ],
+      "defaultValue": "",
+      "operateCode": "49159"
+    },
+    {
+      "id": 9,
+      "type": "SWING_HORIZONTAL",
+      "titleIndex": 8,
+      "titles": [
+        "air_conditioner_wind_horizontal_auto",
+        "air_conditioner_wind_horizontal_stop"
+      ],
+      "icons": [
+        "icon_air_conditioner_wind_horizontal_stop",
+        "icon_air_conditioner_wind_horizontal_auto"
+      ],
+      "defaultValue": "",
+      "operateCode": "49161"
+    }
+  ],
+  "settings": {
+    "temperature": {
+      "min": 17,
+      "max": 31,
+      "default": 28,
+      "step": 1
+    },
+    "layout": {
+      "columns": 3,
+      "spacing": 16
+    }
+  }
+}

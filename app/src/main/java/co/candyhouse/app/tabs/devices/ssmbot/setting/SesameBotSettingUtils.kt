@@ -4,12 +4,12 @@ import co.candyhouse.app.R
 import co.candyhouse.sesame.open.device.CHSesameBotMechSettings
 
 fun botMode(setting: CHSesameBotMechSettings): SesameBotMode {
-    if (setting.clickLockSec.toInt() == 20) {
-        return SesameBotMode.Cell
+    return if (setting.clickLockSec.toInt() == 20) {
+        SesameBotMode.Cell
     } else if (setting.userPrefDir.toInt() == 0) {
-        return SesameBotMode.Normal
+        SesameBotMode.Normal
     } else {
-        return SesameBotMode.LongPress
+        SesameBotMode.LongPress
     }
 }
 

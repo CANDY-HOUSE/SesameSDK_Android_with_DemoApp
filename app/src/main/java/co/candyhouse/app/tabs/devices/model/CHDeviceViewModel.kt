@@ -1,305 +1,598 @@
 package co.candyhouse.app.tabs.devices.model
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import candyhouse.sesameos.ir.base.IrRemote
+import candyhouse.sesameos.ir.server.CHIRAPIManager
+import co.candyhouse.app.R
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.devices.ssm2.*
+import co.candyhouse.app.tabs.account.cheyKeyToUserKey
+import co.candyhouse.app.tabs.account.getHistoryTag
+import co.candyhouse.app.tabs.account.userKeyToCHKey
+import co.candyhouse.app.tabs.devices.hub3.bean.IrRemoteRepository
+import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
+import co.candyhouse.app.tabs.devices.ssm2.getLevel
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.app.tabs.devices.ssm2.getRank
+import co.candyhouse.app.tabs.devices.ssm2.uiPriority
+import co.candyhouse.server.CHLoginAPIManager
+import co.candyhouse.server.CHResult
+import co.candyhouse.server.CHResultState
+import co.candyhouse.server.CHUserKey
+import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHHub3
+import co.candyhouse.sesame.open.device.CHHub3Delegate
+import co.candyhouse.sesame.open.device.CHSesameConnector
+import co.candyhouse.sesame.open.device.CHWifiModule2
+import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.uuidToBytes
 import co.receiver.widget.SesameForegroundService
+import co.receiver.widget.SesameReceiver
+import co.utils.JsonUtil
+import co.utils.JsonUtil.parseList
 import co.utils.SharedPreferencesUtils
-import kotlinx.coroutines.*
+import co.utils.alertview.AlertView
+import co.utils.alertview.enums.AlertStyle
+import com.amazonaws.mobile.client.AWSMobileClient
+import com.amazonaws.mobile.client.Callback
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.debounce
-import kotlin.collections.ArrayList
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHSesameSensorDelegate, CHSesameTouchProDelegate {
+class BeanDevices(
+    val list: List<CHDevices>,
+    val postion: Int = -1
+)
 
-    private val channel = Channel<Boolean>(1)
+data class LockDeviceStatus(var id: String, var model: Byte, var status: Byte)
 
-    init {
-        GlobalScope.launch(IO) {
-            channel.consumeAsFlow().debounce(300).collect {
-                //                        L.d("hcia", "[widget 更新] isLive:" + SesameForegroundService.isLive)
-                CHDeviceManager.getCandyDevices {
-                    var countWidget = 0 // 紀錄 用戶開啟 Wedget 的個數
-                    it.onSuccess {
-                        it.data.forEach {
-                            when (it) {
-                                is CHSesameLock -> {
-                                    if (it.getIsWidget()) {
-                                        countWidget++ //有打開 widget 我就＋1
+class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDelegate,
+    CHHub3Delegate {
+
+    var targetShareLevel: Int = 0
+    var guestKeyId: String? = null
+    private var userKeys: ArrayList<String> = ArrayList()
+    val myChDevices = MutableStateFlow(ArrayList<CHDevices>())
+    var neeReflesh = MutableLiveData<BeanDevices>()
+    val ssmLockLiveData = MutableLiveData<CHDevices>()
+    val ssmDeviceLiveDataForMatter = MutableLiveData<CHDevices>()
+    private val delegateManager = DeviceViewModelDelegates(this)
+    val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
+    private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
+
+    private val iRRepository = IrRemoteRepository()
+
+    fun saveKeysToServer() {
+        CHDeviceManager.getCandyDevices { it ->
+            it.onSuccess { chResultState ->
+                if (chResultState.data.isNotEmpty()) {
+                    CHLoginAPIManager.upLoadKeys(chResultState.data.map {
+                        cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname())
+                    }) {
+                        it.onFailure {
+                            MainActivity.activity?.let { act ->
+                                if (!act.isFinishing && !act.isDestroyed) {
+                                    act.runOnUiThread {
+                                        AlertView(
+                                            act.getString(R.string.upload_keys_fail),
+                                            "",
+                                            AlertStyle.DIALOG
+                                        ).apply {
+                                            show(act as AppCompatActivity)
+                                        }
                                     }
                                 }
                             }
                         }
-                        if (countWidget == 0) { // 如果 沒有widget 功能。關掉 ForegroundService
-                            if (SesameForegroundService.isLive) {
-                                MainActivity.activity!!.stopService(Intent(MainActivity.activity!!, SesameForegroundService::class.java))
-                            }
-                        } else {
-                            ContextCompat.startForegroundService(MainActivity.activity!!.applicationContext, Intent(MainActivity.activity!!, SesameForegroundService::class.java))
-                        }
+                        syncDeviceFromServer()
                     }
+                } else {
+                    syncDeviceFromServer()
                 }
-
             }
         }
     }
 
-    var targetShareLevel: Int = 0
-    var guestKeyId: String? = null
-    var userKeys: ArrayList<String>? = null
-    val myChDevices = MutableStateFlow(ArrayList<CHDevices>())
-    var neeReflesh = MutableLiveData<Boolean>()
-    val ssmLockLiveData = MutableLiveData<CHDevices>()
-    var ssmosLockDelegates: MutableMap<CHDevices, CHDeviceStatusDelegate> = mutableMapOf()
+    private fun syncDeviceFromServer() {
+        CHLoginAPIManager.getKeys {
+            receiveKeysFromServer(it)
+            SharedPreferencesUtils.isNeedFreshDevice = false
+        }
+    }
 
+    private fun receiveKeysFromServer(it: Result<CHResultState<Array<CHUserKey>>>) {
+        it.onSuccess { result ->
+            userKeys.clear()
+            userKeys.addAll(result.data.map { it.deviceUUID.lowercase() })
+
+            viewModelScope.launch {
+                result.data.forEach { userKey ->
+                    SharedPreferencesUtils.preferences.edit() {
+                        putString(userKey.deviceUUID.lowercase(), userKey.deviceName)
+                    }
+                    SharedPreferencesUtils.preferences.edit() {
+                        putInt("l" + userKey.deviceUUID.lowercase(), userKey.keyLevel)
+                    }
+                    userKey.rank?.let { rank ->
+                        SharedPreferencesUtils.preferences.edit() {
+                            putInt("ra" + userKey.deviceUUID.lowercase(), rank)
+                        }
+                    }
+                }
+                val userks = result.data.mapNotNull { userKey ->
+                    try {
+                        userKeyToCHKey(userKey, getHistoryTag())
+                    } catch (e: IllegalArgumentException) {
+                        L.d("UserKeyToCHKey", "Error converting userKey to CHKey: ${e.message}")
+                        null
+                    }
+                }
+                CHDeviceManager.receiveCHDeviceKeys(userks) { response ->
+                    response.onSuccess {
+                        updateDevices(it.data)
+                    }
+                    response.onFailure {
+                        updateDevices()
+                    }
+                }
+            }
+        }
+        it.onFailure {
+            updateDevices()
+        }
+    }
 
     fun refleshDevices() {
-
+        val status = AWSStatus.getAWSLoginStatus()
+        L.d("sf", "👘 refleshDevices islogin:$status")
+        if (status) {
+            syncDeviceFromServer()
+        } else {
+            updateDevices()
+        }
     }
 
-
     fun updateDevices() {
-
-//        L.d("hcia", "👘 同步本地 updateDevices:")
         CHDeviceManager.getCandyDevices {
-
             it.onSuccess {
-                viewModelScope.launch { //                    L.d("hcia", "👘  viewModelScope:")
-                    myChDevices.value.apply { //                        L.d("hcia", "👘 刷新 clear:")
-                        clear()
+                updateDevices(it.data)
+            }
+            it.onFailure {
+                neeReflesh.postValue(BeanDevices(emptyList()))
+            }
+        }
+    }
 
-                        myChDevices.value.addAll(it.data) //                        L.d("hcia", "👘 刷新 排序:")
-                        myChDevices.value.sortWith(compareBy({ -1 * it.getRank() }, { it.uiPriority() }, { it.getNickname() }))
-//                        myChDevices.value.sortWith(compareBy({ it.uiPriority() }, { it.getNickname() }))
-                        //                        L.d("hcia", "👘 刷新 去權 :")
-                        it.data.forEach { device ->
-                            val checkyou = userKeys?.contains(device.deviceId.toString())
-//                            L.d("hcia", "device.deviceId:" + device.deviceId +"  checkyou:"+checkyou)
+    private val sharedDelegate = object : CHDeviceStatusDelegate {
 
-//                            L.d("hcia", "checkyou:" + checkyou)
+        override fun onMechStatus(device: CHDevices) {
+            CoroutineScope(Dispatchers.Main).launch {
+                deviceStatusCallbacks[device]?.invoke(device)
+            }
+            L.d("onMechStatus", "onMechStatus3: ${device.mechStatus?.position}")
+        }
 
-                            if (checkyou == false) {
-                                device.dropKey { }
-//                                L.d("hcia", "刷新 !!!!checkyou:" + checkyou)
-                                myChDevices.value.remove(device)
-                            }
-                        }
-                        userKeys = null
+        override fun onBleDeviceStatusChanged(
+            device: CHDevices,
+            status: CHDeviceStatus,
+            shadowStatus: CHDeviceStatus?
+        ) {
+            L.d(
+                "harry",
+                "👘 onBleDeviceStatusChanged: ${device.getNickname()},  $status; deviceStatusCallbacks: " + deviceStatusCallbacks[device]
+            )
+            CoroutineScope(Dispatchers.Main).launch {
+                deviceStatusCallbacks[device]?.invoke(device)
+            }
+            L.d("onMechStatus", "onBleDeviceStatusChanged3")
+        }
+    }
 
-                        viewModelScope.launch { //                            L.d("hcia", "通知ＵＩ刷新 !!!!neeReflesh:" + neeReflesh)
-                            neeReflesh.postValue(false)
-                        }
-                    }.apply {
-                        forEach { device ->
-                            device.delegate = this@CHDeviceViewModel
-                            backgroundAutoConnect(device)
+    private fun listerChDeviceStatus(chDevices: CHDevices, call: (device: CHDevices) -> Unit) {
+        deviceStatusCallbacks[chDevices] = call
+        ssmosLockDelegates[chDevices] = sharedDelegate
+    }
+
+    // 在主线程里使用 setValue 方法更新 LiveData； 防止数据竞争， 快速post时会丢失数据， 修复bug:
+    // 【ID1001306】【Android】【app】关掉手机蓝牙，设备列表中的Sesame设备蓝牙图标不会自动置灰显示或置灰速度慢,需手动刷新才置灰(ios端正常)
+    private fun updateNeeRefresh(device: CHDevices) {
+        MainScope().launch {
+            val devices = myChDevices.value ?: emptyList()
+            val index = devices.indexOf(device)
+
+            // 如果 device 不在 devices 中，提供一个默认值或处理逻辑
+            val safeIndex = if (index == -1) {
+                // 根据业务逻辑选择合适的默认值，这里假设为 -1
+                -1
+            } else {
+                index
+            }
+
+            neeReflesh.setValue(
+                BeanDevices(
+                    devices, // 使用实际的设备列表，而不是空列表
+                    safeIndex
+                )
+            )
+        }
+    }
+
+    private fun updateDevices(list: List<CHDevices>) {
+        viewModelScope.launch {
+            val updatedDevices = ArrayList(list).apply {
+                sortWith(
+                    compareBy(
+                        { -1 * it.getRank() },
+                        { it.uiPriority() },
+                        { it.getNickname() })
+                )
+            }
+            val filteredDevices = if (userKeys.isNotEmpty()) {
+                updatedDevices.filter { device ->
+                    userKeys.contains(device.deviceId.toString().lowercase()).also { isInUserKeys ->
+                        if (!isInUserKeys) {
+                            device.dropKey { }
                         }
                     }
+                }
+            } else {
+                updatedDevices
+            }
+            synchronized(this@CHDeviceViewModel) {
+                userKeys.clear()
+                myChDevices.value = ArrayList(filteredDevices)
+                myChDevices.value.forEach { device ->
+                    device.delegate = delegateManager
+                    backgroundAutoConnect(device)
+
+                    // 红外设备
+                    if (device is CHHub3) {
+                        L.d("sf", "fetchIRDevices...")
+                        fetchIRDevices(device)
+                    }
+
+                    // 设备列表更新
+                    listerChDeviceStatus(device) {
+                        updateNeeRefresh(it)
+                    }
+
+                    // 下拉刷新，更新界面
+                    if (CHDeviceManager.isRefresh.get()) {
+                        L.e("sf", "下拉刷新，设备ID=${device.deviceId}")
+                        updateNeeRefresh(device)
+                    }
+                }
+                // 下拉刷新增加判断，如果没有设备的处理
+                if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
+                    L.e("sf", "下拉刷新，没有发现任何设备")
+                    neeReflesh.postValue(BeanDevices(emptyList()))
+                }
+            }
+            L.d("harry", "👘 updateDevices: ${myChDevices.value.size}")
+        }
+    }
+
+    private fun fetchIRDevices(device: CHHub3) {
+        //增加AWSMobileClient初始化的判断，成功后再发起获取红外线设备.避免AWSMobileClient has not been initialized yet.
+        if (AWSStatus.getAWSLoginStatus()) {
+            L.d("sf", "AWSMobileClient initialized.")
+
+            val uuid = device.deviceId.toString().uppercase(Locale.getDefault())
+            L.d("sf", "======= " + device.getNickname() + " " + uuid)
+
+            CHIRAPIManager.fetchIRDevices(uuid) { it ->
+                it.onSuccess { result ->
+                    L.d("sf", "data==== " + result.data.toString())
+
+                    val jsonString = JsonUtil.toJson(result.data)
+                    val tempList = jsonString.parseList<IrRemote>()
+
+                    viewModelScope.launch {
+                        L.d("sf", "保存红外遥控器列表数据……")
+                        iRRepository.setRemotes(uuid, tempList)
+
+                        //刷新对应Hub3 Item
+                        updateNeeRefresh(device)
+                    }
+                }
+                it.onFailure {
+                    L.d("sf", "result==== onFailure ${it.message}")
+                }
+            }
+        } else {
+            L.d("sf", "AWSMobileClient has not been initialized yet.")
+        }
+    }
+
+    private val _channel = Channel<Int>()
+    val channel = _channel.receiveAsFlow()
+    fun deleteIRDevice(uuid: String, subid: String, type: Int) {
+        CHIRAPIManager.deleteIRDevice(uuid, subid) { it ->
+            it.onSuccess { result ->
+                L.d("sf", "data==== " + result.data.toString())
+                viewModelScope.launch {
+                    // 删除成功，发送成功消息
+                    _channel.send(type)
+                }
+            }
+            it.onFailure {
+                L.d("sf", "result==== onFailure ${it.message}")
+            }
+        }
+    }
+
+    fun getIrRemoteList(key: String): List<IrRemote> {
+        L.d("sf", "获取红外线列表数据……")
+        return iRRepository.getRemotesByKey(key)
+    }
+
+    suspend fun getHub3Data(uuid: String): Result<List<IrRemote>> {
+        return withContext(IO) {
+            try {
+                // 先执行网络请求
+                val fetchResult = suspendCoroutine { continuation ->
+                    CHIRAPIManager.fetchIRDevices(uuid) { result ->
+                        result.onSuccess { data ->
+                            L.d("sf", "data==== ${data.data}")
+
+                            val jsonString = JsonUtil.toJson(data.data)
+                            val tempList = jsonString.parseList<IrRemote>()
+
+                            viewModelScope.launch {
+                                L.d("sf", "保存红外遥控器列表数据……")
+                                iRRepository.setRemotes(uuid, tempList)
+                                continuation.resume(true)
+                            }
+                        }
+                        result.onFailure { error ->
+                            L.d("sf", "result==== onFailure ${error.message}")
+                            continuation.resume(false)
+                        }
+                    }
+                }
+
+                // 等待网络请求和数据保存完成后，再获取列表
+                if (fetchResult) {
+                    val result = getIrRemoteList(uuid)
+                    Result.success(result)
+                } else {
+                    Result.failure(Exception("Fetch failed"))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    fun backgroundAutoConnect(device: CHDevices) {// 根據不同設備判斷要不要自動斷線連線
+        GlobalScope.launch(IO) { // 在 IO 调度器上启动新协程
+            if (device.deviceStatus == CHDeviceStatus.ReceivedAdV) {
+                if (device !is CHSesameConnector && device !is CHWifiModule2) {
+                    L.d("backgroundAutoConnect", Thread.currentThread().name)
+                    // 自动重连
+                    device.connect { }
                 }
             }
         }
     }
 
+    fun handleAppGoToForeground() {
+        GlobalScope.launch(Dispatchers.Main) {
+            neeReflesh.postValue(BeanDevices(emptyList()))
+        }
+    }
 
-    fun updateWidgets() {
-        GlobalScope.launch(IO) { //            L.d("hcia", "channel -->:")
-            channel.send(true)
+    fun handleAppGoToBackground() {
+        CHBleManager.mScanning = CHScanStatus.BleClose
+        myChDevices.value.forEach {
+            if (it.deviceStatus.value == CHDeviceLoginStatus.Login) {
+                it.disconnect { }
+            }
+        }
+    }
+
+    @SuppressLint("ServiceCast", "ImplicitSamInstance")
+    fun updateWidgets(id: String? = null) {
+        GlobalScope.launch(Dispatchers.Main) {
+            synchronized(CHDeviceManager.listDevices) {
+                CHDeviceManager.listDevices.clear()
+                CHDeviceManager.listDevices.addAll(myChDevices.value)
+                val isOpenWidget = CHDeviceManager.listDevices.any { it.getIsWidget() }
+                if (isOpenWidget) {
+                    if (ContextCompat.checkSelfPermission(
+                            CHDeviceManager.app,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        )
+                        != PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(
+                            CHDeviceManager.app,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                        != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        MainActivity.activity?.apply {
+                            ActivityCompat.requestPermissions(
+                                this, arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                ), 201
+                            )
+                        }
+                        return@synchronized
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        if (ContextCompat.checkSelfPermission(
+                                CHDeviceManager.app,
+                                Manifest.permission.FOREGROUND_SERVICE_LOCATION
+                            )
+                            != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            MainActivity.activity?.apply {
+                                ActivityCompat.requestPermissions(
+                                    this,
+                                    arrayOf(Manifest.permission.FOREGROUND_SERVICE_LOCATION),
+                                    201
+                                )
+                            }
+                            return@synchronized
+                        }
+
+                    }
+                    // SesameForegroundService.isLive 避免重启前台服务
+                    if (!SesameForegroundService.isLive) {
+                        CHDeviceManager.app.sendBroadcast(
+                            Intent(
+                                CHDeviceManager.app,
+                                SesameReceiver::class.java
+                            ).apply {
+                                action = SesameReceiver.SERVER_ACTION
+                            })
+                    } else {
+                        CHDeviceManager.app.sendBroadcast(Intent(SesameForegroundService.aciton).apply {
+                            putExtra(SesameForegroundService.acitonKey, id)
+                        })
+                    }
+                } else {
+                    if (SesameForegroundService.isLive) {
+                        CHDeviceManager.app.stopService(
+                            Intent(
+                                CHDeviceManager.app,
+                                SesameForegroundService::class.java
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 
     fun dropDevice(result: CHResult<CHEmpty>) {
         val targetDevice: CHDevices = ssmLockLiveData.value!!
-        targetDevice.dropKey {
-            it.onSuccess {
-                updateDevices()
-                SharedPreferencesUtils.preferences.edit().remove(targetDevice?.deviceId.toString()).apply()
-                viewModelScope.launch {
-                    result.invoke(Result.success(it))
+        if (AWSStatus.getAWSLoginStatus()) {
+            CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
+                it.onSuccess {
+                    myChDevices.value =
+                        myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
+                    neeReflesh.postValue(BeanDevices(emptyList()))
+
+                    viewModelScope.launch {
+                        result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
+                    }
+                    targetDevice.dropKey {
+                        it.onSuccess {
+                            SharedPreferencesUtils.preferences.edit() {
+                                remove(targetDevice.deviceId.toString())
+                            }
+                        }
+                    }
                 }
-
-            }
-            it.onFailure {
-                viewModelScope.launch {
-                    result.invoke(Result.failure(it))
+                it.onFailure {
+                    viewModelScope.launch {
+                        result.invoke(Result.failure(it))
+                    }
                 }
-
+            }
+        } else {
+            targetDevice.dropKey {
+                it.onSuccess {
+                    refleshDevices()
+                    SharedPreferencesUtils.preferences.edit() {
+                        remove(targetDevice.deviceId.toString())
+                    }
+                    viewModelScope.launch {
+                        result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
+                    }
+                }
+                it.onFailure {
+                    viewModelScope.launch {
+                        result.invoke(Result.failure(it))
+                    }
+                }
             }
         }
     }
 
-    override fun onAPSettingChanged(device: CHWifiModule2, settings: CHWifiModule2MechSettings) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onAPSettingChanged(device, settings)
-        }
-    }
-
-//    override fun onNetWorkStatusChanged(device: CHWifiModule2, settings: CHWifiModule2NetWorkStatus) { //        L.d("hcia", "總代理 onNetWorkStatusChanged settings:" + settings)
-//        viewModelScope.launch {
-//            (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onNetWorkStatusChanged(device, settings)
-//        }
-//    }
-
-    override fun onSSM2KeysChanged(device: CHWifiModule2, ssm2keys: Map<String, String>) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onSSM2KeysChanged(device, ssm2keys)
-        }
-    }
-
-
-    override fun onOTAProgress(device: CHWifiModule2, percent: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onOTAProgress(device, percent)
-        }
-    }
-
-    override fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onScanWifiSID(device, ssid, rssi)
-        }
-    }
-
-    override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {
-
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onBleDeviceStatusChanged(device, status, shadowStatus)
-        }
-        viewModelScope.launch {
-            ssmosLockDelegates.get(device)?.onBleDeviceStatusChanged(device, status, shadowStatus)
-        }
-        backgroundAutoConnect(device)
-        updateWidgets()
-    }
-
-    private fun backgroundAutoConnect(device: CHDevices) {// 根據不同設備判斷要不要自動斷線連線
-        if (device.deviceStatus == CHDeviceStatus.ReceivedAdV) {
-            if (device !is CHSesameConnector && device !is CHWifiModule2) {
-                device.connect { } //自動重連
-            }
-        }
-    }
-
-    override fun onMechStatus(device: CHDevices) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device])?.onMechStatus(device)
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onMechStatus(device)
-        }
-
-    }
-
-
-    override fun onFingerPrintReceive(device: CHSesameConnector, ID: String, name: String, type: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onFingerPrintReceive(device, ID, name, type)
-        }
-    }
-
-    override fun onFingerPrintChanged(device: CHSesameConnector, ID: String, name: String, type: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onFingerPrintChanged(device, ID, name, type)
-        }
-    }
-
-    override fun onFingerPrintReceiveEnd(device: CHSesameConnector) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onFingerPrintReceiveEnd(device)
-        }
-    }
-
-    override fun onFingerPrintReceiveStart(device: CHSesameConnector) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onFingerPrintReceiveStart(device)
-        }
-    }
-
-    override fun onCardReceive(device: CHSesameConnector, ID: String, name: String, type: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onCardReceive(device, ID, name, type)
-        }
-    }
-
-    override fun onCardReceiveEnd(device: CHSesameConnector) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onCardReceiveEnd(device)
-        }
-    }
-
-    override fun onCardChanged(device: CHSesameConnector, ID: String, name: String, type: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onCardChanged(device, ID, name, type)
-        }
-    }
-
-    override fun onCardReceiveStart(device: CHSesameConnector) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onCardReceiveStart(device)
-        }
-    }
-
-    override fun onKeyBoardReceive(device: CHSesameConnector, ID: String, name: String, type: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onKeyBoardReceive(device, ID, name, type)
-        }
-    }
-
-    override fun onKeyBoardReceiveEnd(device: CHSesameConnector) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onKeyBoardReceiveEnd(device)
-        }
-    }
-
-    override fun onKeyBoardChanged(device: CHSesameConnector, ID: String, name: String, type: Byte) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onKeyBoardChanged(device, ID, name, type)
-        }
-    }
-
-    override fun onKeyBoardReceiveStart(device: CHSesameConnector) {
-        viewModelScope.launch {
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onKeyBoardReceiveStart(device)
-        }
-    }
-
-    override fun onSSM2KeysChanged(device: CHSesameConnector, ssm2keys: Map<String, ByteArray>) {
-        viewModelScope.launch {
-//            L.d("hcia", "ssmosLockDelegates.get(device):" + ssmosLockDelegates.get(device as CHSesameLocker))
-            (ssmosLockDelegates[device] as? CHSesameSensorDelegate)?.onSSM2KeysChanged(device, ssm2keys)
-            (ssmosLockDelegates[device] as? CHSesameTouchProDelegate)?.onSSM2KeysChanged(device, ssm2keys)
-        }
-    }
-
-
-    fun resetDevice(result: CHResult<CHEmpty>) { //        L.d("hcia", "targetModel:" + targetModel)
+    fun resetDevice(result: CHResult<CHEmpty>) {
         val targetDevice: CHDevices = ssmLockLiveData.value!!
-        targetDevice.reset {
-            it.onSuccess {
-                updateDevices()
-                viewModelScope.launch {
-                    result.invoke(Result.success(it))
+
+        if (AWSStatus.getAWSLoginStatus()) {
+            // L.d("hcia", "登入刪除:")
+            CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
+                it.onSuccess {
+                    targetDevice.reset {
+                        it.onSuccess {
+                            refleshDevices()
+                            viewModelScope.launch {
+                                result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
+                            }
+                        }
+                        it.onFailure {
+                            viewModelScope.launch {
+                                result.invoke(Result.failure(it))
+                            }
+                        }
+                    }
+                }
+                it.onFailure {
+                    L.d("hcia", "it:$it")
                 }
             }
-
-
-            it.onFailure {
-                viewModelScope.launch {
-                    result.invoke(Result.failure(it))
+        } else {
+            L.d("hcia", "未登入reset")
+            targetDevice.reset {
+                it.onSuccess {
+                    refleshDevices()
+                    viewModelScope.launch {
+                        result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
+                    }
+                }
+                it.onFailure {
+                    viewModelScope.launch {
+                        result.invoke(Result.failure(it))
+                    }
                 }
             }
         }
-
     }
 
+    fun updateHub3IrDevice(irRemote: IrRemote, chDeviceId: String) {
+        val localIrRemotes = iRRepository.getRemotesByKey(chDeviceId)
+        localIrRemotes.let {
+            val index = it.indexOfFirst { it.uuid == irRemote.uuid }
+            if (index != -1) {
+                it[index].state = irRemote.state
+                iRRepository.setRemotes(chDeviceId, it)
+            }
+        }
+    }
 
 }

@@ -6,7 +6,7 @@ import co.candyhouse.app.tabs.MainActivity
 import no.nordicsemi.android.dfu.DfuBaseService
 
 class DfuService : DfuBaseService() {
-    override fun getNotificationTarget(): Class<out Activity?>? {
+    override fun getNotificationTarget(): Class<out Activity?> {
         /*
 		 * As a target activity the NotificationActivity is returned, not the MainActivity. This is because the notification must create a new task:
 		 *
@@ -24,8 +24,7 @@ class DfuService : DfuBaseService() {
     }
 
     override fun isDebug(): Boolean {
-         return BuildConfig.DEBUG
-//        return true
+        return BuildConfig.DEBUG
     }
 
 }

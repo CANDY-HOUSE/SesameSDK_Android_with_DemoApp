@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/transparent"
+    android:layout_marginLeft="10dp"
+    android:layout_height="120dp">
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:layout_constraintTop_toTopOf="parent"
+
+        android:layout_gravity="center"
+        android:text="1"
+        android:gravity="center"
+
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/tvName"
+        android:textStyle="bold"
+        android:background="@drawable/fg_ir_circle"
+        android:textColor="@color/black"
+        android:textSize="22dp"
+        android:layout_margin="10dp"
+        />
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:id="@+id/imgView"
+        android:layout_gravity="center"
+        android:scaleType="center"
+        android:background="@drawable/fg_ir_circle"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        />
+</FrameLayout>

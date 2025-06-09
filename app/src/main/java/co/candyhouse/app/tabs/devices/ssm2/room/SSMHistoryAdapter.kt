@@ -1,7 +1,6 @@
 package co.candyhouse.app.tabs.devices.ssm2.room
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,7 +48,7 @@ class SSMHistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesame
         (viewHolder as HeaderViewHolder).textView.text = mGroupHistData[sectionIndex].first
     }
 
-    override fun onCreateItemViewHolder(parent: ViewGroup, itemType: Int): SectioningAdapter.ItemViewHolder? {
+    override fun onCreateItemViewHolder(parent: ViewGroup, itemType: Int): SectioningAdapter.ItemViewHolder {
         return ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_simple_item, parent, false))
     }
 

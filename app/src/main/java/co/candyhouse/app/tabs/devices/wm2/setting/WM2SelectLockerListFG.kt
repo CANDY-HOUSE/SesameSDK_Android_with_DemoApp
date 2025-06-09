@@ -7,19 +7,32 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.databinding.FgWm2SelectLockerListBinding
+import co.candyhouse.app.databinding.FgWm2SettingBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.device.*
 import co.utils.SharedPreferencesUtils
 import co.utils.recycle.GenericAdapter
-import kotlinx.android.synthetic.main.fg_wm2_scan_list.*
 
-class WM2SelectLockerListFG : BaseDeviceFG(R.layout.fg_wm2_select_locker_list), CHWifiModule2Delegate {
+class WM2SelectLockerListFG : BaseDeviceFG<FgWm2SelectLockerListBinding>(), CHWifiModule2Delegate {
+
+    fun  isLock(it: CHDevices):Boolean{
+
+
+        return   (it is CHSesame2) || (it is CHSesame5) || (it is CHSesameBot) || (it is CHSesameBike)
+}
+    override fun getViewBinder()= FgWm2SelectLockerListBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        leaderboard_list.apply {
-            adapter = object : GenericAdapter<CHDevices>(mDeviceModel.myChDevices.value.filter { (it is CHSesame2) || (it is CHSesame5) || (it is CHSesameBot) || (it is CHSesameBike) }) {
+        bind.leaderboardList.apply {
+            adapter = object : GenericAdapter<CHDevices>(mDeviceModel.myChDevices.value.filter {
+              isLock(it)&&!hasAddedOrIsGuestKey(it)
+
+            }.toMutableList())
+
+            {
                 override fun getLayoutId(position: Int, obj: CHDevices): Int = R.layout.key_cell
                 override fun getViewHolder(view: View, viewType: Int): RecyclerView.ViewHolder =
                         object : RecyclerView.ViewHolder(view), Binder<CHDevices> {
@@ -42,7 +55,7 @@ class WM2SelectLockerListFG : BaseDeviceFG(R.layout.fg_wm2_select_locker_list), 
                             }
                         }
             }
-        } //end leaderboard_list.apply
+        } //end bind.leaderboardList.apply
     }
 
 }

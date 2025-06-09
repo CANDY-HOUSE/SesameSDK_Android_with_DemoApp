@@ -1,6 +1,7 @@
 package co.utils
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -16,6 +17,7 @@ object SharedPreferencesUtils {
     var isNeedFreshDevice by SharedPreferenceDelegates.boolean(false)
     var deviceToken by SharedPreferenceDelegates.string()
     var isUploadDeveceToken by SharedPreferenceDelegates.boolean()
+    var userId by SharedPreferenceDelegates.string()
 }
 
 object SharedPreferenceDelegates {
@@ -26,33 +28,44 @@ object SharedPreferenceDelegates {
         }
 
         override fun setValue(thisRef: SharedPreferencesUtils, property: KProperty<*>, value: Int) {
-            thisRef.preferences.edit().putInt(property.name, value).apply()
+            thisRef.preferences.edit() { putInt(property.name, value) }
         }
     }
 
-
     fun boolean(defaultValue: Boolean = false) =
         object : ReadWriteProperty<SharedPreferencesUtils, Boolean> {
-            override fun getValue(thisRef: SharedPreferencesUtils, property: KProperty<*>): Boolean {
+            override fun getValue(
+                thisRef: SharedPreferencesUtils,
+                property: KProperty<*>
+            ): Boolean {
                 return thisRef.preferences.getBoolean(property.name, defaultValue)
             }
 
-            override fun setValue(thisRef: SharedPreferencesUtils, property: KProperty<*>, value: Boolean) {
-                thisRef.preferences.edit().putBoolean(property.name, value).apply()
+            override fun setValue(
+                thisRef: SharedPreferencesUtils,
+                property: KProperty<*>,
+                value: Boolean
+            ) {
+                thisRef.preferences.edit() { putBoolean(property.name, value) }
             }
         }
-
 
     fun string(defaultValue: String? = null) =
         object : ReadWriteProperty<SharedPreferencesUtils, String?> {
-            override fun getValue(thisRef: SharedPreferencesUtils, property: KProperty<*>): String? {
+            override fun getValue(
+                thisRef: SharedPreferencesUtils,
+                property: KProperty<*>
+            ): String? {
                 return thisRef.preferences.getString(property.name, defaultValue)
             }
 
-            override fun setValue(thisRef: SharedPreferencesUtils, property: KProperty<*>, value: String?) {
-                thisRef.preferences.edit().putString(property.name, value).apply()
+            override fun setValue(
+                thisRef: SharedPreferencesUtils,
+                property: KProperty<*>,
+                value: String?
+            ) {
+                thisRef.preferences.edit() { putString(property.name, value) }
             }
         }
-
 
 }

@@ -1,85 +1,170 @@
-apply plugin: 'com.android.application'
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics.gradle)
+    alias(libs.plugins.ksp)
+}
 
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
 android {
-    compileSdkVersion 32
+    namespace 'co.candyhouse.app'
+
+    compileSdk rootProject.ext.compileSdkVersion
+
+    signingConfigs {
+        release {
+            def passStore = System.getenv("storePassword")
+            def passKey = System.getenv("keyPassword")
+            def ssmKeyAlias = System.getenv("keyAlias")
+            storeFile file(rootProject.file('Sesame.jks').getCanonicalFile())
+            storePassword "$passStore"
+            keyPassword "$passKey"
+            keyAlias "$ssmKeyAlias"
+
+            // 处理 CI 环境中的签名文件
+            if (System.getenv("CI") == "true") {
+                println("CI signing...")
+                // CI 环境中跳过签名配置检查，因为签名将由 GitHub Actions 处理
+                storeFile = null
+                storePassword = null
+                keyPassword = null
+                keyAlias = null
+            }
+        }
+    }
 
     defaultConfig {
-
+        def getGitHash = { ->
+            def stdout = new ByteArrayOutputStream()
+            exec {
+                commandLine 'git', 'rev-parse', '--short=9', 'HEAD'
+                standardOutput = stdout
+            }
+            return stdout.toString().trim()
+        }
         applicationId 'co.candyhouse.sesame2'
-        minSdkVersion 21
-        targetSdkVersion 32
-        versionCode 163
-        versionName "3.0.163"
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        // 本地打包，开发者可以根据需要修改此值
+        versionCode 266
+        // 版本名称根据业务规则定义，有改动需要提交到master
+        versionName '3.0.266'
         vectorDrawables.useSupportLibrary = true
+        buildConfigField("String", "GIT_HASH", "\"${getGitHash}\"")
+        ndk {
+            debugSymbolLevel 'FULL'
+        }
+
+        // AWS Cognito 配置
+        buildConfigField("String", "AWS_IDENTITY_POOL_ID", "\"${rootProject.ext['aws.cognito.identityPoolId']}\"")
+        buildConfigField("String", "AWS_USER_POOL_ID", "\"${rootProject.ext['aws.cognito.userPoolId']}\"")
+        buildConfigField("String", "AWS_APP_CLIENT_ID", "\"${rootProject.ext['aws.cognito.appClientId']}\"")
+
+        // Google Maps API Key
+        manifestPlaceholders = [
+                GOOGLE_MAPS_API_KEY: rootProject.ext['google.maps.apiKey']
+        ]
     }
 
     buildTypes {
         debug {
-
-            buildConfigField("String", "testname", "\"test\"")
+            minifyEnabled false
+            shrinkResources false
+            // 添加调试符号，debug is true
+            debuggable true
+            buildConfigField("String", "ch_user_server", "\"${rootProject.ext['candyhouse.sesame.app.api.dev']}\"")
+            firebaseCrashlytics {
+                mappingFileUploadEnabled = false
+                nativeSymbolUploadEnabled = false
+                unstrippedNativeLibsDir = null
+                strippedNativeLibsDir = null
+            }
         }
+
         release {
             minifyEnabled true
             shrinkResources true
+            // 添加调试符号，release is false
+            debuggable false
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
-            buildConfigField("String", "testname", "\"test\"")
+            buildConfigField("String", "ch_user_server", "\"${rootProject.ext['candyhouse.sesame.app.api.prod']}\"")
+            if (signingConfigs.release.storeFile != null) {
+                println("Local signing...")
+                signingConfig signingConfigs.release
+            }
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
+        }
+
+        ci {
+            initWith release
+            matchingFallbacks = ['release']
+        }
+
+    }
+
+    // CI环境中重写versionCode
+    applicationVariants.configureEach { variant ->
+        if (variant.buildType.name == 'ci') {
+            variant.outputs.configureEach { output ->
+                // 检查是否在 CI 环境中
+                if (System.getenv("CI") == "true") {
+                    output.versionCodeOverride = Integer.parseInt(System.getenv("VERSION_CODE"))
+                    println "Set CI version: ${output.versionCodeOverride}"
+                }
+            }
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+        compose true
+    }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    namespace 'co.candyhouse.app'
-
 }
 
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-    maven {
-        url "https://jitpack.io"
-    }
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/CANDY-HOUSE/SesameSDK_Android")
-
-    }
-}
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation project(':ir')
     implementation project(':sesame-sdk')
-    implementation 'androidx.appcompat:appcompat:1.6.0-alpha05'
-    implementation 'com.google.android.material:material:1.6.1'
-    implementation 'androidx.core:core-ktx:1.8.0'
-//    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
-    implementation 'androidx.navigation:navigation-runtime-ktx:2.5.1'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
-    // new  2022/04/21
-    implementation "androidx.navigation:navigation-dynamic-features-fragment:2.5.1"
-    implementation "androidx.navigation:navigation-compose:2.5.1"
-    implementation 'pub.devrel:easypermissions:3.0.0'
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    kapt "androidx.lifecycle:lifecycle-compiler:2.5.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2"
-    implementation 'no.nordicsemi.android:dfu:2.0.2'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-    implementation 'org.zakariya.stickyheaders:stickyheaders:0.7.10'
-    implementation 'com.github.victorminerva:AutoResizeEditText:0.1.0'
-    api 'com.weigan:loopView:0.2.2'
-    implementation 'com.github.warkiz.widget:indicatorseekbar:2.1.2'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
 
+    implementation libs.androidx.work.runtime
+    implementation libs.androidx.core.ktx.v180
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.swiperefreshlayout
 
+    implementation libs.core
+    implementation libs.easypermissions
+    implementation libs.material
+    implementation libs.dfu
+    implementation libs.stickyheaders
+    implementation libs.wheelpicker
+    implementation libs.autoresizeedittext
+    implementation libs.indicatorseekbar
+    implementation libs.loopview
+
+    implementation libs.play.services.location
+    implementation libs.play.services.maps
+
+    implementation platform(libs.firebase.bom)
+    implementation(libs.firebase.config.ktx)
+    implementation libs.firebase.analytics.ktx
+    implementation libs.firebase.messaging.ktx
+    implementation libs.firebase.crashlytics.ktx
 }

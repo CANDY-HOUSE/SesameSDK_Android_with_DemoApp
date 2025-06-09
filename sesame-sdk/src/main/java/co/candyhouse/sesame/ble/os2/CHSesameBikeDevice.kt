@@ -6,40 +6,28 @@ import android.bluetooth.*
 import android.content.pm.PackageManager
 import android.os.Build
 import co.candyhouse.sesame.ble.*
-import co.candyhouse.sesame.ble.CHDeviceUtil
-import co.candyhouse.sesame.ble.SesameResultCode
-import co.candyhouse.sesame.ble.SesameNotifypayload
-import co.candyhouse.sesame.ble.SSM2OpCode
-import co.candyhouse.sesame.ble.SSM2ResponsePayload
-import co.candyhouse.sesame.ble.SesameItemCode
-import co.candyhouse.sesame.ble.checkBle
-import co.candyhouse.sesame.ble.SesameBleTransmit
 import co.candyhouse.sesame.ble.os2.base.CHSesameOS2
 import co.candyhouse.sesame.ble.os2.base.SSM2Payload
 import co.candyhouse.sesame.ble.os2.base.SesameOS2BleCipher
 import co.candyhouse.sesame.ble.os2.base.SesameOS2ResponseCallback
-
-import co.candyhouse.sesame.open.CHBleManager.appContext
-import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.db.model.createHistag
 import co.candyhouse.sesame.db.model.hisTagC
 import co.candyhouse.sesame.open.*
-import co.candyhouse.sesame.open.device.*
 import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
+import co.candyhouse.sesame.open.CHBleManager.appContext
+import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
+import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.*
-import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
-
 import co.candyhouse.sesame.utils.*
-import co.candyhouse.sesame.utils.EccKey
-import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlinx.coroutines.channels.Channel
 
 @SuppressLint("MissingPermission") internal class CHSesameBikeDevice() : CHSesameOS2(), CHSesameBike, CHDeviceUtil {
 
@@ -76,11 +64,29 @@ import kotlinx.coroutines.channels.Channel
 
 
     override fun goIOT() {
-
+        CHIotManager.subscribeSesame2Shadow(this) { result ->
+            result.onSuccess { resource ->
+                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                    resource.data.state.reported.mechst?.let { mechShadow ->
+                        mechStatus = CHSesameBotMechStatus(mechShadow.hexStringToByteArray())// 韌體是用 bot 去改的。格式走 bot
+                    }
+                }
+                resource.data.state.reported.wm2s?.let { wm2s ->
+                    isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
+                }
+                if (isConnectedByWM2) {
+                    deviceShadowStatus = if ((mechStatus as CHSesameBotMechStatus).isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+                } else {
+                    deviceShadowStatus = null
+                }
+            }
+        }
     }
 
 
     override fun connect(result: CHResult<CHEmpty>) {
+        L.d("harry","[CHSesameBikeDevice.kt][connect]")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 if (CHBleManager.mScanning == CHScanStatus.BleClose) {
@@ -164,7 +170,7 @@ import kotlinx.coroutines.channels.Channel
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
 //            L.d("hcia", "BluetoothGatt " + ":發現服務:")
-            L.d("parceNotifyPayload","onServicesDiscovered$status")
+
             for (service in gatt?.services!!) {
                 if (service.uuid == Sesame2Chracs.uuidService01) {
                     for (charc in service.characteristics) {
@@ -187,7 +193,6 @@ import kotlinx.coroutines.channels.Channel
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
-            L.d("parceNotifyPayload","onConnectionStateChange$newState")
             if (newState == BluetoothProfile.STATE_CONNECTED) {
 //                    L.d("hcia", "ssm " + ":連接狀態＋＋" + BleBaseType.GattConnectStateDec(newState) + " 狀態:" + BleBaseType.GattConnectStatusDec(status))
                 deviceStatus = CHDeviceStatus.DiscoverServices
@@ -214,7 +219,7 @@ import kotlinx.coroutines.channels.Channel
     }
 
     private fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
-        L.d("parceNotifyPayload",receivePayload.cmdItCode.toString())
+
 //        L.d("hcia", "receivePayload.cmdItCode:" + receivePayload.cmdItCode)
         if (receivePayload.cmdItCode == SesameItemCode.login.value) {
 
@@ -231,8 +236,6 @@ import kotlinx.coroutines.channels.Channel
         }
         if (receivePayload.cmdItCode == SesameItemCode.initial.value) {
             mSesameToken = receivePayload.payload
-            L.d("parceNotifyPayload","isNeedAuthFromServer:$isNeedAuthFromServer----isRegistered:$isRegistered")
-
             if (isRegistered) {
                 if (isNeedAuthFromServer == true) {
                     val userIdx = sesame2KeyData!!.keyIndex.hexStringToByteArray()
@@ -269,7 +272,7 @@ import kotlinx.coroutines.channels.Channel
         if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historyTag), result)
         }
-        if (checkBle(result)) return
+        if (!isBleAvailable(result)) return
         val his = sesame2KeyData!!.createHistag(historyTag)
 
         sendEncryptCommand(SSM2Payload(SSM2OpCode.async, SesameItemCode.unlock, his)) { res ->
@@ -326,7 +329,7 @@ import kotlinx.coroutines.channels.Channel
     }
 
     override fun getVersionTag(result: CHResult<String>) {
-        if (checkBle(result)) return
+        if (!isBleAvailable(result)) return
 
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.versionTag, byteArrayOf())) { res ->
             val gitTag = res.payload.sliceArray(4..15)
@@ -348,7 +351,7 @@ import kotlinx.coroutines.channels.Channel
 //        L.d("hcia", "註冊開始 ==>" + " adv deviceName:" + advertisement!!.deviceName + " mSesameToken:" + mSesameToken.toHexString())
             makeApiCall(resultRegister) {
                 L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-                val registerSesame1 = CHServerAuth.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
+                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIclient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
                 deviceStatus = CHDeviceStatus.Registering
 
                 val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
@@ -368,7 +371,7 @@ import kotlinx.coroutines.channels.Channel
 
                 cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
                 sendPlainCommand(cmd) { result ->
-                    L.d("parceNotifyPayload","result:"+result.cmdItCode.toString())
+
                     val candyDevice = CHDevice(deviceId.toString(), CHProductModel.BiKeLock.deviceModel(),//sesame_2
                         null, "0000", ownerKey!!.toHexString(), sesamePublicKey.toHexString())
                     sesame2KeyData = candyDevice
@@ -384,7 +387,7 @@ import kotlinx.coroutines.channels.Channel
     }
 
     override fun reset(result: CHResult<CHEmpty>) {
-        if (checkBle(result)) return
+        if (!isBleAvailable(result)) return
 
         sendEncryptCommand(SSM2Payload(SSM2OpCode.delete, SesameItemCode.registration, byteArrayOf())) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
@@ -399,7 +402,7 @@ import kotlinx.coroutines.channels.Channel
         L.d("hcia", "啟動dfu" + deviceStatus + " " + isRegistered)
 
         if (isRegistered) {
-            if (checkBle(result)) return
+            if (!isBleAvailable(result)) return
             sendEncryptCommand(SSM2Payload(SSM2OpCode.update, SesameItemCode.enableDFU, "01".hexStringToByteArray())) { res ->
                 if (res.cmdResultCode == SesameResultCode.success.value) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(advertisement?.device!!)))
@@ -448,8 +451,6 @@ import kotlinx.coroutines.channels.Channel
             return
         }
         val data = gattTxBuffer?.getChunk() ?: return
-        L.d("parceNotifyPayload","transmit:${data.toHexString()}")
-
         mCharacteristic?.value = data
         mBluetoothGatt?.writeCharacteristic(mCharacteristic)
 //        L.d("hcia", "botWrite:" + botWrite)

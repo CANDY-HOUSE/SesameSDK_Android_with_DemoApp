@@ -1,0 +1,115 @@
+<resources>
+    <string name="nofindmode">找不到型號？一鍵匹配</string>
+    <string name="finddevicemsg">請將手機靠近Hub3，點擊開始後，將手中遙控器對準設備並按下遙控器上的按鍵，系統會自動找到最匹配的遙控器</string>
+    <string name="start">開始</string>
+    <string name="ir_set_controller_name">設定遙控器名稱</string>
+    <string name="cancel">取消</string>
+    <string name="ir_delete">刪除</string>
+    <string name="ir_send_success">發送成功</string>
+    <string name="ir_edit_limit">約6個字</string>
+    <string name="ir_modify_key_name">修改按鍵名稱</string>
+
+    <!-- Power Status -->
+    <string name="ir_remote_power_on">開啟</string>
+    <string name="ir_remote_power_off">關閉</string>
+
+    <!-- Temperature -->
+    <string name="air_conditioner_temperature">溫度</string>
+
+    <!-- Mode -->
+    <string name="air_conditioner_model_auto_01">自動模式</string>
+    <string name="air_conditioner_model_cold_02">製冷模式</string>
+    <string name="air_conditioner_model_dry_03">除濕模式</string>
+    <string name="air_conditioner_model_wind_04">送風模式</string>
+    <string name="air_conditioner_model_hot_05">製熱模式</string>
+
+    <!-- Wind Vertical -->
+    <string name="air_conditioner_wind_vertical_v1">向上風向</string>
+    <string name="air_conditioner_wind_vertical_v2">居中風向</string>
+    <string name="air_conditioner_wind_vertical_v3">向下風向</string>
+
+    <!-- Wind Horizontal -->
+    <string name="air_conditioner_wind_horizontal_auto">自動擺風</string>
+    <string name="air_conditioner_wind_horizontal_stop">停止擺風</string>
+
+    <!-- Wind Speed -->
+    <string name="air_conditioner_wind_speed_auto">自動風量</string>
+    <string name="air_conditioner_wind_speed_v1">最小風量</string>
+    <string name="air_conditioner_wind_speed_v2">中等風量</string>
+    <string name="air_conditioner_wind_speed_v3">最大風量</string>
+    <string name="ir_device_info_empty">設備資訊為空</string>
+    <string name="key_unsupported">按鍵正在適配中</string>
+    <string name="ir_study">學習🖋️</string>
+    <string name="ir_ble_connect_fail">藍牙連接失敗</string>
+    <string name="ir_diy_empty">點擊⊕圖示，進入學習模式，將遙控器對準Hub3，按下遙控器按鍵，以便添加新的紅外按鍵</string>
+    <string name="network_retry">網路異常，請點擊重試</string>
+    <string name="ir_change_fail">修改失敗</string>
+    <string name="ir_delete_fail">刪除按鍵失敗</string>
+    <string name="ir_ble_noable">手機藍芽未開啟</string>
+    <string name="ir_no_code">暫無按鍵列表，請從Hub3設定介面進入，添加按鍵</string>
+    <string name="ir_long_click_edit">長按編輯🖋️</string>
+    <string name="ir_click_send">點擊發射🚀</string>
+    <string name="ir_ble_invalid">請返回Hub3詳細頁面，以便觸發自動連接藍牙。</string>
+    <string name="air_conditioner_temperature_refuse_change">當前模式不支援溫度調節</string>
+    <string name="ir_company_notice">找不到特定品牌的遙控器型號？您可以嘗試搜尋相似名稱的遙控器型號。</string>
+    <string name="ir_match_key">正在匹配第%1$d組第%2$d個按鍵（共%3$d組，每組7個按鍵）</string>
+    <string name="air_match_responded">有反應，繼續匹配</string>
+    <string name="air_match_no_respond_turn_next">無反應，換下一組</string>
+    <string name="ir_match_tips">請點擊開始按鍵，開始自動匹配空調。</string>
+    <string name="air_match_finished">有反應，添加遙控器</string>
+    <string name="air_match_success">添加遙控器成功</string>
+    <string name="air_match_add_failed">添加設備失敗</string>
+    <string name="air_match_end">已經是最後一組數據</string>
+    <string name="air_match_no_respond">無反應</string>
+    <string name="air_company_control">遙控器型號</string>
+    <string name="air_company_brand">空調品牌</string>
+    <string name="ir_company_search_brand_hint">搜索空調品牌</string>
+    <string name="air_match_item_tips">請點擊列表中高亮按鍵</string>
+    <string name="air_match_introduction">請點擊下方列表中標示的按鍵，測試裝置是否有回應</string>
+    <string name="air_control_match">無法控制裝置？自動匹配遙控器</string>
+    <string name="ir_save">儲存</string>
+    <string name="ir_confirm_controller_name">請確認遙控器名稱</string>
+
+    <string name="tv_remote_mute">靜音</string>
+    <string name="tv_remote_back">返回</string>
+    <string name="tv_remote_up">上</string>
+    <string name="tv_remote_menu">選單</string>
+    <string name="tv_remote_left">左</string>
+    <string name="tv_remote_ok">確定</string>
+    <string name="tv_remote_right">右</string>
+    <string name="tv_remote_volume_up">音量+</string>
+    <string name="tv_remote_down">下</string>
+    <string name="tv_remote_channel_up">頻道+</string>
+    <string name="tv_remote_volume_down">音量-</string>
+    <string name="tv_remote_home">主頁</string>
+    <string name="tv_remote_channel_down">頻道-</string>
+
+    <string name="ir_mode">模式</string>
+    <string name="light_mode_normal">標準模式</string>
+    <string name="light_mode_reading">閱讀模式</string>
+    <string name="light_mode_working">工作模式</string>
+    <string name="light_mode_evening">夜晚模式</string>
+    <string name="light_brightness_up">亮度+</string>
+    <string name="light_brightness_down">亮度-</string>
+    <string name="light_color_temp_up">色溫+</string>
+    <string name="light_color_temp_down">色溫-</string>
+    <string name="ir_remote_power">電源</string>
+    <string name="ir_support_info">HXD</string>
+
+    <string-array name="strs_device">
+        <item>空調</item>
+        <item>熱水器</item>
+        <item>空氣淨化器</item>
+        <item>電視</item>
+        <item>IPTV</item>
+        <item>機上盒</item>
+        <item>影碟機</item>
+        <item>風扇</item>
+        <item>投影機</item>
+        <item>遙控燈</item>
+        <item>數位相機</item>
+        <item>音響</item>
+        <item>掃地機</item>
+        <item>學習</item>
+    </string-array>
+</resources>

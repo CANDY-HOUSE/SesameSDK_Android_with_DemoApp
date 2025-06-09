@@ -1,30 +1,26 @@
-buildscript {
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20"
-
-
-
-    }
-    repositories {
-        google()
-        jcenter()
-
-
-
-
-    }
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics.gradle) apply false
 }
 
-allprojects {
-    repositories {
-        google()
-        jcenter()
+ext {
+    // 编译版本
+    compileSdkVersion = 34
+    minSdkVersion = 21
+    targetSdkVersion = 34
 
+    // 加载配置文件
+    def configFile = file('app.properties')
+    if (configFile.exists()) {
+        def props = new Properties()
+        props.load(new FileInputStream(configFile))
+
+        props.each { key, value ->
+            ext[key] = value
+        }
     }
 }
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-

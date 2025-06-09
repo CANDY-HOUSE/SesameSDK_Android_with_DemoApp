@@ -1,8 +1,9 @@
 ![SesameSDK](https://github.com/CANDY-HOUSE/.github/blob/main/profile/images/SesameSDK.png?raw=true)
 # SesameSDK3.0 for Android
 
-- Sesame app on <img src="https://img.shields.io/badge/Play Store-34A853?logo=googleplay&logoColor=white"/> [https://play.google.com/store/apps/details?id=co.candyhouse.sesame2](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
-- Sesame app on <img src="https://img.shields.io/badge/Google Drive-1A73E8?logo=googledrive&logoColor=white"/> [https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/](https://drive.google.com/file/d/15aRQl6aWBVwJSE4l3ZL-eMisPoe-f2lW/)
+- Sesame app on [![Play Store](https://img.shields.io/badge/Play%20Store-34A853?logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
+- Sesame app on [![GitHub release](https://img.shields.io/github/release/CANDY-HOUSE/SesameSDK_Android_with_DemoApp.svg)](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases/latest)
+
 - ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
 
 
@@ -16,12 +17,26 @@
 - デバイスの各種設定
 - バッテリー残量の取得
 
+## Disclaimer
+
+Please read our [DISCLAIMER](DISCLAIMER.md) before using this software.
+
 ##  Requirements
 <img src="https://img.shields.io/badge/Kotlin-1.4-7F52FF" />.  
 <img src="https://img.shields.io/badge/Bluetooth-4.0LE +-0082FC" />  
 <img src="https://img.shields.io/badge/Android-5.0 +-3DDC84" />  
 <img src="https://img.shields.io/badge/Android Studio-2022 +-3DDC84" />  
 
+## 設定方法
+
+本デモはAWS・Firebaseサービスを使用します。以下の手順で設定してください：
+
+1. **Google Firebase設定**  
+   「app/google-services.json」ファイルを置き換えてください。詳細はGoogle Firebase連携をご参照ください
+2. **Google Maps API設定**  
+   「app.properties」を開き、「YOUR_GOOGLE_MAP_KEY」を置き換えてください
+3. **AWS設定**  
+   無料で利用可能なAWS設定パラメータを提供していますが、リクエスト回数に制限があります
  
 ### 1. ライブラリーの依存
 ```svg

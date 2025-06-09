@@ -3,8 +3,12 @@ package co.candyhouse.sesame.ble
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanResult
 import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.utils.*
-import java.util.*
+import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.base64decodeHex
+import co.candyhouse.sesame.utils.noHashtoUUID
+import co.candyhouse.sesame.utils.toBigLong
+import co.candyhouse.sesame.utils.toHexString
+import java.util.UUID
 import kotlin.experimental.and
 
 
@@ -17,6 +21,7 @@ internal interface CHBaseAdv {
     var deviceName: String?
     var productModel: CHProductModel?
     var isConnecable: Boolean?
+
 }
 
 internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
@@ -25,13 +30,18 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
     override var isConnecable: Boolean? = true
     private val advBytes = scanResult.scanRecord?.manufacturerSpecificData?.valueAt(0)!!
 
-    override var isRegistered: Boolean = (advBytes[2] and 1) > 0
     override var adv_tag_b1: Boolean = (advBytes[2] and 2) > 0
     override val rssi: Int = scanResult.rssi
     override var device = scanResult.device
     override var deviceName = scanResult.scanRecord?.deviceName
     override var productModel: CHProductModel? = CHProductModel.getByValue(advBytes.copyOfRange(0, 1).toBigLong().toInt())
 
+    override var isRegistered: Boolean =
+            if (productModel == CHProductModel.Hub3) {
+                (advBytes[1] and 1) > 0 // 1:registered 0:unregistered， Hub3 在Matter的二合一广播里，压缩去掉了机型的保留字。所以这里要用第二个字节advBytes[1]。
+            } else {
+                (advBytes[2] and 1) > 0
+            }
 
     override val deviceID: UUID?
         get() {
@@ -45,6 +55,16 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                     null
                 }
 
+                CHProductModel.Hub3 -> return try {
+//                    L.d("hub3", "advBytes:" + advBytes.toHexString())
+                    val hub3ID = ("00000000055afd810d00" + advBytes.copyOfRange(2, 8).toHexString()).noHashtoUUID()
+//                    L.d("hub3", "uuid:" + hub3ID)
+                    hub3ID
+                } catch (e: Exception) {
+                    L.d("hcia", "e:" + e)
+                    null
+                }
+
                 CHProductModel.SS2, CHProductModel.SS4, CHProductModel.SesameBot1, CHProductModel.BiKeLock -> return try {
                     val tmpID = (deviceName + "==").base64decodeHex().noHashtoUUID()
                     tmpID
@@ -53,7 +73,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                     null
                 }
 
-                CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SSMOpenSensor, CHProductModel.SSMTouchPro, CHProductModel.SSMTouch, CHProductModel.BiKeLock2, CHProductModel.BLEConnector -> return try {
+                CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SSMOpenSensor, CHProductModel.SSMTouchPro, CHProductModel.SSMTouch, CHProductModel.BiKeLock2, CHProductModel.BLEConnector, CHProductModel.Hub3, CHProductModel.Remote, CHProductModel.RemoteNano, CHProductModel.SS5US, CHProductModel.SesameBot2, CHProductModel.SSMFace, CHProductModel.SSMFacePro, CHProductModel.SSMFaceProAI, CHProductModel.SS6Pro -> return try {
 //                    L.d("hcia", "[ss5] isRegistered:" + isRegistered)
 //                    L.d("hcia", "[ss5] advBytes:" + advBytes.toHexString())
 //                    L.d("hcia", "[ss5] deviceName:" + deviceName)
@@ -66,6 +86,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
 //                    L.d("hcia", "e:" + e)
                     return UUID.fromString("1bfe50d8-0000-1111-1111-199ceff15268")
                 }
+
                 else -> {
                     return UUID.fromString("1bfe50d8-0000-4e8a-95b8-199ceff15268")
                 }

@@ -6,19 +6,16 @@
     android:background="@color/gray0"
     android:orientation="vertical">
 
-
     <RelativeLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@color/status_bg">
 
-
         <include
             layout="@layout/back_sub"
             android:layout_width="100dp"
             android:layout_height="40dp" />
-
 
     </RelativeLayout>
 
@@ -37,7 +34,6 @@
             android:text="@string/auto_mode"
             android:textColor="@color/black"
             android:textSize="17dp" />
-
 
         <Switch
             android:id="@+id/autolock_switch"
@@ -59,15 +55,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".MapsActivity" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
             android:background="@color/status_bg_cover"
-            android:text="@string/sesame_autounlock_hint">
-
-        </TextView>
+            android:padding="16dp"
+            android:text="@string/sesame_autounlock_hint" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -84,7 +84,6 @@
             <com.warkiz.widget.IndicatorSeekBar
                 android:id="@+id/range_bar"
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_marginBottom="40dp"
@@ -93,7 +92,6 @@
                 app:isb_indicator_text_size="18sp"
                 app:isb_max="500"
                 app:isb_min="0"
-
                 app:isb_only_thumb_draggable="false"
                 app:isb_progress_value_float="true"
                 app:isb_seek_smoothly="true"
@@ -106,18 +104,15 @@
                 app:isb_tick_marks_size="13dp"
                 app:isb_tick_texts_array="@array/no_hand_lock_settimg"
                 app:isb_tick_texts_color="@color/light_red"
-
                 app:isb_tick_texts_size="15sp"
                 app:isb_ticks_count="2"
                 app:isb_track_background_color="@color/no_grey"
                 app:isb_track_background_size="2dp"
                 app:isb_track_progress_color="@color/light_red"
-
                 app:isb_track_progress_size="4dp" />
 
-
         </RelativeLayout>
-    </RelativeLayout>
 
+    </RelativeLayout>
 
 </LinearLayout>

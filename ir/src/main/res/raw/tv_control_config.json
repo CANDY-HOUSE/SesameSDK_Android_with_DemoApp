@@ -1,0 +1,137 @@
+{
+  "controls": [
+    {
+      "id": 1,
+      "type": "POWER_STATUS_ON",
+      "titleIndex": 0,
+      "titles": ["ir_remote_power"],
+      "icons": ["icon_tv_power_on"],
+      "defaultValue": "",
+      "operateCode": "49153"
+    },
+    {
+      "id": 2,
+      "type": "HOME",
+      "titleIndex": 1,
+      "titles": ["tv_remote_home"],
+      "icons": ["icon_tv_home"],
+      "defaultValue": "",
+      "operateCode": "49166"
+    },
+
+    {
+      "id": 3,
+      "type": "BACK",
+      "titleIndex": 2,
+      "titles": ["tv_remote_back"],
+      "icons": ["icon_tv_back"],
+      "defaultValue": "",
+      "operateCode": "49156"
+    },
+    {
+      "id": 4,
+      "type": "MUTE",
+      "titleIndex": 3,
+      "titles": ["tv_remote_mute"],
+      "icons": ["icon_tv_mute"],
+      "defaultValue": "",
+      "operateCode": "49154"
+    },
+    {
+      "id": 5,
+      "type": "UP",
+      "titleIndex": 4,
+      "titles": ["tv_remote_up"],
+      "icons": ["icon_tv_up"],
+      "defaultValue": "",
+      "operateCode": "49157"
+    },
+    {
+      "id": 7,
+      "type": "MENU",
+      "titleIndex": 6,
+      "titles": ["tv_remote_menu"],
+      "icons": ["icon_tv_menu"],
+      "defaultValue": "",
+      "operateCode": "49158"
+    },
+    {
+      "id": 8,
+      "type": "LEFT",
+      "titleIndex": 7,
+      "titles": ["tv_remote_left"],
+      "icons": ["icon_tv_left"],
+      "defaultValue": "",
+      "operateCode": "49159"
+    },
+    {
+      "id": 9,
+      "type": "OK",
+      "titleIndex": 8,
+      "titles": ["tv_remote_ok"],
+      "icons": ["icon_tv_ok"],
+      "defaultValue": "",
+      "operateCode": "49160"
+    },
+    {
+      "id": 10,
+      "type": "RIGHT",
+      "titleIndex": 9,
+      "titles": ["tv_remote_right"],
+      "icons": ["icon_tv_right"],
+      "defaultValue": "",
+      "operateCode": "49161"
+    },
+    {
+      "id": 11,
+      "type": "VOLUME_UP",
+      "titleIndex": 10,
+      "titles": ["tv_remote_volume_up"],
+      "icons": ["icon_tv_volume_up"],
+      "defaultValue": "",
+      "operateCode": "49162"
+    },
+    {
+      "id": 12,
+      "type": "DOWN",
+      "titleIndex": 11,
+      "titles": ["tv_remote_down"],
+      "icons": ["icon_tv_down"],
+      "defaultValue": "",
+      "operateCode": "49163"
+    },
+    {
+      "id": 13,
+      "type": "CHANNEL_UP",
+      "titleIndex": 12,
+      "titles": ["tv_remote_channel_up"],
+      "icons": ["icon_tv_channel_up"],
+      "defaultValue": "",
+      "operateCode": "49164"
+    },
+    {
+      "id": 14,
+      "type": "VOLUME_DOWN",
+      "titleIndex": 13,
+      "titles": ["tv_remote_volume_down"],
+      "icons": ["icon_tv_volume_down"],
+      "defaultValue": "",
+      "operateCode": "49165"
+    },
+    {
+      "id": 15,
+      "type": "CHANNEL_DOWN",
+      "titleIndex": 14,
+      "titles": ["tv_remote_channel_down"],
+      "icons": ["icon_tv_channel_down"],
+      "defaultValue": "",
+      "operateCode": "49167"
+    }
+  ],
+  "settings": {
+    "layout": {
+      "columns": 3,
+      "spacing": 16
+    }
+  }
+}

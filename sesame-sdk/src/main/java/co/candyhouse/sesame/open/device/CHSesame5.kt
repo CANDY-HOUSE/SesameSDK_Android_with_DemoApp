@@ -3,18 +3,20 @@ package co.candyhouse.sesame.open.device
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.bytesToShort
+import co.candyhouse.sesame.utils.bytesToUShort
 import java.util.*
 
 interface CHSesame5 : CHSesameLock {
     var mechSetting: CHSesame5MechSettings?
+    var opsSetting: CHSesame5OpsSettings?
     fun lock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
     fun unlock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
     fun toggle(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
     fun magnet(result: CHResult<CHEmpty>)
     fun configureLockPosition(lockTarget: Short, unlockTarget: Short, result: CHResult<CHEmpty>)
     fun autolock(delay: Int, result: CHResult<Int>)
-//    fun history(cursor: Long?, result: CHResult<Pair<List<CHSesame5History>, Long?>>)
-    fun history(cursor: Long?, uuid: UUID, result: CHResult<Pair<List<CHSesame5History>, Long?>>)
+    fun history(cursor: Long?, uuid: UUID, subUUID: String?, result: CHResult<Pair<List<CHSesame5History>, Long?>>)
+    fun opSensorControl(isEnable: Int, result: CHResult<Int>)
 }
 
 
@@ -38,7 +40,11 @@ class CHSesame5MechSettings(data: ByteArray) {
     var autoLockSecond: Short = bytesToShort(data[4], data[5])
 }
 
-sealed class CHSesame5History(timestamp: Long, val recordID: Int, val mechStatus: CHSesame5MechStatus?, val historyTag: ByteArray?) {
+class CHSesame5OpsSettings(data: ByteArray) {
+    var opsLockSecond: UShort = bytesToUShort(data[0], data[1])
+}
+
+sealed class CHSesame5History( timestamp: Long, val recordID: Int, val mechStatus: CHSesame5MechStatus?, var historyTag: ByteArray?) {
     var date: Date = Date(timestamp)
 
     open class ManualLocked(timestamp: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?) : CHSesame5History(timestamp, recordID, mechStatus, histag)

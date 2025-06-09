@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/wm2_navig"
+    app:startDestination="@+id/FriendListFG">
+
+    <!--“通讯录”界面入口-->
+    <fragment
+        android:id="@+id/FriendListFG"
+        android:name="co.candyhouse.app.tabs.friend.FriendListFG"
+        android:label="FriendListFG"
+        tools:layout="@layout/fg_friend_list">
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG2" />
+        <action
+            android:id="@+id/to_regist"
+            app:destination="@id/registerDevicesFG" />
+        <action
+            android:id="@+id/to_WM2SettingFG"
+            app:destination="@id/WM2SettingFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_FriendDetailFG"
+            app:destination="@id/FriendDetailFG" />
+        <action
+            android:id="@+id/action_to_SSM2SetAngleFG"
+            app:destination="@id/SSM2SetAngleFG" />
+    </fragment>
+
+    <!--其他fragment-->
+    <fragment
+        android:id="@+id/scanFG2"
+        android:name="co.candyhouse.app.tabs.menu.ScanQRcodeFG"
+        android:label="ScanFG" />
+    <fragment
+        android:id="@+id/registerDevicesFG"
+        android:name="co.candyhouse.app.tabs.devices.ScanNewDeviceFG"
+        android:label="fragment_register"
+        tools:layout="@layout/fg_rg_device" />
+    <fragment
+        android:id="@+id/WM2SettingFG"
+        android:name="co.candyhouse.app.tabs.devices.wm2.setting.WM2SettingFG"
+        android:label="WM2SettingFG"
+        tools:layout="@layout/fg_wm2_setting" />
+    <fragment
+        android:id="@+id/SSM2SetAngleFG"
+        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
+        android:label="SSM2SetAngleFG" />
+    <fragment
+        android:id="@+id/FriendDetailFG"
+        android:name="co.candyhouse.app.tabs.friend.FriendDetailFG"
+        android:label="FriendDetailFG"
+        tools:layout="@layout/fg_friend_detail">
+        <action
+            android:id="@+id/action_FriendDetailFG_to_friendSelectLockerListFG"
+            app:destination="@id/friendSelectLockerListFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/friendSelectLockerListFG"
+        android:name="co.candyhouse.app.tabs.friend.FriendSelectLockerListFG"
+        android:label="FriendSelectLockerListFG" />
+
+</navigation>
+

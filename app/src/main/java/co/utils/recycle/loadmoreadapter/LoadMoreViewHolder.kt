@@ -2,8 +2,6 @@ package co.utils.recycle.loadmoreadapter
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import co.utils.L
 
 internal interface ILoadMore {
     /**

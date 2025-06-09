@@ -6,21 +6,17 @@ import android.bluetooth.*
 import android.content.pm.PackageManager
 import android.os.Build
 import co.candyhouse.sesame.ble.*
-import co.candyhouse.sesame.ble.CHDeviceUtil
-import co.candyhouse.sesame.ble.SesameResultCode
-import co.candyhouse.sesame.ble.SesameNotifypayload
-import co.candyhouse.sesame.ble.SSM2OpCode
-import co.candyhouse.sesame.ble.SSM3ResponsePayload
 import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.ble.os3.base.CHSesameOS3
 import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
-import co.candyhouse.sesame.open.CHBleManager.appContext
-import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.*
+import co.candyhouse.sesame.open.CHBleManager.appContext
+import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
 import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
@@ -29,6 +25,7 @@ import java.util.*
 import kotlin.experimental.and
 
 @SuppressLint("MissingPermission") internal class CHWifiModule2Device : CHSesameOS3(), CHWifiModule2, CHDeviceUtil {
+    var WM2LasItemCode: UByte = WM2ActionCode.CODE_NON.value
 
     override var ssm2KeysMap: MutableMap<String, String> = mutableMapOf()
 
@@ -47,8 +44,40 @@ import kotlin.experimental.and
 
 
     override fun goIOT() {
-        //        L.d("hcia", "[wm2] goIOT:" )
+        L.d("hcia", "[wm2] goIOT:" )
+        CHIotManager.subscribeWifiModule2(this) {
+            it.onSuccess {
+                val isConnectIOT = it.data.state.reported.c //               L.d("hcia", "🥝 wm2回傳收到影子消息 isConnectIOT:" + isConnectIOT)
+                isConnectIOT?.apply { //                    CHWifiModule2NetWorkStatus(false, false, isConnectIOT, false,false,false)
+                    mechStatus = CHWifiModule2NetWorkStatus((mechStatus as? CHWifiModule2NetWorkStatus)?.isAPWork, (mechStatus as? CHWifiModule2NetWorkStatus)?.isNetWork, isConnectIOT, false, false, false, null)
+                }
 
+                val ssks = it.data.state.reported.ssks
+
+                val keysListData = ssks?.hexStringToByteArray() //6e4f547250375a5137464d486868516c73385367347701 //                L.d("hcia", "🐖 keysListData?.size:" + keysListData?.size)//23
+                val ssm2KeysMapFromIOT: MutableMap<String, String> = mutableMapOf()
+
+                val keyDatas = keysListData?.divideArray(23)
+                keyDatas?.forEach {
+                    val ss2_ir_22 = it.sliceArray(IntRange(0, 21))
+                    val device_status = it[22]
+                    try {
+                        val ssmID = (String(ss2_ir_22) + "==").base64decodeHex().noHashtoUUID() //                        L.d("hcia", "ssmID:" + ssmID)
+                        ssm2KeysMapFromIOT.put(ssmID!!.toString(), device_status.toString())
+                    } catch (e: Exception) {
+                        L.d("hcia", "🐖 IOT e:" + e)
+                    } //                        L.d("hcia", "🐖 IOT 收到鑰匙上鎖狀態 device_status:" + device_status)//ss2_device_status;// 0:沒連上 ,1:藍芽連上 ,2:登入成功
+                }
+
+                //                L.d("hcia", "ssm2KeysMapFromIOT:" + ssm2KeysMapFromIOT)
+                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                    ssm2KeysMap.clear()
+                    ssm2KeysMap.putAll(ssm2KeysMapFromIOT)
+                    (delegate as? CHWifiModule2Delegate)?.onSSM2KeysChanged(this, ssm2KeysMapFromIOT)
+                }
+
+            } //end success
+        }
 
     }
 
@@ -78,6 +107,8 @@ import kotlin.experimental.and
         }
 
     override fun connect(result: CHResult<CHEmpty>) {
+        L.d("harry","[CHWifiModule2Device.kt][connect]")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 if (CHBleManager.mScanning == CHScanStatus.BleClose) {
@@ -149,8 +180,21 @@ import kotlin.experimental.and
             L.d("hcia", "🀄Command:<==:" + wm2RespPl.cmdItCode + " - " + wm2RespPl.cmdResultCode + " " + String(wm2RespPl.payload) + "<--")
             cmdCallBack[wm2RespPl.cmdItCode]?.invoke(wm2RespPl)
             cmdCallBack.remove(wm2RespPl.cmdItCode)
+            L.d("harry", "WM2LasItemCode = $WM2LasItemCode")
             L.d("hcia", "1wm2RespPl.cmdItCode:" + wm2RespPl.cmdItCode)
-            L.d("hcia", "2cmdCallBack:" + cmdCallBack)
+//            L.d("hcia", "2cmdCallBack:" + cmdCallBack)
+
+            /* 解决 bug： APP 发 3， WM2 回 3； 如此循环超过六七次后， APP 发 3， WM2 回 4 。
+               bug 复现的具体操作： 在选wifi SSID 的页面， 点任一 SSID，弹窗选取消，如此循环 直至出现 “APP 发 3 ， WM2 回 4” 的现象。
+2024-05-07 10:28:49.934 14582-14582 harry                   co.candyhouse.sesame2                D  📡 setWifiSSID sendCommand start !!!  (CHWifiModule2Device.kt:294) 主線成
+2024-05-07 10:28:49.935 14582-14582 harry                   co.candyhouse.sesame2                D  [sendCommand：3]  (CHSesameOS3.kt:217) 主線成
+2024-05-07 10:28:49.935 14582-14582 harry                   co.candyhouse.sesame2                D  📡 setWifiSSID sendCommand end !!!  (CHWifiModule2Device.kt:305) 主線成
+2024-05-07 10:28:50.549 14582-14596 hcia                    co.candyhouse.sesame2                D  🀄Command:<==:4 - 5 <--  (CHWifiModule2Device.kt:179) 副線成
+             */
+            if ((wm2RespPl.cmdItCode == WM2ActionCode.UPDATE_WIFI_PASSWORD.value) && (WM2LasItemCode == WM2ActionCode.UPDATE_WIFI_SSID.value)) {
+                cmdCallBack.remove(WM2ActionCode.UPDATE_WIFI_SSID.value)
+                WM2LasItemCode = WM2ActionCode.CODE_NON.value
+            }
         }
 
         override fun onCharacteristicWrite(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int) {
@@ -202,6 +246,7 @@ import kotlin.experimental.and
 
 
     override fun register(result: CHResult<CHEmpty>) {
+        L.d("harry", "📡 wm2" + ":註冊:" + deviceId.toString() + " " + deviceStatus)
         if (isRegistered) {
             result.invoke(Result.failure(CHError.BleInvalidAction.value))
             return
@@ -260,14 +305,19 @@ import kotlin.experimental.and
     }
 
     override fun setWifiSSID(ssid: String, result: CHResult<CHEmpty>) {
+        L.d("harry", "📡 setWifiSSID sendCommand start !!!")
         sendCommand(SesameOS3Payload(WM2ActionCode.UPDATE_WIFI_SSID.value, ssid.toByteArray())) { res ->
-            if (res.cmdResultCode == SesameResultCode.success.value) { //                L.d("hcia", "設定帳號完畢:" + String(res.payload))
+            L.d("harry", "📡 setWifiSSID sendCommand res.payload:" + res.payload.toHexString())
+            WM2LasItemCode = WM2ActionCode.UPDATE_WIFI_SSID.value
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                L.d("hcia", "設定帳號完畢:" + res.payload.toHexString())
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             } else {
                 L.d("hcia", "設定wifi錯誤:" + res.cmdResultCode.toString())
                 result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", (res.cmdResultCode).toInt())))
             }
         }
+        L.d("harry", "📡 setWifiSSID sendCommand end !!!")
     }
 
 
@@ -283,6 +333,7 @@ import kotlin.experimental.and
         val company = CHConfiguration.CLIENT_ID!!.replace(":", "").replace("-", "")
         //        L.d("hcia", "company.toByteArray():" + company.toByteArray().toHexString())
         val verification = company + ":" + deviceId.toString().uppercase().split('-').last()
+        L.d("wm2", "verification: $verification")
         sendCommand(SesameOS3Payload(WM2ActionCode.CONNECT_WIFI.value, verification.toByteArray())) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
@@ -305,7 +356,12 @@ import kotlin.experimental.and
         val b64k = noHashUUID.hexStringToByteArray().base64Encode().replace("=", "")
         val ssmIRData = b64k.toByteArray()
 
-        val ssmPKData = if ((ssm.sesame2KeyData!!.deviceModel == "sesame_5") || (ssm.sesame2KeyData!!.deviceModel == "sesame_5_pro") || (ssm.sesame2KeyData!!.deviceModel == "bike_2")) {
+        val ssmPKData = if ((ssm.sesame2KeyData!!.deviceModel == "sesame_5")
+                || (ssm.sesame2KeyData!!.deviceModel == "sesame_5_pro")
+                || (ssm.sesame2KeyData!!.deviceModel == "sesame_5_us")
+
+                || (ssm.sesame2KeyData!!.deviceModel == "bike_2"))
+        {
             "41B6D190EBBC1E9FA49E62710D80092784E998649FCA150419D2C70C6573BCA4666481EA47FDD755BB0761AB95EF95C9BD24016D54B14606EB5835541E45F27E".hexStringToByteArray()
         } else {
             ssm.sesame2KeyData!!.sesame2PublicKey.hexStringToByteArray()
@@ -366,6 +422,7 @@ import kotlin.experimental.and
     }
 
     override fun updateFirmware(onResponse: CHResult<BluetoothDevice>) {
+        L.d("harry","updateFirmware")
         sendCommand(SesameOS3Payload(WM2ActionCode.OPEN_OTA_SERVER.value, byteArrayOf())) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(advertisement!!.device!!)))

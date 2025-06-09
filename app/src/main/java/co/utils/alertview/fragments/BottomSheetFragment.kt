@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import co.utils.alertview.objects.AlertAction
-import kotlinx.android.synthetic.main.action_layout_light.view.*
-import kotlinx.android.synthetic.main.alert_layout_light.view.*
+
 
 import java.util.ArrayList
 import co.utils.alertview.enums.AlertActionStyle
@@ -27,10 +27,10 @@ class BottomSheetFragment(private val title: String, private val message: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme)
+        setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         // Inflate view according to theme selected. Default is AlertTheme.LIGHT
         var view: View? = null
@@ -45,25 +45,27 @@ class BottomSheetFragment(private val title: String, private val message: String
     }
 
     private fun initView(view: View) {
-        view.tvTitle.text = title
-        view.tvMessage.text = message
+        view.findViewById<TextView>(R.id.tvTitle).text = title
+        view.findViewById<TextView>(R.id.tvMessage).text = message
 
         // In case of title or message is empty
         if (title.isEmpty()) {
-            view.tvTitle.visibility = View.GONE
-            view.title_zone.visibility = View.GONE
+            view.findViewById<TextView>(R.id.tvTitle).visibility = View.GONE
+            view.findViewById<View>(R.id.title_zone)     .visibility = View.GONE
         }
-        if (message.isEmpty()) view.tvMessage.visibility = View.GONE
+        if (message.isEmpty())    view.findViewById<TextView>(R.id.tvMessage).visibility = View.GONE
 
         // Change view according to selected Style
-        if (style == AlertStyle.BOTTOM_SHEET)
-            view.tvCancel.visibility = View.GONE
-        else if (style == AlertStyle.IOS)
-            view.tvCancel.visibility = View.VISIBLE
-        view.tvCancel.setOnClickListener({ dismiss() })
+        if (style == AlertStyle.BOTTOM_SHEET) {
+            view.findViewById<TextView>(R.id.tvCancel).visibility = View.GONE
+        }
+        else if (style == AlertStyle.IOS) {
+            view.findViewById<TextView>(R.id.tvCancel).visibility = View.VISIBLE
+        }
+        view.findViewById<TextView>(R.id.tvCancel).setOnClickListener { dismiss() }
 
         // Inflate action views
-        inflateActionsView(view.actionsLayout, actions)
+        inflateActionsView(view.findViewById(R.id.actionsLayout), actions)
     }
 
     /**
@@ -79,32 +81,32 @@ class BottomSheetFragment(private val title: String, private val message: String
             else if (theme == AlertTheme.DARK)
                 view = LayoutInflater.from(context).inflate(R.layout.action_layout_dark, null)
 
-            view!!.tvAction.text = action.title
+            view!!.findViewById<TextView>(R.id.tvAction).text = action.title
 
             // Click listener for action.
-            view.tvAction.setOnClickListener({
+            view.findViewById<TextView>(R.id.tvAction).setOnClickListener {
                 dismiss()
                 // For Kotlin
                 action.action?.invoke(action)
 
                 // For Java
                 action.actionListener?.onActionClick(action)
-            })
+            }
 
             // Action text color according to AlertActionStyle
             if (context != null) {
                 when (action.style) {
                     AlertActionStyle.POSITIVE -> {
-                        view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+                        view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.blue0))
                     }
                     AlertActionStyle.NEGATIVE -> {
-                        view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                        view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
                     }
                     AlertActionStyle.DEFAULT -> {
                         if (theme == AlertTheme.LIGHT)
-                            view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkGray))
+                            view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.blue0))
                         else if (theme == AlertTheme.DARK)
-                            view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightWhite))
+                            view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.lightWhite))
                     }
                 }
             }

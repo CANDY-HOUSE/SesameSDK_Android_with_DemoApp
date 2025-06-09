@@ -34,7 +34,7 @@
         android:background="@color/clear"
         android:gravity="left|center_vertical"
         android:inputType="text"
-        android:layout_marginRight="14dp"
+        android:layout_marginRight="12dp"
 
         android:paddingLeft="28dp"
 
@@ -56,6 +56,9 @@
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
         android:text="@string/last_name"
+        android:maxLength="12"
+        android:maxLines="1"
+
         android:textColor="@color/text_hint"
         android:textSize="12sp" />
 
@@ -67,7 +70,7 @@
         android:background="@color/clear"
         android:gravity="left|center_vertical"
         android:inputType="text"
-        android:layout_marginRight="14dp"
+        android:layout_marginRight="12dp"
 
         android:paddingLeft="28dp"
         android:textSize="16sp"
@@ -84,7 +87,8 @@
     <TextView
         android:id="@+id/hint_second_tx"
         android:layout_marginTop="3dp"
-
+        android:maxLength="12"
+        android:maxLines="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="24dp"

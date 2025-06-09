@@ -19,19 +19,19 @@ data class KeyQues(var ak: String, var n: String, var e: String)
 
 
 data class KeyResp(
-    var sig1: String,
-    var st: String,
-    var pubkey: String
+        var sig1: String,
+        var st: String,
+        var pubkey: String
 )
 
 object CHServerAuth {
     const val serverKey =
-        "04a040fcc7386b2a08304a3a2f0834df575c936794209729f0d42bd84218b35803932bea522200b2ebcbf17ab57c4509b4a3f1e268b2489eb3b75f7a765adbe181"
+            "04a040fcc7386b2a08304a3a2f0834df575c936794209729f0d42bd84218b35803932bea522200b2ebcbf17ab57c4509b4a3f1e268b2489eb3b75f7a765adbe181"
 
     /*生成共享key*/
     private fun ecdhShareKey(key: Key, remotePublicKey: ByteArray): ByteArray {
         val remoteECPub: ECPublicKey = KeyFactory.getInstance("EC")
-            .generatePublic(X509EncodedKeySpec("3059301306072a8648ce3d020106082a8648ce3d030107034200".hexStringToByteArray() + remotePublicKey)) as ECPublicKey
+                .generatePublic(X509EncodedKeySpec("3059301306072a8648ce3d020106082a8648ce3d030107034200".hexStringToByteArray() + remotePublicKey)) as ECPublicKey
         val kaA = KeyAgreement.getInstance("ECDH")
         kaA.init(key)
         kaA.doPhase(remoteECPub, true)
@@ -44,8 +44,8 @@ object CHServerAuth {
         val erBytes: ByteArray = data.e.hexStringToByteArray()
         val oneKey = AesCmac(keyBytes, 16).computeMac(erBytes) //2b0a26d1b0c341b7670c4fa7ae01edf5
         val twoKey = AesCmac(
-            oneKey!!,
-            16
+                oneKey!!,
+                16
         ).computeMac(erBytes)
         val priKey = oneKey + twoKey!!
         val pair = priKeyToPubKey(priKey.toHexString())
@@ -89,11 +89,11 @@ object CHServerAuth {
         if (p2 == ECPoint.POINT_INFINITY) return p1
         val p: BigInteger = field.p
         val lambda: BigInteger = p2.affineY.subtract(p1.affineY)
-            .multiply(p2.affineX.subtract(p1.affineX).modInverse(p)).mod(p)
+                .multiply(p2.affineX.subtract(p1.affineX).modInverse(p)).mod(p)
         val x3: BigInteger =
-            lambda.multiply(lambda).subtract(p1.affineX).subtract(p2.affineX).mod(p)
+                lambda.multiply(lambda).subtract(p1.affineX).subtract(p2.affineX).mod(p)
         val y3: BigInteger =
-            p1.affineY.add(lambda.multiply(x3.subtract(p1.affineX))).negate().mod(p)
+                p1.affineY.add(lambda.multiply(x3.subtract(p1.affineX))).negate().mod(p)
         return ECPoint(x3, y3)
     }
 
@@ -101,19 +101,19 @@ object CHServerAuth {
         if (p == ECPoint.POINT_INFINITY) return p
         val pValue: BigInteger = field.p
         val lambda: BigInteger = p.affineX.pow(2).multiply(BigInteger.valueOf(3)).add(a)
-            .multiply(p.affineY.multiply(BigInteger.valueOf(2)).modInverse(pValue)).mod(pValue)
+                .multiply(p.affineY.multiply(BigInteger.valueOf(2)).modInverse(pValue)).mod(pValue)
         val x3: BigInteger =
-            lambda.pow(2).subtract(p.affineX.multiply(BigInteger.valueOf(2))).mod(pValue)
+                lambda.pow(2).subtract(p.affineX.multiply(BigInteger.valueOf(2))).mod(pValue)
         val y3: BigInteger =
-            p.affineY.add(lambda.multiply(x3.subtract(p.affineX))).negate().mod(pValue)
+                p.affineY.add(lambda.multiply(x3.subtract(p.affineX))).negate().mod(pValue)
         return ECPoint(x3, y3)
     }
 
 
- private   fun priKeyToPubKey(privateKeyHex: String): Pair<ByteArray?, ECPrivateKey?> {
+    private   fun priKeyToPubKey(privateKeyHex: String): Pair<ByteArray?, ECPrivateKey?> {
         try {
             val keySpec =
-                PKCS8EncodedKeySpec("3041020100301306072a8648ce3d020106082a8648ce3d030107042730250201010420${privateKeyHex}".hexStringToByteArray())
+                    PKCS8EncodedKeySpec("3041020100301306072a8648ce3d020106082a8648ce3d030107042730250201010420${privateKeyHex}".hexStringToByteArray())
             // 使用"EC"（椭圆曲线）算法创建KeyFactory对象
             val kf: KeyFactory = KeyFactory.getInstance("EC")
             // 生成私钥
@@ -128,8 +128,8 @@ object CHServerAuth {
             val s: BigInteger = ecPrivateKey.s
             val ecPoint: ECPoint? = multiply(G, s, field, a)
             val publicKeySpec = ECPublicKeySpec(
-                ecPoint,
-                ecPrivateKey.params
+                    ecPoint,
+                    ecPrivateKey.params
             )
             val keyFactory: KeyFactory = KeyFactory.getInstance("EC")
             // 生成公钥

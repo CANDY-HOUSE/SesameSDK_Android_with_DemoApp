@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -36,7 +35,6 @@
         android:background="@color/white"
         android:orientation="vertical">
 
-
         <TextView
             android:id="@+id/user_name"
             android:layout_width="wrap_content"
@@ -50,7 +48,6 @@
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold" />
-
 
         <TextView
             android:id="@+id/mail"
@@ -81,9 +78,16 @@
                 android:src="@drawable/ic_icons_outlined_qr_code" />
         </RelativeLayout>
 
-
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/tvIr"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:text="IR"
+        android:textColor="@color/blue"
+        android:textSize="32px" />
 
     <ScrollView xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/scroll_view"
@@ -98,9 +102,7 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="450dp">
-
-            </RelativeLayout>
+                android:layout_height="450dp" />
 
             <TextView
                 android:id="@+id/login_state_txt"
@@ -139,6 +141,19 @@
                     android:textStyle="bold" />
             </RelativeLayout>
 
+            <TextView
+                android:id="@+id/delAccount"
+                android:layout_width="match_parent"
+                android:layout_height="53dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="550dp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:text="@string/delete_account"
+                android:textColor="@color/red"
+                android:textSize="17sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

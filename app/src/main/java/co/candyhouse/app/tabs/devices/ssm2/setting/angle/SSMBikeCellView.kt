@@ -5,24 +5,33 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.LinearInterpolator
+import android.view.animation.TranslateAnimation
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.isVisible
 import co.candyhouse.app.R
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.ssm5UIParser
 import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHSesameBike
-import android.view.animation.AnimationUtils
-import androidx.core.view.isVisible
-import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.utils.L
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 class SSMBikeCellView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
     private var ssmImg: Bitmap
 
-    var ssmWidth: Int = 0
-    var ssmMargin: Int = 0
+    private var ssmWidth: Int = 0
+    private var ssmMargin: Int = 0
+    private var animationJob: Job? = null
 
     init {
         ssmImg = ContextCompat.getDrawable(context, R.drawable.icon_nosignal)!!.toBitmap()
@@ -45,24 +54,55 @@ class SSMBikeCellView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     fun setLockImage(ssm: CHDevices) {
-        isVisible = (ssm !is CHSesameConnector)
+        stopAnimationAndThread()
+        isVisible =
+            if (ssm !is CHSesameConnector) true else ssm.productModel == CHProductModel.SSMOpenSensor && ssm.mechStatus != null
         ssmImg = ContextCompat.getDrawable(context, ssm5UIParser(ssm))!!.toBitmap()
         invalidate()
         setLock(ssm)
 
     }
 
-    fun setLock(ssm: CHDevices) {
+    private fun startAnimationTimer(timeInSeconds: Int) {
+        animationJob = CoroutineScope(Dispatchers.Main).launch {
+            delay(timeInSeconds * 1000L)
+            if (animation != null && animation.hasStarted() && !animation.hasEnded()) {
+                clearAnimation()
+
+            }
+        }
+    }
+
+    private fun stopAnimationAndThread() {
+        animationJob?.cancel() // 停止监控线程
+        clearAnimation() // 停止动画
+    }
+    private fun setLock(ssm: CHDevices) {
         if (ssm.mechStatus == null) {
-//            L.d("hcia", " mechStatus:" + ssm.mechStatus)
             return
         }
-//        L.d("hcia", "${ssm.getNickname()} isStop:" + ssm.mechStatus!!.isStop)
+
+
         if (ssm.mechStatus!!.isStop == true) {
             clearAnimation()
         } else {
-            startAnimation(AnimationUtils.loadAnimation(context, R.anim.shake))
+            clearAnimation()
+          //  startAnimation(AnimationUtils.loadAnimation(context, R.anim.shake))
+            startAnimation(shakeAnim())
+            startAnimationTimer(3)
         }
+    }
+    private fun shakeAnim():TranslateAnimation{
+      val  shakeAnimation = TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, -0.03f,  // fromXDelta
+                Animation.RELATIVE_TO_SELF, 0.03f,  // toXDelta
+                Animation.RELATIVE_TO_SELF, 0f,  // fromYDelta (保持Y轴不动)
+                Animation.RELATIVE_TO_SELF, 0f) // toYDelta (保持Y轴不动)
+        shakeAnimation.duration = 60
+        shakeAnimation.interpolator = LinearInterpolator()
+        shakeAnimation.repeatCount = Animation.INFINITE
+        shakeAnimation.repeatMode = Animation.REVERSE
+        return  shakeAnimation
     }
 }
 

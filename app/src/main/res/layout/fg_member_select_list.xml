@@ -36,7 +36,6 @@
         android:layout_below="@+id/menu">
 
         <androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/leaderboard_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

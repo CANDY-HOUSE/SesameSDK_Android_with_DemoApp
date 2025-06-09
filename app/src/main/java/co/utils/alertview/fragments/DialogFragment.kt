@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
@@ -15,8 +16,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertTheme
 import co.utils.alertview.objects.AlertAction
-import kotlinx.android.synthetic.main.action_layout_light.view.*
-import kotlinx.android.synthetic.main.alert_layout_light.view.*
+import com.amazonaws.AmazonClientException
+
 import java.util.*
 
 /**
@@ -47,17 +48,21 @@ class DialogFragment(private val title: String, private val message: String, pri
     }
 
     private fun initView(view: View?) {
-        view!!.tvTitle.text = title
-        view.tvMessage.text = message
+        view?.apply {
+            view.findViewById<TextView>(R.id.tvTitle).text = title
+            view.findViewById<TextView>(R.id.tvMessage).text = message
 
-        // In case of title or message is empty
-        if (title.isEmpty()) view.tvTitle.visibility = View.GONE
-        if (message.isEmpty()) view.tvMessage.visibility = View.GONE
+            // In case of title or message is empty
+            if (title.isEmpty()) view.findViewById<TextView>(R.id.tvTitle).visibility = View.GONE
+            if (message.isEmpty()) view.findViewById<TextView>(R.id.tvMessage).visibility = View.GONE
 
-        view.tvCancel.visibility = View.GONE
+            view.findViewById<View>(R.id.tvCancel)       .visibility = View.GONE
 
-        // Inflate action views
-        inflateActionsView(view.actionsLayout, actions)
+            // Inflate action views 
+         
+            inflateActionsView(view.findViewById(R.id.actionsLayout), actions)
+        }
+       
     }
 
     /**
@@ -73,10 +78,10 @@ class DialogFragment(private val title: String, private val message: String, pri
             else if (theme == AlertTheme.DARK)
                 view = LayoutInflater.from(context).inflate(R.layout.action_layout_dark, null)
 
-            view!!.tvAction.text = action.title
+            view!!.findViewById<TextView>(R.id.tvAction).text = action.title
 
             // Click listener for action.
-            view.tvAction.setOnClickListener {
+            view.findViewById<TextView>(R.id.tvAction).setOnClickListener {
                 dismiss()
 
                 // For Kotlin
@@ -90,16 +95,17 @@ class DialogFragment(private val title: String, private val message: String, pri
             if (context != null) {
                 when (action.style) {
                     AlertActionStyle.POSITIVE -> {
-                        view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+
+                        view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
                     }
                     AlertActionStyle.NEGATIVE -> {
-                        view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                        view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
                     }
                     AlertActionStyle.DEFAULT -> {
                         if (theme == AlertTheme.LIGHT)
-                            view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkGray))
+                            view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.darkGray))
                         else if (theme == AlertTheme.DARK)
-                            view.tvAction.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightWhite))
+                            view.findViewById<TextView>(R.id.tvAction).setTextColor(ContextCompat.getColor(requireContext(), R.color.lightWhite))
                     }
 
                 }
@@ -113,13 +119,37 @@ class DialogFragment(private val title: String, private val message: String, pri
 
 
 fun Fragment.toastMSG(msg: String?) {
-    activity?.runOnUiThread {
+    val context = activity ?: return
+    context.runOnUiThread {
         Toast.makeText(
-                activity,
-                msg,
-                Toast.LENGTH_LONG
+            context,
+            msg?:"Message is null",
+            Toast.LENGTH_LONG
         ).show()
     }
 }
 
+fun Fragment.toastError(error: Exception?) {
 
+    when (error) {
+        is AmazonClientException -> {
+            activity?.runOnUiThread {
+                Toast.makeText(
+                        activity,
+                        error.message,
+                        Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+        else -> {
+            activity?.runOnUiThread {
+                Toast.makeText(
+                        activity,
+                        error?.message,
+                        Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+}

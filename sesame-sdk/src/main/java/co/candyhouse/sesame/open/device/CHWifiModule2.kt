@@ -1,5 +1,6 @@
 package co.candyhouse.sesame.open.device
 
+import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.server.dto.CHEmpty
 interface CHWifiModule2Delegate : CHDeviceStatusDelegate {
