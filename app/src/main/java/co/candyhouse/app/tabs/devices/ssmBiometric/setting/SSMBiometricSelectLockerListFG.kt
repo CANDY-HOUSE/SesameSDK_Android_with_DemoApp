@@ -64,6 +64,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                     CHProductModel.SSMFace -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
                     CHProductModel.SSMFacePro -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
                     CHProductModel.SSMFaceProAI -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
+                    CHProductModel.SSMFaceAI -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
                     else -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SSMOpenSensor && it.productModel != CHProductModel.SesameBot1 }
                 }
 

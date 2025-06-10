@@ -179,7 +179,7 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
             super.onMtuChanged(gatt, mtu, status)
             L.d("[say]", "[onMtuChanged] mtu: $mtu, status: $status")
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                if ((productModel == CHProductModel.SSMTouchPro) || (productModel == CHProductModel.SSMTouch) || (productModel == CHProductModel.SSMFacePro) || (productModel == CHProductModel.SSMFaceProAI) || (productModel == CHProductModel.SSMFace)) {
+                if ((productModel == CHProductModel.SSMTouchPro) || (productModel == CHProductModel.SSMTouch) || (productModel == CHProductModel.SSMFacePro) || (productModel == CHProductModel.SSMFaceProAI) || (productModel == CHProductModel.SSMFaceAI) || (productModel == CHProductModel.SSMFace)) {
                     deviceStatus = CHDeviceStatus.DiscoverServices
                     mBluetoothGatt = gatt
                     gatt?.discoverServices()
@@ -227,7 +227,7 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                if ((productModel == CHProductModel.SSMTouchPro) || (productModel == CHProductModel.SSMTouch) || (productModel == CHProductModel.SSMFacePro) || (productModel == CHProductModel.SSMFaceProAI) || (productModel == CHProductModel.SSMFace)) { // 连接成功后立即请求MTU变更
+                if ((productModel == CHProductModel.SSMTouchPro) || (productModel == CHProductModel.SSMTouch) || (productModel == CHProductModel.SSMFacePro) || (productModel == CHProductModel.SSMFaceAI) || (productModel == CHProductModel.SSMFaceProAI) || (productModel == CHProductModel.SSMFace)) { // 连接成功后立即请求MTU变更
                     // 如果是刷卡机, 需要设置 MTU。 iOS会自动协商， 但是 Android 需要手动设置。
                     val result = gatt.requestMtu(251) // 统一成 苹果手机 的 251
                     L.d("onConnectionStateChange", "MTU request result: $result")
