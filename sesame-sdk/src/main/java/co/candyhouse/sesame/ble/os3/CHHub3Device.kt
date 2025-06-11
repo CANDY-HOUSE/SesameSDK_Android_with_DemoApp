@@ -86,10 +86,8 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         }
 
     override fun getVersionTag(result: CHResult<String>) {
-        L.d("harry", "getVersionTag")
         if (!(this as CHDevices).isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.versionTag.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
-            L.d("harry", "getVersionTag res: " + String(res.payload))
             result.invoke(Result.success(CHResultState.CHResultStateBLE("B:${String(res.payload)}")))
         }
         CHAccountManager.getVersion {
@@ -109,9 +107,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     private fun getOtaProgress() {
-        L.d("harry", "[hub3] getOtaProgress:")
         val topic = "hub3/ota/${deviceId.toString().uppercase()}/progress" // hub3/ota/00000000-055A-FD81-0D00-D432048D8781/progress
-        L.d("harry", "[hub3] getOtaProgress 訂閱主題:$topic")
         CHIotManager.subscribeTopic(topic) { it ->
             it.onSuccess {
                 L.d("hub3", "data: " + it.data.HexLog())
@@ -121,12 +117,9 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun updateHub3Firmware(deviceUUID: String, result: CHResult<CHEmpty>) {
-        L.d("harry", "[updateHub3Firmware] [deviceUUID: $deviceUUID]")
         CHAccountManager.updateHub3Firmware(deviceUUID) { it ->
             it.onFailure { }
-            it.onSuccess {
-                L.d("harry", "data: " + it.data.toString())
-            }
+            it.onSuccess { }
         }
         getOtaProgress()
         // 对齐iOS，HUB3固件升级默认不显示0%

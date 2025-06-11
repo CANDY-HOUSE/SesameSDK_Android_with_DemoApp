@@ -243,7 +243,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         handleHub3Status()
         checkIsCompany()
         // 从Iot获取hub3数据，并回调刷新版本号
-        L.d("harry", "request hub3 status")
         val currentDevice = (mDeviceViewModel.ssmLockLiveData.value!! as CHHub3)
         currentDevice.getHub3StatusFromIot(currentDevice.deviceId.toString()) {}
     }

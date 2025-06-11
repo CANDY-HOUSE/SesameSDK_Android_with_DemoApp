@@ -244,7 +244,6 @@ class MainRoomSS5FG : BaseDeviceFG<FgRoomSs5MainBinding>() {
                             delay(3000)
                             if (isAdded) {
                                 cursor = (System.currentTimeMillis())  // 這裡是為了讓他拉取最新的資料，不然會拉到舊的資料。
-                                L.d("harry", "cursor:$cursor")
                                 refreshHistory(true)    // 一次拉15笔（在Pixel 6a上，大概是一页多点）；
                             }
                         }

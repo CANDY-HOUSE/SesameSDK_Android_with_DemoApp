@@ -14,12 +14,10 @@ class CHFaceEventHandler(private val delegate: CHFaceDelegate?) : CHEventHandler
 
         when (payload.cmdItCode) {
             SesameItemCode.SSM_OS3_FACE_CHANGE.value -> {
-                L.d("harry", "SSM_OS3_FACE_CHANGE data: " + payload.payload.toHexString())
                 delegate.onFaceReceive(device, CHSesameTouchFace(payload.payload))
                 return true
             }
             SesameItemCode.SSM_OS3_FACE_NOTIFY.value -> {
-                L.d("harry", "SSM_OS3_FACE_NOTIFY data: " + payload.payload.toHexString())
                 delegate.onFaceReceive(device, CHSesameTouchFace(payload.payload))
                 return true
             }

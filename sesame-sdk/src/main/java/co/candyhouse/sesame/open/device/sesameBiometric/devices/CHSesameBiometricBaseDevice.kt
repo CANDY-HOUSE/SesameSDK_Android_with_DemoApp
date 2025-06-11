@@ -215,8 +215,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      */
     @OptIn(ExperimentalStdlibApi::class)
     override fun register(result: CHResult<CHEmpty>) {
-        L.d("harry", "TouchPro register")
-
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
             return
@@ -261,8 +259,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
                 sendCommand(SesameOS3Payload(SesameItemCode.mechStatus.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
                     mechStatus = CHSesameTouchProMechStatus(res.payload)
-                    L.d("harry", "[reg]getBatteryPrecentage: " + mechStatus?.getBatteryPrecentage())
-                    L.d("harry", "[reg]getBatteryVoltage: " + mechStatus?.getBatteryVoltage())
                 }
             }
         }
@@ -303,7 +299,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     override fun subscribeNameUpdateTopic(cardDelegate: CHCardDelegate) {
         CHIotManager.subscribeNameUpdateTopic(this) {
             it.onSuccess { resource ->
-                L.d("harry", "[stp][iot][nameUpdate]:" + resource.data)
                 val cardNameRequest: CHCardNameRequest = resource.data
                 cardDelegate.onCardReceive(cardNameRequest)
             }
@@ -342,7 +337,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      */
     private fun getLatestState(result: CHResult<OpenSensorData>) {
         CHAccountManager.openSensorHistoryGet(sesame2KeyData!!.deviceUUID.uppercase()) { it ->
-            L.d("harry", "openSensorHistoryGet: $it")
             it.onSuccess {
                 val openSensorData = OpenSensorData.fromByteArray(it.data.toString().toByteArray())
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(openSensorData)))

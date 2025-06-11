@@ -331,9 +331,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                         if (targetDevice.productModel == CHProductModel.Hub3) {
                             L.d("sf", "hub3模块升级固件……")
                             mDeviceModel.ssmLockLiveData.value!!.updateFirmware { res ->
-                                L.d("harry", "res:$res")
                                 res.onSuccess {
-                                    L.d("harry", "updateFirmware:" + it.data.address)
                                     //(mDeviceModel.ssmLockLiveData.value!! as CHHub3).updateFirmware {}
                                 }
                             }

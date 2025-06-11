@@ -89,7 +89,6 @@ object CHIRAPIManager {
         irDeviceUuid: String,
         onResponse: CHResult<List<CHHub3IRCode>>
     ) {
-        L.d("harry", "getIRCodes: hubDeviceUuid: $hubDeviceUuid irDeviceUuid: $irDeviceUuid")
         makeApiCall(onResponse) {
             try {
                 val res = jpAPIClient.getIRCodes(hubDeviceUuid, irDeviceUuid)

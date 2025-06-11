@@ -24,7 +24,6 @@ class IRDeviceViewModel : ViewModel() {
      * 获取指定IR设备的按键列表
      */
     fun getIrCodeListInfo(onSuccess: () -> Unit, onError: () -> Unit){
-        L.d("harry", "[getIrCodeListInfo] chHub3.deviceId.toString().uppercase(): " + chHub3.deviceId.toString().uppercase() + "; irRemoteDeviceLiveData.value!!.uuid: " + irRemoteDeviceLiveData.value!!.uuid)
         fetchIrCodeList(chHub3.deviceId.toString().uppercase(),irRemoteDeviceLiveData.value!!.uuid,
             onSuccess = { list ->
                 list.forEach {
@@ -47,10 +46,8 @@ class IRDeviceViewModel : ViewModel() {
         onError: () -> Unit
     ) {
         CHIRAPIManager.getIRCodes(hubDeviceUuid,irDeviceUuid) {
-            L.d("harry", "[getIRCodes] hubDeviceUuid: $hubDeviceUuid irDeviceUuid: $irDeviceUuid")
             viewModelScope.launch(Dispatchers.Main) {
                 it.onSuccess {
-                    L.d(tag, "getIRCodes success deviceId: $irDeviceUuid size=${it.data.size}; data: ${it.data}")
                     onSuccess(it.data)
                 }
                 it.onFailure {

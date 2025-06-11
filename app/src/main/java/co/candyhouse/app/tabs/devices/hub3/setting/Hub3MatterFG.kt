@@ -60,11 +60,7 @@ class Hub3MatterFG : BaseDeviceFG<FgMatterBinding>() {
         var manualCodeString: String = ""
 
         targetDevice.apply {
-
-            bind.matterPairingZone.setOnClickListener {
-                L.d("harry", "[hub3][matter_pairing_zone][setOnClickListener]")
-
-            }
+            bind.matterPairingZone.setOnClickListener { }
         }
 
         scope.launch { // 在页面创建时启动一个新的协程
@@ -76,13 +72,8 @@ class Hub3MatterFG : BaseDeviceFG<FgMatterBinding>() {
 
         (targetDevice as CHHub3).getMatterPairingCode { it ->
             it.onSuccess {
-                L.d("harry", "[hub3][getMatterPairingCode][" + it.data.toHexString() + "]")
                 qrCodeString = String(it.data.sliceArray(0..21), Charsets.US_ASCII)
-                L.d("harry", "[hub3][getMatterPairingCode][qrCodeString: $qrCodeString]")
                 manualCodeString = String(it.data.sliceArray(22 until it.data.size), Charsets.US_ASCII)
-
-
-                L.d("harry", "[hub3][getMatterPairingCode][manualCode: $manualCodeString]")
                 //bind.idTextViewMATTERManualCode.text = manualCodeString
                 bind.keyId.post {
                     bind.keyId.visibility=View.VISIBLE
@@ -93,11 +84,9 @@ class Hub3MatterFG : BaseDeviceFG<FgMatterBinding>() {
 
                 (targetDevice as CHHub3).openMatterPairingWindow { it ->
                     it.onSuccess {
-                        L.d("harry", "[hub3][openMatterPairingWindow][onSuccess]")
                         bind.idTextViewMATTERManualCode.post {
                             if (it.data.toInt() == 0) {
                                 bind.idTextViewMATTERManualCode.visibility = View.VISIBLE
-
                             } else {
                                 bind.idTextViewMATTERManualCode.text = "这台 Hub3 连接了太多的 Matter 网络， 请重置后再试。"
                                 bind.idTextViewMATTERManualCode.visibility = View.VISIBLE

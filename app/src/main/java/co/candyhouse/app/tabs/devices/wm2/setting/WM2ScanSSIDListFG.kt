@@ -71,8 +71,7 @@ class WM2ScanSSIDListFG : BaseDeviceFG<FgWm2ScanListBinding>(), CHWifiModule2Del
                             wifiImg.setImageResource(if (wifi_rssi.rssi > -50) R.drawable.ic_wifi_blue else if (wifi_rssi.rssi > -70) R.drawable.ic_wifi_blue_middle else R.drawable.ic_wifi_blue_weak)
 
                             itemView.setOnClickListener {
-                                if (System.currentTimeMillis() - lastClickTime <= interval) {
-                                    L.d("harry", "点得太快了， 等蓝牙回复消息需要点时间")
+                                if (System.currentTimeMillis() - lastClickTime <= interval) { // 点得太快了， 等蓝牙回复消息需要点时间
                                     return@setOnClickListener
                                 }
                                 lastClickTime = System.currentTimeMillis()

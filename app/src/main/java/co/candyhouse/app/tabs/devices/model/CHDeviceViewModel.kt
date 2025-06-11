@@ -206,10 +206,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             status: CHDeviceStatus,
             shadowStatus: CHDeviceStatus?
         ) {
-            L.d(
-                "harry",
-                "👘 onBleDeviceStatusChanged: ${device.getNickname()},  $status; deviceStatusCallbacks: " + deviceStatusCallbacks[device]
-            )
             CoroutineScope(Dispatchers.Main).launch {
                 deviceStatusCallbacks[device]?.invoke(device)
             }
@@ -297,7 +293,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     neeReflesh.postValue(BeanDevices(emptyList()))
                 }
             }
-            L.d("harry", "👘 updateDevices: ${myChDevices.value.size}")
         }
     }
 

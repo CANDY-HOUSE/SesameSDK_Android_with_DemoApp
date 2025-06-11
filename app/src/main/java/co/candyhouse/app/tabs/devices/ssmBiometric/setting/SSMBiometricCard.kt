@@ -176,12 +176,9 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
 
     // 异步操作， 获取服务器上的名字， 然后刷新 UI
     private fun getCardName(cardNameUUID: String, cardID: String, type: Byte, deviceUUID: String) {
-        L.d("harry", "getCardName: $cardNameUUID")
         AWSStatus.getSubUUID()?.let {
             (mDeviceModel.ssmLockLiveData.value as CHCardCapable).cardNameGet(cardID.uppercase(), cardNameUUID, it, deviceUUID) { it ->
-                L.d("harry", "cardName: $it")
                 it.onSuccess {
-                    L.d("harry", "cardName:${it.data}")
                     val name: String = if (it.data == "") {
                         getString(R.string.default_card_name)
                     } else {
@@ -195,7 +192,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
                 }
             }
         } ?: run {
-            L.d("harry", "getCardName: AWSStatus.getSubUUID() is null")
             // 如果没有 AWSStatus.getSubUUID()， 直接使用默认名称
             val name: String = getString(R.string.default_card_name)
             runOnUiThread {
@@ -234,14 +230,11 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         )
         getCardCapable()?.cardNameSet(cardNameRequest) { it ->
             it.onSuccess {
-                L.d("harry", "cardNameSet: ${it.data}")
                 if (it.data == "Ok") {
                     runOnUiThread {
                         data.name = name
                         updateCardList(data)
                     }
-                } else {
-                    L.d(tag, "cardNameSet error: ${it.data}")
                 }
             }
             it.onFailure {

@@ -349,10 +349,6 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
         isEncryt: DeviceSegmentType = DeviceSegmentType.cipher,
         onResponse: SesameOS3ResponseCallback
     ) {
-        L.d(
-            "harry",
-            "[sendCommand：${payload.itemCode}][paylaod: " + payload.data.toHexString() + "]"
-        )
         val tmp = cmdCallBack[payload.itemCode]
 //        L.d("hcia", "[put][qeueu][${payload.itemCode}][again]")
 
@@ -372,7 +368,6 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
             return
         }
         cmdCallBackMap[payload.itemCode] = System.currentTimeMillis()
-        L.d("harry", "cmdCallBackMap: $cmdCallBackMap")
         CoroutineScope(IO).launch {
             try {
 //            L.d("hcia", "[acquire] semaphore?.availablePermits():" + semaphore?.availablePermits())
@@ -399,13 +394,11 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
 
     /** 預設指令: 版本。重置。更新韌體(DFU) */
     open fun getVersionTag(result: CHResult<String>) {
-        L.d("harry", "getVersionTag")
         if (!(this as CHDevices).isBleAvailable(result)) return
         sendCommand(
             SesameOS3Payload(SesameItemCode.versionTag.value, byteArrayOf()),
             DeviceSegmentType.cipher
         ) { res ->
-            L.d("harry", "getVersionTag res: " + String(res.payload))
             //            val gitTag = res.payload.sliceArray(4..15) //
             // CHIotManager.updateSS2ShadowVertion(this, String(gitTag))
             result.invoke(Result.success(CHResultState.CHResultStateBLE(String(res.payload))))

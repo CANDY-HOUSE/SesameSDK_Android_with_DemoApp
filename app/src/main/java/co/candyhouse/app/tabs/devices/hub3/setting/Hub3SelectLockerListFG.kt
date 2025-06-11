@@ -61,7 +61,6 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
                                     title.text = this
                                 }
                                 itemView.setOnClickListener {
-                                    // L.d("harry", "locker type: " + locker.productModel)
                                     if ((locker.productModel == CHProductModel.SSMFace) || (locker.productModel == CHProductModel.SSMTouchPro) || (locker.productModel == CHProductModel.SSMTouch) || (locker.productModel == CHProductModel.SSMFacePro) || (locker.productModel == CHProductModel.SSMFaceProAI) || (locker.productModel == CHProductModel.SSMFaceAI) ) {
                                         (mDeviceModel.ssmLockLiveData.value!! as CHHub3).insertSesame(locker, locker.getNickname(), MatterProductModel.None) {
                                             it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }
@@ -74,9 +73,7 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
                                                     it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }
                                                 }
                                             }
-                                            CHProductModel.SSMOpenSensor -> {
-                                                L.d("harry", "locker type: " + locker.productModel)
-                                            }
+                                            CHProductModel.SSMOpenSensor -> { }
                                             else -> {
                                                 (mDeviceModel.ssmLockLiveData.value!! as CHHub3).insertSesame(locker, locker.getNickname(), MatterProductModel.DoorLock) {
                                                     it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }

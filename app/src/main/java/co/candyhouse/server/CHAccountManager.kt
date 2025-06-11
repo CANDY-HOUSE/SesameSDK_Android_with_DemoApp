@@ -66,7 +66,6 @@ object CHLoginAPIManager {
 
     fun putKey(key: CHUserKey, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            L.d("harry", "key: $key")
             val res = jpAPIClient.putKey(key)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }

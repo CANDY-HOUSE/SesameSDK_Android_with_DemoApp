@@ -99,54 +99,12 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
                     }
                 }
             }
-            bind.      chengeAngleZone.setOnClickListener {
-
+            bind.chengeAngleZone.setOnClickListener {
                 safeNavigate(R.id.action_SSM2SettingFG_to_SSM2SetAngleFG)
-
             }
 
-            SharedPreferencesUtils.deviceToken?.let { fcmToken ->
-                (mDeviceModel.ssmLockLiveData.value as CHSesame5).isEnableNotification(fcmToken) {
-                    it.onSuccess {
-                        bind.notiSwitch.post {
-
-                            bind.notiSwitch.isActivated = false
-                            bind.notiSwitch.isChecked = it.data
-                            checkTvSysNotifyMsg(it.data)
-
-                            bind.notiSwitch.setOnClickListener {}
-
-                            bind.notiSwitch.setOnTouchListener { _, motionEvent ->
-                                if (motionEvent.action == MotionEvent.ACTION_UP) {
-                                    if (bind.notiSwitch.isChecked == false) {
-                                        L.d("hcia", "打開 enableNotification:")
-
-                                        (mDeviceModel.ssmLockLiveData.value as CHSesame5).enableNotification(fcmToken) {
-                                            it.onSuccess {
-                                                bind.notiSwitch.post {
-                                                    bind.notiSwitch.isChecked = true
-                                                    checkTvSysNotifyMsg(true)
-                                                }
-                                            }
-                                        }
-
-                                    } else {
-                                        (mDeviceModel.ssmLockLiveData.value as CHSesame5).disableNotification(fcmToken) {
-                                            it.onSuccess {
-                                                bind.notiSwitch.post {
-                                                    bind.notiSwitch.isChecked = false
-                                                    checkTvSysNotifyMsg()
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                true
-                            }
-                        }
-                    }
-                }
-            }
+            // 开关锁通知
+            setupNotificationSwitch()
         }
         bind.autolockStatus.setOnClickListener {
             L.d("ischecaksa","isChecked:"+bind.autolockSwitch.isChecked)
@@ -156,6 +114,46 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
         }
 
     } //end view created
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupNotificationSwitch() {
+        val device = mDeviceModel.ssmLockLiveData.value as? CHSesame5 ?: return
+
+        SharedPreferencesUtils.deviceToken?.let { fcmToken ->
+            device.isEnableNotification(fcmToken) { result ->
+                result.onSuccess { response ->
+                    bind.notiSwitch.post {
+                        bind.notiSwitch.apply {
+                            isActivated = false
+                            isChecked = response.data
+                            setOnClickListener {} // 防止默认点击
+                        }
+                        checkTvSysNotifyMsg(response.data)
+
+                        bind.notiSwitch.setOnTouchListener { _, event ->
+                            if (event.action == MotionEvent.ACTION_UP) {
+                                handleSwitchToggle(device, fcmToken, !bind.notiSwitch.isChecked)
+                            }
+                            true
+                        }
+                    }
+                }
+            }
+        } ?: L.d("sf", "FCM token unavailable. Reconnect and restart app")
+    }
+
+    private fun handleSwitchToggle(device: CHSesame5, token: String, enable: Boolean) {
+        val operation = if (enable) device::enableNotification else device::disableNotification
+
+        operation(token) { result ->
+            result.onSuccess {
+                bind.notiSwitch.post {
+                    bind.notiSwitch.isChecked = enable
+                    checkTvSysNotifyMsg(enable)
+                }
+            }
+        }
+    }
 
     override fun onResume() {
         super.onResume()

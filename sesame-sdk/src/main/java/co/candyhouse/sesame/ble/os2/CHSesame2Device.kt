@@ -65,12 +65,10 @@ internal enum class CHError(val value: NSError) {
         set(value) {
             field = value
             if (value == null) {
-                L.d("harry", "[ssm] [adv] end:" + value)
                 rssi = -100
                 deviceStatus = CHDeviceStatus.NoBleSignal
                 return
             }
-//            L.d("harry", "[ssm] [adv] end:" + value.deviceName)
             rssi = advertisement?.rssi
             deviceId = advertisement!!.deviceID
             isRegistered = advertisement!!.isRegistered
@@ -242,7 +240,6 @@ internal enum class CHError(val value: NSError) {
 
 
     override fun connect(result: CHResult<CHEmpty>) {
-        L.d("harry", "[CHSesame2Device.kt][connect]")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 if (CHBleManager.mScanning == CHScanStatus.BleClose) {

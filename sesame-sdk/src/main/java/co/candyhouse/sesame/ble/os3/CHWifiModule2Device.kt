@@ -107,8 +107,6 @@ import kotlin.experimental.and
         }
 
     override fun connect(result: CHResult<CHEmpty>) {
-        L.d("harry","[CHWifiModule2Device.kt][connect]")
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 if (CHBleManager.mScanning == CHScanStatus.BleClose) {
@@ -180,7 +178,6 @@ import kotlin.experimental.and
             L.d("hcia", "🀄Command:<==:" + wm2RespPl.cmdItCode + " - " + wm2RespPl.cmdResultCode + " " + String(wm2RespPl.payload) + "<--")
             cmdCallBack[wm2RespPl.cmdItCode]?.invoke(wm2RespPl)
             cmdCallBack.remove(wm2RespPl.cmdItCode)
-            L.d("harry", "WM2LasItemCode = $WM2LasItemCode")
             L.d("hcia", "1wm2RespPl.cmdItCode:" + wm2RespPl.cmdItCode)
 //            L.d("hcia", "2cmdCallBack:" + cmdCallBack)
 
@@ -246,7 +243,6 @@ import kotlin.experimental.and
 
 
     override fun register(result: CHResult<CHEmpty>) {
-        L.d("harry", "📡 wm2" + ":註冊:" + deviceId.toString() + " " + deviceStatus)
         if (isRegistered) {
             result.invoke(Result.failure(CHError.BleInvalidAction.value))
             return
@@ -305,9 +301,7 @@ import kotlin.experimental.and
     }
 
     override fun setWifiSSID(ssid: String, result: CHResult<CHEmpty>) {
-        L.d("harry", "📡 setWifiSSID sendCommand start !!!")
         sendCommand(SesameOS3Payload(WM2ActionCode.UPDATE_WIFI_SSID.value, ssid.toByteArray())) { res ->
-            L.d("harry", "📡 setWifiSSID sendCommand res.payload:" + res.payload.toHexString())
             WM2LasItemCode = WM2ActionCode.UPDATE_WIFI_SSID.value
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 L.d("hcia", "設定帳號完畢:" + res.payload.toHexString())

@@ -112,23 +112,18 @@ internal open class CHCardCapableImpl() :
     }
 
     override fun cardNameGet(cardID: String, cardNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>) {
-        L.d("harry", "【cardNameGet】cardNameUUID: $cardNameUUID； subUUID: $subUUID； deviceUUID: $deviceUUID")
         CHAccountManager.getCardName(cardID, cardNameUUID, subUUID, deviceUUID) { it ->
-            L.d("harry", "getCardName: $it")
             it.onSuccess {
                 val cardName = it.data
-                L.d("harry", "cardName: $cardName")
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(cardName)))
             }
         }
     }
 
     override fun cardNameSet(cardNameRequest: CHCardNameRequest, result: CHResult<String>) {
-        L.d("harry", "【cardNameSet】cardNameUUID: ${cardNameRequest.cardNameUUID}; subUUID: ${cardNameRequest.subUUID}; deviceUUID: ${cardNameRequest.stpDeviceUUID}; name: ${cardNameRequest.name}; cardID: ${cardNameRequest.cardID}")
         CHAccountManager.setCardName(cardNameRequest) { it ->
             it.onSuccess {
                 val res = it.data
-                L.d("harry", "cardNameSet: $res")
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             }
             it.onFailure { result.invoke(Result.failure(it)) }

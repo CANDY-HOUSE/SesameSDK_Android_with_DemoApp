@@ -130,9 +130,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
     // 异步操作， 获取服务器上的名字， 然后刷新 UI
     private fun getFingerPrintName(fingerPrintNameUUID: String, fingerPrintID: String, type: Byte, deviceUUID: String) {
         (mDeviceModel.ssmLockLiveData.value as CHFingerPrintCapable).fingerPrintNameGet(fingerPrintID, fingerPrintNameUUID, UserUtils.getUserId()?:"", deviceUUID) {
-            L.d("harry", "fingerPrintName: $it")
             it.onSuccess {
-                L.d("harry", "fingerPrintName:${it.data}")
                 val name: String = if (it.data == "") { // 如果服务器上没有名字， 使用默认名称
                     getString(R.string.default_fingerprint_name)
                 } else {
@@ -176,7 +174,6 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
         )
         getFingerPrintCapable()?.fingerPrintNameSet(fingerPrintNameRequest) { it ->
             it.onSuccess {
-                L.d("harry", "fingerPrintNameSet: ${it.data}")
                 if (it.data == "Ok") {
                     data.name = name
                     runOnUiThread { updateFingerprintList(data) }
@@ -236,7 +233,6 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
                 name: String,
                 type: Byte
             ) {
-                L.d("harry", "onFingerPrintChanged : name.length = ${name.length}, name: $name")
                 val newFingerprint = if ((name.length == 32) && name.isUUIDv4()) {
                     FingerPrint(ID, getString(R.string.default_fingerprint_name), type, name.noHashtoUUID().toString())
                 } else {
@@ -473,7 +469,6 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
      * 重命名指纹
      */
     private fun renameFingerPrint(data: FingerPrint, newName: String) {
-        L.d("harry", "id: ${data.id}; oldName: ${data.name}; newName: $newName; oldNameLength: ${data.name.length}; fingerPrintNameUUID: ${data.fingerPrintNameUUID}")
         setFingerPrintName(data, newName, getDeviceUUID())
     }
 

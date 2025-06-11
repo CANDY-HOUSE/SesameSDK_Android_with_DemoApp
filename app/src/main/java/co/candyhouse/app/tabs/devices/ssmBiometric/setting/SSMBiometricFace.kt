@@ -163,12 +163,9 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
 
     // 异步操作， 获取服务器上的名字， 然后刷新 UI
     private fun getFaceName(face: CHSesameTouchFace, deviceUUID: String) {
-        L.d("harry", "[getFaceName] nameUUID: ${face.nameUUID}")
         AWSStatus.getSubUUID()?.let { it ->
             (mDeviceModel.ssmLockLiveData.value as CHFaceCapable).faceNameGet(face.id, face.nameUUID, it, deviceUUID) {
-                L.d("harry", "【faceNameGet】 faceName: $it")
                 it.onSuccess {
-                    L.d("harry", "faceName:${it.data}")
                     face.name = if (it.data == "") { // 如果服务器上没有名字， 使用默认名称
                         getString(R.string.default_face_name)
                     } else {
@@ -180,7 +177,6 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
                 }
             }
         } ?: run { // 未登录用户， 没有 subUUID
-            L.d("harry", "getFaceName: AWSStatus.getSubUUID() is null")
             // 如果没有 AWSStatus.getSubUUID()， 直接使用默认名称
             face.name = getString(R.string.default_face_name)
             runOnUiThread {
@@ -205,8 +201,6 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
                     runOnUiThread {
                         updateFaceList(face)
                     }
-                } else {
-                    L.d("harry", "faceNameSet error: ${it.data}")
                 }
             }
             it.onFailure { error ->
@@ -474,7 +468,6 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
      * 重命名人脸
      */
     private fun renameFace(data: CHSesameTouchFace, newName: String) {
-        L.d("harry", "id: ${data.id}; oldName: ${data.name}; newName: $newName; oldNameLength: ${data.name.length}; faceNameUUID: ${data.nameUUID}")
         setFaceName(data, newName, getDeviceUUID())
     }
 

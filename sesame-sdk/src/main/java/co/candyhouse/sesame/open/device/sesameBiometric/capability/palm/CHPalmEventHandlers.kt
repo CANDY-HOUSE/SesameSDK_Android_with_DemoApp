@@ -14,7 +14,6 @@ class CHPalmEventHandler(private val delegate: CHPalmDelegate?)  : CHEventHandle
 
         when (payload.cmdItCode) {
             SesameItemCode.SSM_OS3_PALM_CHANGE.value -> {
-                L.d("harry", "SSM_OS3_PALM_CHANGE data: " + payload.payload.toHexString())
                 delegate.onPalmChanged(device, CHSesameTouchFace(payload.payload))
                 return true
             }
@@ -23,7 +22,6 @@ class CHPalmEventHandler(private val delegate: CHPalmDelegate?)  : CHEventHandle
                 return true
             }
             SesameItemCode.SSM_OS3_PALM_NOTIFY.value -> {
-                L.d("harry", "SSM_OS3_PALM_NOTIFY data: " + payload.payload.toHexString())
                 delegate.onPalmReceive(device, CHSesameTouchFace(payload.payload))
                 return true
             }

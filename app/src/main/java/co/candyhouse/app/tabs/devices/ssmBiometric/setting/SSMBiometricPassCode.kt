@@ -159,12 +159,9 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
     // 异步操作， 获取服务器上的名字， 然后刷新 UI
     private fun getKeyboardPassCodeName(keyboardPassCodeNameUUID: String, keyboardPassCodeID: String, type: Byte, deviceUUID: String) {
         // TODO: 如果手机没联网， 需要提示用户？？？
-        L.d("harry", "getKeyboardPassCodeName: $keyboardPassCodeNameUUID")
         AWSStatus.getSubUUID()?.let { it ->
             (mDeviceModel.ssmLockLiveData.value as CHPassCodeCapable).keyBoardPassCodeNameGet(keyboardPassCodeID.hexStringToIntStr(), keyboardPassCodeNameUUID, it, deviceUUID) {
-                L.d("harry", "KeyboardPassCodeName: $it")
                 it.onSuccess {
-                    L.d("harry", "KeyboardPassCodeName:${it.data}")
                     val name: String = if (it.data == "") { // 如果服务器上没有名字， 使用默认名称
                         getString(R.string.default_passcode_name)
                     } else {
@@ -178,7 +175,6 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
                 }
             }
         } ?: run { // 未登录用户， 没有 subUUID
-            L.d("harry", "getKeyboardPassCodeName: AWSStatus.getSubUUID() is null")
             // 如果没有 AWSStatus.getSubUUID()， 直接使用默认名称
             val name: String = getString(R.string.default_passcode_name)
             runOnUiThread {

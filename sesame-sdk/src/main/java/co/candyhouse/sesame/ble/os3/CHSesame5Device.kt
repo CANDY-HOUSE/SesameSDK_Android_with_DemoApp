@@ -104,11 +104,9 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                     resource.data.state.reported.mechst?.let { mechShadow ->
                         // 【ID1001300】【Android】【app】Android app 蓝牙与 AWSIoT 都有设备状态时, 优先显示蓝牙状态（有时 AWSIoT 的角度开关锁状态是错的, 期望 UI 优先显示 Bluetooth的角度开关锁状态）
                         val res: CHResult<CHEmpty> = { }
-                        if (!isBleAvailable(res)) {
-                            L.d("harry", "蓝牙不可用， 使用 iot 的状态。")
+                        if (!isBleAvailable(res)) { // 蓝牙不可用， 使用 iot 的状态。
                             mechStatus = CHSesame5MechStatus(CHSesame2MechStatus(mechShadow.hexStringToByteArray()).ss5Adapter())
                         }
-                        L.d("hub3_ss5", "mechStatus: " + (mechStatus as CHSesame5MechStatus).position)
                     }
                     deviceShadowStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
                 } else {
@@ -184,12 +182,10 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
 //                L.d("hcia", "it.data:" + it.data)
 
                 it.data.histories.forEach {
-                    L.d("harry", "【服务器给的】history:${it}")
                     val historyType = Sesame2HistoryTypeEnum.getByValue(it.type)
                     val ts = it.timeStamp
                     val recordID = it.recordID
                     val histag = it.historyTag?.base64decodeByteArray()
-                    L.d("history", "tag:${histag?.toHexString()}---${it}")
                     val params = it.parameter?.base64decodeByteArray()
                     var mechStatus: CHSesame5MechStatus? = null
                     if (params != null) {
@@ -287,7 +283,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     }
 
     override fun register(result: CHResult<CHEmpty>) {
-        L.d("harry", "[ss5][register]:$deviceId")
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
             return
@@ -373,7 +368,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                 }
             }
             isReadHistoryCommandRunning = false
-            L.d("harry", "readHistoryCommand end !!!")
         }
     }
 

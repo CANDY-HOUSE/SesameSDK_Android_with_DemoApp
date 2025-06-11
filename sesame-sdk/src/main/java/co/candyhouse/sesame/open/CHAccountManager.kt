@@ -142,7 +142,6 @@ object CHAccountManager {
     internal fun openSensorHistoryGet(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.openSensorHistoryGet(deviceUUID)
-            L.d("harry", "openSensorHistoryGet: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -150,7 +149,6 @@ object CHAccountManager {
     internal fun setCardName(cardNameRequest: CHCardNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setCardName(cardNameRequest)
-            L.d("harry", "setCardName: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -158,7 +156,6 @@ object CHAccountManager {
     internal fun getCardName(cardID: String, cardNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val cardName = jpAPIclient.getCardName(cardID, cardNameUUID, subUUID, stpDeviceUUID)
-            L.d("harry", "getCardName: $cardName")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(cardName)))
         }
     }
@@ -166,7 +163,6 @@ object CHAccountManager {
     internal fun getFingerPrintName(fingerPrintID: String, fingerPrintNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val fingerPrintName = jpAPIclient.getFingerPrintName(fingerPrintID, fingerPrintNameUUID, subUUID, stpDeviceUUID)
-            L.d("harry", "getFingerPrintName: $fingerPrintName")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(fingerPrintName)))
         }
     }
@@ -174,7 +170,6 @@ object CHAccountManager {
     internal fun setFingerPrintName(fingerPrintNameRequest: CHFingerPrintNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setFingerPrintName(fingerPrintNameRequest)
-            L.d("harry", "setFingerPrintName: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -182,7 +177,6 @@ object CHAccountManager {
     internal fun getFaceName(faceID: String, faceNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val faceName = jpAPIclient.getFaceName(faceID, faceNameUUID, subUUID, stpDeviceUUID)
-            L.d("harry", "getFaceName: $faceName")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(faceName)))
         }
     }
@@ -190,7 +184,6 @@ object CHAccountManager {
     internal fun setFaceName(faceNameRequest: CHFaceNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setFaceName(faceNameRequest)
-            L.d("harry", "setFaceName: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }

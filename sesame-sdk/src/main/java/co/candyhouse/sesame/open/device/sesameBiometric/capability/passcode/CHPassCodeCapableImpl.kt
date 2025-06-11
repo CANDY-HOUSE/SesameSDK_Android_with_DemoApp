@@ -82,21 +82,15 @@ internal open class CHPassCodeCapableImpl() :
         CHAccountManager.getKeyBoardPassCodeName(keyBoardPassCode, keyBoardPassCodeNameUUID, subUUID, deviceUUID) { it ->
             it.onSuccess {
                 val keyBoardPassCodeName = it.data
-                L.d("harry", "keyBoardPassCodeName: $keyBoardPassCodeName； keyBoardPassCode: $keyBoardPassCode")
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(keyBoardPassCodeName)))
             }
         }
     }
 
     override fun keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, result: CHResult<String>) {
-        L.d(
-            "harry",
-            "【keyBoardPassCodeNameSet】keyBoardPassCodeNameUUID: ${keyBoardPassCodeNameRequest.keyBoardPassCodeNameUUID}; keyBoardPassCode: ${keyBoardPassCodeNameRequest.keyBoardPassCode}; subUUID: ${keyBoardPassCodeNameRequest.subUUID}; deviceUUID: ${keyBoardPassCodeNameRequest.stpDeviceUUID}"
-        )
         CHAccountManager.setKeyBoardPassCodeName(keyBoardPassCodeNameRequest) { it ->
             it.onSuccess {
                 val res = it.data
-                L.d("harry", "keyBoardPassCodeNameSet res: $res")
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             }
             it.onFailure { result.invoke(Result.failure(it)) }

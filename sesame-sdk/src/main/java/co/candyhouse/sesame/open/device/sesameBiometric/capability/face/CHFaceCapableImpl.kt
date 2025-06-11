@@ -66,7 +66,6 @@ internal class CHFaceCapableImpl() :
         CHAccountManager.getFaceName(faceID, faceNameUUID, subUUID, deviceUUID) { it ->
             it.onSuccess {
                 val faceName = it.data
-                L.d("harry", "faceName: $faceName")
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(faceName)))
             }
             it.onFailure { result.invoke(Result.failure(it)) }
@@ -74,11 +73,9 @@ internal class CHFaceCapableImpl() :
     }
 
     override fun faceNameSet(faceNameRequest: CHFaceNameRequest, result: CHResult<String>) {
-        L.d("harry", "【faceNameSet】faceNameUUID: ${faceNameRequest.faceNameUUID}; faceID: ${faceNameRequest.faceID}; subUUID: ${faceNameRequest.subUUID}; deviceUUID: ${faceNameRequest.stpDeviceUUID}")
         CHAccountManager.setFaceName(faceNameRequest) { it ->
             it.onSuccess {
                 val res = it.data
-                L.d("harry", "faceNameSet: $res")
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             }
         }

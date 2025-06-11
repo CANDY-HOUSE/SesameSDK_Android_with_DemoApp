@@ -24,7 +24,6 @@ class SesameOpenSensorNoBLESettingFG :
 
     @SuppressLint("SimpleDateFormat")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        L.d("harry", "【OpenSensor】 没有蓝牙信号的 设置页面")
         super.onViewCreated(view, savedInstanceState)
         val device = mDeviceModel.ssmLockLiveData.value
 
