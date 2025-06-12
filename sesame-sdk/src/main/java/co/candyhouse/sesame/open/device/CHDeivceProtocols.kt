@@ -381,7 +381,7 @@ interface CHSesameProtocolMechStatus {
     fun getBatteryPrecentage(): Int {
         val voltage = getBatteryVoltage()
         /*
-        *    修正电池电量显示不准的问题。(仅限***芯片的ADC)
+        *    修正电池电量显示不准的问题。(仅限Sesame5系列芯片的ADC)
         *
         *    1、 在刷卡机上，用万用表实测电源电压为6V时，芯片读到的单节电池ADC值乘以2后，为5850mV。
         *    2、 调整固件里的采样次数和GPIO的开关时机，实测对这个误差无影响。
