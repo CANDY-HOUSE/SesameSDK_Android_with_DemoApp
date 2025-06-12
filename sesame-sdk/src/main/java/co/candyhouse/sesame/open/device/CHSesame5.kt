@@ -2,8 +2,10 @@ package co.candyhouse.sesame.open.device
 
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.bytesToUShort
+import co.candyhouse.sesame.utils.toHexString
 import java.util.*
 
 interface CHSesame5 : CHSesameLock {
@@ -19,7 +21,6 @@ interface CHSesame5 : CHSesameLock {
     fun opSensorControl(isEnable: Int, result: CHResult<Int>)
 }
 
-
 class CHSesame5MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
     private val battery = bytesToShort(data[0], data[1])
     override val position: Short = bytesToShort(data[4], data[5])
@@ -29,7 +30,6 @@ class CHSesame5MechStatus(override val data: ByteArray) : CHSesameProtocolMechSt
     override var isBatteryCritical: Boolean = flags and 32 > 0
     override var isStop: Boolean? = flags and 16 > 0
     override fun getBatteryVoltage(): Float {
-//        L.d("hcia", "[ss5][volt]" + battery * 2f / 1000f)
         return battery * 2f / 1000f
     }
 }

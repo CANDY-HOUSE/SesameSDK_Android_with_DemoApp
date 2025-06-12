@@ -191,7 +191,6 @@ object CHAccountManager {
     internal fun getPalmName(palmID: String, palmNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val palmName = jpAPIclient.getPalmName(palmID, palmNameUUID, subUUID, stpDeviceUUID)
-            L.d("harry", "getPalmName: $palmName")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(palmName)))
         }
     }
@@ -199,16 +198,13 @@ object CHAccountManager {
     internal fun setPalmName(palmNameRequest: CHPalmNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setPalmName(palmNameRequest)
-            L.d("harry", "setPalmName: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
     internal fun getKeyBoardPassCodeName(keyBoardPassCode: String, keyBoardPassCodeNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
-        L.d("harry", "【getKeyBoardPassCodeName】keyBoardPassCode: $keyBoardPassCode; nameUUID: $keyBoardPassCodeNameUUID； subUUID: $subUUID； stpDeviceUUID: $stpDeviceUUID")
         makeApiCall(onResponse) {
             val keyBoardPassCodeName = jpAPIclient.getKeyBoardPassCodeName(keyBoardPassCode, keyBoardPassCodeNameUUID, subUUID, stpDeviceUUID)
-            L.d("harry", "getKeyBoardPassCodeName: $keyBoardPassCodeName")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(keyBoardPassCodeName)))
         }
     }
@@ -216,7 +212,6 @@ object CHAccountManager {
     internal fun setKeyBoardPassCodeName(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setKeyBoardPassCodeName(keyBoardPassCodeNameRequest)
-            L.d("harry", "setKeyBoardPassCodeName: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -224,7 +219,6 @@ object CHAccountManager {
     internal fun getHub3StatusFromIot(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.getHub3StatusFromIot(deviceUUID)
-            // L.d("harry", "getHub3StatusFromIot: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -232,7 +226,6 @@ object CHAccountManager {
     internal fun updateHub3Firmware(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.updateHub3Firmware(deviceUUID)
-            L.d("harry", "updateHub3Firmware: $res")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -310,8 +303,6 @@ object CHAccountManager {
         makeApiCall(onResponse) {
             val msg = System.currentTimeMillis().toUInt24ByteArray()
             val keyCheck = AesCmac((ss2 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(msg)!!.sliceArray(0..3)
-//            L.d("hcia", "ss2.deviceId.toString().uppercase():" + ss2.deviceId.toString().uppercase())
-            L.d("harry", "cmdSesame: " + CHSS2WebCMDReq(cmd.value.toByte(), historytag.base64Encode(), keyCheck.toHexString()))
             jpAPIclient.ss2CommandToWM2Post(ss2.deviceId.toString().uppercase(), CHSS2WebCMDReq(cmd.value.toByte(), historytag.base64Encode(), keyCheck.toHexString()))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
         }

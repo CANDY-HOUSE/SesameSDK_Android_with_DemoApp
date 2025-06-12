@@ -370,7 +370,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
 
     private fun checkBiometricDeviceView() {
         if (mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.SSMOpenSensor
-            || mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.BLEConnector
             || mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.Remote
             || mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.RemoteNano
 

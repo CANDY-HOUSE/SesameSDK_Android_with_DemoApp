@@ -114,7 +114,7 @@ enum class CHProductModel {
         override fun productType() = 11
         override fun deviceModel() = "BLE_Connector_1" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "BLE Connector 1"
-        override fun deviceFactory() = CHSesameTouchProDevice()
+        override fun deviceFactory() = CHSesame5Device()
     },
     Hub3 {
         override fun productType() = 13

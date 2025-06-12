@@ -311,7 +311,6 @@ import kotlin.experimental.and
                 result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", (res.cmdResultCode).toInt())))
             }
         }
-        L.d("harry", "📡 setWifiSSID sendCommand end !!!")
     }
 
 
@@ -416,7 +415,6 @@ import kotlin.experimental.and
     }
 
     override fun updateFirmware(onResponse: CHResult<BluetoothDevice>) {
-        L.d("harry","updateFirmware")
         sendCommand(SesameOS3Payload(WM2ActionCode.OPEN_OTA_SERVER.value, byteArrayOf())) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(advertisement!!.device!!)))

@@ -434,7 +434,6 @@ internal enum class CHError(val value: NSError) {
         mCharacteristic ?: return //todo check return work
         mCharacteristic?.value = gattTxBuffer?.getChunk() ?: return
 
-        L.d("harry", "[app][say]:" + mCharacteristic?.value?.toHexString())
 //        mBluetoothGatt?.writeCharacteristic(mCharacteristic)
         val check = mBluetoothGatt?.writeCharacteristic(mCharacteristic)
 //        L.d("hcia", "[app][say]:" + mCharacteristic?.value?.toHexString() + " check:" + check)

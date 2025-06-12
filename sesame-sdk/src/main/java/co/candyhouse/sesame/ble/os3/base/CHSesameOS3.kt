@@ -427,8 +427,6 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
     }
 
     open fun updateFirmware(onResponse: CHResult<BluetoothDevice>) {
-        L.d("harry", "updateFirmware")
-
         val device = (this as CHDeviceUtil).advertisement?.device
         if (device != null) {
             onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(device)))

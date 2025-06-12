@@ -127,7 +127,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun setHub3Brightness(brightness: Byte, result: CHResult<Byte>) {
-        L.d("harry", "[setHub3Brightness] [brightness: ${brightness.toUByte()}]")
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(Hub3ItemCode.HUB3_ITEM_CODE_LED_DUTY.value, byteArrayOf(brightness)), DeviceSegmentType.cipher) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(brightness)))
@@ -135,7 +134,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun getHub3StatusFromIot(deviceUUID: String, result: CHResult<Byte>) {
-        L.d("harry", "[getHub3StatusFromIot] [deviceUUID: $deviceUUID]")
         CHAccountManager.getHub3StatusFromIot(deviceUUID) { it ->
             it.onFailure { }
             it.onSuccess {
@@ -160,27 +158,21 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 // 从json中取出wifi_ssid和wifi_password
                 val wifiSSID = jsonObject.optString("wifi_ssid")
                 val wifiPassword = jsonObject.optString("wifi_password")
-                L.d("harry", "wifiSSID: $wifiSSID, wifiPassword: $wifiPassword")
-
                 mechSetting?.wifiSSID = wifiSSID
                 mechSetting?.wifiPassWord = wifiPassword
                 // 从json中取出固件版本号 v
                 versionTagFromIoT = jsonObject.optString("v")
                 hub3LastFirmwareVer = jsonObject.optString("hub3LastFirmwareVer")
-                L.d("harry", "versionTagFromIoT: $versionTagFromIoT")
                 (delegate as? CHWifiModule2Delegate)?.onAPSettingChanged(this, mechSetting!!)
 
                 val ssks = jsonObject.optString("ssks")
-                L.d("hcia", "🥝 [hub3]数据库里存的ssm列表:$ssks, len: " + ssks?.length) // 42503131-3130-380E-005B-3A255606017802
                 val ssmSum = ssks?.length?.div(38) ?: 0
                 val ssm5KeysMapFromIOT: MutableMap<String, String> = mutableMapOf()
                 for (i in 0 until ssmSum) {
                     val ssmID = (ssks?.substring(i * 38, i * 38 + 36))?.lowercase()
-                    L.d("hcia", "[hub3]数据库里存的ssm$i: $ssmID")
                     ssm5KeysMapFromIOT[ssmID.toString()] = "$i"
                 }
                 if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
-                    L.d("hcia", "[hub3][-]hub3手機登入狀態:" + deviceStatus.value)
                     ssm2KeysMap.clear()
                     ssm2KeysMap.putAll(ssm5KeysMapFromIOT)
                     (delegate as? CHHub3Delegate)?.onSSM2KeysChanged(this, ssm2KeysMap)
@@ -197,18 +189,12 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             it.onSuccess {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        L.d("harry", "data: " + it.data)
-                        // {"state":{"reported":{"c":false,"v":""}},"metadata":{"reported":{"c":{"timestamp":1736395348},"v":{"timestamp":1736395348}}},"version":18493,"timestamp":1736395348}
                         val jsonObject = JSONObject(it.data)
-                        L.d("harry", "jsonObject: $jsonObject")
                         val state = jsonObject.optJSONObject("state")
-                        L.d("harry", "state: $state")
                         val reported = state?.optJSONObject("reported")
-                        L.d("harry", "reported: $reported")
                         val isConnectIOT = reported?.optBoolean("c")
                         L.d("hcia", "🥝 [hub3]hub3是否連線到IoT:" + isConnectIOT)
                         versionTagFromIoT = reported?.optString("v")
-                        L.d("harry", "versionTagFromIoT: $versionTagFromIoT")
                         isConnectIOT?.apply {
                             mechStatus = CHWifiModule2NetWorkStatus(
                                 isConnectIOT,
@@ -226,7 +212,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 }
 
             }
-            it.onFailure { L.d("harry", "subscribeHub3 fail!!!") }
+            it.onFailure { }
         }
     }
 
@@ -246,7 +232,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun register(result: CHResult<CHEmpty>) {
-        L.d("harry", "hub3 register")
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
             return
@@ -260,7 +245,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             deviceStatus = CHDeviceStatus.Registering
             sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
                 isRegistered = true
-                L.d("harry", "[hub3][reg][IRRes]:" + IRRes.payload.toHexString())
                 val ecdhSecretPre16 = EccKey.ecdh(IRRes.payload).sliceArray(0..15)
                 val wm2Key = ecdhSecretPre16.toHexString()
                 val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", wm2Key, serverSecret)
@@ -285,8 +269,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     /** update Hub3 firmware */
     override fun updateFirmware(onResponse: CHResult<BluetoothDevice>) {
-        L.d("harry", "【Hub3】【updateFirmware】")
-        var result: CHResult<CHEmpty> = { }
+        val result: CHResult<CHEmpty> = { }
         if (!isBleAvailable(result)) {
             L.d("sf", "OTA通道升级固件...")
             // 如果藍牙不可用，通过 WebSocket 转 IoT 更新固件。 不要直接走IoT， 为以后全部切换到 WebSocket 做准备。
@@ -324,7 +307,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             )
         ) { ssmResponsePayload ->
             L.d("hcia", "ADD_SESAME cmdResultCode:" + ssmResponsePayload.cmdResultCode)
-            L.d("harry", "matterProductModel.value: " + matterProductModel.value.toString())
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
     }
@@ -356,7 +338,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun irCodeEmit(id: String, result: CHResult<CHEmpty>) {
-        L.d("harry", "irCodeEmit: $id")
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_CODE_EMIT.value, byteArrayOf(id.hexStringToByteArray()[0]))) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
@@ -392,18 +373,14 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     override fun getMatterPairingCode(result: CHResult<ByteArray>) {
         if (!isBleAvailable(result)) return
-        L.d("harry", "[发]getMatterPairingCode")
         sendCommand(SesameOS3Payload(SesameItemCode.HUB3_MATTER_PAIRING_CODE.value, byteArrayOf())) { res ->
-            L.d("harry", "[收]getMatterPairingCode: " + res.payload.toHexString())
             result.invoke(Result.success(CHResultState.CHResultStateBLE(res.payload)))
         }
     }
 
     override fun openMatterPairingWindow(result: CHResult<Byte>) {
         if (!isBleAvailable(result)) return
-        L.d("harry", "[发] openMatterPairingWindow")
         sendCommand(SesameOS3Payload(SesameItemCode.HUB3_MATTER_PAIRING_WINDOW.value, byteArrayOf())) { res ->
-            L.d("harry", "[收] openMatterPairingWindow: " + res.payload.toHexString())
             result.invoke(Result.success(CHResultState.CHResultStateBLE(res.payload[0])))
         }
     }
@@ -508,7 +485,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             }
 
             SesameItemCode.moveTo.value -> {
-                L.d("harry", "moveTo:" + receivePayload.payload[0])
                 (delegate as? CHHub3Delegate)?.onOTAProgress(this, receivePayload.payload.first())
                 multicastDelegate.invokeAll {
                     (this as? CHHub3Delegate)?.onOTAProgress(this@CHHub3Device, receivePayload.payload.first())
@@ -599,7 +575,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             }
 
             Hub3ItemCode.HUB3_ITEM_CODE_LED_DUTY.value -> {
-                L.d("harry", "[收]HUB3_ITEM_CODE_LED_DUTY:" + receivePayload.payload[0].toUByte())
                 hub3Brightness = receivePayload.payload[0]
                 (delegate as? CHHub3Delegate)?.onHub3BrightnessReceive(this, receivePayload.payload[0].toInt())
             }

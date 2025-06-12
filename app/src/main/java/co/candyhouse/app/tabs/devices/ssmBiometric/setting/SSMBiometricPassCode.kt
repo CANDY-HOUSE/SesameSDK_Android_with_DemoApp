@@ -216,7 +216,6 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
         )
         getPassCodeCapable()?.keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest) { it ->
             it.onSuccess {
-                L.d("harry", "keyBoardPassCodeNameSet: ${it.data}")
                 if (it.data == "Ok") {
                     data.name = name
                     runOnUiThread { updatePassCodeList(data) }
@@ -255,7 +254,6 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             override fun onKeyBoardReceive(
                 device: CHSesameConnector, ID: String, name: String, type: Byte
             ) {
-                L.d("harry", "onKeyBoardReceive : ID = $ID, name.length = ${name.length}, name: $name, type: $type")
                 // 直接显示从BLE得到的密码。收完数据后，批量获取密码名称
                 runOnUiThread {
                     mKbSecretList.remove(mKbSecretList.find { it.id == ID })
@@ -281,8 +279,6 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             override fun onKeyBoardChanged(
                 device: CHSesameConnector, ID: String, name: String, type: Byte
             ) {
-                L.d("harry", "onKeyBoardChanged : ID = $ID, name.length = ${name.length}, name: $name, type: $type")
-
                 val newPassCode = if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
                     KeyboardPassCode(ID, getString(R.string.default_passcode_name), type, name.noHashtoUUID().toString())
                 } else {
@@ -296,7 +292,6 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             }
 
             override fun onKeyBoardModeChange(device: CHSesameConnector, mode: Byte) {
-                L.d("harry", "[onKeyBoardModeChange] mode: $mode")
                 updateModeUI(mode)
             }
 

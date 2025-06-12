@@ -305,7 +305,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
                 name: String,
                 type: Byte
             ) {
-                L.d("harry", "onCardChanged : $cardID; cardName: $name; cardNameLength: ${name.length}")
                 val newCard = if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
                     SuiCard(cardID, getString(R.string.default_card_name), type, name.noHashtoUUID().toString())
                 } else {
@@ -385,7 +384,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
 
     private fun getCardNameInNeed(device: CHSesameConnector,cardID: String, name: String, type: Byte) {
         if ((name.length == 32) && name.isUUIDv4()) { // 如果是 UUID 格式的名字
-            L.d("harry", "cardName is uuid")
             val cardNameUUID = name.noHashtoUUID().toString()
             getCardName(cardNameUUID, cardID, type, getDeviceUUID())
         }
@@ -508,7 +506,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
      * 重命名卡片
      */
     private fun renameCard(data: SuiCard, newName: String) {
-        L.d("harry", "cardName: ${data.id} ${data.name}; newName: $newName; cardNameLength: ${data.name.length}; cardNameUUID: ${data.cardNameUUID}")
         setCardName(data, newName, getDeviceUUID())
     }
 
@@ -541,7 +538,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
 
             getCardCapable()?.sendNfcCardsDataGetCmd(deviceUUID) { result ->
                 result.onSuccess { data ->
-                    L.d("harry", "cards res: ${data.data}")
                 }
             }
         }
