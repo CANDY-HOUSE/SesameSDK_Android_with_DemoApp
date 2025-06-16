@@ -22,8 +22,8 @@
     <string name="matterMsg">已進入Matter配網模式，請於十五分鐘內完成配網，萬一失敗請重新進入此頁以重新進入Matter配網模式</string>
     <string name="qrcodeNotSupport">該二維碼不支持</string>
     <string name="DelFace">删除人臉</string>
-    <string name="sesamefaceMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入人臉。輸入後點擊 X。</string>
-    <string name="sesamepalmMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入掌靜脈。輸入後點擊 X。</string>
+    <string name="sesamefaceMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入人臉。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
+    <string name="sesamepalmMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入掌靜脈。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
     <string name="title_about">關於</string>
     <string name="title_friends">通訊錄</string>
     <string name="title_registered">已註冊</string>

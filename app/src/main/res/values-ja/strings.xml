@@ -25,8 +25,8 @@
     <string name="DelFace">顔の削除</string>
     <string name="matterMsg">Matterペアリングモードに入りました。15分以内にペアリングを完了してください。失敗した場合は、このページに再度アクセスしてMatterペアリングモードを再起動してください</string>
     <string name="qrcodeNotSupport">このQRコードは対応していません</string>
-    <string name="sesamefaceMsg">%1$sに近づきBluetooth接続し、⊕ をタップして顔を登録。登録後 X をタップ。</string>
-    <string name="sesamepalmMsg">%1$sに近づきBluetooth接続し、⊕ をタップして手のひら静脈を登録。登録後 X をタップ。</string>
+    <string name="sesamefaceMsg">%1$sに近づきBluetooth接続し、⊕ をタップして顔を登録。登録後 X をタップ。取付けた状態で登録した方が認証率が遥かに高い。</string>
+    <string name="sesamepalmMsg">%1$sに近づきBluetooth接続し、⊕ をタップして手のひら静脈を登録。登録後 X をタップ。取付けた状態で登録した方が認証率が遥かに高い。</string>
     <string name="hub3_hint_ir">このHub3から5メートル以内の赤外線デバイスを追加してください：</string>
     <string name="addFail">追加に失敗しました</string>
     <string name="cameraError">カメラエラーError</string>

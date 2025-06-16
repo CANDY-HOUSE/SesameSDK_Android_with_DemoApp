@@ -262,8 +262,8 @@
     <string name="DelFace">Delete the Face</string>
     <string name="DelPalm">Delete the Palm Veins</string>
 
-    <string name="sesamefaceMsg">Approach %1$s and tap ⊕. Show your Face then tap X.</string>
-    <string name="sesamepalmMsg">Approach %1$s and tap ⊕. Show Palm Veins then tap X.</string>
+    <string name="sesamefaceMsg">Approach %1$s and tap ⊕. Show your Face then tap X. Register after mounting for supreme recognition rates.</string>
+    <string name="sesamepalmMsg">Approach %1$s and tap ⊕. Show Palm Veins then tap X. Register after mounting for supreme recognition rates.</string>
 
     <string name="TouchProPWDRename">Rename the passcode🖊️</string>
     <string name="TouchProPWDModify">Modify the passcode value🖊️</string>

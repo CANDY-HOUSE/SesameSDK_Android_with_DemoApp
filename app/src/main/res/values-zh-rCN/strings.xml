@@ -22,8 +22,8 @@
 
     <string name="title_friends">通讯录</string>
     <string name="title_me">我</string>
-    <string name="sesamefaceMsg">靠近 %1$s 连蓝牙, 点击 ⊕ 输入人脸。输入后点击 X。</string>
-    <string name="sesamepalmMsg">靠近 %1$s 连蓝牙, 点击 ⊕ 输入掌静脉。输入后点击 X。</string>
+    <string name="sesamefaceMsg">靠近 %1$s 连蓝牙, 点击 ⊕ 输入人脸。输入后点击 X。安装好后再注册，识别率会极高。</string>
+    <string name="sesamepalmMsg">靠近 %1$s 连蓝牙, 点击 ⊕ 输入掌静脉。输入后点击 X。安装好后再注册，识别率会极高。</string>
     <string name="DelFace">删除人脸</string>
     <string name="facial">人脸</string>
     <string name="title_list">芝麻</string>
