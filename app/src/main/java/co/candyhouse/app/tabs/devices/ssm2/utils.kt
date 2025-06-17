@@ -361,8 +361,8 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_f826b5
         CHProductModel.SS5US -> R.raw.sesame5us_30_16_26c21d
         CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_0ea68f
-        CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_9c43e1
-        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_6f2470
+        CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_321ab0
+        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_321ab0
         CHProductModel.SSMFace -> R.raw.sesameface1_30_19_0ea68f
         CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_37454c
         else ->0
