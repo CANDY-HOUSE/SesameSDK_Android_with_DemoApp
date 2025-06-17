@@ -327,24 +327,32 @@ object CHAccountManager {
             try {
                 val res = jpAPIclient.postCredentialListToServer(credentialListRequest)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-   internal fun deleteCredentialInfo(request: AuthenticationDataWrapper, onResponse: CHResult<Any>) {
+    internal fun deleteCredentialInfo(request: AuthenticationDataWrapper, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             try {
                 val res = jpAPIclient.deleteCredentialInfo(request)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
 
         }
     }
 
+
+    internal fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            val postBatteryDataRes = jpAPIclient.postBatteryData(deviceID, payloadString)
+            L.d("harry", "[ss5][postBatteryData]: $postBatteryDataRes")
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postBatteryDataRes)))
+        }
+    }
 }
 
 fun isInternetAvailable(): Boolean {

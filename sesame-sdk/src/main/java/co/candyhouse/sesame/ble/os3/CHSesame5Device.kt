@@ -371,11 +371,22 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         }
     }
 
+    // 如果这台锁当前没有被 Hub3 连上云端， 则通过 APP 报告给云端。
+    private fun reportBatteryData(payloadString: String) {
+        L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
+        if (isInternetAvailable() && !isConnectedByWM2) {
+            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        }
+    }
+
     /** 指令接收 */
 
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
         super.onGattSesamePublish(receivePayload)
-//        L.d("switch", "[ss5] " + receivePayload.cmdItCode)
+        L.d("onGattSesamePublish", "[ss5] " + receivePayload.cmdItCode + ", data: " + receivePayload.payload.toHexString())
+        if (receivePayload.cmdItCode == SesameItemCode.SSM3_ITEM_CODE_BATTERY_VOLTAGE.value) {
+            reportBatteryData(receivePayload.payload.toHexString())
+        }
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
             mechStatus = CHSesame5MechStatus(receivePayload.payload)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
