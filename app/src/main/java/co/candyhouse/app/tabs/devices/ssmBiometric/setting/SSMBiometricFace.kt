@@ -416,7 +416,7 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
         val image = itemView.findViewById<ImageView>(R.id.image)
 
         // 设置数据
-        title.text = (data.id.hexStringToByteArray()[0].toUInt().toInt() + 1).toString().padStart(3, '0')
+        title.text = (data.id.hexStringToByteArray()[0].toUInt().toInt()).toString().padStart(3, '0')
         name.text = if (data.name == "") getString(R.string.default_face_name) else data.name
         image.setImageResource(R.drawable.camera_face)
 
