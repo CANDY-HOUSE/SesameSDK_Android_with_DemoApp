@@ -210,6 +210,8 @@ internal interface CHPrivateAPIClient {
     ): Any
 
     @Operation(path = "/device/v2/credential", method = "POST")
-    fun deleteCredentialInfo(deleteRequest: AuthenticationDataWrapper):Any
+    fun deleteCredentialInfo(deleteRequest: AuthenticationDataWrapper): Any
 
+    @Operation(path = "/device/v2/sesame5/{device_id}/battery", method = "POST")
+    fun postBatteryData(@Parameter(name = "device_id", location = "path") deviceID: String, body: String): Any
 }
