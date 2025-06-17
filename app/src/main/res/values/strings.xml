@@ -262,8 +262,8 @@
     <string name="DelFace">Delete the Face</string>
     <string name="DelPalm">Delete the Palm Veins</string>
 
-    <string name="sesamefaceMsg">Approach %1$s and tap ⊕. Show your Face then tap X.</string>
-    <string name="sesamepalmMsg">Approach %1$s and tap ⊕. Show Palm Veins then tap X.</string>
+    <string name="sesamefaceMsg">Approach %1$s and tap ⊕. Show your Face then tap X. Register after mounting for supreme recognition rates.</string>
+    <string name="sesamepalmMsg">Approach %1$s and tap ⊕. Show Palm Veins then tap X. Register after mounting for supreme recognition rates.</string>
 
     <string name="TouchProPWDRename">Rename the passcode🖊️</string>
     <string name="TouchProPWDModify">Modify the passcode value🖊️</string>
@@ -310,6 +310,6 @@
     <string name="distance">Distance</string>
     <string name="brightness">Brightness</string>
     <string name="radar">Radar Detection\nDistance</string>
-    <string name="radar_distance_description">This is the distance at which the radar wakes the system from sleep mode.\nIn high-traffic areas, shorter distance saves battery life.\nIn low-traffic areas, maximum distance ensures the best experience.</string>
+    <string name="radar_distance_description">・This is the Radar wake-up detection range.\n・Over 10 visits/day: shorten range to save power !\n・10 or fewer visits/day: extend to max range for the best experience.\n・Even at minimum range, touching the radar at the “forehead” still triggers radar and instantly starts face or palm-vein recognition, balancing power saving with a supreme user experience.</string>
 
 </resources>

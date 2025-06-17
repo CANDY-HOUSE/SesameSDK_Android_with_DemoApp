@@ -25,8 +25,8 @@
     <string name="DelFace">顔の削除</string>
     <string name="matterMsg">Matterペアリングモードに入りました。15分以内にペアリングを完了してください。失敗した場合は、このページに再度アクセスしてMatterペアリングモードを再起動してください</string>
     <string name="qrcodeNotSupport">このQRコードは対応していません</string>
-    <string name="sesamefaceMsg">%1$sに近づきBluetooth接続し、⊕ をタップして顔を登録。登録後 X をタップ。</string>
-    <string name="sesamepalmMsg">%1$sに近づきBluetooth接続し、⊕ をタップして手のひら静脈を登録。登録後 X をタップ。</string>
+    <string name="sesamefaceMsg">%1$sに近づきBluetooth接続し、⊕ をタップして顔を登録。登録後 X をタップ。取付けた状態で登録した方が認証率が遥かに高い。</string>
+    <string name="sesamepalmMsg">%1$sに近づきBluetooth接続し、⊕ をタップして手のひら静脈を登録。登録後 X をタップ。取付けた状態で登録した方が認証率が遥かに高い。</string>
     <string name="hub3_hint_ir">このHub3から5メートル以内の赤外線デバイスを追加してください：</string>
     <string name="addFail">追加に失敗しました</string>
     <string name="cameraError">カメラエラーError</string>
@@ -301,7 +301,7 @@
     <string name="distance">距離</string>
     <string name="brightness">明るさ</string>
     <string name="radar">レーダーの\n探知距離</string>
-    <string name="radar_distance_description">レーダーがシステムを睡眠状態から起こす距離です。\n人通りの多い場所では、 短めに設定することで電池消費を抑えられます。\n人通りの少ない場所では、最長に設定すると非常に快適にご利用いただけます。</string>
+    <string name="radar_distance_description">・レーダーがシステムを睡眠状態から起こす距離です。\n・人通りが一日10回を超える場合、節電のため、レーダーの探知距離を短めに設定して下さい！\n・人通りが一日10回以下の場合、最長距離に設定すると非常に快適にご利用頂けます。\n・最短距離に設定しても、「おでこ」に在るレーダーに触れるとレーダーが感知し、顔認証や手のひら静脈認証が即座に開始されるため、ある程度、極度な省電力と極上のユーザー体験の両立を実現できます。</string>
 
 </resources>
 

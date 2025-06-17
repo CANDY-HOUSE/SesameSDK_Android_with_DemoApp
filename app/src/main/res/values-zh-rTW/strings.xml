@@ -22,8 +22,8 @@
     <string name="matterMsg">已進入Matter配網模式，請於十五分鐘內完成配網，萬一失敗請重新進入此頁以重新進入Matter配網模式</string>
     <string name="qrcodeNotSupport">該二維碼不支持</string>
     <string name="DelFace">删除人臉</string>
-    <string name="sesamefaceMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入人臉。輸入後點擊 X。</string>
-    <string name="sesamepalmMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入掌靜脈。輸入後點擊 X。</string>
+    <string name="sesamefaceMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入人臉。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
+    <string name="sesamepalmMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入掌靜脈。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
     <string name="title_about">關於</string>
     <string name="title_friends">通訊錄</string>
     <string name="title_registered">已註冊</string>
@@ -322,6 +322,6 @@
     <string name="distance">距離</string>
     <string name="brightness">亮度</string>
     <string name="radar">雷達偵查距離</string>
-    <string name="radar_distance_description">這是雷達喚醒系統的距離設置。\n人流量大的地方, 設置較短距離以節省電池消耗。\n人流量少的地方, 設置最長距離以獲得最佳體驗。</string>
+    <string name="radar_distance_description">・這是雷達喚醒系統的偵測距離。\n・每日人流量超過10次之地方, 設置短距以省電！\n・每日人流量10次以下之地方, 設置最長距離以獲得最爽體驗。\n・即使為最短距離，觸碰「額頭」的雷達，雷達也能感應並立即啓動人臉或掌靜脈識別，兼顧極度省電與最爽體驗。</string>
 
 </resources>

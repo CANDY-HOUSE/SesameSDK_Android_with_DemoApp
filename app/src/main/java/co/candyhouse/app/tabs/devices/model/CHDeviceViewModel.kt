@@ -297,34 +297,21 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     private fun fetchIRDevices(device: CHHub3) {
-        //增加AWSMobileClient初始化的判断，成功后再发起获取红外线设备.避免AWSMobileClient has not been initialized yet.
-        if (AWSStatus.getAWSLoginStatus()) {
-            L.d("sf", "AWSMobileClient initialized.")
-
-            val uuid = device.deviceId.toString().uppercase(Locale.getDefault())
-            L.d("sf", "======= " + device.getNickname() + " " + uuid)
-
-            CHIRAPIManager.fetchIRDevices(uuid) { it ->
-                it.onSuccess { result ->
-                    L.d("sf", "data==== " + result.data.toString())
-
-                    val jsonString = JsonUtil.toJson(result.data)
-                    val tempList = jsonString.parseList<IrRemote>()
-
-                    viewModelScope.launch {
-                        L.d("sf", "保存红外遥控器列表数据……")
-                        iRRepository.setRemotes(uuid, tempList)
-
-                        //刷新对应Hub3 Item
-                        updateNeeRefresh(device)
-                    }
-                }
-                it.onFailure {
-                    L.d("sf", "result==== onFailure ${it.message}")
+        val uuid = device.deviceId.toString().uppercase(Locale.getDefault())
+        CHIRAPIManager.fetchIRDevices(uuid) { it ->
+            it.onSuccess { result ->
+                L.d("sf", "data==== " + result.data.toString())
+                val jsonString = JsonUtil.toJson(result.data)
+                val tempList = jsonString.parseList<IrRemote>()
+                viewModelScope.launch {
+                    L.d("sf", "保存红外遥控器列表数据……")
+                    iRRepository.setRemotes(uuid, tempList)
+                    updateNeeRefresh(device)
                 }
             }
-        } else {
-            L.d("sf", "AWSMobileClient has not been initialized yet.")
+            it.onFailure {
+                L.d("sf", "result==== onFailure ${it.message}")
+            }
         }
     }
 
