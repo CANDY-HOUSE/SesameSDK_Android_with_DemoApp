@@ -5,7 +5,6 @@ import co.candyhouse.sesame.server.dto.CHCardNameRequest
 
 interface CHCardDelegate {
     fun onCardReceive(device: CHSesameConnector, cardID: String, name: String, type: Byte) {}
-    fun onCardReceive(cardNameRequest: CHCardNameRequest) {}
     fun onCardChanged(device: CHSesameConnector, cardID: String, name: String, type: Byte) {}
     fun onCardReceiveEnd(device: CHSesameConnector) {}
     fun onCardReceiveStart(device: CHSesameConnector) {}

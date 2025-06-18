@@ -73,14 +73,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
 
     override fun getViewBinder() = FgSsmTpCardListBinding.inflate(layoutInflater)
 
-    private fun subscribeNameUpdateTopic() {
-        getBiometricBase()?.subscribeNameUpdateTopic(cardDelegate)
-    }
-
-    private fun unsubscribeNameUpdateTopic() {
-        getBiometricBase()?.unsubscribeNameUpdateTopic()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -89,11 +81,9 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         setupCardDelegate()
         setupRecyclerView()
         loadInitialData()
-        subscribeNameUpdateTopic()
     }
 
     override fun onDestroyView() {
-        unsubscribeNameUpdateTopic()
         cleanupResources()
         super.onDestroyView()
     }
@@ -262,12 +252,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
                 runOnUiThread {
                     mCardList.clear()
                     bind.swiperefresh.isRefreshing = true
-                }
-            }
-
-            override fun onCardReceive(cardNameRequest: CHCardNameRequest) {
-                runOnUiThread {
-                    updateCardList(SuiCard(cardNameRequest.cardID, cardNameRequest.name, cardNameRequest.cardType, cardNameRequest.cardNameUUID))
                 }
             }
 

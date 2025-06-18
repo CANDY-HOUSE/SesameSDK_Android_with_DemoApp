@@ -296,19 +296,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
     }
 
-    override fun subscribeNameUpdateTopic(cardDelegate: CHCardDelegate) {
-        CHIotManager.subscribeNameUpdateTopic(this) {
-            it.onSuccess { resource ->
-                val cardNameRequest: CHCardNameRequest = resource.data
-                cardDelegate.onCardReceive(cardNameRequest)
-            }
-        }
-    }
-
-    override fun unsubscribeNameUpdateTopic() {
-        CHIotManager.unsubscribeNameUpdateTopic(this)
-    }
-
     /**
      * 处理OpenSensor的IoT连接
      */
