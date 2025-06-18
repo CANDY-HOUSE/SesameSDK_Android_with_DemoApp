@@ -207,29 +207,6 @@ internal object CHIotManager {
 
     }
 
-    fun subscribeNameUpdateTopic(ssm2: CHDevices, onResponse: CHResult<CHCardNameRequest>) {
-        L.d(tag, "🐖 請求訂閱 subscribeNameUpdateTopic iotStatus:" + iotStatus + " " + ssm2.deviceId.toString().uppercase())
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
-            return
-        }
-        val nameUpdateTopic = "${ssm2.deviceId.toString().uppercase()}/name/update"
-        mqttManager.subscribeToTopic(nameUpdateTopic, AWSIotMqttQos.QOS0) { _, data ->
-            L.d(tag, "String(data!!): " + String(data!!))
-            val cardNameRequest = Gson().fromJson(String(data), CHCardNameRequest::class.java)
-            L.d(tag, "cardNameRequest: $cardNameRequest")
-            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(cardNameRequest)))
-        }
-    }
-
-    fun unsubscribeNameUpdateTopic(ssm2: CHDevices,) {
-        try {
-            val nameUpdateTopic = "${ssm2.deviceId.toString().uppercase()}/name/update"
-            mqttManager.unsubscribeTopic(nameUpdateTopic)
-        } catch (e: Exception) {
-            L.d("sf", "unsubscribeNameUpdateTopic:Exception=" + e.message)
-        }
-    }
-
     private fun doSubscribeSSM(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
 //        val ss2Topic = "\$aws/things/sesame2/shadow/name/${ssm2.deviceId.toString().uppercase()}/update/accepted"
         val ss2Topic = "\$aws/things/sesame2/shadow/name/${ssm2.deviceId.toString().uppercase()}/update/documents"

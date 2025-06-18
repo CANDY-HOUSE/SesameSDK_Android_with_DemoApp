@@ -17,8 +17,6 @@ interface CHSesameBiometricBase : CHSesameConnector, CHRemoteNanoCapable, CHCapa
     // 设备管理能力
     fun login(token: String?)
     fun goIOT()
-    fun subscribeNameUpdateTopic(cardDelegate: CHCardDelegate)
-    fun unsubscribeNameUpdateTopic()
 
     // 事件处理相关
     fun addEventHandler(handler: CHEventHandler)
