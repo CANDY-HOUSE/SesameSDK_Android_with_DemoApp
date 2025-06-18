@@ -78,7 +78,7 @@ class SesameForegroundService : Service() {
         L.d("sf", "SesameForegroundService-onCreate...")
 
         // 先创建通知并启动前台服务
-        // 当API版本大于29时，统一使用FOREGROUND_SERVICE_TYPE_DATA_SYNC 发送前台通知。
+        // 当API版本大于29时，统一使用FOREGROUND_SERVICE_TYPE_LOCATION 发送前台通知。
         createNotificationChannel()
         val notification = createNotification()
 
@@ -89,7 +89,7 @@ class SesameForegroundService : Service() {
                 startForeground(
                     NOTIFICATION_ID,
                     notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                 )
             } catch (e: Exception) {
                 L.d("sf", "SesameForegroundService-onCreate:Exception=" + e.message)
