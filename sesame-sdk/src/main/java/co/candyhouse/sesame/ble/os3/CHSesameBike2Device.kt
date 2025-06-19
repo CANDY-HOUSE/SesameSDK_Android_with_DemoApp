@@ -100,9 +100,21 @@ import java.util.*
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
     }
 
+    // 如果这台设备当前没有被 Hub3 连上云端， 则通过 APP 报告给云端。
+    private fun reportBatteryData(payloadString: String) {
+        L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
+        if (isInternetAvailable() && !isConnectedByWM2) {
+            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        }
+    }
+
     /** 指令接收 */
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
+        L.d("harry", "CHSesameBike2Device onGattSesamePublish: ${receivePayload.cmdItCode} payload: ${receivePayload.payload.toHexString()}")
         super.onGattSesamePublish(receivePayload)
+        if (receivePayload.cmdItCode == SesameItemCode.SSM3_ITEM_CODE_BATTERY_VOLTAGE.value) {
+            reportBatteryData(receivePayload.payload.toHexString())
+        }
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
             mechStatus = CHSesameBike2MechStatus(receivePayload.payload)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
