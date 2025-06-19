@@ -165,7 +165,7 @@ class SesameForegroundService : Service() {
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("CANDY HOUSE")
-            .setContentText("Widget Running - Keep Active!")
+            .setContentText("Monitoring location in foreground for automatic door unlocking as you approach home.")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
