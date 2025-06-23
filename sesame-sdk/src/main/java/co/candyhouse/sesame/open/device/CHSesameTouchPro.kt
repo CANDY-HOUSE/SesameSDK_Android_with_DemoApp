@@ -1,10 +1,5 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.server.dto.CHCardNameRequest
-import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.bytesToShort
 import com.google.gson.Gson
 
@@ -18,16 +13,23 @@ class CHSesameTouchProMechStatus(override val data: ByteArray) : CHSesameProtoco
 /** Open sensor */
 class CHSesameOpenSensorMechStatus(openSensorData: OpenSensorData) : CHSesameProtocolMechStatus {
     override val data: ByteArray = openSensorData.toByteArray()
-    private val battery: Int = openSensorData.Battery
+    private val battery: Short? = openSensorData.Battery
+    private val lightLoadBatteryVoltage: Short? = openSensorData.lightLoadBatteryVoltage_mV
+    private val heavyLoadBatteryVoltage: Short? = openSensorData.heavyLoadBatteryVoltage_mV
 
     override fun getBatteryVoltage(): Float {
-        return battery * 2f / 1000f
+        battery?.let {
+            return it * 2f / 1000f
+        }
+        lightLoadBatteryVoltage?.let {
+            return (it + heavyLoadBatteryVoltage!!) / 1000f
+        }
+        return 0f
     }
 
     // OpenSensor 用的电池是 CR1632, 与 Touch Pro 用的电池 CR123A 不同。
     override fun getBatteryPrecentage(): Int {
         val voltage = getBatteryVoltage()
-        L.d("voltage", voltage.toString())
         /*
         *    修正电池电量显示不准的问题。
         *    在刷卡机的曲线上， 实测低于8%的电量开始， 会出现偶尔丢失蓝牙信号的问题。
@@ -60,7 +62,9 @@ class CHSesameOpenSensorMechStatus(openSensorData: OpenSensorData) : CHSesamePro
 data class OpenSensorData(
     val Status: String,
     val TimeStamp: Long,
-    val Battery: Int
+    val Battery: Short?,
+    val lightLoadBatteryVoltage_mV: Short?,
+    val heavyLoadBatteryVoltage_mV: Short?,
 ) {
     fun toByteArray(): ByteArray {
         val gson = Gson()

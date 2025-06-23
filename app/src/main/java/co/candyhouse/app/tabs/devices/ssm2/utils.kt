@@ -98,10 +98,9 @@ fun parseOpensensorState(mechStatus: CHSesameOpenSensorMechStatus?): SpannableSt
     mechStatus?.data?.let { data ->
         try {
             val state = OpenSensorData.fromByteArray(data)
-            val status = state.Status
-            val statusLen = if (null == status || status.isEmpty()) 0 else status.length
-            val timeStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                .format(Date(state.TimeStamp))
+            val status = state.Status ?: return null
+            val statusLen = if (status.isEmpty()) 0 else status.length
+            val timeStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(state.TimeStamp))
             val (dateString, timeString) = timeStr.split(" ")
             return SpannableStringBuilder().apply {
                 append("$status\n$dateString\n$timeString")
