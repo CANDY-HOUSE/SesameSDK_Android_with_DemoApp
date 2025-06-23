@@ -128,6 +128,3 @@ bleScanner はデバイスをスキャンして chDeviceMap に格納します�
 - [Android Ble](https://developer.android.com/guide/topics/connectivity/bluetooth-le?hl=zh-cn)
 - [Android Nfc](https://developer.android.com/guide/topics/connectivity/nfc?hl=zh-cn)
 - [Android jetpack](https://developer.android.com/jetpack?hl=zh-cn)
-
-### [SDK利用規約](https://jp.candyhouse.co/pages/sesamesdk%E5%88%A9%E7%94%A8%E8%A6%8F%E7%B4%84)
-

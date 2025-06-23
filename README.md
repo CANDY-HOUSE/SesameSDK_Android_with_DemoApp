@@ -17,9 +17,6 @@
 - デバイスの各種設定
 - バッテリー残量の取得
 
-## Disclaimer
-
-Please read our [DISCLAIMER](DISCLAIMER.md) before using this software.
 
 ##  Requirements
 <img src="https://img.shields.io/badge/Kotlin-1.4-7F52FF" />.  
