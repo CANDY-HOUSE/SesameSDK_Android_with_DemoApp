@@ -3,6 +3,7 @@ package candyhouse.sesameos.ir.viewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import candyhouse.sesameos.ir.base.BaseIr
 import candyhouse.sesameos.ir.base.CHHub3IRCode
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
@@ -208,7 +209,13 @@ class IRDeviceViewModel : ViewModel() {
         this.chHub3= chHub3
     }
 
-    fun getCHHub3() = chHub3
+    // 避免lateinit property chHub3 has not been initialized
+    fun getCHHub3(): CHHub3 {
+        if (!::chHub3.isInitialized) {
+            chHub3 = BaseIr.hub3Device.value!!
+        }
+        return chHub3
+    }
 
     fun setRemoteDevice(irRemote: IrRemote) {
         irRemoteDeviceLiveData.value = irRemote

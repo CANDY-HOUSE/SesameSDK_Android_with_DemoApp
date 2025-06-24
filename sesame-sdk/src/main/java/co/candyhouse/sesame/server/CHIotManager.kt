@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -82,6 +83,8 @@ internal object CHIotManager {
         try {
             // 使用协程包装异步回调
             suspendCancellableCoroutine { continuation ->
+                val resumed = AtomicBoolean(false)
+
                 mqttManager.connect(createCredentialsProvider()) { status, error ->
                     iotStatus = status
                     L.d(tag, "🥝 IoT连接状态: $status")
@@ -92,7 +95,7 @@ internal object CHIotManager {
                             CoroutineScope(Dispatchers.IO).launch {
                                 updateDevicesOnConnect()
                             }
-                            if (continuation.isActive) continuation.resume(Unit)
+                            if (resumed.compareAndSet(false, true) && continuation.isActive) continuation.resume(Unit)
                         }
 
                         AWSIotMqttClientStatus.Reconnecting -> {
@@ -109,11 +112,11 @@ internal object CHIotManager {
                                 delay(3000)
                                 connectIoT() // 重新连接
                             }
-                            if (continuation.isActive) continuation.resume(Unit)
+                            if (resumed.compareAndSet(false, true) && continuation.isActive) continuation.resume(Unit)
                         }
 
                         else -> {
-                            if (continuation.isActive) {
+                            if (resumed.compareAndSet(false, true) && continuation.isActive) {
                                 if (error != null) continuation.resumeWithException(error)
                                 else continuation.resume(Unit)
                             }

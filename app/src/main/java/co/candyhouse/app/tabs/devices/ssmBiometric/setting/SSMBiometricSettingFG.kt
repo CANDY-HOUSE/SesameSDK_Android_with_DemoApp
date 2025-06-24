@@ -44,7 +44,22 @@ import com.warkiz.widget.SeekParams
 import kotlinx.coroutines.launch
 
 class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding>() {
+    private val tag = "SSMBiometricSettingFG"
+
     var mDeviceList = ArrayList<LockDeviceStatus>()
+
+    // 定义雷达灵敏度距离和固件值的查找表
+    private val DISTANCE_TO_FIRMWARE_TABLE = listOf(
+        30 to 116,
+        60 to 44,
+        80 to 31,
+        100 to 23,
+        120 to 21,
+        150 to 20,
+        200 to 17,
+        270 to 16
+    )
+
     override fun getViewBinder() = FgSesameTouchproSettingBinding.inflate(layoutInflater)
 
     private fun add_ssmTextColor() {
@@ -155,16 +170,15 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setRadarUI(device: CHSesameConnector, payload: ByteArray) {
-        L.d("sf", "setRadarUI..." + payload[0] + " " + payload[1])
+        L.d(tag, "setRadarUI..." + payload[0] + " " + payload[1])
 
         val sensitivityValue = payload[1].toInt() and 0xFF
-        val percentage = calculateRadarPercentage(sensitivityValue)
-        val distance = calculateDistance(percentage)
+        val distance = calculateDistanceFromFirmwareValue(sensitivityValue)
 
-        L.d("sf", "设备返回的雷达灵敏度：$percentage%, 距离：${distance}cm")
+        L.d(tag, "设备返回的雷达灵敏度值：$sensitivityValue, 对应标准距离：${distance}cm")
 
-        bind.radarSeekbar.setMin(40f)
-        bind.radarSeekbar.setMax(400f)
+        bind.radarSeekbar.setMin(30f)
+        bind.radarSeekbar.setMax(270f)
         bind.radarSeekbar.setProgress(distance.toFloat())
         bind.radarSeekbar.setIndicatorTextFormat(getString(R.string.distance) + " \${PROGRESS}cm")
 
@@ -175,13 +189,9 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
 
             override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
                 val distance1 = seekBar.progress
-                val percentage1 = (distance1 - 40) * 100 / 360
-                val sensitivityValue2 = calculateSensitivityValue(percentage1)
+                val sensitivityValue2 = calculateFirmwareValueFromDistance(distance1)
 
-                L.d(
-                    "sf",
-                    "设置雷达灵敏度距离: ${distance1}cm, 百分比: $percentage1%, 值: $sensitivityValue2"
-                )
+                L.d(tag, "设置雷达灵敏度距离: ${distance1}cm, 固件值: $sensitivityValue2")
 
                 setRadarSensitivity(device, sensitivityValue2)
             }
@@ -192,18 +202,43 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         }
     }
 
-    private fun calculateRadarPercentage(sensitivityValue: Int): Int {
-        return ((116 - sensitivityValue) * 100) / (116 - 16)
+    // 根据固件值计算距离（使用线性插值）
+    private fun calculateDistanceFromFirmwareValue(firmwareValue: Int): Int {
+        if (firmwareValue >= 116) return 30
+        if (firmwareValue <= 16) return 270
+
+        // 找到相邻的两个点进行插值
+        for (i in 0 until DISTANCE_TO_FIRMWARE_TABLE.size - 1) {
+            val (dist1, fw1) = DISTANCE_TO_FIRMWARE_TABLE[i]
+            val (dist2, fw2) = DISTANCE_TO_FIRMWARE_TABLE[i + 1]
+
+            if (firmwareValue in fw2..fw1) {
+                val ratio = (firmwareValue - fw2).toFloat() / (fw1 - fw2)
+                return (dist2 + ratio * (dist1 - dist2)).toInt()
+            }
+        }
+
+        return 30
     }
 
-    private fun calculateSensitivityValue(percentage: Int): Byte {
-        val value = 116 - (percentage * (116 - 16)) / 100
-        return value.toByte()
-    }
+    // 根据距离计算固件值（使用线性插值）
+    private fun calculateFirmwareValueFromDistance(distance: Int): Byte {
+        if (distance <= 30) return 116
+        if (distance >= 270) return 16
 
-    private fun calculateDistance(percentage: Int): Int {
-        // 0% -> 40cm, 100% -> 400cm
-        return 40 + (percentage * 360) / 100
+        // 找到相邻的两个点进行插值
+        for (i in 0 until DISTANCE_TO_FIRMWARE_TABLE.size - 1) {
+            val (dist1, fw1) = DISTANCE_TO_FIRMWARE_TABLE[i]
+            val (dist2, fw2) = DISTANCE_TO_FIRMWARE_TABLE[i + 1]
+
+            if (distance in dist1..dist2) {
+                val ratio = (distance - dist1).toFloat() / (dist2 - dist1)
+                val firmwareValue = fw1 + ratio * (fw2 - fw1)
+                return firmwareValue.toInt().toByte()
+            }
+        }
+
+        return 116
     }
 
     private fun setRadarSensitivity(device: CHSesameConnector, sensitivityValue: Byte) {
@@ -211,11 +246,11 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
 
         device.setRadarSensitivity(payload) { res ->
             res.onSuccess {
-                L.d("sf", "雷达灵敏度设置成功")
+                L.d(tag, "雷达灵敏度设置成功")
             }
 
             res.onFailure { error ->
-                L.e("sf", "雷达灵敏度设置失败: $error")
+                L.e(tag, "雷达灵敏度设置失败: $error")
             }
         }
     }
