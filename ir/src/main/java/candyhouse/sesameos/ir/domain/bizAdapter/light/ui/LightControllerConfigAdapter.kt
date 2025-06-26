@@ -9,6 +9,7 @@ import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallb
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
 import candyhouse.sesameos.ir.ext.Ext
 import candyhouse.sesameos.ir.ext.UIResourceExtension
+import candyhouse.sesameos.ir.models.ControlConfig
 import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.models.ItemType
 import candyhouse.sesameos.ir.models.UIControlConfig
@@ -223,14 +224,14 @@ class LightControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val item = IrControlItem(
             id = controlConfig.id,
             type = type,
-            title = UIResourceExtension.getString(context, controlConfig.titles[0]),
+            title = UIResourceExtension.getStringByIndex(context, controlConfig, 0),
             value = "",
             isSelected = when (type) {
                 ItemType.POWER_STATUS_ON -> isPowerOn
                 ItemType.POWER_STATUS_OFF -> !isPowerOn
                 else -> false
             },
-            iconRes = UIResourceExtension.getIconResourceId(context, controlConfig.icons[0]),
+            iconRes = UIResourceExtension.getResource(context, controlConfig),
             optionCode = controlConfig.operateCode
         )
         updateCallback?.onItemUpdate(item)
@@ -242,17 +243,14 @@ class LightControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             IrControlItem(
                 id = controlConfig.id,
                 type = type,
-                title = UIResourceExtension.getString(context, controlConfig.titles[0]),
+                title = UIResourceExtension.getStringByIndex(context, controlConfig, 0),
                 value = "",
                 isSelected = when (type) {
                     ItemType.POWER_STATUS_ON -> isPowerOn
                     ItemType.POWER_STATUS_OFF -> !isPowerOn
                     else -> false
                 },
-                iconRes = UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[0]
-                ),
+                iconRes = UIResourceExtension.getResource(context, controlConfig),
                 optionCode = controlConfig.operateCode
             )
         }

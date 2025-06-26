@@ -200,13 +200,10 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             IrControlItem(
                 id = controlConfig.id,
                 type = type,
-                title = UIResourceExtension.getString(context, controlConfig.titles[0]),
+                title = UIResourceExtension.getStringByIndex(context, controlConfig, 0),
                 value = "",
                 isSelected = true,
-                iconRes = UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[0]
-                ),
+                iconRes = UIResourceExtension.getResource(context, controlConfig),
                 optionCode = controlConfig.operateCode
             )
         }

@@ -2,6 +2,7 @@ package candyhouse.sesameos.ir.ext
 
 import android.content.Context
 import candyhouse.sesameos.ir.R
+import candyhouse.sesameos.ir.models.ControlConfig
 import co.candyhouse.sesame.utils.L
 
 object UIResourceExtension {
@@ -31,7 +32,7 @@ object UIResourceExtension {
         } else resourceName
     }
 
-    fun getIconResourceId(context: Context, iconName: String): Int {
+   private fun getIconResourceId(context: Context, iconName: String): Int {
         return context.resources.getIdentifier(
             iconName,
             "drawable",
@@ -39,7 +40,28 @@ object UIResourceExtension {
         )
     }
 
+    fun getResource(context: Context, controlConfig: ControlConfig): Int {
+        return if (controlConfig.icons.isNotEmpty()) {
+            getIconResourceId(
+                context,
+                controlConfig.icons[0]
+            )
+        } else {
+            0
+        }
+    }
 
+    fun getResourceByIndex(context: Context, controlConfig: ControlConfig, index: Int): Int {
+        val iconIndex = if (index >= 0 && index < controlConfig.icons.size) index else 0
+        return if (controlConfig.icons.isNotEmpty()) {
+            getIconResourceId(
+                context,
+                controlConfig.icons[iconIndex]
+            )
+        } else {
+            0
+        }
+    }
 
     private val stringMap = mapOf(
         // Power Control
@@ -104,6 +126,18 @@ object UIResourceExtension {
         } catch (e: Exception) {
             L.e("StringResourceMapper", "Error getting string for key: $key", e)
             key
+        }
+    }
+
+    fun getStringByIndex(context: Context, controlConfig: ControlConfig, index: Int): String {
+        val stringIndex = if (index >= 0 && index < controlConfig.icons.size) index else 0
+        return if (controlConfig.titles.isNotEmpty()) {
+            getString(
+                context,
+                controlConfig.titles[stringIndex]
+            )
+        } else {
+            ""
         }
     }
 }

@@ -9,13 +9,9 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.sesame.ble.UUID4HistoryTag
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.device.CHSesame5History
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.toHexString
@@ -23,15 +19,8 @@ import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
-import kotlin.text.toByteArray
 
 class SesameFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -92,20 +81,15 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
                                 historyTagData == null -> {
                                     sendNotification(title = "$deviceName $event", isme = false)
                                 }
-
                                 else -> {
-                                    val jsonHistoryTag =
-                                        JSONObject(historyTagData).getJSONArray("data")
-                                            .toByteArray()
-                                    val deviceHistoryTag = device.getHistoryTag()
-                                    if (deviceHistoryTag != null) {
-                                        val isMe = checkMe(triggerUserSub)
-                                        L.d(tag = "hcia", msg = "isMe:$isMe")
-                                        sendNotification(
-                                            title = "$deviceName $event," + String(jsonHistoryTag),
-                                            isme = isMe
-                                        )
-                                    }
+                                    val jsonHistoryTag = JSONObject(historyTagData).getJSONArray("data").toByteArray()
+                                    val devicesHistoryTag = device.getHistoryTag()
+                                    val isMe = checkMe(triggerUserSub,jsonHistoryTag,devicesHistoryTag)
+                                    L.d(tag = "hcia", msg = "isMe:$isMe")
+                                    sendNotification(
+                                        title = "$deviceName $event," + String(jsonHistoryTag),
+                                        isme = isMe
+                                    )
                                 }
                             }
                         }
@@ -117,28 +101,49 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
             }
         } catch (e: Exception) {
             L.d("hcia", "e:$e")
-            sendNotification("error!: $data", false)
         }
     }
 
-    private fun checkMe(triggerUserSub: String?): Boolean {
-        if (triggerUserSub != null) {
-            try {
-                val jsonObject = JSONObject(triggerUserSub)
-                val dataArray = jsonObject.getJSONArray("data")
-                val byteArray = ByteArray(dataArray.length())
-                for (i in 0 until dataArray.length()) {
-                    byteArray[i] = dataArray.getInt(i).toByte()
-                }
-                if (byteArray.size == 16) {
-                    val triggerUserSubHex = byteArray.toHexString()
-                    val userId = UserUtils.getUserId()?.replace("-", "")
-                    if (triggerUserSubHex == userId) {
-                        return true
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+    private fun checkMe(triggerUserSub: String?,jsonHistoryTag: ByteArray,devicesHistoryTag: ByteArray?): Boolean {
+        return try {
+            val triggerData = parseTriggerUserData(triggerUserSub)
+            when {
+                triggerData.isEmpty() -> checkIfSameHistoryTag(jsonHistoryTag, devicesHistoryTag)
+                triggerData.size == 16 -> checkIfSameTriggerUser(triggerData)
+                else -> false
+            }
+        } catch (e: Exception) {
+            L.e("checkMe", "Error parsing triggerUserSub", e)
+            false
+        }
+    }
+
+    private fun parseTriggerUserData(triggerUserSub: String?): ByteArray {
+        if (triggerUserSub == null || triggerUserSub.isEmpty()) {
+            return ByteArray(0)
+        }
+        val jsonObject = JSONObject(triggerUserSub)
+        val dataArray = jsonObject.getJSONArray("data")
+
+        return ByteArray(dataArray.length()) { i ->
+            dataArray.getInt(i).toByte()
+        }
+    }
+
+    private fun checkIfSameTriggerUser(triggerData: ByteArray): Boolean {
+        val triggerUserSubHex = triggerData.toHexString()
+        val userId = UserUtils.getUserId()?.replace("-", "") ?: return false
+        return triggerUserSubHex.equals(userId, ignoreCase = true)
+    }
+
+    private fun checkIfSameHistoryTag(
+        jsonHistoryTag: ByteArray,
+        devicesHistoryTag: ByteArray?
+    ): Boolean {
+        // 如果触发数据为空，检查历史标签是否匹配
+        devicesHistoryTag?.let {
+            if (jsonHistoryTag.isNotEmpty() && String(it).equals(String(jsonHistoryTag))){
+                return true
             }
         }
         return false

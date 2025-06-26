@@ -5,7 +5,7 @@
       "type": "POWER_STATUS_ON",
       "titleIndex": 0,
       "titles": ["ir_remote_power"],
-      "icons": ["icon_tv_power_on"],
+      "icons": [],
       "defaultValue": "",
       "operateCode": "49153"
     },

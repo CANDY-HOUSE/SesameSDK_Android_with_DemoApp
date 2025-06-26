@@ -64,7 +64,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     }
 
     override fun matchRemoteDevice(irRemote: IrRemote) {
-        L.Companion.d(tag, "matchRemoteDevice: irRemote $irRemote")
+        L.d(tag, "matchRemoteDevice: irRemote $irRemote")
 
         // 如果不是空调设备或已有code，直接返回
         if (irRemote.type != IRDeviceType.DEVICE_REMOTE_AIR || irRemote.code > 0) {
@@ -81,7 +81,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
         // 如果model匹配失败，尝试通过state匹配
         if (!matchByState(irRemote, irTypeList)) {
-            L.Companion.e(tag, "matchRemoteDevi  ce: failed to match remote device")
+            L.e(tag, "matchRemoteDevi  ce: failed to match remote device")
         }
 
     }
@@ -245,7 +245,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val air = AirProcessor()
         val parseSuccess = air.parseAirData(currentState)
         if (!parseSuccess) {
-            L.Companion.e(tag, "updateUIConfig: failed to parse state")
+            L.e(tag, "updateUIConfig: failed to parse state")
             return
         }
         isPowerOn = getPower(air)
@@ -254,10 +254,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         currentFanSpeedIndex = getFanSpeedIndex(air)
         currentVerticalSwingIndex = getVerticalSwingIndex(air)
         currentSwingSwitchIndex = getHorizontalSwingIndex(air)
-        L.Companion.d(tag,"updateUIConfig: isPowerOn $isPowerOn, currentTemperature $currentTemperature, currentModeIndex $currentModeIndex, currentFanSpeedIndex $currentFanSpeedIndex, currentVerticalSwingIndex $currentVerticalSwingIndex, currentSwingSwitchIndex $currentSwingSwitchIndex")
+        L.d(tag,"updateUIConfig: isPowerOn $isPowerOn, currentTemperature $currentTemperature, currentModeIndex $currentModeIndex, currentFanSpeedIndex $currentFanSpeedIndex, currentVerticalSwingIndex $currentVerticalSwingIndex, currentSwingSwitchIndex $currentSwingSwitchIndex")
         config?.let {
             val items = createControlItems(it)
-            L.Companion.d(tag, "updateUIConfig: items.size ${items.size}")
+            L.d(tag, "updateUIConfig: items.size ${items.size}")
             items.forEach { item->
                 updateCallback?.onItemUpdate(item)
             }
@@ -305,7 +305,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     private fun getHorizontalSwingIndex(air: AirProcessor): Int {
         return when (air.mAutomaticWindDirection) {
             0x01 -> 0
-            0x02 -> 1
+            0x00 -> 1
             else -> 0
         }
     }
@@ -314,7 +314,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val matchedType = irTypeList.find { it.model == irRemote.model }
         if (matchedType != null) {
             irRemote.code = matchedType.code
-            L.Companion.d(tag, "matchByModel: matched code ${irRemote.code}")
+            L.d(tag, "matchByModel: matched code ${irRemote.code}")
             return true
         }
         return false
@@ -324,27 +324,27 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         // 检查 state 是否为空
         val state = irRemote.state
         if (state == null) {
-            L.Companion.d(tag, "matchByState: state is null")
+            L.d(tag, "matchByState: state is null")
             return false
         }
 
         // 转换十进制
         val code = convertToDecimal(state)
         if (code == null) {
-            L.Companion.d(tag, "matchByState: failed to convert state to code")
+            L.d(tag, "matchByState: failed to convert state to code")
             return false
         }
 
         // 查找匹配的类型
         val matchedType = irTypeList.find { it.code == code }
         if (matchedType == null) {
-            L.Companion.d(tag, "matchByState: no matching type found for code $code")
+            L.d(tag, "matchByState: no matching type found for code $code")
             return false
         }
         // 更新信息
         irRemote.code = code
         irRemote.model = matchedType.model
-        L.Companion.d(tag, "matchByState: matched code $code, model ${matchedType.model}")
+        L.d(tag, "matchByState: matched code $code, model ${matchedType.model}")
         return true
     }
 
@@ -353,7 +353,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return try {
             // 检查字符串长度
             if (value.length < 8) {
-                L.Companion.d(tag, "convertToDecimal length < 8")
+                L.d(tag, "convertToDecimal length < 8")
                 return null
             }
 
@@ -363,14 +363,14 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
             // 验证是否为有效的16进制数
             if (!isValidHex(byte2) || !isValidHex(byte3)) {
-                L.Companion.d(tag, "convertToDecimal contains invalid hex")
+                L.d(tag, "convertToDecimal contains invalid hex")
                 return null
             }
 
             // 合并并转换
             (byte2 + byte3).toInt(16)
         } catch (e: Exception) {
-            L.Companion.d(tag, "convertToDecimal convert failed:${value} ${e.message}")
+            L.d(tag, "convertToDecimal convert failed:${value} ${e.message}")
             null
         }
     }
@@ -402,7 +402,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             ItemType.SWING_VERTICAL -> cycleVerticalSwing(item, device)
             ItemType.SWING_HORIZONTAL -> cycleSwingSwitch(item, device)
             else -> {
-                L.Companion.e(tag, "Unknown item type")
+                L.e(tag, "Unknown item type")
             }
         }
         return true
@@ -447,24 +447,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = controlConfig.id,
             type = ItemType.POWER_STATUS_ON,
-            title = if (controlConfig.titles.isNotEmpty()) {
-                UIResourceExtension.getString(
-                    context,
-                    controlConfig.titles[resId]
-                )
-            } else {
-                ""
-            },
+            title = UIResourceExtension.getStringByIndex(context,controlConfig,resId),
             value = controlConfig.defaultValue,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
-            iconRes = if (controlConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[resId]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
             optionCode = controlConfig.operateCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -483,14 +469,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = item.title,
             value = item.value,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
-            iconRes = if (controlConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[resId]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
             optionCode = controlConfig.operateCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -505,24 +484,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = controlConfig.id,
             type = ItemType.POWER_STATUS_OFF,
-            title = if (controlConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getString(
-                    context,
-                    controlConfig.titles[resId]
-                )
-            } else {
-                ""
-            },
+            title = UIResourceExtension.getStringByIndex(context,controlConfig,resId),
             value = controlConfig.defaultValue,
             isSelected = isItemSelected(ItemType.POWER_STATUS_OFF),
-            iconRes = if (controlConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[resId]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
             optionCode = controlConfig.operateCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -540,14 +505,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = item.title,
             value = item.value,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
-            iconRes = if (controlConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[resId]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
             optionCode = controlConfig.operateCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -626,27 +584,13 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = if (controlConfig.titles.isNotEmpty()) {
-                UIResourceExtension.getString(
-                    context,
-                    controlConfig.titles[currentModeIndex]
-                )
-            } else {
-                ""
-            },
+            title = UIResourceExtension.getStringByIndex(context,controlConfig,currentModeIndex),
             value = item.value,
             isSelected = false,
-            iconRes = if (controlConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    controlConfig.icons[currentModeIndex]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentModeIndex),
             optionCode = controlConfig.operateCode
         )
-        L.Companion.d(tag, "cycleMode: newItem is ${newItem.toString()}")
+        L.d(tag, "cycleMode: newItem is ${newItem.toString()}")
         updateCallback?.onItemUpdate(newItem)
     }
 
@@ -660,24 +604,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = if (itemConfig.titles.isNotEmpty()) {
-                UIResourceExtension.getString(
-                    context,
-                    itemConfig.titles[currentFanSpeedIndex]
-                )
-            } else {
-                ""
-            },
+            title = UIResourceExtension.getStringByIndex(context,itemConfig,currentFanSpeedIndex),
             value = item.value,
             isSelected = false,
-            iconRes = if (itemConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    itemConfig.icons[currentFanSpeedIndex]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentFanSpeedIndex),
             optionCode = item.optionCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -693,24 +623,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = if (itemConfig.titles.isNotEmpty()) {
-                UIResourceExtension.getString(
-                    context,
-                    itemConfig.titles[currentVerticalSwingIndex]
-                )
-            } else {
-                ""
-            },
+            title = UIResourceExtension.getStringByIndex(context,itemConfig,currentVerticalSwingIndex),
             value = item.value,
             isSelected = false,
-            iconRes = if (itemConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    itemConfig.icons[currentVerticalSwingIndex]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentVerticalSwingIndex),
             optionCode = item.optionCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -725,24 +641,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = if (itemConfig.titles.isNotEmpty()) {
-                UIResourceExtension.getString(
-                    context,
-                    itemConfig.titles[currentSwingSwitchIndex]
-                )
-            } else {
-                ""
-            },
+            title = UIResourceExtension.getStringByIndex(context,itemConfig,currentSwingSwitchIndex),
             value = item.value,
             isSelected = false,
-            iconRes = if (itemConfig.icons.isNotEmpty()) {
-                UIResourceExtension.getIconResourceId(
-                    context,
-                    itemConfig.icons[currentSwingSwitchIndex]
-                )
-            } else {
-                0
-            },
+            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentSwingSwitchIndex),
             optionCode = item.optionCode
         )
         updateCallback?.onItemUpdate(newItem)
@@ -768,55 +670,14 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                         optionCode = controlConfig.operateCode
                     )
                 }
-
-                ItemType.POWER_STATUS_ON, ItemType.POWER_STATUS_OFF -> {
-                    IrControlItem(
-                        id = controlConfig.id,
-                        type = type,
-                        title = if (controlConfig.titles.isNotEmpty()) {
-                            UIResourceExtension.getString(
-                                context,
-                                controlConfig.titles[currentIndex]
-                            )
-                        } else {
-                            ""
-                        },
-                        value = getValueForType(type),
-                        isSelected = isItemSelected(type),
-                        iconRes = if (controlConfig.icons.isNotEmpty()) {
-                            UIResourceExtension.getIconResourceId(
-                                context,
-                                controlConfig.icons[currentIndex]
-                            )
-                        } else {
-                            0
-                        },
-                        optionCode = controlConfig.operateCode
-                    )
-                }
-
                 else -> {
                     IrControlItem(
                         id = controlConfig.id,
                         type = type,
-                        title = if (controlConfig.titles.isNotEmpty()) {
-                            UIResourceExtension.getString(
-                                context,
-                                controlConfig.titles[currentIndex]
-                            )
-                        } else {
-                            ""
-                        },
+                        title = UIResourceExtension.getStringByIndex(context,controlConfig,currentIndex),
                         value = getValueForType(type),
                         isSelected = isItemSelected(type),
-                        iconRes = if (controlConfig.icons.isNotEmpty()) {
-                            UIResourceExtension.getIconResourceId(
-                                context,
-                                controlConfig.icons[currentIndex]
-                            )
-                        } else {
-                            0
-                        },
+                        iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentIndex),
                         optionCode = controlConfig.operateCode
                     )
                 }
