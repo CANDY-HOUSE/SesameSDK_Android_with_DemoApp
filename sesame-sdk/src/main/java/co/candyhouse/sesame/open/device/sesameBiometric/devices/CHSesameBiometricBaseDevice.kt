@@ -20,14 +20,12 @@ import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
 import co.candyhouse.sesame.open.device.CHSesameTouchProMechStatus
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.open.device.OpenSensorData
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHCapabilitySupport
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHEventHandler
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectDelegate
@@ -35,7 +33,6 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CH
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
@@ -123,8 +120,8 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
                 handlePubKeySesame(receivePayload)
             }
 
-            SesameItemCode.SSM_OS3_AT58LPB_PARAM_PUBLISH.value -> {
-                L.e("sf", "get SesameItemCode.SSM_OS3_AT58LPB_PARAM_PUBLISH...")
+            SesameItemCode.SSM_OS3_RADAR_PARAM_PUBLISH.value -> {
+                L.e("sf", "get SesameItemCode.SSM_OS3_RADAR_PARAM_PUBLISH...")
                 handled = true
                 handleRadar(receivePayload)
             }

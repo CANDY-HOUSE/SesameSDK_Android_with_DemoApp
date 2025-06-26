@@ -89,7 +89,7 @@ internal class CHDeviceConnectCapableImpl() : CHDeviceConnectCapable {
     override fun setRadarSensitivity(payload: ByteArray, result: CHResult<CHEmpty>) {
         L.d("sf", "蓝牙发送雷达灵敏度值：" + payload[1])
 
-        support?.sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_AT58LPB_PARAM_SET.value, payload)) { _ ->
+        support?.sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_RADAR_PARAM_SET.value, payload)) { _ ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
     }
