@@ -85,6 +85,8 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
                 is CHSesame5History.WM2Unlock -> R.drawable.ic_history_unlock
                 is CHSesame5History.WEBLock -> R.drawable.ic_history_lock
                 is CHSesame5History.WEBUnlock -> R.drawable.ic_history_unlock
+                is CHSesame5History.DoorOpen -> R.drawable.ic_history_door_open
+                is CHSesame5History.DoorClose -> R.drawable.ic_history_door_close
                 else -> R.drawable.ic_ap_alert
             })
             right_img.setImageResource(when (history) {
@@ -97,6 +99,8 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
                 is CHSesame5History.BLEUnlock -> R.drawable.ic_bluetooth_grey
                 is CHSesame5History.WEBLock -> R.drawable.svg_pc
                 is CHSesame5History.WEBUnlock -> R.drawable.svg_pc
+                is CHSesame5History.DoorOpen -> R.drawable.ic_bluetooth_grey
+                is CHSesame5History.DoorClose -> R.drawable.ic_bluetooth_grey
                 else -> R.drawable.ic_ap_alert
             })
         }

@@ -166,6 +166,8 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             Sesame2HistoryTypeEnum.WM2_UNLOCK -> CHSesame5History.WM2Unlock(ts, recordID, mechStatus, histag)
             Sesame2HistoryTypeEnum.WEB_LOCK -> CHSesame5History.WEBLock(ts, recordID, mechStatus, histag)
             Sesame2HistoryTypeEnum.WEB_UNLOCK -> CHSesame5History.WEBUnlock(ts, recordID, mechStatus, histag)
+            Sesame2HistoryTypeEnum.DOOR_OPEN -> CHSesame5History.DoorOpen(ts, recordID, mechStatus, histag)
+            Sesame2HistoryTypeEnum.DOOR_CLOSE -> CHSesame5History.DoorClose(ts, recordID, mechStatus, histag)
             else -> null
         }
     }

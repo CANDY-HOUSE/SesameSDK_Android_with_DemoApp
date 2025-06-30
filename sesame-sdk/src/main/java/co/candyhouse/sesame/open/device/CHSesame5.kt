@@ -56,6 +56,8 @@ sealed class CHSesame5History( timestamp: Long, val recordID: Int, val mechStatu
     open class WM2Unlock(timestamp: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?) : CHSesame5History(timestamp, recordID, mechStatus, histag)
     open class WEBLock(timestamp: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?) : CHSesame5History(timestamp, recordID, mechStatus, histag)
     open class WEBUnlock(timestamp: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?) : CHSesame5History(timestamp, recordID, mechStatus, histag)
+    open class DoorOpen(timestamp: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?) : CHSesame5History(timestamp, recordID, mechStatus, histag)
+    open class DoorClose(timestamp: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?) : CHSesame5History(timestamp, recordID, mechStatus, histag)
 
 }
 
