@@ -10,11 +10,13 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
+import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.toHexString
+import co.utils.NotificationUtils
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -24,27 +26,44 @@ import org.json.JSONObject
 
 class SesameFirebaseMessagingService : FirebaseMessagingService() {
 
+    private val tag = "SesameFirebaseMessagingService"
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         if (remoteMessage.data.isNotEmpty()) {
-            L.d("hcia", "Message data payload: ${remoteMessage.data}")
+            L.d(tag, "Message data payload: ${remoteMessage.data}")
             handleNow(remoteMessage.data)
         }
         // Check if message contains a notification payload.
         remoteMessage.notification?.let {
-            L.d("hcia", "Message Notification Body: ${it.body}")
+            L.d(tag, "Message Notification Body: ${it.body}")
         }
     }
 
     override fun onNewToken(token: String) {
+        L.d(tag, "onNewToken=$token")
         SharedPreferencesUtils.isUploadDeveceToken = false
         SharedPreferencesUtils.deviceToken = token
+        baseContext.candyHouseApplication.subscriptionManager.onNewToken(token)
     }
 
     /**
      * Handle time allotted to BroadcastReceivers.
      */
     private fun handleNow(data: MutableMap<String, String>) {
-        L.d("hcia", "[推送] data:$data")
+        data["messageType"]?.let {
+            val messageType = data["messageType"]
+            //广告活动
+            if (messageType == "announcement") {
+                val title = data["title"]
+                val body = data["body"]
+                val imageUrl = data["imageUrl"]
+                val url = data["url"]
+                val messageAction = data["messageAction"]
+
+                NotificationUtils.sendNotification(this, title, body, url, imageUrl, messageAction)
+                return
+            }
+        }
 
         data["device"]?.let {
             L.d("hcia", "it1:$it")
@@ -81,10 +100,11 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
                                 historyTagData == null -> {
                                     sendNotification(title = "$deviceName $event", isme = false)
                                 }
+
                                 else -> {
                                     val jsonHistoryTag = JSONObject(historyTagData).getJSONArray("data").toByteArray()
                                     val devicesHistoryTag = device.getHistoryTag()
-                                    val isMe = checkMe(triggerUserSub,jsonHistoryTag,devicesHistoryTag)
+                                    val isMe = checkMe(triggerUserSub, jsonHistoryTag, devicesHistoryTag)
                                     L.d(tag = "hcia", msg = "isMe:$isMe")
                                     sendNotification(
                                         title = "$deviceName $event," + String(jsonHistoryTag),
@@ -104,7 +124,7 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun checkMe(triggerUserSub: String?,jsonHistoryTag: ByteArray,devicesHistoryTag: ByteArray?): Boolean {
+    private fun checkMe(triggerUserSub: String?, jsonHistoryTag: ByteArray, devicesHistoryTag: ByteArray?): Boolean {
         return try {
             val triggerData = parseTriggerUserData(triggerUserSub)
             when {
@@ -142,7 +162,7 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
     ): Boolean {
         // 如果触发数据为空，检查历史标签是否匹配
         devicesHistoryTag?.let {
-            if (jsonHistoryTag.isNotEmpty() && String(it).equals(String(jsonHistoryTag))){
+            if (jsonHistoryTag.isNotEmpty() && String(it).equals(String(jsonHistoryTag))) {
                 return true
             }
         }

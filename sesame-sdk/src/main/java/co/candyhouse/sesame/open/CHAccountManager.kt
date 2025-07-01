@@ -27,6 +27,7 @@ import co.candyhouse.sesame.server.dto.CHSS2Infor
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
 import co.candyhouse.sesame.server.dto.CHSSMHisUploadRequest
+import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64Encode
@@ -345,6 +346,12 @@ object CHAccountManager {
         }
     }
 
+    fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            val subscribeMesg = jpAPIclient.subscribeToTopic(body)
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(subscribeMesg)))
+        }
+    }
 
     internal fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {

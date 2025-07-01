@@ -61,5 +61,11 @@
         android:name="co.candyhouse.app.tabs.friend.FriendSelectLockerListFG"
         android:label="FriendSelectLockerListFG" />
 
+    <!-- 添加 WebViewFragment -->
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="co.candyhouse.app.tabs.menu.WebViewFG"
+        android:label="WebView" />
+
 </navigation>
 

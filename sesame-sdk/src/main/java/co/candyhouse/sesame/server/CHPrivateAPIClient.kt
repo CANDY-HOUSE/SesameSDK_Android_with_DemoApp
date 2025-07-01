@@ -18,6 +18,7 @@ import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHcfp
+import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame2.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
@@ -211,6 +212,9 @@ internal interface CHPrivateAPIClient {
 
     @Operation(path = "/device/v2/credential", method = "POST")
     fun deleteCredentialInfo(deleteRequest: AuthenticationDataWrapper): Any
+
+    @Operation(path = "/device/v1/subscribe", method = "POST")
+    fun subscribeToTopic(body: SubscriptionRequest): Any
 
     @Operation(path = "/device/v2/sesame5/{device_id}/battery", method = "POST")
     fun postBatteryData(@Parameter(name = "device_id", location = "path") deviceID: String, body: String): Any

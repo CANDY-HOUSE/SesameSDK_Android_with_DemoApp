@@ -9,11 +9,9 @@ import co.candyhouse.app.ext.AppLifecycleObserver
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHIotManagerPublic
-import co.candyhouse.sesame.utils.L
+import co.receiver.TopicSubscriptionManager
 import co.utils.SharedPreferencesUtils
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,6 +29,8 @@ open class BaseApp : Application() {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     lateinit var appLifecycleObserver: AppLifecycleObserver
+
+    lateinit var subscriptionManager: TopicSubscriptionManager
 
     override fun onCreate() {
         super.onCreate()
@@ -50,20 +50,9 @@ open class BaseApp : Application() {
             CHIRAPIManager.initialize(this)
             SharedPreferencesUtils.init(PreferenceManager.getDefaultSharedPreferences(this))
         }
-        setupFirebase()
         setupCrashlytics()
         initializeAWS()
-    }
-
-    private fun setupFirebase() {
-        Firebase.messaging.token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                task.result?.let { fcmToken ->
-                    SharedPreferencesUtils.deviceToken = fcmToken
-                    L.d("sf", "fcmToken:$fcmToken")
-                }
-            }
-        }
+        setupSubscriptionManager()
     }
 
     private fun setupCrashlytics() {
@@ -83,5 +72,10 @@ open class BaseApp : Application() {
     override fun onTerminate() {
         super.onTerminate()
         appScope.cancel() // 取消所有协程
+    }
+
+    private fun setupSubscriptionManager() {
+        subscriptionManager = TopicSubscriptionManager(this)
+        subscriptionManager.checkAndSubscribeToTopics()
     }
 }

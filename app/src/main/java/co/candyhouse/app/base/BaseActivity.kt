@@ -52,7 +52,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     private val restartValue = 100
     private val outStateSaveKey = "outStateSaveKey"
 
-    private lateinit var navController: NavController
+    protected lateinit var navController: NavController
 
     // 底部导航对应的Fragment ID
     private val bottomNavFragmentIds = listOf(

@@ -14,7 +14,9 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
+import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
 import co.candyhouse.app.base.NfcSetting
 import co.candyhouse.app.ext.NfcHandler
@@ -31,6 +33,7 @@ import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
+import co.utils.AnalyticsUtil
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.toHexString
@@ -93,6 +96,8 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+
+        intent?.let { handleNotificationIntent(it) }
 
         // 如果是主Activity启动的Intent，直接返回
         if (intent?.action == "android.intent.action.MAIN") return
@@ -191,7 +196,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                 CoroutineScope(IO).launch {
                     for (index in 0 until 5) {//每隔兩秒開一次開開
                         if (checkBLELock) {
-                            device.toggle (historytag = UserUtils.getUserIdWithByte()){
+                            device.toggle(historytag = UserUtils.getUserIdWithByte()) {
                                 it.onSuccess {
                                     checkBLELock = false
                                 }
@@ -346,6 +351,38 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             if (SharedPreferencesUtils.isNeedFreshDevice) {
                 deviceViewModel.refleshDevices()
             }
+        }
+    }
+
+    private fun handleNotificationIntent(intent: Intent) {
+        if (intent.action == Intent.ACTION_MAIN) {
+            when (val action = intent.getStringExtra("notification_action")) {
+                "open_webview" -> {
+                    val url = intent.getStringExtra("url")
+                    url?.let {
+                        // 延迟一下，确保主界面已经加载完成
+                        lifecycleScope.launch {
+                            delay(500)
+                            openWebView(url)
+                        }
+                    }
+
+                    // 埋点：用户点击了通知
+                    AnalyticsUtil.logButtonClick(action)
+                }
+            }
+        }
+    }
+
+    private fun openWebView(url: String) {
+        try {
+            val bundle = Bundle().apply {
+                putString("url", url)
+                putString("where", "notification")
+            }
+            navController.navigate(R.id.webViewFragment, bundle)
+        } catch (e: Exception) {
+            L.e("NotificationUtils", "Navigation error", e)
         }
     }
 

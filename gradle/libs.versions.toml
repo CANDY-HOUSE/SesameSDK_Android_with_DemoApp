@@ -45,6 +45,7 @@ workRuntime = "2.9.1"
 firebaseCrashlyticsGradle = "2.9.5"
 googleServices = "4.4.2"
 ksp = "2.0.20-1.0.24"
+glide = "4.16.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -108,6 +109,7 @@ rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 stickyheaders = { module = "org.zakariya.stickyheaders:stickyheaders", version.ref = "stickyheaders" }
 tyrus-standalone-client = { module = "org.glassfish.tyrus.bundles:tyrus-standalone-client", version.ref = "tyrusStandaloneClient" }
 wheelpicker = { module = "com.github.open-android:WheelPicker", version.ref = "wheelpicker" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
