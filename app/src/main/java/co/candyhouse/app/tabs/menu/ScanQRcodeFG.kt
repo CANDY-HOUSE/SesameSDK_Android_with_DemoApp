@@ -9,9 +9,6 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -19,7 +16,6 @@ import cn.bingoogolapple.qrcode.core.QRCodeView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
-import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
@@ -88,32 +84,8 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         }
     }
 
-    private fun hideSystemUI() {
-        MainActivity.activity?.let { activity ->
-            WindowCompat.setDecorFitsSystemWindows(activity.window, false)
-            WindowInsetsControllerCompat(
-                activity.window,
-                activity.window.decorView
-            ).let { controller ->
-                controller.hide(WindowInsetsCompat.Type.systemBars())
-                controller.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        }
-    }
-
-    private fun showSystemUI() {
-        MainActivity.activity?.let { activity ->
-            WindowCompat.setDecorFitsSystemWindows(activity.window, true)
-            WindowInsetsControllerCompat(activity.window, activity.window.decorView).show(
-                WindowInsetsCompat.Type.systemBars()
-            )
-        }
-    }
-
     override fun onResume() {
         super.onResume()
-        hideSystemUI()
         if (EasyPermissions.hasPermissions(requireContext(), Manifest.permission.CAMERA)) {
             bind.zxingview.visibility = View.VISIBLE
             bind.zxingview.startCamera()
@@ -124,7 +96,6 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
 
     override fun onPause() {
         super.onPause()
-        showSystemUI()
         safeDestroy()
     }
 

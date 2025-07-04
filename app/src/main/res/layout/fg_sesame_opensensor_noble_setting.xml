@@ -7,8 +7,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/status_bg">
+        android:layout_height="40dp">
 
         <include
             layout="@layout/back_sub"

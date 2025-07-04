@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import androidx.core.content.edit
+import co.candyhouse.app.BuildConfig
 import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.L
@@ -27,19 +28,26 @@ class TopicSubscriptionManager(private val context: Context) {
     // 使用标准主题而非FIFO主题
     private val topics = listOf("app_announcements")
 
+    companion object {
+        private const val PREF_APP_VERSION = "last_subscription_app_version"
+        private const val SUBSCRIPTION_REFRESH_INTERVAL = 30L * 24 * 60 * 60 * 1000
+    }
+
     fun checkAndSubscribeToTopics() {
         if (shouldRefreshSubscriptions()) {
-            L.e(tag, "更新token。。。")
+            L.e(tag, "需要更新订阅...")
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val token = task.result
                     L.d(tag, "fcmToken:$token")
                     SharedPreferencesUtils.deviceToken = token
-                    subscribeToTopicsIfNeeded(token)
+                    // 强制刷新所有订阅
+                    forceRefreshSubscriptions(token)
                 }
             }
         } else {
-            L.e(tag, "不需要更新token。。。")
+            L.e(tag, "检查现有订阅...")
+            L.d(tag, "androidDeviceId=" + prefs.getString("androidDeviceId", null))
             SharedPreferencesUtils.deviceToken?.let { subscribeToTopicsIfNeeded(it) }
         }
     }
@@ -50,9 +58,40 @@ class TopicSubscriptionManager(private val context: Context) {
 
         val storedToken = prefs.getString(lastTokenKey, null)
         val lastSubscriptionTime = prefs.getLong(lastSubscriptionTimeKey, 0)
+        val lastAppVersion = prefs.getInt(PREF_APP_VERSION, 0)
         val currentTime = System.currentTimeMillis()
+        val currentAppVersion = BuildConfig.VERSION_CODE
 
-        return storedToken == null || (currentTime - lastSubscriptionTime > 7 * 24 * 60 * 60 * 1000)
+        return when {
+            storedToken == null -> true
+            currentAppVersion > lastAppVersion -> {
+                L.d(tag, "检测到版本更新: $lastAppVersion -> $currentAppVersion")
+                true
+            }
+
+            (currentTime - lastSubscriptionTime > SUBSCRIPTION_REFRESH_INTERVAL) -> {
+                L.d(tag, "距离上次订阅超过30天")
+                true
+            }
+
+            else -> false
+        }
+    }
+
+    private fun forceRefreshSubscriptions(token: String) {
+        clearTokenSubscriptions(token)
+        subscribeToTopicsIfNeeded(token)
+    }
+
+    private fun clearTokenSubscriptions(token: String) {
+        prefs.edit {
+            val tokenSuffix = token.takeLast(10)
+            topics.forEach { topic ->
+                val key = "topic_${topic}_${tokenSuffix}"
+                remove(key)
+            }
+        }
+        L.d(tag, "已清除token的订阅记录，将强制重新订阅")
     }
 
     private fun subscribeToTopicsIfNeeded(token: String) {
@@ -109,6 +148,8 @@ class TopicSubscriptionManager(private val context: Context) {
                     prefs.edit {
                         putBoolean(key, true)
                         putLong("last_subscription_time", System.currentTimeMillis())
+                        putString("androidDeviceId", androidDeviceId)
+                        putInt(PREF_APP_VERSION, BuildConfig.VERSION_CODE)
                     }
                     L.d(tag, "订阅成功: $topic")
                 } else {

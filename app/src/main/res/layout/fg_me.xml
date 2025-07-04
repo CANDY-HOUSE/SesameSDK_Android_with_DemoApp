@@ -127,14 +127,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
                 android:layout_marginTop="300dp"
-                android:background="@color/white">
+                android:background="@color/status_bg">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
-                    android:background="@color/white"
                     android:gravity="center_vertical"
                     android:text="@string/logout"
                     android:textSize="17sp"
@@ -148,7 +147,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:layout_marginTop="550dp"
-                android:background="@color/white"
+                android:background="@color/status_bg"
                 android:gravity="center"
                 android:text="@string/delete_account"
                 android:textColor="@color/red"

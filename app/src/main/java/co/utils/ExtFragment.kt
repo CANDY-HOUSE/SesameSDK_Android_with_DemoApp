@@ -1,6 +1,8 @@
 package co.utils
 
 import android.os.Bundle
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -36,3 +38,10 @@ fun Fragment.safeNavigate(actionId: Int, bundle: Bundle?) {
     }
 }
 
+fun Fragment.applyBottomInsets() {
+    ViewCompat.setOnApplyWindowInsetsListener(requireView()) { v, insets ->
+        val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+        v.setPadding(0, 0, 0, systemBars.bottom)
+        insets
+    }
+}

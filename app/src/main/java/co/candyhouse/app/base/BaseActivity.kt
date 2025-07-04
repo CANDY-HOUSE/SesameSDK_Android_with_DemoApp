@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuView
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -37,11 +38,8 @@ import com.amazonaws.mobile.client.UserState
 import com.amazonaws.mobile.client.UserStateDetails
 import com.amazonaws.mobile.config.AWSConfiguration
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.bottomnavigation.LabelVisibilityMode
-import com.google.android.material.navigation.NavigationBarView
 import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
-import androidx.core.view.size
 
 open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
@@ -93,6 +91,13 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
         }
 
         setContentView(R.layout.activity_main)
+
+        // 处理边到边显示
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_container)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, systemBars.top, 0, 0)
+            insets
+        }
 
         // 初始化视图
         initializeMainView(findViewById(R.id.bottom_nav))

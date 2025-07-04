@@ -1,5 +1,7 @@
 package co.candyhouse.app.base
 
+import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.viewbinding.ViewBinding
@@ -7,11 +9,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.ext.DfuProgressHandler
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.server.dto.CHcfp
-import co.candyhouse.sesame.server.dto.ChSubCfp
-import co.candyhouse.sesame.utils.L
+import co.utils.applyBottomInsets
 import com.google.android.material.snackbar.Snackbar
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper
 
@@ -37,6 +36,11 @@ abstract class BaseDeviceFG<T : ViewBinding> : BaseNFG<T>() {
         super.onPause()
         DfuServiceListenerHelper.unregisterProgressListener(requireActivity(), dfuProgressListener)
         snackbar?.dismiss()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        applyBottomInsets()
     }
 
     fun hasAddedOrIsGuestKey(device: CHDevices): Boolean {

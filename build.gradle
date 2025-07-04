@@ -9,9 +9,9 @@ plugins {
 
 ext {
     // 编译版本
-    compileSdkVersion = 34
+    compileSdkVersion = 35
     minSdkVersion = 21
-    targetSdkVersion = 34
+    targetSdkVersion = 35
 
     // 加载配置文件
     def configFile = file('app.properties')
