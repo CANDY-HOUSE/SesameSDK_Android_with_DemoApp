@@ -523,19 +523,12 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.runCatching {
-            if (isRegisterMode) {
-                getCHHub3().irModeSet(MODEL_CONTROL.toByte()) {}
-            }
-
-            getCHHub3().unsubscribeLearnData()
-
-            if (::chHub3Delegate.isInitialized) {
-                getCHHub3().multicastDelegate.removeDelegate(chHub3Delegate)
-            }
-        }.onFailure { e ->
-            L.e(gTag, "${e.message}")
-            safeNavigateBack()
+        if (isRegisterMode) {
+            viewModel.getCHHub3().irModeSet(MODEL_CONTROL.toByte()) {}
+        }
+        viewModel.getCHHub3().unsubscribeLearnData()
+        if (::chHub3Delegate.isInitialized) {
+            viewModel.getCHHub3().multicastDelegate.removeDelegate(chHub3Delegate)
         }
         setFragmentResult(
             Config.learningIrDeviceResult, bundleOf(
