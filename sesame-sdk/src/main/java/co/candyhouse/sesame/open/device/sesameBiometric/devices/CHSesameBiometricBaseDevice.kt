@@ -125,6 +125,12 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
                 handled = true
                 handleRadar(receivePayload)
             }
+
+            // todo: 处理版本标签, 通知服务器发邮件？ 需求： 所有产品的操作系统版本状态将实时记录，当新版本发布时，将通过邮件通知。 https://jp.candyhouse.co/pages/changelog
+            // todo: Face / Face Pro / Face AI  / Face AI Pro 这四个机型的固件已实施这个 publish 过来的 item code。 待处理： APP 与 云端， 比较版本， 决定是否发邮件。
+            SesameItemCode.versionTag.value -> {
+                L.d("versionTag", "get SesameItemCode.versionTag...")
+            }
         }
 
         // 分发事件到各处理器
@@ -346,7 +352,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      * 检查蓝牙可用性
      */
     override fun <T> isBleAvailable(result: CHResult<T>): Boolean {
-       return  (this as CHDevices).isBleAvailable(result)
+        return (this as CHDevices).isBleAvailable(result)
     }
 
     /**
