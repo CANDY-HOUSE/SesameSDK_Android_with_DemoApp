@@ -302,7 +302,11 @@ internal object CHIotManager {
     }
 
     fun unsubscribeTopic(topic: String) {
-        mqttManager.unsubscribeTopic(topic)
+        try {
+            mqttManager.unsubscribeTopic(topic)
+        } catch (e: Exception) {
+            L.e(tag, "unsubscribeTopic failed", e)
+        }
     }
 
     fun deleteThingShadow(sesame: CHDevices) {

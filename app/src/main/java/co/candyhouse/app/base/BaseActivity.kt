@@ -92,7 +92,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
         setContentView(R.layout.activity_main)
 
-        // 处理边到边显示
+        // 处理顶部内容区域
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_container)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
@@ -124,6 +124,16 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                 else -> bottomNav.visibility = View.GONE
             }
         }
+
+        // 处理底部导航栏 - 使用 margin 而不是 padding
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val params = v.layoutParams as ViewGroup.MarginLayoutParams
+            params.bottomMargin = systemBars.bottom
+            v.layoutParams = params
+            insets
+        }
+
         disableTooltip(bottomNav)
     }
 

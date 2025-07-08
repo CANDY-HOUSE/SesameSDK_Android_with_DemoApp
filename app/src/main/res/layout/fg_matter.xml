@@ -3,15 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray0"
     android:orientation="vertical">
 
 
     <RelativeLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/gray0">
+        android:layout_height="40dp">
 
         <include
             layout="@layout/back_sub"

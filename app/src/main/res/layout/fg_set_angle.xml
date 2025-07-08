@@ -1,14 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray0"
     android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/status_bg">
+        android:layout_height="40dp">
 
         <include
             layout="@layout/back_sub"
@@ -29,6 +27,7 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/gray0"
         android:layout_below="@+id/menu">
 
         <RelativeLayout
