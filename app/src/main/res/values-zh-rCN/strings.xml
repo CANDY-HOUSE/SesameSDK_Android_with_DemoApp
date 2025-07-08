@@ -160,7 +160,7 @@
     <string name="wm2_pwk_hint">请输入 WiFi 密码</string>
     <string name="hub3_ir_title">红外遥控</string>
     <string name="wm2_ssid">WiFi SSID</string>
-    <string name="shareSesameToFriends">共享设备…</string>
+    <string name="shareSesameToFriends">点击以共享设备</string>
 
     <string name="revoke">撤销</string>
     <string name="login">登入/注册</string>

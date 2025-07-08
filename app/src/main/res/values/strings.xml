@@ -154,7 +154,7 @@
     <string name="hub3_ir_title">IR Control</string>
     <string name="wm2_ssid">WiFi SSID</string>
 
-    <string name="shareSesameToFriends">Share devices…</string>
+    <string name="shareSesameToFriends">Tap to share devices</string>
 
     <string name="revoke">Revoke</string>
     <string name="login">Log In/Sign up</string>
