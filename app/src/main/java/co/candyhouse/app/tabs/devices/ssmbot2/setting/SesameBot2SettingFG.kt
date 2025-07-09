@@ -14,7 +14,6 @@ import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame2.BuildConfig
 import co.utils.SharedPreferencesUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
