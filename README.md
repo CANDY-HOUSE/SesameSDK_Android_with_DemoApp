@@ -36,20 +36,47 @@
    無料で利用可能なAWS設定パラメータを提供していますが、リクエスト回数に制限があります
  
 ### 1. ライブラリーの依存
+1.1 ソースコード統合
 ```svg
+   implementation project(':ir')
    implementation project(':sesame-sdk')
 ```
+1.2 JitPack統合
+```svg
+   // settings.gradle
+   dependencyResolutionManagement {
+		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+		repositories {
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
+   // build.gradle
+   dependencies {
+       implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:ir:v3.0.266-429'
+       implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesame-sdk:v3.0.266-429'
+	}
+```
+最新バージョンを確認：[https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp](https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp)
 ### 2. manifest.xml でAndroid権限を設定しましょう
 ```agsl
    
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT " />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
 ```
 ### 3. application 初期化
 ```agsl
