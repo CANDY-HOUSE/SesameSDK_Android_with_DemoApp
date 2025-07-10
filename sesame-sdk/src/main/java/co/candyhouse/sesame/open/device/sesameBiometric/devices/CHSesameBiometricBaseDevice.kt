@@ -32,6 +32,7 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDev
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
+import co.candyhouse.sesame.open.isInternetAvailable
 import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
@@ -97,11 +98,20 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         eventHandlers.clear()
     }
 
+    // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
+    private fun reportBatteryData(payloadString: String) {
+        L.d("harry", "[stp][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
+        if (isInternetAvailable()) {
+            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        }
+    }
+
     /**
      * 处理来自设备的事件通知
      */
     @OptIn(ExperimentalStdlibApi::class)
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
+        L.d("harry", "[stp][onGattSesamePublish] cmdItCode: ${receivePayload.cmdItCode}  payload: ${receivePayload.payload.toHexString()}")
         super.onGattSesamePublish(receivePayload)
         // 处理机械状态更新
         var handled = false
@@ -130,6 +140,10 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
             // todo: Face / Face Pro / Face AI  / Face AI Pro 这四个机型的固件已实施这个 publish 过来的 item code。 待处理： APP 与 云端， 比较版本， 决定是否发邮件。
             SesameItemCode.versionTag.value -> {
                 L.d("versionTag", "get SesameItemCode.versionTag...")
+            }
+
+            SesameItemCode.SSM3_ITEM_CODE_BATTERY_VOLTAGE.value -> {
+                reportBatteryData(receivePayload.payload.toHexString())
             }
         }
 

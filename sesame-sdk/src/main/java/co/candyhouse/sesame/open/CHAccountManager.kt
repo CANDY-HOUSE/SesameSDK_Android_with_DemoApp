@@ -356,7 +356,7 @@ object CHAccountManager {
     internal fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val postBatteryDataRes = jpAPIclient.postBatteryData(deviceID, payloadString)
-            L.d("harry", "[ss5][postBatteryData]: $postBatteryDataRes")
+            L.d("harry", "[postBatteryData]: $postBatteryDataRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postBatteryDataRes)))
         }
     }
