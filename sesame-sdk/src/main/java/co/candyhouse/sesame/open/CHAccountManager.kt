@@ -84,9 +84,9 @@ object CHAccountManager {
         }
     }
 
-    internal fun enableNotification(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) {
+    internal fun enableNotification(device: CHSesameLock, fcmToken: String, subUUID:String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val tmpEnable = jpAPIclient.fcmTokenSignPost(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken))
+            val tmpEnable = jpAPIclient.fcmTokenSignPost(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken, subUUID))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(tmpEnable)))
         }
     }

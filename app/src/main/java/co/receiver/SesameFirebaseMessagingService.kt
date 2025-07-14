@@ -50,6 +50,22 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
      * Handle time allotted to BroadcastReceivers.
      */
     private fun handleNow(data: MutableMap<String, String>) {
+        if (handleAdvertisementNotification(data)) {
+            return
+        }
+        if (handleFriedNotification(data)) {
+            return
+        }
+        handleAlertTitleNotification(data)
+    }
+
+    private fun handleAlertTitleNotification(data: MutableMap<String, String>) {
+        data["alertTitle"]?.let {
+            sendNotification(it)
+        }
+    }
+
+    private fun handleAdvertisementNotification(data: MutableMap<String, String>): Boolean {
         data["messageType"]?.let {
             val messageType = data["messageType"]
             //广告活动
@@ -59,121 +75,29 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
                 val imageUrl = data["imageUrl"]
                 val url = data["url"]
                 val messageAction = data["messageAction"]
-
                 NotificationUtils.sendNotification(this, title, body, url, imageUrl, messageAction)
-                return
-            }
-        }
-
-        data["device"]?.let {
-            L.d("hcia", "it1:$it")
-        }
-        data["event"]?.let {
-            L.d("hcia", "通知")
-
-            L.d("hcia", "it2:$it")
-            if (it == "friend") {
-                SharedPreferencesUtils.isNeedFreshFriend = true
-                return
-            }
-            if (it == "device") {
-                SharedPreferencesUtils.isNeedFreshDevice = true
-                return
-            }
-        }
-        try {
-            val deviceID = data["deviceId"]
-            val event = data["event"].tohisEventi18(this)
-            val deviceName = SharedPreferencesUtils.preferences.getString(
-                deviceID?.lowercase(),
-                getString(R.string.Sesame)
-            )
-            CHDeviceManager.getCandyDevices { result ->
-                result.onSuccess {
-                    it.data.forEach { device ->
-                        if (device.deviceId.toString()
-                                .uppercase() == deviceID && device is CHSesameLock
-                        ) {
-                            val historyTagData = data["historyTag"]
-                            val triggerUserSub = data["triggerUserSub"]
-                            when {
-                                historyTagData == null -> {
-                                    sendNotification(title = "$deviceName $event", isme = false)
-                                }
-
-                                else -> {
-                                    val jsonHistoryTag = JSONObject(historyTagData).getJSONArray("data").toByteArray()
-                                    val devicesHistoryTag = device.getHistoryTag()
-                                    val isMe = checkMe(triggerUserSub, jsonHistoryTag, devicesHistoryTag)
-                                    L.d(tag = "hcia", msg = "isMe:$isMe")
-                                    sendNotification(
-                                        title = "$deviceName $event," + String(jsonHistoryTag),
-                                        isme = isMe
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                result.onFailure {
-                    L.d(tag = "hcia", msg = "it:$it")
-                }
-            }
-        } catch (e: Exception) {
-            L.d("hcia", "e:$e")
-        }
-    }
-
-    private fun checkMe(triggerUserSub: String?, jsonHistoryTag: ByteArray, devicesHistoryTag: ByteArray?): Boolean {
-        return try {
-            val triggerData = parseTriggerUserData(triggerUserSub)
-            when {
-                triggerData.isEmpty() -> checkIfSameHistoryTag(jsonHistoryTag, devicesHistoryTag)
-                triggerData.size == 16 -> checkIfSameTriggerUser(triggerData)
-                else -> false
-            }
-        } catch (e: Exception) {
-            L.e("checkMe", "Error parsing triggerUserSub", e)
-            false
-        }
-    }
-
-    private fun parseTriggerUserData(triggerUserSub: String?): ByteArray {
-        if (triggerUserSub == null || triggerUserSub.isEmpty()) {
-            return ByteArray(0)
-        }
-        val jsonObject = JSONObject(triggerUserSub)
-        val dataArray = jsonObject.getJSONArray("data")
-
-        return ByteArray(dataArray.length()) { i ->
-            dataArray.getInt(i).toByte()
-        }
-    }
-
-    private fun checkIfSameTriggerUser(triggerData: ByteArray): Boolean {
-        val triggerUserSubHex = triggerData.toHexString()
-        val userId = UserUtils.getUserId()?.replace("-", "") ?: return false
-        return triggerUserSubHex.equals(userId, ignoreCase = true)
-    }
-
-    private fun checkIfSameHistoryTag(
-        jsonHistoryTag: ByteArray,
-        devicesHistoryTag: ByteArray?
-    ): Boolean {
-        // 如果触发数据为空，检查历史标签是否匹配
-        devicesHistoryTag?.let {
-            if (jsonHistoryTag.isNotEmpty() && String(it).equals(String(jsonHistoryTag))) {
                 return true
             }
         }
         return false
     }
 
-    private fun sendNotification(title: String, isme: Boolean) {
-        L.d("hcia", "送出推送 title:$title")
-        if (isme) {
-            return
+    private fun handleFriedNotification(data: MutableMap<String, String>): Boolean {
+        data["event"]?.let {
+            if (it == "friend") {
+                SharedPreferencesUtils.isNeedFreshFriend = true
+                return true
+            }
+            if (it == "device") {
+                SharedPreferencesUtils.isNeedFreshDevice = true
+                return true
+            }
         }
+        return  false
+    }
+
+    private fun sendNotification(title: String) {
+        L.d("hcia", "送出推送 title:$title")
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(

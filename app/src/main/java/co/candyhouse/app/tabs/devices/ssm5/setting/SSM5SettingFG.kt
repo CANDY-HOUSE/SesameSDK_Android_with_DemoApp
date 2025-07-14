@@ -22,6 +22,7 @@ import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame5
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
+import co.utils.UserUtils
 import co.utils.safeNavigate
 
 class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
@@ -144,8 +145,8 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
 
     private fun handleSwitchToggle(device: CHSesame5, token: String, enable: Boolean) {
         val operation = if (enable) device::enableNotification else device::disableNotification
-
-        operation(token) { result ->
+        val subUUID = UserUtils.getUserId()?:""
+        operation(token,subUUID) { result ->
             result.onSuccess {
                 bind.notiSwitch.post {
                     bind.notiSwitch.isChecked = enable

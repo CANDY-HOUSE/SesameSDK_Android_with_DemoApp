@@ -334,9 +334,9 @@ interface CHSesameLock : CHDevices {
         }
     }
 
-    fun enableNotification(fcmToken: String, result: CHResult<Any>) {
+    fun enableNotification(fcmToken: String, subUUID:String, result: CHResult<Any>) {
         L.d("hcia", "String:" + String)
-        CHAccountManager.enableNotification(this, fcmToken) {
+        CHAccountManager.enableNotification(this, fcmToken, subUUID) {
             it.onSuccess {
                 L.d("hcia", "it:" + it)
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
@@ -347,7 +347,7 @@ interface CHSesameLock : CHDevices {
         }
     }
 
-    fun disableNotification(fcmToken: String, result: CHResult<Any>) {
+    fun disableNotification(fcmToken: String, subUUID: String = "", result: CHResult<Any>) {
         CHAccountManager.cancelNotification(this, fcmToken) {
             it.onSuccess {
                 L.d("hcia", "it:" + it)
