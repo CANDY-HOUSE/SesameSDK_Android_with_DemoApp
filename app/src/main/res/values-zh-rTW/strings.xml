@@ -252,12 +252,12 @@
         name="upload_keys_fail"
         >現在網路狀態不太穩定，下拉刷新或登出可能導致芝麻設備清單消失。</string>
 
-    <string name="TouchEmptyFingerHint">靠近%1$s設備，點擊⊕圖標，將手指放在%2$s上以添加指紋。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
-    <string name="TouchEmptyFingerHintFace">靠近Sesame Face設備，點擊⊕圖標，將手指放在Sesame Face上以添加指紋。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
-    <string name="TouchEmptyNFCHint">靠近%1$s設備，點擊⊕圖標，將NFC卡放在%2$s上以添加NFC卡。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
-    <string name="TouchEmptyNFCFaceHint">靠近Sesame Face設備，點擊⊕圖標，將NFC卡放在Sesame Face上以添加NFC卡。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
-    <string name="TouchEmptyPasscodeHint">靠近%1$s設備，點擊⊕圖標，輸入數字密碼並以上鎖或解鎖按鈕添加數字密碼。</string>
-    <string name="HUB3EmptyIRCodeHint">靠近智聯中心 3設備，點擊⊕圖標，將遙控器指向智聯中心 3，按下遙控器上的按鈕以發送紅外線信號。</string>
+    <string name="TouchEmptyFingerHint">靠近%1$s連藍牙, 點擊 ⊕, 將手指放在%2$s上以添加指紋。添加後點擊 X。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
+    <string name="TouchEmptyFingerHintFace">靠近Sesame Face連藍牙, 點擊 ⊕, 將手指放在Sesame Face上以添加指紋。添加後點擊 X。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
+    <string name="TouchEmptyNFCHint">靠近%1$s連藍牙, 點擊 ⊕, 將NFC卡放在%2$s上以添加NFC卡。添加後點擊 X。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
+    <string name="TouchEmptyNFCFaceHint">靠近Sesame Face連藍牙, 點擊 ⊕, 將NFC卡放在Sesame Face上以添加NFC卡。添加後點擊 X。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
+    <string name="TouchEmptyPasscodeHint">靠近%1$s連藍牙, 點擊 ⊕, 輸入數字密碼並以上鎖或解鎖按鈕添加數字密碼。添加後點擊 X。</string>
+    <string name="HUB3EmptyIRCodeHint">靠近智聯中心3連藍牙, 點擊 ⊕, 將遙控器指向智聯中心3，按下遙控器上的按鈕以發送紅外線信號。</string>
 
     <string name="TouchProCardRename">修改 NFC卡 的名稱🖊️</string>
     <string name="TouchProFaceRename">修改 人臉 的名稱🖊️</string>

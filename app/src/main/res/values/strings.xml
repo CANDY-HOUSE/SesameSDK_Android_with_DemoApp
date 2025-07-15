@@ -236,12 +236,12 @@
 
     <string name="upload_keys_fail">You’re experiencing binding issues due to an unstable network. It’s possible to lose all paired Sesame devices if you pull to refresh or logout.</string>
 
-    <string name="TouchEmptyFingerHint">Approach the %1$s device, tap the ⊕ icon, and place your finger on %2$s to add a fingerprint.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
-    <string name="TouchEmptyFingerHintFace">Approach the Sesame Face device, tap the ⊕ icon, and place your finger on Sesame Face to add a fingerprint.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
-    <string name="TouchEmptyNFCHint">Approach the  %1$s device, tap the ⊕ icon, and place your NFC card on  %2$s to add the NFC card.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
-    <string name="TouchEmptyNFCFaceHint">Approach the Sesame Face device, tap the ⊕ icon, and place your NFC card on Sesame Face to add the NFC card.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
-    <string name="TouchEmptyPasscodeHint">Approach the %1$s device, tap the ⊕ icon, enter the passcode and press the lock or unlock button to add the passcode.</string>
-    <string name="HUB3EmptyIRCodeHint">Approach the HUB3 device, tap the ⊕ icon, point the IR control at HUB3, press a button of the IR control to enter the IR Code.</string>
+    <string name="TouchEmptyFingerHint">Connect %1$s with Bluetooth, tap ⊕, and place your finger on %2$s to add a fingerprint, tap X when finished.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
+    <string name="TouchEmptyFingerHintFace">Connect Sesame Face with Bluetooth, tap ⊕, and place your finger on Sesame Face to add a fingerprint, tap X when finished.\n\nAlso, by registering the same finger at different angles, the recognition rate can greatly improve👍</string>
+    <string name="TouchEmptyNFCHint">Connect  %1$s with Bluetooth, tap ⊕, and place your NFC card on %2$s to add the NFC card, tap X when finished.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
+    <string name="TouchEmptyNFCFaceHint">Connect Sesame Face with Bluetooth, tap ⊕, and place your NFC card on Sesame Face to add the NFC card, tap X when finished.\n\nAndroid phones or watches usually have multiple built-in NFC cards, and the NFC card number you add each time may vary. It is recommended that you add all built-in IC cards to reduce the likelihood of misjudgment.</string>
+    <string name="TouchEmptyPasscodeHint">Connect %1$s with Bluetooth, tap ⊕, enter the passcode and press the lock or unlock button to add the passcode, tap X when finished.</string>
+    <string name="HUB3EmptyIRCodeHint">Connect HUB3 with Bluetooth, tap ⊕, point the IR control at HUB3, press a button of the IR control to enter the IR Code.</string>
     <string name="TouchProCardRename">Rename the NFC card🖊️</string>
     <string name="TouchProFaceRename">Rename the Face🖊️</string>
     <string name="TouchProPalmRename">Rename the Palm Veins🖊️</string>
@@ -262,8 +262,8 @@
     <string name="DelFace">Delete the Face</string>
     <string name="DelPalm">Delete the Palm Veins</string>
 
-    <string name="sesamefaceMsg">Approach %1$s and tap ⊕. Show your Face then tap X. Register after mounting for supreme recognition rates.</string>
-    <string name="sesamepalmMsg">Approach %1$s and tap ⊕. Show Palm Veins then tap X. Register after mounting for supreme recognition rates.</string>
+    <string name="sesamefaceMsg">Connect %1$s with Bluetooth, tap ⊕. Show your Face then tap X. Register after mounting for supreme recognition rates.</string>
+    <string name="sesamepalmMsg">Connect %1$s with Bluetooth, tap ⊕. Show Palm Veins then tap X. Register after mounting for supreme recognition rates.</string>
 
     <string name="TouchProPWDRename">Rename the passcode🖊️</string>
     <string name="TouchProPWDModify">Modify the passcode value🖊️</string>

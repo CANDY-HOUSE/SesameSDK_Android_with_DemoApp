@@ -227,12 +227,12 @@
 
     <string name="upload_keys_fail">ネットワーク接続の不安定によりデバイスのペアリングが失敗した場合、画面のリフレッシュもしくはアカウントのログアウト・再ログインをするとデバイスが消失するリスクがございます。</string>
 
-    <string name="TouchEmptyFingerHint">S%1$sデバイスに近づき、⊕ アイコンを押し、%2$sに指をかざして指紋を追加してください。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
-    <string name="TouchEmptyFingerHintFace">Sesame Faceデバイスに近づき、⊕ アイコンを押し、Sesame Faceに指をかざして指紋を追加してください。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
-    <string name="TouchEmptyNFCHint">%1$sデバイスに近づき、⊕ アイコンを押し、%2$sにICカードをかざしてICカードを追加してください。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
-    <string name="TouchEmptyNFCFaceHint">Sesame Faceデバイスに近づき、⊕ アイコンを押し、Sesame FaceにICカードをかざしてICカードを追加してください。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
-    <string name="TouchEmptyPasscodeHint">%1$sデバイスに近づき、⊕ アイコンを押し、%1$sに暗証番号を入力して施錠また解錠ボタンで追加してください。</string>
-    <string name="HUB3EmptyIRCodeHint">ハブ 3に近づき⊕アイコンをタップして、リモコンをハブ 3に向け、リモコンのボタンを押して赤外線信号を送信します。</string>
+    <string name="TouchEmptyFingerHint">S%1$sに近づきBluetooth接続し、⊕ をタップして%2$sに指をかざして指紋を登録。登録後 X をタップ。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
+    <string name="TouchEmptyFingerHintFace">Sesame Faceに近づきBluetooth接続し、⊕ をタップしてSesame Faceに指をかざして指紋を登録。登録後 X をタップ。\n\nまた、指の角度を変えて何度も同一の指を登録すると、さらに認識率は大幅向上👍</string>
+    <string name="TouchEmptyNFCHint">%1$sに近づきBluetooth接続し、⊕ をタップして%2$sにICカードをかざしてICカードを登録。登録後 X をタップ。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
+    <string name="TouchEmptyNFCFaceHint">Sesame Faceに近づきBluetooth接続し、⊕ をタップしてSesame FaceにICカードをかざしてICカードを登録。登録後 X をタップ。\n\nAndroidスマホやウォッチは通常、複数のICカードを内蔵しており、毎回追加するICカード番号が変わる可能性があります。誤判定を減らすため、内蔵のICカードを全て追加するのをお勧めします。</string>
+    <string name="TouchEmptyPasscodeHint">%1$sに近づきBluetooth接続し、⊕ をタップして%1$sに暗証番号を入力して施錠また解錠ボタンで追加してください。</string>
+    <string name="HUB3EmptyIRCodeHint">ハブ3に近づきBluetooth接続し、⊕ をタップして、リモコンをハブ3に向け、リモコンのボタンを押して赤外線信号を送信します。</string>
 
     <string name="TouchProCardRename">ICカードの名前変更🖊️</string>
     <string name="TouchProFaceRename">顔の名前変更🖊️</string>
