@@ -345,20 +345,20 @@ fun CHDevices.getFirZip(): Int {
     return when (productModel) {
         CHProductModel.SS2 -> R.raw.sesame_221_0_8c080c
         CHProductModel.SS4 -> R.raw.sesame_421_4_50ce5b
-        CHProductModel.SS5 -> R.raw.sesame5_30_5_18a8e4
-        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_18a8e4
+        CHProductModel.SS5 -> R.raw.sesame5_30_5_8ec498
+        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_8ec498
         CHProductModel.WM2 -> 0
         CHProductModel.SesameBot1 -> R.raw.sesamebot1_21_2_369eb9
         CHProductModel.BiKeLock -> R.raw.sesamebike1_21_3_d7162a
         CHProductModel.BiKeLock2 -> R.raw.sesamebike2_30_6_18a8e4
         CHProductModel.SSMTouchPro -> R.raw.sesametouch1pro_30_9_1d18be
         CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_1d18be
-        CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_e222af
+        CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_8ec498
         CHProductModel.BLEConnector -> R.raw.bleconnector_30_11_c44362
         CHProductModel.Remote -> R.raw.remote_30_14_e222af
         CHProductModel.RemoteNano -> R.raw.remoten_30_15_e222af
         CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_18a8e4
-        CHProductModel.SS5US -> R.raw.sesame5us_30_16_18a8e4
+        CHProductModel.SS5US -> R.raw.sesame5us_30_16_8ec498
         CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_1d18be
         CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_321ab0
         CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_321ab0
