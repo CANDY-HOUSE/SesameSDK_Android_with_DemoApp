@@ -2,65 +2,44 @@ package co.candyhouse.app.tabs.devices.ssm2.setting.angle
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgNoHandBinding
-import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
-import co.candyhouse.app.tabs.devices.ssm2.getNOHandLeft
-import co.candyhouse.app.tabs.devices.ssm2.getNOHandRadius
-import co.candyhouse.app.tabs.devices.ssm2.getNOHandRight
-import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
-import co.candyhouse.app.tabs.devices.ssm2.setNOHandLeft
-import co.candyhouse.app.tabs.devices.ssm2.setNOHandRadius
-import co.candyhouse.app.tabs.devices.ssm2.setNOHandRight
+import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.app.tabs.devices.ssm2.*
+import co.candyhouse.app.tabs.devices.ssm2.setting.SSM2SettingFG
 import co.utils.getLastKnownLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
 
 class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
-    private val locationPermissionRequestCode = 1
-    private val accessBackgroundLocationPermissionRequestCode = 2
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private lateinit var googleMap: GoogleMap
 
     override fun getViewBinder() = FgNoHandBinding.inflate(layoutInflater)
 
     private fun checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), locationPermissionRequestCode)
+                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
         } else {
             initializeMap()
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == locationPermissionRequestCode) {
-            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), accessBackgroundLocationPermissionRequestCode)
-            }
-        }
-        if (requestCode == accessBackgroundLocationPermissionRequestCode) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 initializeMap()
             }
@@ -72,17 +51,18 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
     private lateinit var mapFragment: SupportMapFragment
 
 
+
     override fun onResume() {
         super.onResume()
 
-        if (::mapFragment.isInitialized) {
+        if (::mapFragment.isInitialized){
             mapFragment.onResume()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if (::mapFragment.isInitialized) {
+        if (::mapFragment.isInitialized){
             mapFragment.onPause()
         }
 
@@ -90,7 +70,7 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        if (::mapFragment.isInitialized) {
+        if (::mapFragment.isInitialized){
             mapFragment.onStop()
         }
 
@@ -98,7 +78,7 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (::mapFragment.isInitialized) {
+        if (::mapFragment.isInitialized){
             mapFragment.onDestroy()
         }
 
@@ -139,9 +119,7 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
         googleMap = map
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
+                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
         }
 
