@@ -355,8 +355,8 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_1d18be
         CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_8ec498
         CHProductModel.BLEConnector -> R.raw.bleconnector_30_11_c44362
-        CHProductModel.Remote -> R.raw.remote_30_14_e222af
-        CHProductModel.RemoteNano -> R.raw.remoten_30_15_e222af
+        CHProductModel.Remote -> R.raw.remote_30_14_cb5c5a
+        CHProductModel.RemoteNano -> R.raw.remoten_30_15_cb5c5a
         CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_18a8e4
         CHProductModel.SS5US -> R.raw.sesame5us_30_16_8ec498
         CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_1d18be
