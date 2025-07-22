@@ -596,13 +596,13 @@
   {
     "code": 187,
     "model": "Hotalux",
-    "alias": "Hotalux 9LKZ773SG 9LKZ775-TSG\n9LKZ775-XSG\n9LKZ793SG\n9LKZ795-TSG-CH1",
+    "alias": "Hotalux 9LKZ773SG 9LKZ775-TSG\n9LKZ773SG 9LKZ775-XSG\n9LKZ773SG 9LKZ793SG\n9LKZ773SG 9LKZ795-TSG-CH1",
     "direction": "H"
   },
   {
     "code": 188,
     "model": "Hotalux",
-    "alias": "Hotalux 9LKZ773SG 9LKZ775-TSG\n9LKZ775-XSG\n9LKZ793SG\n9LKZ795-TSG-CH2",
+    "alias": "Hotalux 9LKZ773SG 9LKZ775-TSG\n9LKZ773SG 9LKZ775-XSG\n9LKZ773SG 9LKZ793SG\n9LKZ773SG 9LKZ795-TSG-CH2",
     "direction": "H"
   },
   {
@@ -848,13 +848,13 @@
   {
     "code": 230,
     "model": "Hotalux",
-    "alias": "Hotalux HLDZE1452 HW600-HLDZB08\nHW600-HLDZB08L\nSLDZA06500L\nSLDZA06500N-CH1",
+    "alias": "Hotalux HLDZE1452 HW600-HLDZB08\nHLDZE1452 HW600-HLDZB08L\nHLDZE1452 SLDZA06500L\nHLDZE1452 SLDZA06500N-CH1",
     "direction": "H"
   },
   {
     "code": 231,
     "model": "Hotalux",
-    "alias": "Hotalux HLDZE1452 HW600-HLDZB08\nHW600-HLDZB08L\nSLDZA06500L\nSLDZA06500N-CH2",
+    "alias": "Hotalux HLDZE1452 HW600-HLDZB08\nHLDZE1452 HW600-HLDZB08L\nHLDZE1452 SLDZA06500L\nHLDZE1452 SLDZA06500N-CH2",
     "direction": "H"
   },
   {
@@ -1802,13 +1802,13 @@
   {
     "code": 433,
     "model": "NEC",
-    "alias": "NEC 9LKZ773SG 9LKZ775-TSG\n9LKZ775-XSG\n9LKZ793SG\n9LKZ795-TSG-CH1",
+    "alias": "NEC 9LKZ773SG 9LKZ775-TSG\n9LKZ773SG 9LKZ775-XSG\n9LKZ773SG 9LKZ793SG\n9LKZ773SG 9LKZ795-TSG-CH1",
     "direction": "N"
   },
   {
     "code": 434,
     "model": "NEC",
-    "alias": "NEC 9LKZ773SG 9LKZ775-TSG\n9LKZ775-XSG\n9LKZ793SG\n9LKZ795-TSG-CH2",
+    "alias": "NEC 9LKZ773SG 9LKZ775-TSG\n9LKZ773SG 9LKZ775-XSG\n9LKZ773SG 9LKZ793SG\n9LKZ773SG 9LKZ795-TSG-CH2",
     "direction": "N"
   },
   {
@@ -2066,13 +2066,13 @@
   {
     "code": 476,
     "model": "NEC",
-    "alias": "NEC HLDZE1452 HW600-HLDZB08\nHW600-HLDZB08L\nSLDZA06500L\nSLDZA06500N-CH1",
+    "alias": "NEC HLDZE1452 HW600-HLDZB08\nHLDZE1452 HW600-HLDZB08L\nHLDZE1452 SLDZA06500L\nHLDZE1452 SLDZA06500N-CH1",
     "direction": "N"
   },
   {
     "code": 477,
     "model": "NEC",
-    "alias": "NEC HLDZE1452 HW600-HLDZB08\nHW600-HLDZB08L\nSLDZA06500L\nSLDZA06500N-CH2",
+    "alias": "NEC HLDZE1452 HW600-HLDZB08\nHLDZE1452 HW600-HLDZB08L\nHLDZE1452 SLDZA06500L\nHLDZE1452 SLDZA06500N-CH2",
     "direction": "N"
   },
   {
@@ -2862,6 +2862,12 @@
     "direction": "P"
   },
   {
+    "code": 27,
+    "model": "Panasonic",
+    "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH1",
+    "direction": "P"
+  },
+  {
     "code": 588,
     "model": "Panasonic",
     "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH1-1",
@@ -2871,6 +2877,12 @@
     "code": 589,
     "model": "Panasonic",
     "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH1-2",
+    "direction": "P"
+  },
+  {
+    "code": 28,
+    "model": "Panasonic",
+    "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH2",
     "direction": "P"
   },
   {
@@ -2886,6 +2898,12 @@
     "direction": "P"
   },
   {
+    "code": 29,
+    "model": "Panasonic",
+    "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH3",
+    "direction": "P"
+  },
+  {
     "code": 592,
     "model": "Panasonic",
     "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH3-1",
@@ -2895,24 +2913,6 @@
     "code": 593,
     "model": "Panasonic",
     "alias": "Panasonic ECONAVI HH-LC600A\nECONAVI HH-LC800A CH3-2",
-    "direction": "P"
-  },
-  {
-    "code": 27,
-    "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LC600A、HH-LC800A CH1",
-    "direction": "P"
-  },
-  {
-    "code": 28,
-    "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LC600A、HH-LC800A CH2",
-    "direction": "P"
-  },
-  {
-    "code": 29,
-    "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LC600A、HH-LC800A CH3",
     "direction": "P"
   },
   {
@@ -2954,19 +2954,19 @@
   {
     "code": 20,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx11A、HH-LCx12A(CH1)",
+    "alias": "Panasonic ECONAVI HH-LCx11A\nECONAVI HH-LCx12A(CH1)",
     "direction": "P"
   },
   {
     "code": 21,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx11A、HH-LCx12A(CH2)",
+    "alias": "Panasonic ECONAVI HH-LCx11A\nECONAVI HH-LCx12A(CH2)",
     "direction": "P"
   },
   {
     "code": 22,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx11A、HH-LCx12A(CH3)",
+    "alias": "Panasonic ECONAVI HH-LCx11A\nECONAVI HH-LCx12A(CH3)",
     "direction": "P"
   },
   {
@@ -3008,19 +3008,19 @@
   {
     "code": 17,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx14A、HH-LCx15A(CH1)",
+    "alias": "Panasonic ECONAVI HH-LCx14A\nECONAVI HH-LCx15A(CH1)",
     "direction": "P"
   },
   {
     "code": 18,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx14A、HH-LCx15A(CH2)",
+    "alias": "Panasonic ECONAVI HH-LCx14A\nECONAVI HH-LCx15A(CH2)",
     "direction": "P"
   },
   {
     "code": 19,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx14A、HH-LCx15A(CH3)",
+    "alias": "Panasonic ECONAVI HH-LCx14A\nECONAVI HH-LCx15A(CH3)",
     "direction": "P"
   },
   {
@@ -3062,19 +3062,19 @@
   {
     "code": 14,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx21A、HH-LCx37A、HH-LCx38A(CH1)",
+    "alias": "Panasonic ECONAVI HH-LCx21A\nECONAVI HH-LCx37A\nECONAVI HH-LCx38A(CH1)",
     "direction": "P"
   },
   {
     "code": 15,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx21A、HH-LCx37A、HH-LCx38A(CH2)",
+    "alias": "Panasonic ECONAVI HH-LCx21A\nECONAVI HH-LCx37A\nECONAVI HH-LCx38A(CH2)",
     "direction": "P"
   },
   {
     "code": 16,
     "model": "Panasonic",
-    "alias": "Panasonic ECONAVI HH-LCx21A、HH-LCx37A、HH-LCx38A(CH3)",
+    "alias": "Panasonic ECONAVI HH-LCx21A\nECONAVI HH-LCx37A\nECONAVI HH-LCx38A(CH3)",
     "direction": "P"
   },
   {
@@ -5930,37 +5930,37 @@
   {
     "code": 1086,
     "model": "Panasonic",
-    "alias": "Panasonic LGBZ1730 HH-LC554AH\nHH-LC754AH\nHH-LC490A-CH1",
+    "alias": "Panasonic LGBZ1730 HH-LC554AH\nLGBZ1730 HH-LC754AH\nLGBZ1730 HH-LC490A-CH1",
     "direction": "P"
   },
   {
     "code": 1087,
     "model": "Panasonic",
-    "alias": "Panasonic LGBZ1730 HH-LC554AH\nHH-LC754AH\nHH-LC490A-CH1",
+    "alias": "Panasonic LGBZ1730 HH-LC554AH\nLGBZ1730 HH-LC754AH\nLGBZ1730 HH-LC490A-CH1",
     "direction": "P"
   },
   {
     "code": 1088,
     "model": "Panasonic",
-    "alias": "Panasonic LGBZ1730 HH-LC554AH\nHH-LC754AH\nHH-LC490A-CH2",
+    "alias": "Panasonic LGBZ1730 HH-LC554AH\nLGBZ1730 HH-LC754AH\nLGBZ1730 HH-LC490A-CH2",
     "direction": "P"
   },
   {
     "code": 1089,
     "model": "Panasonic",
-    "alias": "Panasonic LGBZ1730 HH-LC554AH\nHH-LC754AH\nHH-LC490A-CH2",
+    "alias": "Panasonic LGBZ1730 HH-LC554AH\nLGBZ1730 HH-LC754AH\nLGBZ1730 HH-LC490A-CH2",
     "direction": "P"
   },
   {
     "code": 1090,
     "model": "Panasonic",
-    "alias": "Panasonic LGBZ1730 HH-LC554AH\nHH-LC754AH\nHH-LC490A-CH3",
+    "alias": "Panasonic LGBZ1730 HH-LC554AH\nLGBZ1730 HH-LC754AH\nLGBZ1730 HH-LC490A-CH3",
     "direction": "P"
   },
   {
     "code": 1091,
     "model": "Panasonic",
-    "alias": "Panasonic LGBZ1730 HH-LC554AH\nHH-LC754AH\nHH-LC490A-CH3",
+    "alias": "Panasonic LGBZ1730 HH-LC554AH\nLGBZ1730 HH-LC754AH\nLGBZ1730 HH-LC490A-CH3",
     "direction": "P"
   },
   {
