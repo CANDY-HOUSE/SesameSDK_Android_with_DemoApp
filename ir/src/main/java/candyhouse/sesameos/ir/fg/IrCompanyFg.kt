@@ -73,6 +73,7 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
     }
 
     private fun gotoIrControlView(irRemoteDevice: IrRemote) {
+        updateRemoteDevice(irRemoteDevice)
         safeNavigate(R.id.action_to_irgridefg, Bundle().apply {
             this.putInt(Config.productKey, arguments?.getInt(Config.productKey) ?: -1)
             this.putParcelable(Config.irDevice, irRemoteDevice)
@@ -80,12 +81,18 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         }).also { clearSearchBar() }
     }
 
+    private fun updateRemoteDevice(irRemoteDevice: IrRemote) {
+        // 更新当前的IRRemoteDevice
+        if (irRemoteDevice.alias.contains("\n")) {
+            irRemoteDevice.alias = irRemoteDevice.alias.substringBefore("\n").trim()
+        }
+    }
+
     fun performSearch(key: String) {
         if (key.isEmpty()) return
         searchList.clear()
-
         irCompanyAdapter.children.forEach { parentItem ->
-            if (parentItem.model?.uppercase()?.contains(key.uppercase()) == true) {
+            if (parentItem.alias.uppercase().contains(key.uppercase())) {
                 searchList.add(parentItem)
             }
         }

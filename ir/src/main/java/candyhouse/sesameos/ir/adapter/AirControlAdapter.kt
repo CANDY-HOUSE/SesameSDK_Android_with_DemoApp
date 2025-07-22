@@ -1,8 +1,10 @@
 package candyhouse.sesameos.ir.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import candyhouse.sesameos.ir.databinding.ItemAirControlBinding
@@ -32,6 +34,7 @@ class AirControlViewsAdapter(
         fun bind(item: IrControlItem, position: Int) {
             binding.apply {
                 tvTitle.setText(item.title)
+                topLine.visibility = if (position < 3) View.VISIBLE else View.GONE
                 if (item.iconRes == 0) {
                     ivIcon.setImageDrawable(null)
                 } else {

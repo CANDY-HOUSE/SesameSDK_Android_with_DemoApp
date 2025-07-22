@@ -149,6 +149,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
                 if (it) {
                     setTitle(value)
                     setRightTextView("")
+                    bind.topTitle.imgRight.visibility = View.GONE
                     bind.linearLayoutHelp.visibility = View.GONE
                 }
             }
@@ -289,6 +290,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
                         viewModel.deleteIrDeviceInfo(viewModel.getDevice(), viewModel.irRemoteDeviceLiveData.value!!)
                     }
                     setRightTextView("")
+                    bind.topTitle.imgRight.visibility = View.GONE
                     irRemote.haveSave = true
                     viewModel.setRemoteDevice(irRemote)
                 }

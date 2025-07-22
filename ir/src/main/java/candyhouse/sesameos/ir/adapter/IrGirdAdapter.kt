@@ -34,6 +34,7 @@ class IrGridAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvName: TextView = itemView.findViewById(R.id.tvName)
         private val lr: View = itemView.findViewById(R.id.lr)
+        private val topLine: View = itemView.findViewById(R.id.topLine)
 
         fun bind(item: CHHub3IRCode) {
             tvName.text = if (item.name.isEmpty()) {
@@ -62,6 +63,7 @@ class IrGridAdapter(
                 true
             }
             lr.visibility = if (adapterPosition % 3 == 2) View.GONE else View.VISIBLE
+            topLine.visibility = if (adapterPosition < 3) View.VISIBLE else View.GONE
         }
     }
 }

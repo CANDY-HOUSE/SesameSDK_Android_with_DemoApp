@@ -1,31 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
 
-    android:layout_height="120dp">
+    android:background="@color/white">
+
     <TextView
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:id="@+id/tvName"
-        android:textColor="@color/black"
-        android:textSize="22sp"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        />
-   <View
-       android:layout_width="match_parent"
-       android:layout_height="1dp"
-       android:layout_gravity="bottom"
-       android:background="@color/gray8"
-       android:id="@+id/lb"/>
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <View
+        android:id="@+id/lb"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="@color/gray8" />
+
+    <View
+        android:id="@+id/lr"
         android:layout_width="1dp"
         android:layout_height="match_parent"
         android:layout_gravity="right"
-        android:background="@color/gray8"
-        android:id="@+id/lr"/>
+        android:background="@color/gray8" />
+
+    <View
+        android:id="@+id/topLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="top"
+        android:background="@color/gray8" />
 </FrameLayout>

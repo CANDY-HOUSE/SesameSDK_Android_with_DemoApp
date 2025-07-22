@@ -38,7 +38,6 @@
         android:paddingBottom="12dp"
         android:layout_marginLeft="10dp"
         android:paddingTop="12dp"
-        android:singleLine="true"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit="marquee_forever"
         android:focusable="true"
