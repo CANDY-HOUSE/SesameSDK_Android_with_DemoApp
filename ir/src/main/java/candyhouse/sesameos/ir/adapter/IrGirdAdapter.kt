@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.runtime.currentComposer
 import androidx.recyclerview.widget.RecyclerView
 import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.base.CHHub3IRCode
@@ -32,9 +33,10 @@ class IrGridAdapter(
     override fun getItemCount(): Int = mData.size
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val columnsPerRow = 3
         private val tvName: TextView = itemView.findViewById(R.id.tvName)
         private val lr: View = itemView.findViewById(R.id.lr)
-        private val topLine: View = itemView.findViewById(R.id.topLine)
+        private val lb: View = itemView.findViewById(R.id.lb)
 
         fun bind(item: CHHub3IRCode) {
             tvName.text = if (item.name.isEmpty()) {
@@ -62,8 +64,18 @@ class IrGridAdapter(
                 onLongClickItem(adapterPosition,item)
                 true
             }
-            lr.visibility = if (adapterPosition % 3 == 2) View.GONE else View.VISIBLE
-            topLine.visibility = if (adapterPosition < 3) View.VISIBLE else View.GONE
+            lr.visibility = if (isLastColumn(adapterPosition)) View.GONE else View.VISIBLE
+            lb.visibility = if (isInLastRow(adapterPosition)) View.GONE else View.VISIBLE
+        }
+
+        private fun isInLastRow(position: Int): Boolean {
+            val totalRows = (itemCount + columnsPerRow - 1) / columnsPerRow
+            val currentRow = position / columnsPerRow
+            return currentRow == totalRows - 1
+        }
+
+        private fun isLastColumn(position: Int): Boolean {
+            return position % columnsPerRow == (columnsPerRow - 1)
         }
     }
 }

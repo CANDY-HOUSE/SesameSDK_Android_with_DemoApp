@@ -30,11 +30,12 @@ class AirControlViewsAdapter(
         private val onItemClick: (IrControlItem) -> Unit,
         private val adapter: AirControlViewsAdapter
     ) : RecyclerView.ViewHolder(binding.root) {
-
+        private val columnsPerRow = 3
         fun bind(item: IrControlItem, position: Int) {
             binding.apply {
                 tvTitle.setText(item.title)
-                topLine.visibility = if (position < 3) View.VISIBLE else View.GONE
+                rightLine.visibility = if (isLastColumn(adapterPosition)) View.GONE else View.VISIBLE
+                bottomLine.visibility = if (isInLastRow(adapterPosition)) View.GONE else View.VISIBLE
                 if (item.iconRes == 0) {
                     ivIcon.setImageDrawable(null)
                 } else {
@@ -60,6 +61,16 @@ class AirControlViewsAdapter(
 
 
             }
+        }
+
+        private fun isInLastRow(position: Int): Boolean {
+            val totalRows = (adapter.itemCount + columnsPerRow - 1) / columnsPerRow
+            val currentRow = position / columnsPerRow
+            return currentRow == totalRows - 1
+        }
+
+        private fun isLastColumn(position: Int): Boolean {
+            return position % columnsPerRow == (columnsPerRow - 1)
         }
 
         companion object {

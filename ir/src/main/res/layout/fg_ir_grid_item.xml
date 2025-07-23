@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="120dp"
-
     android:background="@color/white">
 
     <TextView
@@ -22,19 +21,13 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_gravity="bottom"
-        android:background="@color/gray8" />
+        android:background="@color/gray5" />
 
     <View
         android:id="@+id/lr"
         android:layout_width="1dp"
         android:layout_height="match_parent"
         android:layout_gravity="right"
-        android:background="@color/gray8" />
+        android:background="@color/gray5" />
 
-    <View
-        android:id="@+id/topLine"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="top"
-        android:background="@color/gray8" />
 </FrameLayout>
