@@ -6,13 +6,12 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import androidx.lifecycle.lifecycleScope
 import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.adapter.IrCompanyAdapter
 import candyhouse.sesameos.ir.base.IrRemote
@@ -20,14 +19,12 @@ import candyhouse.sesameos.ir.databinding.FgIrCpfgBinding
 import candyhouse.sesameos.ir.ext.Config
 import candyhouse.sesameos.ir.ext.Ext
 import candyhouse.sesameos.ir.ext.IRDeviceType
-import co.candyhouse.sesame.utils.L
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
+import java.util.Collections
 import java.util.Locale
-
 
 class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
 
@@ -35,38 +32,48 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
     private val tag: String = IrCompanyFg::class.java.simpleName
 
     private var originalY: Float = 0f
-
-    var searchList: MutableList<IrRemote> = mutableListOf()
-    private lateinit var irCompanyAdapter: IrCompanyAdapter
-    private lateinit var searchAdapter: IrCompanyAdapter
-    private val controlList = mutableListOf<IrRemote>()
+    private var isInSearchMode = false
+    private val masterList = Collections.synchronizedList(mutableListOf<IrRemote>())
+    private var currentDisplayList: List<IrRemote> = emptyList()
+    private lateinit var irAdapter: IrCompanyAdapter
+    private var searchJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupCompanyRecyclerView()
+        setupRecyclerView()
         setupSearchView()
         setupSideBarView()
         setupSearchAnimation()
         initData()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchJob?.cancel()
+        searchJob = null
+    }
+
     private fun initData() {
         initIrRemoteData()
     }
 
-    private fun setupSearchView() {
-        searchAdapter = IrCompanyAdapter(requireActivity(), searchList) { irRemote,position ->
+    private fun setupRecyclerView() {
+        irAdapter = IrCompanyAdapter(requireActivity()) { irRemote, position ->
             gotoIrControlView(irRemote)
         }
-        bind.editRyView.adapter = searchAdapter
+        bind.indexTb.adapter = irAdapter
+    }
+
+    private fun setupSearchView() {
         bind.edtTv.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                if (s != null && s.toString().isNotEmpty()) {
-                    performSearch(s.toString())
-                } else {
-                    restoreInitialState()
+                val searchText = s?.toString() ?: ""
+                if (searchText.isNotEmpty()) {
+                    performSearch(searchText)
+                } else if (isInSearchMode) {
+                    exitSearchMode()
                 }
             }
         })
@@ -78,7 +85,7 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
             this.putInt(Config.productKey, arguments?.getInt(Config.productKey) ?: -1)
             this.putParcelable(Config.irDevice, irRemoteDevice)
             this.putBoolean(Config.isNewDevice, true)
-        }).also { clearSearchBar() }
+        })
     }
 
     private fun updateRemoteDevice(irRemoteDevice: IrRemote) {
@@ -88,52 +95,56 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         }
     }
 
-    fun performSearch(key: String) {
+    private fun performSearch(key: String) {
         if (key.isEmpty()) return
-        searchList.clear()
-        irCompanyAdapter.children.forEach { parentItem ->
-            if (parentItem.alias.uppercase().contains(key.uppercase())) {
-                searchList.add(parentItem)
+        searchJob?.cancel()
+
+        if (!isInSearchMode) {
+            enterSearchMode()
+        }
+        searchJob = viewLifecycleOwner.lifecycleScope.launch {
+            val filteredList = withContext(Dispatchers.Default) {
+                synchronized(masterList) {
+                    masterList.filter { it.alias.uppercase().contains(key.uppercase()) }
+                }
             }
-        }
-        restoreInitialState(true)
-    }
-
-    fun restoreInitialState(isShowEdit: Boolean = false) {
-        if (isShowEdit) {
-            bind.indexTb.visibility = View.GONE
-            bind.editRyView.visibility = View.VISIBLE
-            searchAdapter.updateChildren(searchList, bind.edtTv.text.toString())
-        } else {
-            bind.indexTb.visibility = View.VISIBLE
-            bind.editRyView.visibility = View.GONE
-            searchList.clear()
+            currentDisplayList = filteredList
+            irAdapter.updateData(filteredList, key, true)
         }
     }
 
-    private fun setupCompanyRecyclerView() {
-        irCompanyAdapter = IrCompanyAdapter(requireActivity(), emptyList()) { irRemote,position  ->
-            gotoIrControlView(irRemote)
-        }
-        bind.indexTb.adapter = irCompanyAdapter
+    private fun enterSearchMode() {
+        isInSearchMode = true
+        expandSearchBar()
+        bind.sideBar.visibility = View.GONE
+    }
+
+    private fun exitSearchMode() {
+        isInSearchMode = false
+        collapseSearchBar()
+        currentDisplayList = masterList
+        irAdapter.updateData(masterList, "", false)
+        bind.sideBar.visibility = View.VISIBLE
     }
 
     private fun setupSideBarView() {
         bind.sideBar.setOnTouchingLetterChangedListener { k ->
-            for (i in 0 until irCompanyAdapter.children.size) {
-                if (irCompanyAdapter.children[i].direction?.uppercase(Locale.ROOT) == k.toUpperCase()) {
-                    bind.indexTb.scrollToPosition(i)
-                    break
+            if (!isInSearchMode) {
+                for (i in 0 until masterList.size) {
+                    if (masterList[i].direction?.uppercase(Locale.ROOT) == k.toUpperCase()) {
+                        bind.indexTb.scrollToPosition(i)
+                        break
+                    }
                 }
             }
         }
     }
 
-
     private fun showControlView() {
-        irCompanyAdapter.updateChildren(controlList)
-        CoroutineScope(Dispatchers.IO).launch {
-            setupSideBar(controlList)
+        currentDisplayList = masterList
+        irAdapter.updateData(masterList)
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            setupSideBar(masterList)
         }
     }
 
@@ -170,7 +181,6 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         } else if (key == IRDeviceType.DEVICE_REMOTE_PJT) {
             value = R.array.strs_pjt_type
         } else if (key == IRDeviceType.DEVICE_REMOTE_LIGHT) {
-//            value = R.array.strs_light_type
             value = R.raw.light_control_type
         } else if (key == IRDeviceType.DEVICE_REMOTE_DC) {
             value = R.array.strs_dc_type
@@ -183,9 +193,13 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
     }
 
     private fun initIrRemoteData() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val key = arguments?.getInt(Config.productKey) ?: -1
-            controlList.addAll(Ext.parseJsonToDeviceList(requireContext(), deviceKeyToAttrs(key),key))
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            if (masterList.isEmpty()) {
+                synchronized(masterList) {
+                    val key = arguments?.getInt(Config.productKey) ?: -1
+                    masterList.addAll(Ext.parseJsonToDeviceList(requireContext(), deviceKeyToAttrs(key), key))
+                }
+            }
             withContext(Dispatchers.Main) {
                 showControlView()
             }
@@ -200,21 +214,20 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
 
         // 编辑框焦点监听
         bind.edtTv.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                expandSearchBar()
+            if (hasFocus && !isInSearchMode) {
+                enterSearchMode()
             }
         }
 
         // 取消按钮点击监听
         bind.textViewSearchCancel.setOnClickListener {
-            collapseSearchBar()
+            exitSearchMode()
         }
     }
 
     private fun expandSearchBar() {
+        bind.indexTb.stopScroll()
         val animSet = AnimatorSet()
-
-        // 使用translationY代替y
         val moveUpAnim = ObjectAnimator.ofFloat(
             bind.linearLayoutResearch,
             "translationY",
@@ -231,13 +244,11 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         fadeOutNotice.duration = 800
         fadeInCancel.duration = 800
 
-        animSet.start()
-
+        animSet.playTogether(moveUpAnim, fadeOutTopTitle, fadeOutNotice, fadeInCancel)
         animSet.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator) {
                 bind.textViewSearchCancel.visibility = View.VISIBLE
                 updateEditTextMargin(false)
-                bind.textViewSearchCancel.alpha = 1f
             }
 
             override fun onAnimationEnd(animation: Animator) {
@@ -262,38 +273,29 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         // 其他动画保持不变
         val fadeInTopTitle = ObjectAnimator.ofFloat(bind.linearLayoutTitle, "alpha", 0f, 1f)
         val fadeInNotice = ObjectAnimator.ofFloat(bind.textviewIrCompanyNotice, "alpha", 0f, 1f)
+        val fadeOutCancel = ObjectAnimator.ofFloat(bind.textViewSearchCancel, "alpha", 1f, 0f)
 
         fadeInTopTitle.duration = 800
         fadeInNotice.duration = 800
+        fadeOutCancel.duration = 800
 
-        animSet.playTogether(moveDownAnim, fadeInTopTitle, fadeInNotice)
+        animSet.playTogether(moveDownAnim, fadeInTopTitle, fadeInNotice, fadeOutCancel)
 
         animSet.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator) {
                 bind.edtTv.text.clear()
-                bind.textViewSearchCancel.visibility = View.GONE
                 bind.linearLayoutTitle.visibility = View.VISIBLE
                 bind.textviewIrCompanyNotice.visibility = View.VISIBLE
                 updateEditTextMargin(true)
             }
 
             override fun onAnimationEnd(animation: Animator) {
+                bind.textViewSearchCancel.visibility = View.GONE
                 bind.edtTv.clearFocus()
                 hideKeyboard()
             }
         })
-
         animSet.start()
-    }
-
-    private fun clearSearchBar() {
-        bind.edtTv.text.clear()
-        bind.textViewSearchCancel.visibility = View.GONE
-        bind.linearLayoutTitle.visibility = View.VISIBLE
-        bind.textviewIrCompanyNotice.visibility = View.VISIBLE
-        updateEditTextMargin(true)
-        bind.edtTv.clearFocus()
-        hideKeyboard()
     }
 
     private fun updateEditTextMargin(showMargin: Boolean) {
@@ -315,6 +317,4 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
             imm.hideSoftInputFromWindow(bind.edtTv.windowToken, 0)
         }
     }
-
-
 }
