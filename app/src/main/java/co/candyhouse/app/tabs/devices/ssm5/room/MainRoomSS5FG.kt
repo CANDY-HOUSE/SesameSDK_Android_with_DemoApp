@@ -140,7 +140,7 @@ class MainRoomSS5FG : BaseDeviceFG<FgRoomSs5MainBinding>() {
                 L.d("uuid historyTag", "本地数据：$i ${mHistorys[i].date} ${mHistorys[i].recordID} ${mHistorys[i].historyTag?.toHexString()}")
             }
             for (i in newHistories.indices) {
-                L.d("uuid historyTag", "服务器数据：$i ${newHistories[i].date} ${newHistories[i].recordID} ${newHistories[i].historyTag?.toHexString()}")
+                L.d("uuid historyTag", "服务器数据：$i 日期： ${newHistories[i].date} ID： ${newHistories[i].recordID} Tag: ${newHistories[i].historyTag?.toHexString()} isCritical: ${newHistories[i].mechStatus?.isCritical} ")
             }
         }
     }

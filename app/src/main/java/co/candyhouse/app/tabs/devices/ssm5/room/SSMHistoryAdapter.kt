@@ -54,6 +54,7 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
         return ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_simple_item, parent, false))
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindItemViewHolder(viewHolder: SectioningAdapter.ItemViewHolder, sectionIndex: Int, itemIndex: Int, itemType: Int) {
 
         val history = mGroupHistData[sectionIndex].second[itemIndex]
@@ -61,8 +62,9 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
         (viewHolder as ItemViewHolder).apply {
 //            locktype.text = history.javaClass.simpleName
             if (BuildConfig.DEBUG) {
-                time.text = SimpleDateFormat("HH:mm:ss a", Locale.getDefault()).format(history.date) + " " + history.recordID
-            }else{
+                val isCriticalText = history.mechStatus?.isCritical?.let { if (it) "失败" else "" } ?: ""
+                time.text = "${SimpleDateFormat("HH:mm:ss a", Locale.getDefault()).format(history.date)} ${history.recordID} $isCriticalText"
+            } else {
                 time.text = SimpleDateFormat("HH:mm:ss a", Locale.getDefault()).format(history.date)
             }
             val titleFirst= history.historyTag?.let { String(it) } ?: when (history) {

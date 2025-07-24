@@ -374,6 +374,8 @@ interface CHSesameProtocolMechStatus {
         get() = !isInLockRange
     val isStop: Boolean?
         get() = null
+    val isCritical: Boolean?
+        get() = null
 
     val data: ByteArray
 
