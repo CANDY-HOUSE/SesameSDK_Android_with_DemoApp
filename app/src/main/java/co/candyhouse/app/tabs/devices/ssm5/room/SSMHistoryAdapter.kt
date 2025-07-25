@@ -62,10 +62,11 @@ class SSM5HistoryAdapter(var mGroupHistData: ArrayList<Pair<String, List<CHSesam
         (viewHolder as ItemViewHolder).apply {
 //            locktype.text = history.javaClass.simpleName
             if (BuildConfig.DEBUG) {
-                val isCriticalText = history.mechStatus?.isCritical?.let { if (it) "失败" else "" } ?: ""
+                val isCriticalText = history.mechStatus?.isCritical?.let { if (it) "⚠\uFE0F" else "" } ?: ""
                 time.text = "${SimpleDateFormat("HH:mm:ss a", Locale.getDefault()).format(history.date)} ${history.recordID} $isCriticalText"
             } else {
-                time.text = SimpleDateFormat("HH:mm:ss a", Locale.getDefault()).format(history.date)
+                val isCriticalText = history.mechStatus?.isCritical?.let { if (it) "⚠\uFE0F" else "" } ?: ""
+                time.text = "${SimpleDateFormat("HH:mm:ss a", Locale.getDefault()).format(history.date)} $isCriticalText"
             }
             val titleFirst= history.historyTag?.let { String(it) } ?: when (history) {
                 is CHSesame5History.AutoLock -> name.context.getString(R.string.autolock)

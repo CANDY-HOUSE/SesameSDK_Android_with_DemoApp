@@ -136,7 +136,7 @@ class TopicSubscriptionManager(private val context: Context) {
         val request = SubscriptionRequest(
             topicName = topic,
             token = token,
-            androidDeviceId = androidDeviceId
+            appDeviceId = androidDeviceId
         )
 
         CHAccountManager.subscribeToTopic(request) { result ->

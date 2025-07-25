@@ -212,7 +212,12 @@ class IRDeviceViewModel : ViewModel() {
     // 避免lateinit property chHub3 has not been initialized
     fun getCHHub3(): CHHub3 {
         if (!::chHub3.isInitialized) {
-            chHub3 = BaseIr.hub3Device.value!!
+            // fixes NullPointerException from firebase crash
+            try {
+                chHub3 = BaseIr.hub3Device.value!!
+            } catch (e: NullPointerException) {
+                throw IllegalStateException("Failed to get CHHub3: hub3Device is null", e)
+            }
         }
         return chHub3
     }

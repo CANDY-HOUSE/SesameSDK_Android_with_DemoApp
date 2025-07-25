@@ -8,5 +8,5 @@ package co.candyhouse.sesame.server.dto
 data class SubscriptionRequest(
     val topicName: String,
     val token: String,
-    val androidDeviceId: String
+    val appDeviceId: String
 )
