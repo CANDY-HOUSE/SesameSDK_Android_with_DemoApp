@@ -23,9 +23,9 @@ class CHSesameOpenSensorMechStatus(openSensorData: OpenSensorData) : CHSesamePro
         }
         lightLoadBatteryVoltage?.let {
             // return (it + heavyLoadBatteryVoltage!!) / 1000f
-            return it.toFloat()
+            return it.toFloat() * 2f / 1000f
         }
-        return 0f
+        return 6.00f
     }
 
     // OpenSensor 用的电池是 CR1632, 与 Touch Pro 用的电池 CR123A 不同。
