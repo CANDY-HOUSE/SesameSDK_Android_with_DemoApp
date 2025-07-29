@@ -22,7 +22,8 @@ class CHSesameOpenSensorMechStatus(openSensorData: OpenSensorData) : CHSesamePro
             return it * 2f / 1000f
         }
         lightLoadBatteryVoltage?.let {
-            return (it + heavyLoadBatteryVoltage!!) / 1000f
+            // return (it + heavyLoadBatteryVoltage!!) / 1000f
+            return it.toFloat()
         }
         return 0f
     }
