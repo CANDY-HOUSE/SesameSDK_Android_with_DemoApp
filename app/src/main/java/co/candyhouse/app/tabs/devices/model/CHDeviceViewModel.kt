@@ -44,7 +44,6 @@ import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.uuidToBytes
 import co.receiver.widget.SesameForegroundService
 import co.receiver.widget.SesameReceiver
 import co.utils.JsonUtil
@@ -52,8 +51,6 @@ import co.utils.JsonUtil.parseList
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -61,7 +58,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -88,8 +88,31 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private val delegateManager = DeviceViewModelDelegates(this)
     val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
     private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
-
     private val iRRepository = IrRemoteRepository()
+
+    // 搜索关键词
+    val searchQuery = MutableStateFlow("")
+    // 过滤后的设备列表
+    val filteredDevices = combine(myChDevices, searchQuery) { devices, query ->
+        if (query.isEmpty()) {
+            devices
+        } else {
+            devices.filter { device ->
+                // 根据名称和UUID过滤（忽略大小写）
+                device.getNickname().contains(query, ignoreCase = true) || device.deviceId?.toString()?.contains(query, ignoreCase = true) == true
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = myChDevices.value
+    )
+
+    // 更新搜索关键词
+    fun updateSearchQuery(query: String) {
+        L.e("DeviceListFG","updateSearchQuery $query")
+        searchQuery.value = query
+    }
 
     fun saveKeysToServer() {
         CHDeviceManager.getCandyDevices { it ->

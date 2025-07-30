@@ -1,10 +1,16 @@
 package co.candyhouse.app.tabs.devices
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import candyhouse.sesameos.ir.base.BaseIr.Companion.hub3Device
@@ -16,6 +22,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.tabs.HomeFragment
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
@@ -26,13 +33,21 @@ import co.utils.recycle.GenericAdapter
 import co.utils.recycle.SimpleItemTouchHelperCallback
 import co.utils.safeNavigate
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
+    private val tag = "DeviceListFG"
+
     override fun getViewBinder() = FgDevicelistBinding.inflate(layoutInflater)
 
     private lateinit var adapter: GenericAdapter<CHDevices>
     private lateinit var itemTouchHelper: ItemTouchHelper
+
+    private var isSearchVisible = true
+    private var searchJob: Job? = null
+    private var lastSearchQuery = ""
 
     override fun onResume() {
         super.onResume()
@@ -58,12 +73,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             }
         }
 
+        bind.searchEditText.text.clear()
         super.onPause()
     }
 
     override fun setupUI() {
         initializeAdapter()
 
+        bind.appBarLayout.setExpanded(false, false)
         bind.leaderboardList.setEmptyView(bind.emptyView)
         bind.leaderboardList.adapter = adapter
     }
@@ -71,11 +88,40 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     override fun setupListeners() {
         //下拉刷新
         bind.swiperefresh.setOnRefreshListener {
+            L.d(tag, "下拉刷新...")
             bind.swiperefresh.isRefreshing = true
             CHDeviceManager.isRefresh.set(true)
             mDeviceViewModel.refleshDevices()
         }
+
+        setupSearchBehavior()
+        setupSearchEditTextListener()
+        setupBackViewListener()
+    }
+
+    private fun setupSearchBehavior() {
+        bind.appBarLayout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+            val totalScrollRange = appBarLayout.totalScrollRange
+            val scrollPercentage = Math.abs(verticalOffset).toFloat() / totalScrollRange
+
+            val wasVisible = isSearchVisible
+            isSearchVisible = scrollPercentage < 0.5f
+
+            if (wasVisible && !isSearchVisible) {
+                hideKeyboard()
+            }
+
+            bind.searchEditText.alpha = 1 - scrollPercentage
+        }
+
         bind.leaderboardList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                // 向上滚动且键盘显示时，收起键盘
+                if (dy > 0 && isKeyboardVisible()) {
+                    hideKeyboard()
+                }
+            }
+
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -85,11 +131,53 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
         })
+    }
 
-        setupBackViewListener()
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(bind.searchEditText.windowToken, 0)
+        bind.searchEditText.clearFocus()
+    }
+
+    private fun isKeyboardVisible(): Boolean {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        return imm.isAcceptingText
+    }
+
+    private fun setupSearchEditTextListener() {
+        bind.searchEditText.doOnTextChanged { text, _, _, _ ->
+            val currentQuery = text.toString()
+
+            if (currentQuery == lastSearchQuery) {
+                return@doOnTextChanged
+            }
+
+            lastSearchQuery = currentQuery
+            searchJob?.cancel()
+
+            // 延迟 300ms 执行搜索，避免频繁触发
+            searchJob = lifecycleScope.launch {
+                delay(300)
+                performSearch(currentQuery)
+            }
+        }
+
+        bind.searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun performSearch(query: String) {
+        mDeviceViewModel.updateSearchQuery(query)
     }
 
     override fun <T : View> observeViewModelData(view: T) {
+        // 初次加载列表
         lifecycleScope.launch {
             mDeviceViewModel.myChDevices.collect {
                 view.post {
@@ -101,10 +189,34 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
         }
+        // 刷新列表
         mDeviceViewModel.neeReflesh.observe(viewLifecycleOwner) { isR ->
             CHDeviceManager.isRefresh.set(false)
             bind.swiperefresh.isRefreshing = false
-            adapter.updateList(mDeviceViewModel.myChDevices.value, isR.postion)
+
+            L.d(tag, "neeReflesh... ${isR.postion}")
+            val displayList = if (mDeviceViewModel.searchQuery.value.isEmpty()) {
+                mDeviceViewModel.myChDevices.value
+            } else {
+                // 重新过滤，确保获取最新状态
+                val query = mDeviceViewModel.searchQuery.value
+                L.d(tag, "刷新搜索结果页面... $query")
+                ArrayList(mDeviceViewModel.myChDevices.value.filter { device ->
+                    device.getNickname().contains(query, ignoreCase = true) ||
+                            device.deviceId?.toString()?.contains(query, ignoreCase = true) == true
+                })
+            }
+
+            adapter.updateList(displayList, isR.postion)
+        }
+        // 监听过滤后的列表
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mDeviceViewModel.filteredDevices.collect { devices ->
+                    L.d(tag, "监听过滤后的列表数目  ${devices.size}")
+                    adapter.updateList(ArrayList(devices))
+                }
+            }
         }
     }
 
@@ -123,15 +235,11 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     }
 
     private fun handleCallBackHub3(hub3: CHHub3, irRemote: IrRemote) {
-        L.d("sf", "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
+        L.d(tag, "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
         hub3Device.value = hub3
         //增加hub3Device.value空判断，如果为空提示用户下拉刷新
         if (hub3Device.value == null) {
-            Toast.makeText(
-                context,
-                "Unexpected error. Pull to refresh.",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(context, "Unexpected error. Pull to refresh.", Toast.LENGTH_SHORT).show()
             return
         }
         when (irRemote.type) {
@@ -154,7 +262,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             }
 
             else -> {
-                L.d("sf", "暂不支持未知类型跳转...")
+                L.d(tag, "暂不支持未知类型跳转...")
             }
         }
     }

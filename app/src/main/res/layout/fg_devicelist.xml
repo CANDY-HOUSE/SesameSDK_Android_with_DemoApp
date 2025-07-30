@@ -15,7 +15,6 @@
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="blestatus"
             android:visibility="gone" />
 
         <TextView
@@ -24,7 +23,6 @@
             android:layout_height="match_parent"
             android:layout_toEndOf="@+id/ble_status_txt"
             android:gravity="center"
-            android:text="blestatus"
             android:visibility="gone" />
 
         <RelativeLayout
@@ -44,23 +42,62 @@
 
     </RelativeLayout>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swiperefresh"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/menu">
 
-        <co.utils.recycle.EmptyRecyclerView
-            android:id="@+id/leaderboard_list"
+        <!-- 搜索框容器 -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            app:elevation="0dp">
+
+            <!-- 搜索框 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                app:layout_scrollFlags="scroll|enterAlways|snap">
+
+                <EditText
+                    android:id="@+id/searchEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/search_background"
+                    android:drawableStart="@drawable/ic_search"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/search_devices"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swiperefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <co.utils.recycle.EmptyRecyclerView
+                android:id="@+id/leaderboard_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <TextView
         android:id="@+id/empty_view"
