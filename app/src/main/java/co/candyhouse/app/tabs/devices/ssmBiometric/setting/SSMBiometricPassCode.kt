@@ -157,14 +157,14 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
                 val jsonString = inputStream.bufferedReader().use { it.readText() }
                 val jsonObject = JSONObject(jsonString)
-                val passcodesObject = jsonObject.getJSONObject("passcodes")
+                val passcodesArray = jsonObject.getJSONArray("passcodes")
 
                 val tempList = mutableListOf<Byte>()
 
-                val keys = passcodesObject.keys()
-                while (keys.hasNext()) {
-                    val account = keys.next()
-                    val password = passcodesObject.getString(account)
+                for (i in 0 until passcodesArray.length()) {
+                    val passcode = passcodesArray.getJSONObject(i)
+                    val account = passcode.getString("account")
+                    val password = passcode.getString("password")
 
                     // 处理密码
                     val hexPassword = convertPasswordToHex(password)
