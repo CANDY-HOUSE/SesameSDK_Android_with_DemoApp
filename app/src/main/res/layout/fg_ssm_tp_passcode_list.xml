@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
+
     <RelativeLayout
         android:id="@+id/menu"
-
         android:layout_width="match_parent"
         android:layout_height="40dp">
+
         <TextView
             android:id="@+id/menu_title"
             android:layout_width="wrap_content"
@@ -19,6 +20,7 @@
             android:textColor="@color/title"
             app:autoSizeTextType="uniform"
             tools:text="name" />
+
         <include
             layout="@layout/back_sub"
             android:layout_width="100dp"
@@ -29,6 +31,7 @@
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true">
+
             <ImageView
                 android:id="@+id/img_mode_verify"
                 android:layout_width="wrap_content"
@@ -51,8 +54,19 @@
                 android:visibility="gone" />
         </RelativeLayout>
 
-
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/menu"
+        android:background="#f2f2f7"
+        android:paddingVertical="10dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/TouchEmptyPasscodeHint"
+        android:textSize="18sp" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
@@ -60,7 +74,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/empty_view">
 
-        <co.utils.recycle.EmptyRecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
+        <co.utils.recycle.EmptyRecyclerView
             android:id="@+id/leaderboard_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -71,16 +85,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    <TextView
-        android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_below="@id/menu"
-        android:text="@string/TouchEmptyPasscodeHint"
-        android:textSize="18sp"
-        android:background="#f2f2f7"
-        android:paddingVertical="10dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:layout_height="wrap_content">
-    </TextView>
+
 </RelativeLayout>

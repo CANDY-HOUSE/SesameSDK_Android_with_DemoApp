@@ -64,6 +64,9 @@ internal enum class SSM2OpCode(val value: Byte) {
     }
 }
 
+internal enum class StpItemCode(val value: UByte) {
+    STP_ITEM_CODE_CARDS_ADD(182u), STP_ITEM_CODE_CARDS_DELETE(183u), STP_ITEM_CODE_PASSCODES_ADD(184u), STP_ITEM_CODE_PASSCODES_DELETE(185u),
+}
 
 internal enum class Sesame2HistoryTypeEnum(var value: Byte) {
 

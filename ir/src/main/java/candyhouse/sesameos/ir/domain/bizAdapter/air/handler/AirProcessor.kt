@@ -266,13 +266,13 @@ class AirProcessor : IrInterface {
 
         // 1. 基本格式验证
         if (state.isEmpty()) {
-            println("Error: Empty input")
+            L.d("","Error: Empty input")
             return false
         }
 
         // 3. 格式检查：确保都是有效的十六进制字符
         if (!state.matches("[0-9A-Fa-f]+".toRegex())) {
-            println("Error: Invalid hex characters in input")
+            L.d("","Error: Invalid hex characters in input")
             return false
         }
 

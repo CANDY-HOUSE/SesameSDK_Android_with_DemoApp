@@ -1,6 +1,7 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode
 
 import co.candyhouse.sesame.ble.SesameItemCode
+import co.candyhouse.sesame.ble.StpItemCode
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHResult
@@ -9,14 +10,14 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.C
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
-import co.candyhouse.sesame.server.dto.AuthenticationData
-import co.candyhouse.sesame.server.dto.CredentialListResponse
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.hexStringToByteArray
-import com.google.gson.Gson
+import co.candyhouse.sesame.utils.toHexString
+import co.candyhouse.sesame.utils.toReverseBytes
+import java.lang.Thread.sleep
+import java.util.concurrent.CountDownLatch
 import kotlin.collections.set
 
 internal open class CHPassCodeCapableImpl() :
@@ -46,6 +47,69 @@ internal open class CHPassCodeCapableImpl() :
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
+    }
+
+    override fun keyBoardPassCodeBatchAdd(data: ByteArray, progressCallback: ((current: Int, total: Int) -> Unit)?, result: CHResult<CHEmpty>) {
+        Thread {
+            try {
+                val dataSize: Short = data.size.toShort()
+                var dataIndex: Short = 0.toShort()
+                val MAX_PAYLOAD_SIZE = 209
+
+                // 计算总包数（向上取整）
+                val totalPackets = (dataSize + MAX_PAYLOAD_SIZE - 1) / MAX_PAYLOAD_SIZE
+                var currentPacket = 0
+
+                L.d("sf", "totalPackets:$totalPackets dataSize:" + dataSize.toReverseBytes().toHexString())
+
+                while (dataIndex < dataSize) {
+                    currentPacket++
+
+                    // 通知进度
+                    progressCallback?.invoke(currentPacket, totalPackets)
+
+                    val tempList = mutableListOf<Byte>()
+                    tempList.addAll(dataIndex.toReverseBytes().toList())
+                    tempList.addAll(dataSize.toReverseBytes().toList())
+
+                    val remainingSize = dataSize - dataIndex
+                    val chunkSize = minOf(remainingSize, MAX_PAYLOAD_SIZE)
+
+                    tempList.addAll(data.slice(dataIndex until (dataIndex + chunkSize)))
+                    dataIndex = (dataIndex + chunkSize).toShort()
+
+                    val batchData = tempList.toByteArray()
+                    L.d("sf", "Packet $currentPacket/$totalPackets - size: ${batchData.size}")
+
+                    val latch = CountDownLatch(1)
+                    var sendSuccess = false
+
+                    sendCommandSafely(
+                        SesameOS3Payload(StpItemCode.STP_ITEM_CODE_PASSCODES_ADD.value, batchData),
+                        result
+                    ) {
+                        sendSuccess = true
+                        latch.countDown()
+                    }
+
+                    latch.await()
+
+                    if (!sendSuccess) {
+                        result.invoke(Result.failure(Exception("Failed at index $currentPacket")))
+                        return@Thread
+                    }
+
+                    // 如果还有数据要发送，延迟4秒
+                    if (dataIndex < dataSize) {
+                        sleep(4000)
+                    }
+                }
+
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } catch (e: Exception) {
+                result.invoke(Result.failure(e))
+            }
+        }.start()
     }
 
     override fun keyBoardPassCodeDelete(keyBoardPassCodeID: String, deviceId: String, result: CHResult<CHEmpty>) {

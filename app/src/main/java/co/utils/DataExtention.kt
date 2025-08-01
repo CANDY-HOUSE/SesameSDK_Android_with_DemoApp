@@ -72,7 +72,6 @@ internal fun String.hexStringToByteArray() =
 internal fun String.hexStringToIntStr(): String {
     var tmp = ""
     for ((index, value) in this.withIndex()) {
-        println("the element at $index is $value")
         if (index % 2 == 1) {
             tmp += value
         }

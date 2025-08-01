@@ -1,10 +1,18 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
 import android.annotation.SuppressLint
+import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
@@ -17,9 +25,9 @@ import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode.CHPassCodeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode.CHPassCodeDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -33,8 +41,11 @@ import co.utils.isUUIDv4
 import co.utils.noHashtoUUID
 import co.utils.recycle.GenericAdapter
 import co.utils.recycle.GenericAdapter.Binder
+import co.utils.toHexString
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.UUID
 
 data class KeyboardPassCode(var id: String, var name: String, var type: Byte, var nameUUID: String)
@@ -57,6 +68,16 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
     private val tag = "SesameKeyboardPassCode"
     private val operationType = "passcode"
 
+    private val jsonFileLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            readJsonAndWriteToBluetooth(it)
+        }
+    }
+
+    private var progressDialog: AlertDialog? = null
+
     override fun getViewBinder() = FgSsmTpPasscodeListBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -77,6 +98,8 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
     override fun onDestroyView() {
         cleanupResources()
         super.onDestroyView()
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 
     /**
@@ -115,6 +138,129 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
         bind.imgModeVerify.setOnClickListener {
             setPassCodeMode(MODE_REGISTER)
         }
+
+        // 长按按钮
+        bind.imgModeVerify.setOnLongClickListener{
+            jsonFileLauncher.launch("application/json")
+            true
+        }
+    }
+
+    private fun readJsonAndWriteToBluetooth(uri: Uri) {
+        try {
+            // 检查文件扩展名
+            val fileName = getFileName(uri)
+            if (!fileName.endsWith(".json", ignoreCase = true)) {
+                Toast.makeText(context, "Please select a JSON file", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+                val jsonString = inputStream.bufferedReader().use { it.readText() }
+                val jsonObject = JSONObject(jsonString)
+                val passcodesObject = jsonObject.getJSONObject("passcodes")
+
+                val tempList = mutableListOf<Byte>()
+
+                val keys = passcodesObject.keys()
+                while (keys.hasNext()) {
+                    val account = keys.next()
+                    val password = passcodesObject.getString(account)
+
+                    // 处理密码
+                    val tempPasscodeValueList = mutableListOf<Byte>()
+                    for (j in password.indices step 2) {
+                        val hexPair = password.substring(j, j + 2)
+                        val hexValue = hexPair.toInt(16).toByte()
+                        tempPasscodeValueList.add(hexValue)
+                    }
+                    tempList.add(tempPasscodeValueList.size.toByte())
+                    tempList.addAll(tempPasscodeValueList)
+
+                    // 处理账号名称
+                    val MAX_PASSCODE_NAME_SIZE = 20
+                    var passcodeName = account.toByteArray()
+                    var passcodeNameSize = passcodeName.size
+                    if (passcodeNameSize > MAX_PASSCODE_NAME_SIZE) {
+                        passcodeNameSize = MAX_PASSCODE_NAME_SIZE
+                        passcodeName = passcodeName.sliceArray(0 until MAX_PASSCODE_NAME_SIZE)
+                    }
+                    tempList.add(passcodeNameSize.toByte())
+                    tempList.addAll(passcodeName.toList())
+                }
+
+                val payloadData = tempList.toByteArray()
+                L.d("sf", "DataSize: " + payloadData.size)
+
+                // 创建进度对话框
+                val dialogView = layoutInflater.inflate(R.layout.dialog_progress, null)
+                val progressBar = dialogView.findViewById<ProgressBar>(R.id.progressBar)
+                val progressText = dialogView.findViewById<TextView>(R.id.progressText)
+
+                progressBar.max = 100
+                progressText.text = "0%"
+
+                progressDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .setBackground(Color.TRANSPARENT.toDrawable())
+                    .create()
+                progressDialog?.window?.apply {
+                    setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+                    setDimAmount(0.2f)
+                }
+                progressDialog?.show()
+
+                // 添加密码到设备，传入进度回调
+                getPassCodeCapable()?.keyBoardPassCodeBatchAdd(
+                    data = payloadData,
+                    progressCallback = { current, total ->
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val percentage = (current * 100) / total
+                            progressBar.progress = percentage
+                            progressText.text = "$percentage%"
+                        }
+                    }
+                ) { result ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        progressDialog?.dismiss()
+                        progressDialog = null
+                        result.onSuccess {
+                            // 设置密码成功，重新加载数据
+                            loadInitialData()
+                        }.onFailure {
+                            Toast.makeText(context, "Password import failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            L.e("sf", "读取JSON文件失败", e)
+            Toast.makeText(context, "Failed to read file: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getFileName(uri: Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val columnIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (columnIndex != -1) {
+                        result = it.getString(columnIndex)
+                    }
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != -1) {
+                result = result?.substring(cut!! + 1)
+            }
+        }
+        return result ?: ""
     }
 
     /**
@@ -317,9 +463,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             authenticationData.type = type
             credentialList.add(authenticationData)
             val request = AuthenticationDataWrapper(
-                operation = operationType,
-                deviceID = getDeviceUUID(),
-                credentialList = credentialList
+                operation = operationType, deviceID = getDeviceUUID(), credentialList = credentialList
             )
             getPassCodeCapable()?.getBoardPassCodeDataSyncCapable()?.putAuthenticationData(request) { result ->
                 result.onSuccess {
@@ -341,9 +485,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             cardAuthenticationData.type = passCode.type
             credentialList.add(cardAuthenticationData)
             val request = AuthenticationDataWrapper(
-                operation = operationType,
-                deviceID = getDeviceUUID(),
-                credentialList = credentialList
+                operation = operationType, deviceID = getDeviceUUID(), credentialList = credentialList
             )
             getPassCodeCapable()?.getBoardPassCodeDataSyncCapable()?.deleteAuthenticationData(request) { result ->
                 result.onSuccess {
@@ -368,9 +510,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
                 credentialList.add(cardAuthenticationData)
             }
             val request = AuthenticationDataWrapper(
-                operation = operationType,
-                deviceID = getDeviceUUID(),
-                credentialList = credentialList
+                operation = operationType, deviceID = getDeviceUUID(), credentialList = credentialList
             )
             getPassCodeCapable()?.getBoardPassCodeDataSyncCapable()?.postAuthenticationData(request) { result ->
                 result.onSuccess {
@@ -424,8 +564,8 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
     ) : RecyclerView.ViewHolder(view), Binder<KeyboardPassCode> {
 
         override fun bind(data: KeyboardPassCode, pos: Int) {
-            val title = itemView.findViewById<TextView>(R.id.title)
-            val name = itemView.findViewById<TextView>(R.id.sub_title)
+            val title = itemView.findViewById<TextView>(R.id.cell_pwd)
+            val name = itemView.findViewById<TextView>(R.id.cell_pwd_name)
 
             // 设置文本
             title.text = data.id.hexStringToIntStr()

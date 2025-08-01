@@ -10,6 +10,7 @@ interface CHPassCodeCapable {
     fun sendKeyBoardPassCodeDataGetCmd(result: CHResult<CHEmpty>)
     fun keyBoardPassCodeChange(ID: String, name: String, result: CHResult<CHEmpty>)
     fun keyBoardPassCodeAdd(id: String, name: String, result: CHResult<CHEmpty>)
+    fun keyBoardPassCodeBatchAdd(data: ByteArray, progressCallback: ((current: Int, total: Int) -> Unit)? = null, result: CHResult<CHEmpty>)
     fun keyBoardPassCodeDelete(keyBoardPassCodeID: String, deviceId: String, result: CHResult<CHEmpty>)
     fun keyBoardPassCodeMove(keyBoardPassCodeID: String, touchProUUID: String, result: CHResult<CHEmpty>)
     fun keyBoardPassCodeModeGet(result: CHResult<Byte>)
