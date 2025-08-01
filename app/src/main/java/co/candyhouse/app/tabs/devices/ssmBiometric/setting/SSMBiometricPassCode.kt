@@ -41,7 +41,6 @@ import co.utils.isUUIDv4
 import co.utils.noHashtoUUID
 import co.utils.recycle.GenericAdapter
 import co.utils.recycle.GenericAdapter.Binder
-import co.utils.toHexString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -168,9 +167,10 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
                     val password = passcodesObject.getString(account)
 
                     // 处理密码
+                    val hexPassword = convertPasswordToHex(password)
                     val tempPasscodeValueList = mutableListOf<Byte>()
-                    for (j in password.indices step 2) {
-                        val hexPair = password.substring(j, j + 2)
+                    for (j in hexPassword.indices step 2) {
+                        val hexPair = hexPassword.substring(j, j + 2)
                         val hexValue = hexPair.toInt(16).toByte()
                         tempPasscodeValueList.add(hexValue)
                     }
@@ -261,6 +261,15 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             }
         }
         return result ?: ""
+    }
+
+    private fun convertPasswordToHex(password: String): String {
+        val hexBuilder = StringBuilder()
+        for (char in password) {
+            val digit = char.digitToIntOrNull() ?: throw IllegalArgumentException("Invalid password digit: $char")
+            hexBuilder.append(String.format("%02x", digit))
+        }
+        return hexBuilder.toString()
     }
 
     /**
