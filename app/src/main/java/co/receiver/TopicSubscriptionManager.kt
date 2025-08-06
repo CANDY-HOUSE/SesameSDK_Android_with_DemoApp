@@ -134,6 +134,7 @@ class TopicSubscriptionManager(private val context: Context) {
         L.d(tag, "androidDeviceId=$androidDeviceId")
 
         val request = SubscriptionRequest(
+            action = "subscribeToTopic",
             topicName = topic,
             token = token,
             appDeviceId = androidDeviceId,
