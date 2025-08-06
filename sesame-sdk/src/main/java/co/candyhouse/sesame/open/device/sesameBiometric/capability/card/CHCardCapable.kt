@@ -10,7 +10,7 @@ interface CHCardCapable {
     fun sendNfcCardsDataGetCmd(deviceUUID: String, result: CHResult<String>)
     fun cardDelete(cardID: String, result: CHResult<CHEmpty>)
     fun cardMove(cardId: String, touchProUUID: String, result: CHResult<CHEmpty>)
-    fun cardAdd(id: String, name: String, result: CHResult<CHEmpty>)
+    fun cardAdd(id: ByteArray, name: String, result: CHResult<CHEmpty>)
     fun cardChange(ID: String, name: String, result: CHResult<CHEmpty>)
     fun cardChangeValue(ID: String, newID: String, result: CHResult<CHEmpty>)
     fun cardModeGet(result: CHResult<Byte>)

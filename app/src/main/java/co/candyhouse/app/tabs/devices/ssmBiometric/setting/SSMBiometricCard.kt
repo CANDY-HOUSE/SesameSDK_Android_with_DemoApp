@@ -5,9 +5,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
@@ -17,9 +17,9 @@ import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
+import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
-import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
@@ -36,7 +36,6 @@ import co.utils.recycle.GenericAdapter.Binder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
-import kotlin.collections.isNotEmpty
 
 data class SuiCard(var id: String, var name: String, var cardType: Byte, var cardNameUUID: String)
 
@@ -123,6 +122,13 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         bind.imgModeVerify.setOnClickListener {
             setCardMode(MODE_REGISTER)
         }
+
+        if (BuildConfig.DEBUG) {
+            bind.menuTitle.setOnLongClickListener {
+                addCardToSTP()
+                true
+            }
+        }
     }
 
     /**
@@ -132,6 +138,14 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         getCardCapable()?.cardModeSet(mode) { result ->
             result.onSuccess {
                 updateModeUI(mode)
+            }
+        }
+    }
+
+    private fun addCardToSTP() {
+        getCardCapable()?.cardAdd(byteArrayOf(0x7c.toByte(), 0x47.toByte(), 0x72.toByte(), 0xdf.toByte()), "4 bytes NFC") { result ->
+            result.onSuccess {
+                L.d(tag, "addCardToSTP success")
             }
         }
     }
@@ -195,7 +209,7 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
     private fun setCardName(data: SuiCard, name: String, deviceUUID: String) {
         if (!data.cardNameUUID.isUUIDv4()) {
             val uuid = UUID.randomUUID().toString().lowercase()
-            getCardCapable()?.cardChange(data.id, uuid.replace("-", "")) { result->
+            getCardCapable()?.cardChange(data.id, uuid.replace("-", "")) { result ->
                 result.onSuccess { res ->
                     data.cardNameUUID = uuid
                     executeCardNameSet(data, name, deviceUUID)
@@ -366,7 +380,7 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         }
     }
 
-    private fun getCardNameInNeed(device: CHSesameConnector,cardID: String, name: String, type: Byte) {
+    private fun getCardNameInNeed(device: CHSesameConnector, cardID: String, name: String, type: Byte) {
         if ((name.length == 32) && name.isUUIDv4()) { // 如果是 UUID 格式的名字
             val cardNameUUID = name.noHashtoUUID().toString()
             getCardName(cardNameUUID, cardID, type, getDeviceUUID())

@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpPasscodeListBinding
@@ -139,9 +140,16 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
         }
 
         // 长按按钮
-        bind.imgModeVerify.setOnLongClickListener{
+        bind.imgModeVerify.setOnLongClickListener {
             jsonFileLauncher.launch("application/json")
             true
+        }
+
+        if (BuildConfig.DEBUG) {
+            bind.menuTitle.setOnLongClickListener {
+                addPassCodeToSTP()
+                true
+            }
         }
     }
 
@@ -279,6 +287,14 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
         getPassCodeCapable()?.keyBoardPassCodeModeSet(mode) { result ->
             result.onSuccess {
                 updateModeUI(mode)
+            }
+        }
+    }
+
+    private fun addPassCodeToSTP() {
+        getPassCodeCapable()?.keyBoardPassCodeAdd(byteArrayOf(0x01.toByte(), 0x02.toByte(), 0x03.toByte()), "123") { result ->
+            result.onSuccess {
+                L.d(tag, "addPassCodeToSTP: success")
             }
         }
     }

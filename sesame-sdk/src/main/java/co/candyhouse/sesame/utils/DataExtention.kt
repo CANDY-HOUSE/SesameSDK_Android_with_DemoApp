@@ -56,7 +56,7 @@ internal fun ByteArray.base64Encode(): String {
 
 
 internal fun String.hexStringToByteArray() =
-        ByteArray(this.length / 2) { this.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+    ByteArray(this.length / 2) { this.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
 
 internal var fixheader = "3059301306072a8648ce3d020106082a8648ce3d03010703420004"
 
@@ -89,6 +89,11 @@ internal fun ByteArray.toInt(): Int {
         result = result or (this[i] and 0xFF.toByte()).toInt()
     }
     return result
+}
+
+internal fun ByteArray.padEnd(length: Int, value: Byte = 0x00.toByte()): ByteArray {
+    if (this.size >= length) return this
+    return this + ByteArray(length - this.size) { value }
 }
 
 internal fun bytesToShort(byte1: Byte, byte2: Byte): Short {

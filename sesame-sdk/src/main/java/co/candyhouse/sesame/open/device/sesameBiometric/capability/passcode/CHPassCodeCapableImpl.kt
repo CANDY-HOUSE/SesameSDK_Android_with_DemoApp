@@ -14,6 +14,7 @@ import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.padEnd
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toReverseBytes
 import java.lang.Thread.sleep
@@ -38,11 +39,11 @@ internal open class CHPassCodeCapableImpl() :
         }
     }
 
-    override fun keyBoardPassCodeAdd(id: String, name: String, result: CHResult<CHEmpty>) {
+    override fun keyBoardPassCodeAdd(id: ByteArray, name: String, result: CHResult<CHEmpty>) {
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_PASSCODE_ADD.value,
-                byteArrayOf(id.toByteArray().size.toByte()) + id.toByteArray() + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray()
+                byteArrayOf(0xF0/*KB_DATA_USED*/.toByte()) + byteArrayOf(0x01/*KB_TYPE_CLOUD*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
