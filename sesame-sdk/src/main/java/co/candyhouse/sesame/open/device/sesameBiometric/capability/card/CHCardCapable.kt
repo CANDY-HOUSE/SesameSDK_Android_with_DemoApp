@@ -11,6 +11,7 @@ interface CHCardCapable {
     fun cardDelete(cardID: String, result: CHResult<CHEmpty>)
     fun cardMove(cardId: String, touchProUUID: String, result: CHResult<CHEmpty>)
     fun cardAdd(id: ByteArray, name: String, result: CHResult<CHEmpty>)
+    fun cardBatchAdd(id: ByteArray, progressCallback: ((current: Int, total: Int) -> Unit)? = null, result: CHResult<CHEmpty>)
     fun cardChange(ID: String, name: String, result: CHResult<CHEmpty>)
     fun cardChangeValue(ID: String, newID: String, result: CHResult<CHEmpty>)
     fun cardModeGet(result: CHResult<Byte>)

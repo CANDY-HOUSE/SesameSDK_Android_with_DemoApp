@@ -7,7 +7,7 @@ plugins {
 android {
     namespace 'co.candyhouse.sesame2'
 
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdk rootProject.ext.minSdkVersion

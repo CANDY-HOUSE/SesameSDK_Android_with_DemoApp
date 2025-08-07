@@ -8,12 +8,12 @@ plugins {
 }
 
 ext {
-    // 编译版本
+    // Build Version
     compileSdkVersion = 35
     minSdkVersion = 21
     targetSdkVersion = 35
 
-    // 加载配置文件
+    // Load Config
     def configFile = file('app.properties')
     if (configFile.exists()) {
         def props = new Properties()

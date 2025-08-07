@@ -313,4 +313,17 @@
     <string name="radar_distance_description">・This is the Radar wake-up detection range.\n・Over 10 visits/day: shorten range to save power !\n・10 or fewer visits/day: extend to max range for the best experience.\n・Even at minimum range, pressing the Unlock Button/Side Button still triggers radar and instantly starts face or palm-vein recognition, balancing power saving with a supreme user experience.</string>
 
     <string name="search_devices">Search Devices</string>
+
+    <string name="ssm_name">Name</string>
+    <string name="ssm_hint_enter_name">Please enter name</string>
+    <string name="ssm_password">Password</string>
+    <string name="ssm_hint_enter_password">Please enter password (numbers only)</string>
+    <string name="ssm_hint_enter_password_tips">Please enter password</string>
+    <string name="ssm_batch_add">Batch Add</string>
+    <string name="ssm_cancel">Cancel</string>
+    <string name="ssm_confirm">Confirm</string>
+
+    <string name="card_id">Card ID</string>
+    <string name="hint_enter_card_id_hex">Please enter Card ID (0-9, A-F, a-f)</string>
+    <string name="hint_enter_card_id">Please enter Card ID</string>
 </resources>

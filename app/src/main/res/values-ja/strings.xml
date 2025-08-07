@@ -304,6 +304,19 @@
     <string name="radar_distance_description">・レーダーがシステムを睡眠状態から起こす距離です。\n・人通りが一日10回を超える場合、節電のため、レーダーの探知距離を短めに設定して下さい！\n・人通りが一日10回以下の場合、最長距離に設定すると非常に快適にご利用頂けます。\n・最短距離に設定しても、施錠状態で「解錠ボタン/側面ボタン」を押すと、顔認証や手のひら静脈認証が即座に開始されるため、ある程度、極度な省電力と極上のユーザー体験の両立を実現できます。</string>
 
     <string name="search_devices">デバイス検索</string>
+
+    <string name="ssm_name">名前</string>
+    <string name="ssm_hint_enter_name">名前を入力してください</string>
+    <string name="ssm_password">パスワード</string>
+    <string name="ssm_hint_enter_password">パスワードを入力してください（数字のみ）</string>
+    <string name="ssm_hint_enter_password_tips">パスワードを入力してください</string>
+    <string name="ssm_batch_add">一括追加</string>
+    <string name="ssm_cancel">キャンセル</string>
+    <string name="ssm_confirm">確認</string>
+
+    <string name="card_id">カードID</string>
+    <string name="hint_enter_card_id_hex">カードIDを入力してください（0-9,A-F,a-f）</string>
+    <string name="hint_enter_card_id">カードIDを入力してください</string>
 </resources>
 
 

@@ -1,13 +1,25 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
+import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
+import android.text.InputFilter
+import android.text.InputType
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
@@ -29,12 +41,15 @@ import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
+import co.utils.hexStringToByteArray
 import co.utils.isUUIDv4
 import co.utils.noHashtoUUID
 import co.utils.recycle.GenericAdapter
 import co.utils.recycle.GenericAdapter.Binder
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.UUID
 
 data class SuiCard(var id: String, var name: String, var cardType: Byte, var cardNameUUID: String)
@@ -69,6 +84,16 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
     private lateinit var cardDelegate: CHCardDelegate
     private val operationType = "nfc_card"
     private val tag = "SesameNfcCards"
+
+    private val jsonFileLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            readJsonAndWriteToBluetooth(it)
+        }
+    }
+
+    private var progressDialog: AlertDialog? = null
 
     override fun getViewBinder() = FgSsmTpCardListBinding.inflate(layoutInflater)
 
@@ -123,12 +148,204 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
             setCardMode(MODE_REGISTER)
         }
 
-        if (BuildConfig.DEBUG) {
-            bind.menuTitle.setOnLongClickListener {
-                addCardToSTP()
-                true
+        // 长按按钮
+        bind.imgModeVerify.setOnLongClickListener {
+            showInputDialog()
+            true
+        }
+    }
+
+    private fun showInputDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_input, null)
+
+        val etName = dialogView.findViewById<EditText>(R.id.etName)
+        val etTitle = dialogView.findViewById<TextView>(R.id.etTitle)
+        val etPassword = dialogView.findViewById<EditText>(R.id.etPassword)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirm)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val btnBatchAdd = dialogView.findViewById<Button>(R.id.btnBatchAdd)
+
+        etTitle.text = getString(R.string.card_id)
+        etPassword.hint = getString(R.string.hint_enter_card_id_hex)
+        etPassword.inputType = InputType.TYPE_CLASS_TEXT or
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        etPassword.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+            if (source.toString().matches(Regex("[0-9A-Fa-f]*"))) {
+                source
+            } else {
+                ""
+            }
+        })
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // 设置圆角背景
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_rounded_bg)
+
+        // 按钮点击事件
+        btnConfirm.setOnClickListener {
+            val name = etName.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            if (name.isEmpty()) {
+                etName.error = getString(R.string.ssm_hint_enter_name)
+                return@setOnClickListener
+            }
+
+            if (password.isEmpty()) {
+                etPassword.error = getString(R.string.hint_enter_card_id)
+                return@setOnClickListener
+            }
+
+            handleConfirm(name, password)
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnBatchAdd.setOnClickListener {
+            handleBatchAdd()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    // 确认事件
+    private fun handleConfirm(name: String, password: String) {
+        getCardCapable()?.cardAdd(password.hexStringToByteArray(), name) { result ->
+            result.onSuccess {
+                L.d(tag, "addCardToSTP success")
             }
         }
+    }
+
+    // 批量添加事件
+    private fun handleBatchAdd() {
+        jsonFileLauncher.launch("application/json")
+    }
+
+    private fun readJsonAndWriteToBluetooth(uri: Uri) {
+        try {
+            // 检查文件扩展名
+            val fileName = getFileName(uri)
+            if (!fileName.endsWith(".json", ignoreCase = true)) {
+                Toast.makeText(context, "Please select a JSON file", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+                val jsonString = inputStream.bufferedReader().use { it.readText() }
+                val jsonObject = JSONObject(jsonString)
+                val nfcCardsArray = jsonObject.getJSONArray("nfc_cards")
+
+                val tempList = mutableListOf<Byte>()
+
+                for (i in 0 until nfcCardsArray.length()) {
+                    val nfcCard = nfcCardsArray.getJSONObject(i)
+                    val name = nfcCard.getString("name")
+                    val id = nfcCard.getString("id")
+
+                    // 处理id
+                    val tempCardsValueList = mutableListOf<Byte>()
+                    for (j in id.indices step 2) {
+                        val hexPair = id.substring(j, j + 2)
+                        val hexValue = hexPair.toInt(16).toByte()
+                        tempCardsValueList.add(hexValue)
+                    }
+                    tempList.add(tempCardsValueList.size.toByte())
+                    tempList.addAll(tempCardsValueList)
+
+                    // 处理name
+                    val MAX_CARD_NAME_SIZE = 20
+                    var cardName = name.toByteArray()
+                    var cardNameSize = cardName.size
+                    if (cardNameSize > MAX_CARD_NAME_SIZE) {
+                        cardNameSize = MAX_CARD_NAME_SIZE
+                        cardName = cardName.sliceArray(0 until MAX_CARD_NAME_SIZE)
+                    }
+                    tempList.add(cardNameSize.toByte())
+                    tempList.addAll(cardName.toList())
+                }
+
+                val payloadData = tempList.toByteArray()
+                L.d("sf", "DataSize: " + payloadData.size)
+
+                // 创建进度对话框
+                val dialogView = layoutInflater.inflate(R.layout.dialog_progress, null)
+                val progressBar = dialogView.findViewById<ProgressBar>(R.id.progressBar)
+                val progressText = dialogView.findViewById<TextView>(R.id.progressText)
+
+                progressBar.max = 100
+                progressText.text = "0%"
+
+                progressDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .setBackground(Color.TRANSPARENT.toDrawable())
+                    .create()
+                progressDialog?.window?.apply {
+                    setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+                    setDimAmount(0.2f)
+                }
+                progressDialog?.show()
+
+                // 添加卡片到设备，传入进度回调
+                getCardCapable()?.cardBatchAdd(
+                    id = payloadData,
+                    progressCallback = { current, total ->
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val percentage = (current * 100) / total
+                            progressBar.progress = percentage
+                            progressText.text = "$percentage%"
+                        }
+                    }
+                ) { result ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        progressDialog?.dismiss()
+                        progressDialog = null
+                        result.onSuccess {
+                            // 设置卡片成功，重新加载数据
+                            loadInitialData()
+                        }.onFailure {
+                            Toast.makeText(context, "Password import failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            L.e("sf", "读取JSON文件失败", e)
+            Toast.makeText(context, "Failed to read file: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getFileName(uri: Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val columnIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (columnIndex != -1) {
+                        result = it.getString(columnIndex)
+                    }
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != -1) {
+                result = result?.substring(cut!! + 1)
+            }
+        }
+        return result ?: ""
     }
 
     /**
@@ -138,14 +355,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         getCardCapable()?.cardModeSet(mode) { result ->
             result.onSuccess {
                 updateModeUI(mode)
-            }
-        }
-    }
-
-    private fun addCardToSTP() {
-        getCardCapable()?.cardAdd(byteArrayOf(0x7c.toByte(), 0x47.toByte(), 0x72.toByte(), 0xdf.toByte()), "4 bytes NFC") { result ->
-            result.onSuccess {
-                L.d(tag, "addCardToSTP success")
             }
         }
     }

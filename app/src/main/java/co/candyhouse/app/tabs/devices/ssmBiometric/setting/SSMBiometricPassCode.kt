@@ -5,7 +5,11 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.text.InputFilter
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -15,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpPasscodeListBinding
@@ -37,6 +40,7 @@ import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
+import co.utils.hexStringToByteArray
 import co.utils.hexStringToIntStr
 import co.utils.isUUIDv4
 import co.utils.noHashtoUUID
@@ -141,16 +145,82 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
 
         // 长按按钮
         bind.imgModeVerify.setOnLongClickListener {
-            jsonFileLauncher.launch("application/json")
+            showInputDialog()
             true
         }
+    }
 
-        if (BuildConfig.DEBUG) {
-            bind.menuTitle.setOnLongClickListener {
-                addPassCodeToSTP()
-                true
+    private fun showInputDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_input, null)
+
+        val etName = dialogView.findViewById<EditText>(R.id.etName)
+        val etPassword = dialogView.findViewById<EditText>(R.id.etPassword)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirm)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val btnBatchAdd = dialogView.findViewById<Button>(R.id.btnBatchAdd)
+
+        // 限制密码输入只能是数字
+        etPassword.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+            if (source.toString().matches(Regex("[0-9]*"))) {
+                source
+            } else {
+                ""
+            }
+        })
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // 设置圆角背景
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_rounded_bg)
+
+        // 按钮点击事件
+        btnConfirm.setOnClickListener {
+            val name = etName.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            if (name.isEmpty()) {
+                etName.error = getString(R.string.ssm_hint_enter_name)
+                return@setOnClickListener
+            }
+
+            if (password.isEmpty()) {
+                etPassword.error = getString(R.string.ssm_hint_enter_password_tips)
+                return@setOnClickListener
+            }
+
+            handleConfirm(name, password)
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnBatchAdd.setOnClickListener {
+            handleBatchAdd()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    // 确认事件
+    private fun handleConfirm(name: String, password: String) {
+        val hexPassword = convertPasswordToHex(password)
+
+        getPassCodeCapable()?.keyBoardPassCodeAdd(hexPassword.hexStringToByteArray(), name) { result ->
+            result.onSuccess {
+                L.d(tag, "addPassCodeToSTP: success")
             }
         }
+    }
+
+    // 批量添加事件
+    private fun handleBatchAdd() {
+        jsonFileLauncher.launch("application/json")
     }
 
     private fun readJsonAndWriteToBluetooth(uri: Uri) {
@@ -287,14 +357,6 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
         getPassCodeCapable()?.keyBoardPassCodeModeSet(mode) { result ->
             result.onSuccess {
                 updateModeUI(mode)
-            }
-        }
-    }
-
-    private fun addPassCodeToSTP() {
-        getPassCodeCapable()?.keyBoardPassCodeAdd(byteArrayOf(0x01.toByte(), 0x02.toByte(), 0x03.toByte()), "123") { result ->
-            result.onSuccess {
-                L.d(tag, "addPassCodeToSTP: success")
             }
         }
     }

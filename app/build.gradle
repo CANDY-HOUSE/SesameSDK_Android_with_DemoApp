@@ -10,7 +10,7 @@ plugins {
 android {
     namespace 'co.candyhouse.app'
 
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
     signingConfigs {
         release {
@@ -35,20 +35,13 @@ android {
     }
 
     defaultConfig {
-        def getGitHash = { ->
-            def stdout = new ByteArrayOutputStream()
-            exec {
-                commandLine 'git', 'rev-parse', '--short=9', 'HEAD'
-                standardOutput = stdout
-            }
-            return stdout.toString().trim()
-        }
+        def getGitHash = providers.exec {
+            commandLine 'git', 'rev-parse', '--short=9', 'HEAD'
+        }.standardOutput.asText.get().trim()
         applicationId 'co.candyhouse.sesame2'
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
-        // 本地打包，开发者可以根据需要修改此值
         versionCode 266
-        // 版本名称根据业务规则定义，有改动需要提交到master
         versionName '3.0.266'
         vectorDrawables.useSupportLibrary = true
         buildConfigField("String", "GIT_HASH", "\"${getGitHash}\"")
