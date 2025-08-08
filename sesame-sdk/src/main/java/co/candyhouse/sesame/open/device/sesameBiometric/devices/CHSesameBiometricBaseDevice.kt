@@ -44,7 +44,9 @@ import co.candyhouse.sesame.utils.divideArray
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.noHashtoUUID
 import co.candyhouse.sesame.utils.toHexString
+import co.candyhouse.sesame.utils.toReverseBytes
 import co.candyhouse.sesame.utils.toUInt32ByteArray
+import com.google.gson.Gson
 
 internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometricBase, CHCapabilitySupport, CHDeviceUtil, CHRemoteNanoCapable by CHRemoteNanoCapableImpl() {
 
@@ -287,6 +289,11 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     override fun goIOT() {
         L.d("hcia", "[stp]goIOT:")
 
+        if (productModel === CHProductModel.Remote || productModel === CHProductModel.RemoteNano) {
+            goIoTWithRemote()
+            return
+        }
+
         if (productModel === CHProductModel.SSMOpenSensor) {
             goIoTWithOpenSensor()
             return
@@ -334,6 +341,28 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
                 mechStatus = CHSesameOpenSensorMechStatus(result.data)
             }
         }
+    }
+
+    private fun goIoTWithRemote() {
+        L.d("hcia", "[stp]goIoTWithOpenSensor:")
+        val topic = "remote/${deviceId.toString().uppercase()}"
+
+        CHIotManager.subscribeTopic(topic) {
+            it.onSuccess {
+                val jsonStr = String(it.data)
+                val jsonObject  = Gson().fromJson(jsonStr, Map::class.java)
+                val lightLoadVoltage = jsonObject["lightLoadBatteryVoltage_mV"]
+                L.d("harry", "Parsed lightLoadBatteryVoltage: $lightLoadVoltage")
+                mechStatus = CHSesameTouchProMechStatus((lightLoadVoltage as Number).toInt().toUInt().toShort().toReverseBytes())
+            }
+        }
+
+        // TODO: 首次打开APP，去云端拿电池电量，用于设备列表页显示
+        // getLatestState {
+        //     it.onSuccess { result ->
+        //         mechStatus = CHSesameOpenSensorMechStatus(result.data)
+        //     }
+        // }
     }
 
     /**

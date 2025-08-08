@@ -403,7 +403,7 @@ class DeviceListAdapter(
             }
             centerText.visibility = View.GONE
             when (chDevice) {
-                is CHSesameTouchPro, is CHHub3 , is CHSesameTouch, is CHSesameTouchPro, is CHSesameFacePro, is CHSesameFace-> {
+                is CHSesameTouchPro, is CHHub3, is CHSesameTouch, is CHSesameTouchPro, is CHSesameFacePro, is CHSesameFace -> {
                     blImg.visibility = View.GONE
                     val opensensorDecide =
                         if (centerText.text.isNullOrEmpty()) View.GONE else View.VISIBLE
@@ -413,6 +413,23 @@ class DeviceListAdapter(
                     btnPercent.visibility = shouldShow
                     battery_contain.visibility = shouldShow
                     centerText.visibility = shouldShow
+                }
+            }
+
+            // 从锁历史标签中获取 Remote/RemoteNano 这两个机型的 电池数据， 如果有的话，显示出来。
+            // 云端收到锁的历史后， 发布消息到 IoT 主题。 goIoTWithRemote 函数订阅此主题， 解析电池电压。
+            if (BuildConfig.DEBUG) {
+                if ((chDevice.productModel == CHProductModel.Remote) || (chDevice.productModel == CHProductModel.RemoteNano)) {
+                    if(chDevice.mechStatus?.getBatteryPrecentage().toString() != "null") {
+                        battery_contain.visibility = View.VISIBLE
+                        batteryPercent.visibility = View.VISIBLE
+                        btnPercent.visibility = View.VISIBLE
+                        btnPercent.progressDrawable = ContextCompat.getDrawable(
+                            itemView.context,
+                            if ((chDevice.mechStatus?.getBatteryPrecentage() ?: 0) < 15) R.drawable.progress_red else R.drawable.progress_blue
+                        )
+                        btnPercent.progress = chDevice.mechStatus?.getBatteryPrecentage() ?: 0
+                    }
                 }
             }
         }
