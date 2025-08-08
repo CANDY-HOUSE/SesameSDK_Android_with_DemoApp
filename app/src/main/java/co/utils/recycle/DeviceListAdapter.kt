@@ -133,24 +133,16 @@ class DeviceListAdapter(
 
             val param = hub3Device.deviceId.toString().uppercase(Locale.getDefault())
             val irRemoteList = mDeviceViewModel.getIrRemoteList(param)
-
-            if (irRemoteList.isNotEmpty()) {
-                flView1.visibility = VISIBLE
-                hub3_rv.adapter = Hub3ItemView(irRemoteList) { bot2Item ->
-                    L.d("sf", "首页红外线列表子控件：" + bot2Item.alias + " " + bot2Item.uuid)
-                    callBackHub3(hub3Device, bot2Item)
+            hub3_rv.adapter = Hub3ItemView(irRemoteList) { bot2Item ->
+                L.d("sf", "首页红外线列表子控件：" + bot2Item.alias + " " + bot2Item.uuid)
+                callBackHub3(hub3Device, bot2Item)
+            }
+            dispatchExpanded(hub3Device)
+            flView1.setOnClickListener {
+                hub3Device.let { device ->
+                    device.setExpandState(!device.expanded)
+                    dispatchExpanded(device)
                 }
-
-                dispatchExpanded(hub3Device)
-
-                flView1.setOnClickListener {
-                    hub3Device.let { device ->
-                        device.setExpandState(!device.expanded)
-                        dispatchExpanded(device)
-                    }
-                }
-            } else {
-                flView1.visibility = GONE
             }
         }
 
