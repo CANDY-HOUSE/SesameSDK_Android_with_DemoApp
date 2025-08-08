@@ -351,18 +351,18 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.SesameBot1 -> R.raw.sesamebot1_21_2_369eb9
         CHProductModel.BiKeLock -> R.raw.sesamebike1_21_3_d7162a
         CHProductModel.BiKeLock2 -> R.raw.sesamebike2_30_6_18a8e4
-        CHProductModel.SSMTouchPro -> R.raw.sesametouch1pro_30_9_151cd6
-        CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_151cd6
+        CHProductModel.SSMTouchPro -> R.raw.sesametouch1pro_30_9_f51e28
+        CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_f51e28
         CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_db7924
         CHProductModel.BLEConnector -> R.raw.bleconnector_30_11_c44362
         CHProductModel.Remote -> R.raw.remote_30_14_cb5c5a
         CHProductModel.RemoteNano -> R.raw.remoten_30_15_cb5c5a
         CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_18a8e4
         CHProductModel.SS5US -> R.raw.sesame5us_30_16_2a1f8e
-        CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_1d18be
-        CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_321ab0
-        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_321ab0
-        CHProductModel.SSMFace -> R.raw.sesameface1_30_19_1d18be
+        CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_f51e28
+        CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_f51e28
+        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_f51e28
+        CHProductModel.SSMFace -> R.raw.sesameface1_30_19_f51e28
         CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_0f1f11
         else ->0
     }
