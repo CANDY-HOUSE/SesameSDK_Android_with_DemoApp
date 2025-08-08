@@ -43,7 +43,7 @@ internal open class CHPassCodeCapableImpl() :
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_PASSCODE_ADD.value,
-                byteArrayOf(0xF0/*KB_DATA_USED*/.toByte()) + byteArrayOf(0x01/*KB_TYPE_CLOUD*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
+                byteArrayOf(0xF0/*KB_DATA_USED*/.toByte()) + byteArrayOf(0x00/*KB_TYPE_CLOUD*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))

@@ -87,7 +87,7 @@ internal open class CHCardCapableImpl() :
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_CARD_ADD.value,
-                byteArrayOf(0xF0/*CARD_DATA_USED*/.toByte())+ byteArrayOf(0x80/*CARD_TYPE_CLOUD_BASE*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
+                byteArrayOf(0xF0/*CARD_DATA_USED*/.toByte())+ byteArrayOf(0x00/*CARD_TYPE_CLOUD_BASE*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
