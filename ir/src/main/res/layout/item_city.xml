@@ -19,10 +19,11 @@
         android:textStyle="bold"
         android:marqueeRepeatLimit="marquee_forever"
         android:focusable="true"
+        android:textColor="@color/black"
         android:focusableInTouchMode="true"
         android:scrollHorizontally="true"
         android:layout_marginBottom="2dp"
-        tools:text="合肥市"
+        tools:text="A"
         android:textSize="16sp" />
     <View
         android:id="@+id/line_tag"
@@ -39,12 +40,13 @@
         android:layout_marginLeft="10dp"
         android:paddingTop="12dp"
         android:ellipsize="marquee"
+        android:textColor="@color/black"
         android:marqueeRepeatLimit="marquee_forever"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:scrollHorizontally="true"
         android:background="?attr/selectableItemBackground"
-        tools:text="合肥市"
+        tools:text="Daikin Air Conditioner"
         android:textSize="16sp"/>
 
     <View
