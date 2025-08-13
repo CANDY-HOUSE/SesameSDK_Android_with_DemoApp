@@ -137,15 +137,37 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret))
             deviceStatus = CHDeviceStatus.Registering
             sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
-                /** 根據設備狀態特殊處理 */
-                mechStatus = CHSesameBot2MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..2))
-                deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-                val ecdhSecretPre16 = EccKey.ecdh(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(3..66)).sliceArray(0..15)
-                sesame2KeyData = CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
-                cipher = SesameOS3BleCipher("customDeviceName", AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
-                CHDB.CHSS2Model.insert(sesame2KeyData!!) {
+                var ecdhSecret = byteArrayOf()
+                try {
+                    val eccPublicKeyFromSS5 = IRRes.payload.toHexString().hexStringToByteArray().sliceArray(13..76)
+                    ecdhSecret = EccKey.ecdh(eccPublicKeyFromSS5)
+                } catch (e: Exception) {
+                    // 如果 EccKey.ecdh 失败， 则可能是旧固件。 旧固件的 mechStatus 只有 3 个字节, 且不含 mechSetting
+                    /** 根據設備狀態特殊處理 */
+                    mechStatus = CHSesameBot2MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..2))
+                    deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+                    val ecdhSecretPre16 = EccKey.ecdh(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(3..66)).sliceArray(0..15)
+                    sesame2KeyData = CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
+                    cipher = SesameOS3BleCipher("customDeviceName", AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
+                    CHDB.CHSS2Model.insert(sesame2KeyData!!) {
+                        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+                    }
+                    return@sendCommand
+                }
+                // 新固件统一成 SS5 一样的格式
+                // TODO： 重构代码，把 bike2 和 bot2 合并为 CHSesame5Device
+                mechStatus = CHSesame5MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..6))
+                // mechSetting = CHSesame5MechSettings(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..12))
+                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                val deviceSecret = ecdhSecretPre16.toHexString()
+                val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
+                sesame2KeyData = candyDevice
+                val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
+                cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
+                CHDB.CHSS2Model.insert(candyDevice) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                 }
+                deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
             }
         }
     }
@@ -177,7 +199,14 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             reportBatteryData(receivePayload.payload.toHexString())
         }
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
-            mechStatus = CHSesameBot2MechStatus(receivePayload.payload)
+            L.d("harry", "[bot2]mechStatus【size: ${receivePayload.payload.size}】: ${receivePayload.payload.toHexString()}")
+            if (receivePayload.payload.size == 7) {
+                // 新固件， mechStatus 统一成 SS5 格式 的 7个字节
+                mechStatus = CHSesame5MechStatus(receivePayload.payload)
+            } else if (receivePayload.payload.size == 3) {
+                // 旧固件， mechStatus 只有 3 个字节
+                mechStatus = CHSesameBike2MechStatus(receivePayload.payload)
+            }
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
         }
     }
