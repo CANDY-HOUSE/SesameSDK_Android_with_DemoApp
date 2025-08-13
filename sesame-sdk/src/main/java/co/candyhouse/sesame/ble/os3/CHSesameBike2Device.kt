@@ -18,6 +18,7 @@ import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHSesame5MechSettings
 import co.candyhouse.sesame.open.device.CHSesame5MechStatus
 import co.candyhouse.sesame.open.device.CHSesameBike2
 import co.candyhouse.sesame.open.device.CHSesameBike2MechStatus
@@ -42,6 +43,7 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
             parceADV(value)
         }
 
+    override var mechSetting: CHSesame5MechSettings? = null
 
     /** 聯網處理 */
     var isConnectedByWM2: Boolean = false
@@ -93,25 +95,12 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
             CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret))
             deviceStatus = CHDeviceStatus.Registering
             sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
-                L.d("harry", "[bike2]register result【size: ${IRRes.payload.size}】:  ${IRRes.payload.toHexString()}")
-
-                if (IRRes.payload.size == 71) {
-                    // 新固件， mechStatus 统一成 SS5 格式 的 7个字节
-                    mechStatus = CHSesame5MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..6))
-                    val eccPublicKeyFromSS5 = IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..70)
-                    val ecdhSecret = EccKey.ecdh(eccPublicKeyFromSS5)
-                    val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
-                    val deviceSecret = ecdhSecretPre16.toHexString()
-                    val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
-                    sesame2KeyData = candyDevice
-                    val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
-                    cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
-                    CHDB.CHSS2Model.insert(candyDevice) {
-                        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-                    }
-                    deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-                } else {
-                    // 旧固件， mechStatus 只有 3 个字节
+                var ecdhSecret = byteArrayOf()
+                try {
+                    val eccPublicKeyFromSS5 = IRRes.payload.toHexString().hexStringToByteArray().sliceArray(13..76)
+                    ecdhSecret = EccKey.ecdh(eccPublicKeyFromSS5)
+                } catch (e: Exception) {
+                    // 如果 EccKey.ecdh 失败， 则可能是旧固件。 旧固件的 mechStatus 只有 3 个字节, 且不含 mechSetting
                     /** 根據設備狀態特殊處理 */
                     mechStatus = CHSesameBike2MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..2))
                     deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
@@ -121,7 +110,22 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
                     CHDB.CHSS2Model.insert(sesame2KeyData!!) {
                         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                     }
+                    return@sendCommand
                 }
+                // 新固件统一成 SS5 一样的格式
+                // TODO： 重构代码，把 bike2 和 bot2 合并为 CHSesame5Device
+                mechStatus = CHSesame5MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..6))
+                mechSetting = CHSesame5MechSettings(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..12))
+                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                val deviceSecret = ecdhSecretPre16.toHexString()
+                val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
+                sesame2KeyData = candyDevice
+                val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
+                cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
+                CHDB.CHSS2Model.insert(candyDevice) {
+                    result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+                }
+                deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
             }
         }
     }

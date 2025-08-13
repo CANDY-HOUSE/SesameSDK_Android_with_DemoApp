@@ -6,6 +6,7 @@ import co.candyhouse.sesame.utils.bytesToShort
 import java.util.*
 
 interface CHSesameBike2 : CHSesameLock {
+    var mechSetting: CHSesame5MechSettings?
     fun unlock(tag: ByteArray? = null, result: CHResult<CHEmpty>)
 }
 
