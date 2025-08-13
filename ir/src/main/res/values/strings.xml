@@ -97,6 +97,10 @@
     <string name="light_color_temp_down">Temp-</string>
     <string name="ir_remote_power">Power</string>
     <string name="ir_support_info">HXD</string>
+    <string name="air_auto_match_introduction">1.Point the remote control at the illuminated LED side of Hub3, then press the power button.\n2.Select the remote control in the return list and confirm whether the device is under control</string>
+    <string name="air_auto_match_code_fail">Failed to find data for this remote control model, please try again</string>
+    <string name="ir_wave_too_short">The remote control data read is too short, please try again</string>
+    <string name="ir_auto_searching_remote">Searching for the most likely remote control...</string>
 
 
     <string-array name="strs_device">

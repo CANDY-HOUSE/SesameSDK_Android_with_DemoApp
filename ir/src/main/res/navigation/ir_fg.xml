@@ -23,22 +23,20 @@
         <action
             android:id="@+id/action_to_irgridefg"
             app:destination="@id/IrGridFg" />
-        <action
-            android:id="@+id/action_to_irAriMatchFg"
-            app:destination="@id/IrAirMatchFg" />
     </fragment>
     <fragment
         android:id="@+id/IrGridFg"
         android:name="candyhouse.sesameos.ir.fg.IrControlFG">
         <action
-            android:id="@+id/action_to_irAriMatchFg"
-            app:destination="@id/IrAirMatchFg" />
+            android:id="@+id/action_to_irAirMatchCodeFg"
+            app:destination="@id/IrAirMatchCodeFg" />
     </fragment>
     <fragment
         android:id="@+id/IrDiy"
         android:name="candyhouse.sesameos.ir.fg.IrDiy" />
     <fragment
-        android:id="@+id/IrAirMatchFg"
-        android:name="candyhouse.sesameos.ir.fg.IrAirMatchFG" />
+        android:id="@+id/IrAirMatchCodeFg"
+        android:name="candyhouse.sesameos.ir.fg.IrAirMatchCodeFG" >
+    </fragment>
 
 </navigation>

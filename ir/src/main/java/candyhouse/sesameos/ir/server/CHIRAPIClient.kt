@@ -8,6 +8,7 @@ import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceModifyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteKeyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceStateRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrLearnedDataAddRequest
+import candyhouse.sesameos.ir.base.irHttpClientBean.IrMatchCodeRequest
 import co.candyhouse.sesame2.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
@@ -130,6 +131,10 @@ internal interface CHIRAPIClient {
         body: IrDeviceRemoteKeyRequest
     ): Any
 
+    @Operation(path = "/device/v2/ir/hub3_match_ir_code", method = "POST")
+    fun matchIrCode(
+        body: IrMatchCodeRequest
+    ): Any
 
 }
 

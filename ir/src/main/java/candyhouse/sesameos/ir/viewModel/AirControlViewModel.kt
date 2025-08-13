@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import candyhouse.sesameos.ir.base.IrCompanyCode
+import candyhouse.sesameos.ir.base.IrMatchRemote
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallback
@@ -40,6 +41,7 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
     private var currentCompanyCode : IrCompanyCode? = null
     private val _isFirstLoad = MutableStateFlow(true)
     val isFirstLoad: StateFlow<Boolean> = _isFirstLoad.asStateFlow()
+    val irMatchRemoteListLiveData = MutableLiveData(emptyList<IrMatchRemote>())
 
 
 
@@ -243,6 +245,14 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
 
     fun markAsLoaded() {
         _isFirstLoad.value = false
+    }
+
+    fun setSearchRemoteList(list: List<IrMatchRemote>) {
+        irMatchRemoteListLiveData.value = list
+    }
+
+    fun getSearchRemoteList():List<IrMatchRemote> {
+        return irMatchRemoteListLiveData.value ?: emptyList()
     }
 }
 

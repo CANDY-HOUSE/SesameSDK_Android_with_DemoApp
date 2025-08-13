@@ -15,4 +15,7 @@ object Config {
     val irCompanyMatchResult: String = "irCompanyMatchResult"
     val irCompanyAddResult: String = "irCompanyAddResult"
     val irMatchSuccess: String = "irMatchSuccess"
+
+    val irAutoSearchResult: String = "irAutoSearchResult"
+    val irSearchResult: String = "irSearchResult"
 }

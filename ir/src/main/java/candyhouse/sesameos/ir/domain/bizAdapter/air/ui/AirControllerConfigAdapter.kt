@@ -95,7 +95,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     }
 
     override suspend fun getCompanyCodeList(context: Context): List<IrCompanyCode> {
-        return Ext.parseCompanyTableToList(context,R.raw.air_conpany_code)
+        return Ext.parseCompanyTableToList(context, R.raw.air_conpany_code)
     }
 
     /**
@@ -135,28 +135,6 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             IrControlItem(
                 id = 1,
                 type = ItemType.MODE,
-                title = context.getString(R.string.air_conditioner_model_auto_01),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        list.add(
-            IrControlItem(
-                id = 2,
-                type = ItemType.MODE,
-                title = context.getString(R.string.air_conditioner_model_hot_05),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        list.add(
-            IrControlItem(
-                id = 3,
-                type = ItemType.MODE,
                 title = context.getString(R.string.air_conditioner_model_cold_02),
                 iconRes = 0,
                 isSelected = false,
@@ -166,7 +144,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         )
         list.add(
             IrControlItem(
-                id = 4,
+                id = 2,
                 type = ItemType.TEMPERATURE_VALUE,
                 title = context.getString(R.string.air_conditioner_temperature) + ":26°C",
                 iconRes = 0,
@@ -177,20 +155,9 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         )
         list.add(
             IrControlItem(
-                id = 5,
+                id = 3,
                 type = ItemType.FAN_SPEED,
                 title = context.getString(R.string.air_conditioner_wind_speed_v3),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        list.add(
-            IrControlItem(
-                id = 6,
-                type = ItemType.POWER_STATUS_OFF,
-                title = context.getString(R.string.ir_remote_power_off),
                 iconRes = 0,
                 isSelected = false,
                 value = "",
@@ -200,33 +167,22 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return list
     }
 
-    override fun getMatchItem(position: Int,items:List<IrControlItem>): IrControlItem? {
+    override fun getMatchItem(position: Int, items: List<IrControlItem>): IrControlItem? {
         return when (position) {
             0 -> {
                 return items[0]
             }
-            1 -> { // 自动模式
-                setModeIndex(4)
-                return items[4]
-            }
-            2 -> { // 制热模式
-                setModeIndex(3)
-                return items[4]
-            }
-            3 -> { // 制冷模式
+            1 -> { // 制冷模式
                 setModeIndex(0)
                 return items[4]
             }
-            4 -> {//温度
+            2 -> {//温度
                 setTemperature(25)
                 return items[3]
             }
-            5 -> { // 最大风量
+            3 -> { // 最大风量
                 setFanSpeedIndex(2)
                 return items[6]
-            }
-            6 -> {
-                return items[2]
             }
             else -> {
                 return null
@@ -254,11 +210,10 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         currentFanSpeedIndex = getFanSpeedIndex(air)
         currentVerticalSwingIndex = getVerticalSwingIndex(air)
         currentSwingSwitchIndex = getHorizontalSwingIndex(air)
-        L.d(tag,"updateUIConfig: isPowerOn $isPowerOn, currentTemperature $currentTemperature, currentModeIndex $currentModeIndex, currentFanSpeedIndex $currentFanSpeedIndex, currentVerticalSwingIndex $currentVerticalSwingIndex, currentSwingSwitchIndex $currentSwingSwitchIndex")
         config?.let {
             val items = createControlItems(it)
             L.d(tag, "updateUIConfig: items.size ${items.size}")
-            items.forEach { item->
+            items.forEach { item ->
                 updateCallback?.onItemUpdate(item)
             }
         }
@@ -447,7 +402,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = controlConfig.id,
             type = ItemType.POWER_STATUS_ON,
-            title = UIResourceExtension.getStringByIndex(context,controlConfig,resId),
+            title = UIResourceExtension.getStringByIndex(context, controlConfig, resId),
             value = controlConfig.defaultValue,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
             iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
@@ -484,7 +439,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = controlConfig.id,
             type = ItemType.POWER_STATUS_OFF,
-            title = UIResourceExtension.getStringByIndex(context,controlConfig,resId),
+            title = UIResourceExtension.getStringByIndex(context, controlConfig, resId),
             value = controlConfig.defaultValue,
             isSelected = isItemSelected(ItemType.POWER_STATUS_OFF),
             iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
@@ -511,7 +466,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun adjustTemperatureAdd(item: IrControlItem, device: CHHub3):Boolean {
+    private fun adjustTemperatureAdd(item: IrControlItem, device: CHHub3): Boolean {
         if (!checkConfig()) {
             return false
         }
@@ -537,8 +492,9 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
         return true
     }
+
     // 检查当前模式是否支持温度调节: 1.制冷模式 4.制热模式
-    private fun canAdjustTemperature():Boolean {
+    private fun canAdjustTemperature(): Boolean {
         if (!checkConfig()) {
             return false
         }
@@ -584,7 +540,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = UIResourceExtension.getStringByIndex(context,controlConfig,currentModeIndex),
+            title = UIResourceExtension.getStringByIndex(context, controlConfig, currentModeIndex),
             value = item.value,
             isSelected = false,
             iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentModeIndex),
@@ -604,7 +560,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = UIResourceExtension.getStringByIndex(context,itemConfig,currentFanSpeedIndex),
+            title = UIResourceExtension.getStringByIndex(context, itemConfig, currentFanSpeedIndex),
             value = item.value,
             isSelected = false,
             iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentFanSpeedIndex),
@@ -623,7 +579,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = UIResourceExtension.getStringByIndex(context,itemConfig,currentVerticalSwingIndex),
+            title = UIResourceExtension.getStringByIndex(context, itemConfig, currentVerticalSwingIndex),
             value = item.value,
             isSelected = false,
             iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentVerticalSwingIndex),
@@ -641,7 +597,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         val newItem = IrControlItem(
             id = item.id,
             type = item.type,
-            title = UIResourceExtension.getStringByIndex(context,itemConfig,currentSwingSwitchIndex),
+            title = UIResourceExtension.getStringByIndex(context, itemConfig, currentSwingSwitchIndex),
             value = item.value,
             isSelected = false,
             iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentSwingSwitchIndex),
@@ -674,7 +630,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                     IrControlItem(
                         id = controlConfig.id,
                         type = type,
-                        title = UIResourceExtension.getStringByIndex(context,controlConfig,currentIndex),
+                        title = UIResourceExtension.getStringByIndex(context, controlConfig, currentIndex),
                         value = getValueForType(type),
                         isSelected = isItemSelected(type),
                         iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentIndex),
@@ -728,7 +684,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     /**
      * 获取当前State
      */
-    fun getCurrentState():String {
+    fun getCurrentState(): String {
         return currentState
     }
 

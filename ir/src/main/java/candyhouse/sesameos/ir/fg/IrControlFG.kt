@@ -17,17 +17,21 @@ import androidx.recyclerview.widget.GridLayoutManager
 import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.adapter.AirControlViewsAdapter
 import candyhouse.sesameos.ir.base.BaseIr
+import candyhouse.sesameos.ir.base.IrMatchRemote
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.databinding.FragmentAirControlBinding
 import candyhouse.sesameos.ir.domain.repository.RemoteRepository
 import candyhouse.sesameos.ir.ext.Config
+import candyhouse.sesameos.ir.ext.Ext.getParcelableArrayListCompat
 import candyhouse.sesameos.ir.ext.Ext.getParcelableCompat
+import candyhouse.sesameos.ir.ext.IRDeviceType
 import candyhouse.sesameos.ir.models.LayoutSettings
 import candyhouse.sesameos.ir.viewModel.AirControlUiState
 import candyhouse.sesameos.ir.viewModel.AirControlViewModel
 import candyhouse.sesameos.ir.viewModel.AirControlViewModelFactory
 import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.launch
+import kotlin.collections.List
 
 /**
  * 红外遥控器控制界面
@@ -182,9 +186,10 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
             L.d(tag, "companyCode=${companyCode.toString()}")
             companyCode?.let {
                 L.d(tag, "go to match company code")
-                safeNavigate(R.id.action_to_irAriMatchFg, Bundle().apply {
+                    safeNavigate(R.id.action_to_irAirMatchCodeFg, Bundle().apply {
                     this.putInt(Config.productKey, viewModel.getIrRemoteDevice()!!.type)
                     this.putParcelable(Config.irCompany, it)
+                    this.putParcelableArrayList(Config.irSearchResult, ArrayList(viewModel.getSearchRemoteList()))
                 })
             }
         })
@@ -296,6 +301,25 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
                 }
                 bind.linearLayoutHelp.visibility = View.GONE
             }
+        }
+        setFragmentResultListener(Config.irAutoSearchResult) {_, bundle ->
+            if (bundle.containsKey(Config.irMatchSuccess)) {
+                viewModel.setSearchRemoteList(emptyList())
+                val irMatchSuccess = bundle.getBoolean(Config.irMatchSuccess, false)
+                if (!irMatchSuccess){
+                    return@setFragmentResultListener
+                }
+                val searchRemoteList = bundle.getParcelableArrayListCompat<IrMatchRemote>(Config.irSearchResult)
+                if (!searchRemoteList.isNullOrEmpty()) {
+                    viewModel.setSearchRemoteList(searchRemoteList)
+                }
+                val irRemote = bundle.getParcelableCompat<IrRemote>(Config.irDevice)
+                if (null == irRemote) {
+                    return@setFragmentResultListener
+                }
+                viewModel.setRemoteDevice(irRemote)
+            }
+
         }
     }
 

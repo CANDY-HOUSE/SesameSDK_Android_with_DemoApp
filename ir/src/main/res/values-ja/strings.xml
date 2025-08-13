@@ -96,6 +96,10 @@
     <string name="light_color_temp_down">色温度-</string>
     <string name="ir_remote_power">電源</string>
     <string name="ir_support_info">HXD</string>
+    <string name="air_auto_match_introduction">1、リモコンをHub3のLED発光側に向け、電源ボタンを押してください\n2、戻りリストからリモコンを選択し、デバイスが制御されているかどうかを確認してください</string>
+    <string name="air_auto_match_code_fail">このリモコン型番のデータ検索に失敗しました。もう一度お試しください</string>
+    <string name="ir_wave_too_short">読み取ったリモコンデータの長さが短すぎます。もう一度お試しください</string>
+    <string name="ir_auto_searching_remote">最も可能性の高いリモコンを検索中...</string>
 
     <string-array name="strs_device">
         <item>エアコン</item>

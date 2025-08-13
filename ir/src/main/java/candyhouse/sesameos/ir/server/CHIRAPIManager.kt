@@ -11,6 +11,7 @@ import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceModifyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteKeyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceStateRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrLearnedDataAddRequest
+import candyhouse.sesameos.ir.base.irHttpClientBean.IrMatchCodeRequest
 import co.candyhouse.sesame.open.CHConfiguration
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
@@ -340,6 +341,31 @@ object CHIRAPIManager {
         } catch (e: Exception) {
             L.e("addHub3LearnedIrData", "Error processing data: ${e.message}", e)
         }
+    }
+
+
+    fun matchIrCode(data: ByteArray, type:Int, branchName:String, onResponse: CHResult<Any>): Boolean {
+
+        if (data.size < DATA_SIZE_MIN_NUM) {
+            L.e("matchIrCode", "Invalid data length: ${data.size}")
+            return false
+        }
+        makeApiCall(onResponse) {
+            try {
+                val requestBody = IrMatchCodeRequest(
+                    irWave = data.toHexString(),
+                    irWaveLength = data.size,
+                    type = type,
+                    brandName = branchName
+                )
+                val res = jpAPIClient.matchIrCode(requestBody)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+            } catch (e: Exception) {
+                L.e("sf", "matchIrCode Error ", e)
+                onResponse.invoke(Result.failure(e))
+            }
+        }
+        return true
     }
 
 }

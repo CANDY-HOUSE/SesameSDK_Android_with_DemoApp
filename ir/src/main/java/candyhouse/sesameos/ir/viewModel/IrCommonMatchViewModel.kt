@@ -8,9 +8,7 @@ import androidx.lifecycle.viewModelScope
 import candyhouse.sesameos.ir.base.IrCompanyCode
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
-import candyhouse.sesameos.ir.domain.bizAdapter.air.ui.AirControllerConfigAdapter
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallback
-import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
 import candyhouse.sesameos.ir.domain.repository.RemoteRepository
 import candyhouse.sesameos.ir.ext.IRDeviceType
 import candyhouse.sesameos.ir.models.IrControlItem
@@ -30,9 +28,9 @@ import kotlin.random.Random
  * 红外遥控器控制逻辑
  * add by wuying@cn.candyhouse.co
  */
-class IrMatchViewModel(val context: Context, val remoteRepository: RemoteRepository) :
+class IrCommonMatchViewModel(val context: Context, val remoteRepository: RemoteRepository) :
     ViewModel() {
-    private val tag = "AirMatchViewModel"
+    private val tag = IrCommonMatchViewModel::class.java.simpleName
     private val _uiState = MutableStateFlow<IrMatchUiState>(IrMatchUiState.Loading)
     private lateinit var device: CHHub3
     private val items: MutableList<IrControlItem> = mutableListOf()
@@ -232,12 +230,12 @@ sealed class IrMatchUiState {
 }
 
 
-class IrMatchViewModelFactory(
+class IrCommonMatchViewModelFactory(
     val context: Context, val remoteRepository: RemoteRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(IrMatchViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST") return IrMatchViewModel(context, remoteRepository) as T
+        if (modelClass.isAssignableFrom(IrCommonMatchViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST") return IrCommonMatchViewModel(context, remoteRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
