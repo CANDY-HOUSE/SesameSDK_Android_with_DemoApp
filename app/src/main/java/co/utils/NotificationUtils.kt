@@ -21,8 +21,8 @@ import com.bumptech.glide.Glide
  */
 object NotificationUtils {
     private const val tag = "NotificationUtils"
+    private val uniqueGroupKey = "group_${System.currentTimeMillis()}"
     private const val CHANNEL_ID = "announcement_channel"
-    private const val NOTIFICATION_ID = 1001
 
     fun sendNotification(
         context: Context,
@@ -57,6 +57,8 @@ object NotificationUtils {
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
+            .setGroup(uniqueGroupKey)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         // 加载并设置大图片
@@ -93,6 +95,6 @@ object NotificationUtils {
             notificationManager.createNotificationChannel(channel)
         }
 
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+        notificationManager.notify(System.currentTimeMillis().toInt(), notificationBuilder.build())
     }
 }
