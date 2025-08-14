@@ -322,6 +322,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun irModeSet(mode: Byte, result: CHResult<CHEmpty>) {
+        L.d("------->","irModeSet mode: $mode")
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_MODE_SET.value, byteArrayOf(mode))) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))

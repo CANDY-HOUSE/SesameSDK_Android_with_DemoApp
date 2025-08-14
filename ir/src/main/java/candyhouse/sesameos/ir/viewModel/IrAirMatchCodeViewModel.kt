@@ -1,6 +1,9 @@
 package candyhouse.sesameos.ir.viewModel
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +19,7 @@ import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallb
 import candyhouse.sesameos.ir.domain.repository.RemoteRepository
 import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.server.CHIRAPIManager
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
@@ -32,8 +36,8 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
     private val tag = IrAirMatchCodeViewModel::class.java.simpleName
     private lateinit var hub3Device: CHHub3
     val irCompanyCodeLiveData = MutableLiveData<IrCompanyCode>()
-
     val irMatchRemoteListLiveData = MutableLiveData<List<IrMatchRemote>>()
+    val connectStatusLiveData = MutableLiveData<Boolean>()
 
     fun setupMatchData(productKey: Int) {
         val handlerCallback = object : HandlerCallback {
@@ -58,9 +62,9 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
         return ::hub3Device.isInitialized
     }
 
-    fun setIrCompanyCode(remoteDevice: IrCompanyCode) {
-        L.d(tag, "setIrCompanyCode remoteDevice=${remoteDevice.code.toString()}")
-        this.irCompanyCodeLiveData.value = remoteDevice
+    fun setIrCompanyCode(irCompanyCode: IrCompanyCode) {
+        L.d(tag, "setIrCompanyCode remoteDevice=${irCompanyCode.code.toString()}")
+        this.irCompanyCodeLiveData.value = irCompanyCode
         remoteRepository.setCurrentSate("")
 //        matchIrDeviceCode()
     }
@@ -76,19 +80,17 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
         return remoteRepository.getCurrentIRDeviceType()
     }
 
-    fun isAirConditioner(): Boolean {
-        return IRType.DEVICE_REMOTE_AIR == getCurrentIrDeviceType()
+    fun startAutoMatch() {
+        startSubscribeIR()
+        enterLearnMode()
     }
-
     @OptIn(ExperimentalStdlibApi::class)
     fun startSubscribeIR() {
         viewModelScope.launch {
-            hub3Device.irModeSet(0x01) { }
             hub3Device.getIrLearnedData {
                 it.onSuccess {
-                    L.d(tag, "[IO][getLearnedData][OK]")
+                    L.d(tag, "getLearnedData success")
                     if (null == irCompanyCodeLiveData.value) {
-                        L.e(tag, "irCompanyCodeLiveData is null, cannot match IR code")
                         irMatchRemoteListLiveData.value = emptyList()
                         return@onSuccess
                     }
@@ -96,6 +98,7 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
                     val callResult = CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), irCompanyCodeLiveData.value!!.name) {
                         it.onSuccess { matchCodeResponse ->
                             L.d(tag, "matchIrCode success: ${matchCodeResponse.data}")
+                            startAutoMatch()
                             val irMatchCodeRequest = matchCodeResponse.data
                             val jsonString = Gson().toJson(irMatchCodeRequest)
                             val irMatchList = parseJsonToIrRemoteWithMatchList(jsonString, getCurrentIrDeviceType())
@@ -105,29 +108,50 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
                         }
                         it.onFailure { error ->
                             L.e(tag, "matchIrCode error: ${error.message}")
+                            startAutoMatch()
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = emptyList()
                             }
                         }
                     }
                     if (!callResult) {
+                        startAutoMatch()
                         viewModelScope.launch(Dispatchers.Main) {
                             Toast.makeText(context, R.string.ir_wave_too_short, Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        unsubscribeIR()
                     }
                 }
-                it.onFailure {
-                    unsubscribeIR()
+                it.onFailure { // 订阅失败，可能网络问题或设备未连接
+                    connectStatusLiveData.value = false
                 }
             }
         }
-
     }
 
-    fun stopSubscribeIR() {
+    fun enterLearnMode() {
+        L.d(tag, "enterLearnMode")
+        viewModelScope.launch(Dispatchers.Main) {
+            if (!checkHub3DeviceStatus()) {
+                connectStatusLiveData.value = false
+                return@launch
+            }
+            connectStatusLiveData.value = true
+            viewModelScope.launch(Dispatchers.IO) {
+                hub3Device.irModeSet(0x01) { result ->
+                    result.onSuccess {
+                        L.d(tag, "enterLearnMode success")
+                    }
+                    result.onFailure { error ->
+                        L.e(tag, "enterLearnMode error: ${error.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    fun exitMatchMode() {
         unsubscribeIR()
+        hub3Device.irModeSet(0x00) { }
     }
 
     fun unsubscribeIR() {
@@ -182,6 +206,23 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
 
     fun setSearchRemoteList(remotes: List<IrMatchRemote>) {
         irMatchRemoteListLiveData.value = remotes
+    }
+
+    fun checkHub3DeviceStatus(): Boolean {
+        return isBluetoothEnabled(context) &&  hub3Device.deviceStatus.value == CHDeviceLoginStatus.Login
+    }
+
+    fun isBluetoothEnabled(context: Context): Boolean {
+        val bluetoothAdapter = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val bluetoothManager =
+                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothManager.adapter
+        } else {
+            @Suppress("DEPRECATION")
+            BluetoothAdapter.getDefaultAdapter()
+        }
+
+        return bluetoothAdapter?.isEnabled == true
     }
 }
 

@@ -49,7 +49,7 @@
     <string name="ir_no_code">暫無按鍵列表，請從Hub3設定介面進入，添加按鍵</string>
     <string name="ir_long_click_edit">長按編輯🖋️</string>
     <string name="ir_click_send">點擊發射🚀</string>
-    <string name="ir_ble_invalid">請返回Hub3詳細頁面，以便觸發自動連接藍牙。</string>
+    <string name="ir_ble_invalid">Hub3連接異常，請返回Hub3詳情界面，重新連接。</string>
     <string name="air_conditioner_temperature_refuse_change">當前模式不支援溫度調節</string>
     <string name="ir_company_notice">找不到特定品牌的遙控器型號？您可以嘗試搜尋相似名稱的遙控器型號。</string>
     <string name="ir_match_key">正在匹配第%1$d組第%2$d個按鍵（共%3$d組，每組7個按鍵）</string>

@@ -50,7 +50,7 @@
     <string name="ir_no_code">No key list available. Please enter through the Hub3 settings interface to add keys</string>
     <string name="ir_long_click_edit">Long press to edit🖋️</string>
     <string name="ir_click_send">Click to emit🚀</string>
-    <string name="ir_ble_invalid">Please return to the Hub3 details page to trigger automatic Bluetooth connection.</string>
+    <string name="ir_ble_invalid">Hub3 connection error. Please return to the Hub3 details page and reconnect.</string>
     <string name="air_conditioner_temperature_refuse_change">Temperature adjustment is not supported in current mode</string>
     <string name="ir_company_notice">Can not find the specific brand remote model? Try searching for similar remote model names.</string>
     <string name="ir_company_search_control_hint">Search Remote Control Model</string>

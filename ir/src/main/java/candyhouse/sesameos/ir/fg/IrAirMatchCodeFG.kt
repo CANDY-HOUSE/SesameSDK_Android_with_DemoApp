@@ -29,7 +29,6 @@ import co.candyhouse.sesame.utils.L
  */
 class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
     private val tag = IrAirMatchCodeFG::class.java.simpleName
-    private var haveMatchResult = false
     private var selectedIrRemote: IrRemote? = null
     private val viewModel: IrAirMatchCodeViewModel by viewModels {
         IrMatchCodeViewModelFactory(
@@ -52,11 +51,8 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
             observeUiState()
             setupTitleView()
             setupRecyclerView()
-            if (!haveMatchResult) {
-                startAutoMatch()
-            }
-            L.d(tag, "onViewCreated haveMatchResult=$haveMatchResult")
         }
+        startAutoMatch()
     }
 
     private fun setupParams() {
@@ -90,13 +86,11 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
         }
         L.d(tag, "irCompanyCode=${irCompanyCode.toString()}")
         viewModel.setIrCompanyCode(irCompanyCode)
-        haveMatchResult = false
         arguments?.let {
             if (it.containsKey(Config.irSearchResult)) {
                 val searchRemoteList = it.getParcelableArrayListCompat<IrMatchRemote>(Config.irSearchResult)
                 if(!searchRemoteList.isNullOrEmpty()) {
                     viewModel.setSearchRemoteList(searchRemoteList)
-                    haveMatchResult = true
                 }
             }
         }
@@ -127,25 +121,15 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
 
     private fun setupTitleView() {
         setTitle(viewModel.irCompanyCodeLiveData.value!!.name)
-        bind.topTitle.imgRight.setImageResource(R.drawable.selector_img_add_del)
-        bind.topTitle.imgRight.visibility = View.VISIBLE
-        bind.topTitle.imgRight.setOnClickListener {
-            if (bind.topTitle.imgRight.isSelected) {
-                stopAutoMatch()
-            } else {
-                startAutoMatch()
-            }
-        }
     }
 
     private fun startAutoMatch() {
         showAutoMatchView(emptyList(), true)
-        viewModel.startSubscribeIR()
+        viewModel.startAutoMatch()
     }
 
     private fun stopAutoMatch() {
-        bind.tvSearching.visibility = View.GONE
-        viewModel.stopSubscribeIR()
+        viewModel.exitMatchMode()
     }
 
     private fun setupRecyclerView() {
@@ -159,21 +143,22 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
         viewModel.irMatchRemoteListLiveData.observe(viewLifecycleOwner) {
             showAutoMatchView(it)
         }
+        viewModel.connectStatusLiveData.observe(viewLifecycleOwner) {
+            bind.rlError.visibility = if (it) View.GONE else View.VISIBLE
+        }
     }
 
     private fun showAutoMatchView(irRemoteList: List<IrMatchRemote>, isSearching: Boolean = false) {
         if (irRemoteList.isEmpty() && !isSearching) {
             Toast.makeText(requireContext(), R.string.air_auto_match_code_fail, Toast.LENGTH_SHORT).show()
         }
-        bind.tvSearching.visibility = if (isSearching) View.VISIBLE else View.GONE
-        bind.topTitle.imgRight.isSelected = isSearching
+        bind.tvSearching.visibility = if (irRemoteList.isEmpty()) View.VISIBLE else View.GONE
         bind.rvMatchRemote.adapter.let { adapter ->
             if (adapter is IrMatchRemoteAdapter) {
                 adapter.updateData(irRemoteList)
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -182,6 +167,7 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopAutoMatch()
         if (selectedIrRemote == null && isRemoving) {
             setFragmentResult(
                 Config.irAutoSearchResult, bundleOf(

@@ -49,7 +49,7 @@
     <string name="ir_no_code">キーリストがありません。Hub3設定画面から入り、キーを追加してください</string>
     <string name="ir_long_click_edit">長押しして編集🖋️</string>
     <string name="ir_click_send">クリックして発射🚀</string>
-    <string name="ir_ble_invalid">Hub3の詳細画面に戻り、Bluetooth自動接続を開始してください。</string>
+    <string name="ir_ble_invalid">Hub3の接続に異常があります。Hub3の詳細画面に戻って、再接続してください。</string>
     <string name="air_conditioner_temperature_refuse_change">現在のモードでは温度調節に対応していません</string>
     <string name="ir_company_notice">お探しのブランドのリモコン型番が見つかりませんか？類似の型番名で検索してみてください。</string>
     <string name="ir_company_search_control_hint">リモコン機種を検索</string>
