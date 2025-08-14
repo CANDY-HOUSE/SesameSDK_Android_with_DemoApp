@@ -142,7 +142,7 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         }
 
         // 添加红外线数据
-        bind.tvIr.setOnClickListener {
+        bind.rlIrAdd.setOnClickListener {
             mDeviceViewModel.ssmLockLiveData.value?.apply {
                 if (this is CHHub3) {
                     hub3Device.value = this
@@ -241,10 +241,16 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
 
     private fun dispatchOnResume() {
         handleHub3Status()
-        checkIsCompany()
         // 从Iot获取hub3数据，并回调刷新版本号
         val currentDevice = (mDeviceViewModel.ssmLockLiveData.value!! as CHHub3)
         currentDevice.getHub3StatusFromIot(currentDevice.deviceId.toString()) {}
+        setupIrView()
+    }
+
+    private fun setupIrView() {
+        bind.tvIrText.visibility = VISIBLE
+        bind.tvIr.visibility = VISIBLE
+        bind.recyIR.visibility = VISIBLE
     }
 
     private fun handleHub3Status() {
@@ -372,22 +378,28 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     private fun checkIrStatus(status: CHWifiModule2NetWorkStatus) {
         if (status.isAPWork == true) {
             bind.devicesEmptyLogo.visibility = if (mDeviceList.size == 0) VISIBLE else GONE
+            bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) GONE else VISIBLE
             bind.addLockerZone.visibility = if (mDeviceList.size < 5) VISIBLE else GONE
 
             bind.addLockerZone.isEnabled = true
             bind.addSsm.setTextColor(resources.getColor(R.color.black))
+            bind.tvAddSsmLogo.setTextColor(resources.getColor(R.color.black))
 
-            bind.tvIr.isEnabled = true
+            bind.rlIrAdd.isEnabled = true
             bind.tvIr.setTextColor(resources.getColor(R.color.black))
+            bind.tvIrAdd.setTextColor(resources.getColor(R.color.black))
         } else {
             // 添加芝麻设备置为灰色
             bind.addLockerZone.isEnabled = false
             bind.addSsm.setTextColor(resources.getColor(R.color.gray1))
+            bind.tvAddSsmLogo.setTextColor(resources.getColor(R.color.gray1))
             bind.devicesEmptyLogo.visibility = GONE
+            bind.tvAddSsmLogo.visibility = VISIBLE
 
             // 添加红外线设备置为灰色
-            bind.tvIr.isEnabled = true
+            bind.rlIrAdd.isEnabled = false
             bind.tvIr.setTextColor(resources.getColor(R.color.gray1))
+            bind.tvIrAdd.setTextColor(resources.getColor(R.color.gray1))
         }
     }
 
@@ -436,6 +448,7 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
             }
 
             bind.devicesEmptyLogo.visibility = if (mDeviceList.size == 0) VISIBLE else GONE
+            bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) GONE else VISIBLE
             adapter = Ssm2DevicesAdapter(context, mDeviceList, this@Hub3SettingFG)
         }
     }
@@ -461,20 +474,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
 
     private fun handleError(exception: Throwable) {
         L.d("sf", "刷新红外线列表数据异常：" + exception.message)
-    }
-
-    private fun checkIsCompany() {
-        // 红外内测放开逻辑前置判断：非公司内部用户，true 放开；false 关闭。
-        val flag = true
-        if (AWSStatus.checkIsCompany() || flag) {
-            bind.tvIrText.visibility = VISIBLE
-            bind.tvIr.visibility = VISIBLE
-            bind.recyIR.visibility = VISIBLE
-        } else {
-            bind.tvIrText.visibility = GONE
-            bind.tvIr.visibility = VISIBLE
-            bind.recyIR.visibility = GONE
-        }
     }
 
     @SuppressLint("SetTextI18n")

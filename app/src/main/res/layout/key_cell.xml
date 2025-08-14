@@ -25,6 +25,7 @@
         android:layout_marginStart="16dp"
         android:layout_toRightOf="@+id/wifi_img"
         android:gravity="center"
+        android:textColor="@color/black"
         android:lines="1"
         tools:text="1111-1111-1111-11111111111-1111111" />
 
