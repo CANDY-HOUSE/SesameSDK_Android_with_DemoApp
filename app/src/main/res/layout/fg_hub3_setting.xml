@@ -664,7 +664,7 @@
                             android:layout_alignParentEnd="true"
                             android:text="+"
                             android:textColor="@color/black"
-                            android:textSize="32sp" />
+                            android:textSize="28sp" />
 
                     </RelativeLayout>
 
@@ -721,7 +721,7 @@
                             android:layout_alignParentEnd="true"
                             android:text="+"
                             android:textColor="@color/black"
-                            android:textSize="32sp" />
+                            android:textSize="28sp" />
                     </RelativeLayout>
 
 
