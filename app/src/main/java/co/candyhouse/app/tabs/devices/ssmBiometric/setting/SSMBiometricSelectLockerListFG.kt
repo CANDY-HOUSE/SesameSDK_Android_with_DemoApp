@@ -48,7 +48,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                             sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 }
                         mDeviceModel.myChDevices.value.filter { it ->
                             val isAllowedProduct =
-                                (it.productModel == CHProductModel.Hub3) || ((it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.SesameBot1 && it.productModel != CHProductModel.BLEConnector)
+                                (it.productModel == CHProductModel.Hub3) || ((it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.SesameBot1)
                             when {
                                 !isAllowedProduct -> false
                                 hasLockInSesame2Keys && it.productModel == CHProductModel.Hub3 -> false
@@ -98,7 +98,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                                         }
                                     }
                                     it.onFailure {
-                                        L.d("SSMBiometricSelectLockerListFG", "insert sesame error! ${title.text}")
+                                        L.d("SSMBiometricSelectLockerListFG","insert sesame error! ${title.text}")
                                     }
                                 }
                             }
