@@ -158,7 +158,13 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
         }
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
             L.d("harry", "[bike2]mechStatus【size: ${receivePayload.payload.size}】: ${receivePayload.payload.toHexString()}")
-            mechStatus = CHSesame5MechStatus(receivePayload.payload)
+            if (receivePayload.payload.size == 7) {
+                // 新固件， mechStatus 统一成 SS5 格式 的 7个字节
+                mechStatus = CHSesame5MechStatus(receivePayload.payload)
+            } else if (receivePayload.payload.size == 3) {
+                // 旧固件， mechStatus 只有 3 个字节
+                mechStatus = CHSesameBike2MechStatus(receivePayload.payload)
+            }
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
         }
     }
