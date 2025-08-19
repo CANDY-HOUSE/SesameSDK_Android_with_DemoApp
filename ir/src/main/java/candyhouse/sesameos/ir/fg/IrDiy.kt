@@ -9,8 +9,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import candyhouse.sesameos.ir.R
@@ -22,26 +22,25 @@ import candyhouse.sesameos.ir.databinding.FgIrDiyBinding
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
 import candyhouse.sesameos.ir.ext.Config
 import candyhouse.sesameos.ir.ext.Ext.getParcelableCompat
-import candyhouse.sesameos.ir.server.CHIRAPIManager
+import candyhouse.sesameos.ir.ext.IROperation
 import candyhouse.sesameos.ir.viewModel.IRDeviceViewModel
+import candyhouse.sesameos.ir.viewModel.IRLearnViewModelFactory
 import candyhouse.sesameos.ir.widget.AlertStyle
 import candyhouse.sesameos.ir.widget.AlertView
 import candyhouse.sesameos.ir.widget.dialog.AlertAction
 import candyhouse.sesameos.ir.widget.dialog.AlertActionStyle
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatus
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
 import co.candyhouse.sesame.utils.L
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.getValue
 
 class IrDiy : IrBaseFG<FgIrDiyBinding>() {
     private val gTag = "IrDiy"
-    val viewModel: IRDeviceViewModel by activityViewModels()
+    val viewModel: IRDeviceViewModel by viewModels { IRLearnViewModelFactory(requireContext().applicationContext) }
     override fun getViewBinder() = FgIrDiyBinding.inflate(layoutInflater)
     val listCodes = mutableListOf<CHHub3IRCode>()
 
@@ -50,8 +49,6 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
     lateinit var adapter: IrGridAdapter
     lateinit var chHub3Delegate: CHHub3Delegate
     var isRegisterMode = false
-    val MODEL_REGISTER = 0x01 // 自学习模式
-    val MODEL_CONTROL = 0x00  // 控制模式
 
     private var shouldContinue = true
 
@@ -117,30 +114,23 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         if (!shouldContinue) return
         setupTitleView()
         setupIrCodeViews()
-        setupHub3Delegate()
-        L.d(
-            gTag,
-            "device status=" + viewModel.getCHHub3().deviceStatus.name + " / " + viewModel.getCHHub3().deviceStatus.value + "  isNewDevice" + (isNewDevice)
-        )
+        L.d(gTag,"device status=" + viewModel.getCHHub3().deviceStatus.name + " / " + viewModel.getCHHub3().deviceStatus.value + "  isNewDevice" + (isNewDevice))
         showLoadingView()
         getIrCodes()
-        getIrModel()
+        getIrMode()
         observeUiState()
         innitDevice()
     }
 
-    private fun getIrModel() {
-        viewModel.getCHHub3().irModeGet {
-            it.onSuccess {
-                L.d("hub3", "[UI][getMode][OK]")
-                view?.post {
-                    if (it.data.toInt() == MODEL_CONTROL) { // IR_MODE_CONTROL
-                        bind.topTitle.imgRight.isSelected = false
-                        isRegisterMode = false
-                    } else {    // IR_MODE_LEARN
-                        bind.topTitle.imgRight.isSelected = true
-                        isRegisterMode = true
-                    }
+    private fun getIrMode() {
+        viewModel.getMode { mode ->
+            handleActionOnMainThread {
+                if (mode.toInt() == IROperation.MODE_CONTROL) {
+                    bind.topTitle.imgRight.isSelected = false
+                    isRegisterMode = false
+                } else {
+                    bind.topTitle.imgRight.isSelected = true
+                    isRegisterMode = true
                 }
             }
         }
@@ -174,24 +164,7 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         bind.topTitle.imgRight.visibility = if (editable) View.VISIBLE else View.GONE
         bind.topTitle.imgRight.setImageResource(R.drawable.selector_img_add_del)
         bind.topTitle.imgRight.setOnClickListener { mView ->
-            if (!isBluetoothEnabled(requireContext())) {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.ir_ble_noable),
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setOnClickListener
-            }
-            if (viewModel.getCHHub3().deviceStatus.value == CHDeviceLoginStatus.Login) {
-                switchModel(mView.isSelected)
-                return@setOnClickListener
-            }
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.ir_ble_invalid),
-                Toast.LENGTH_SHORT
-            ).show()
-
+            switchModel(mView.isSelected)
         }
     }
 
@@ -199,20 +172,8 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         adapter = IrGridAdapter(
             requireContext(),
             listCodes, editable, onClickItem = { item ->
-                emitIrCode(item)
-                handleActionOnIoThread {
-                    viewModel.getCHHub3().getIrLearnedData() { it ->
-                        it.onSuccess {
-                            L.d("getIrLearnedData", "[IO][getLearnedData][OK]")
-                            L.d("getIrLearnedData", "[hub3][deviceUUID] " + viewModel.getCHHub3().deviceId)
-                            L.d("getIrLearnedData", "[irCode][UUID] " + item.irID)
-                            val irDataNameUUID = UUID.randomUUID().toString()
-                            // 旧的数据， 发射一次后， 固件会把数据发到云端， APP接收后， 生成 UUID ， 存到云端， 以后从云端发数据， 而不是发 id。
-                            CHIRAPIManager.addHub3LearnedIrData(it.data, viewModel.getCHHub3().deviceId.toString().uppercase(), irDataNameUUID, item.uuid, item.irID)
-                            // this.chHub3Delegate.onIRCodeChanged(viewModel.getCHHub3(), id, item.name)
-                        }
-                    }
-                }
+                emitIrLearnCode(item)
+                viewModel.updateLearnDataToServer()
             },
             onLongClickItem = { position, item ->
                 if (editable) {
@@ -225,8 +186,8 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         }
     }
 
-    private fun emitIrCode(item: CHHub3IRCode) {
-        viewModel.emitIrCode(
+    private fun emitIrLearnCode(item: CHHub3IRCode) {
+        viewModel.emitIrLearnCode(
             viewModel.getCHHub3().deviceId.toString().uppercase(),
             item.irID,
             viewModel.irRemoteDeviceLiveData.value!!.uuid,
@@ -251,55 +212,27 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
     fun switchModel(isClose: Boolean) {
         if (isClose) {
             isRegisterMode = false
-            viewModel.getCHHub3().unsubscribeLearnData()
-            viewModel.getCHHub3().irModeSet(MODEL_CONTROL.toByte()) {
-                it.onSuccess {
-                    handleActionOnMainThread {
-                        bind.topTitle.imgRight.isSelected = false
-                    }
-                }
-
-            }
+            viewModel.exitLearnMode()
         } else {
             isRegisterMode = true
-            viewModel.getCHHub3().irModeSet(MODEL_REGISTER.toByte()) { it ->
-                it.onSuccess {
-                    handleActionOnMainThread {
-                        bind.topTitle.imgRight.isSelected = true
-                    }
-                    handleActionOnIoThread {
-                        viewModel.getCHHub3().getIrLearnedData() { it ->
-                            it.onSuccess {
-                                L.d("getIrLearnedData", "[IO][getLearnedData][OK]")
-                                L.d("getIrLearnedData", "[hub3][deviceUUID] " + viewModel.getCHHub3().deviceId)
-                                val irDataNameUUID = UUID.randomUUID().toString() // 新学习的 UUID 格式的红外码的数据， 直接上云。 固件不再存到 Flash 里。
-                                CHIRAPIManager.addHub3LearnedIrData(it.data, viewModel.getCHHub3().deviceId.toString().uppercase(), irDataNameUUID, viewModel.irRemoteDeviceLiveData.value!!.uuid, irDataNameUUID)
-                                this.chHub3Delegate.onIRCodeChanged(viewModel.getCHHub3(), irDataNameUUID, "")
-                            }
-                        }
-                    }
-                }
-            }
+            viewModel.enterLearnMode()
         }
     }
 
     private fun showContentView() {
-        L.d(gTag, "showContentView")
         handleActionOnMainThread {
             bind.progressG.visibility = View.GONE
             if (bind.ryView.visibility != View.VISIBLE) {
                 bind.ryView.visibility = View.VISIBLE
             }
-            bind.textViewEmpty.visibility =
-                if (listCodes.isEmpty()) View.VISIBLE else View.GONE
+            bind.linearLayoutEmpty.visibility = if (listCodes.isEmpty()) View.VISIBLE else View.GONE
             bind.linearLayoutNetworkRetry.visibility = View.GONE
         }
     }
 
     private fun showLoadingView() {
-        L.d(gTag, "showLoadingView")
         handleActionOnMainThread {
-            bind.textViewEmpty.visibility = View.GONE
+            bind.linearLayoutEmpty.visibility = View.GONE
             bind.ryView.visibility = View.GONE
             bind.linearLayoutNetworkRetry.visibility = View.GONE
             bind.progressG.visibility = View.VISIBLE
@@ -307,9 +240,8 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
     }
 
     private fun showOverLayLoadingView() {
-        L.d(gTag, "showOverLayLoadingView")
         handleActionOnMainThread {
-            bind.textViewEmpty.visibility = View.GONE
+            bind.linearLayoutEmpty.visibility = View.GONE
             bind.linearLayoutNetworkRetry.visibility = View.GONE
             bind.progressG.visibility = View.VISIBLE
         }
@@ -320,7 +252,7 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         handleActionOnMainThread {
             bind.progressG.visibility = View.GONE
             bind.ryView.visibility = View.GONE
-            bind.textViewEmpty.visibility = View.GONE
+            bind.linearLayoutEmpty.visibility = View.GONE
             bind.linearLayoutNetworkRetry.visibility = View.VISIBLE
             bind.linearLayoutNetworkRetry.setOnClickListener {
                 onclick()
@@ -328,66 +260,7 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         }
     }
 
-    private fun setupHub3Delegate() {
-        chHub3Delegate = object : CHHub3Delegate {
-            override fun onBleDeviceStatusChanged(
-                device: CHDevices,
-                status: CHDeviceStatus,
-                shadowStatus: CHDeviceStatus?
-            ) {
-                L.d(
-                    gTag,
-                    "onBleDeviceStatusChanged status=${status.value} / ${status.name}"
-                )
-                if (status.value == CHDeviceLoginStatus.Login) {
-                    viewModel.getCHHub3().getIRCodes {}
-                }
-            }
-
-            override fun onIRCodeChanged(
-                device: CHHub3,
-                id: String,
-                name: String
-            ) { // 从设备端接收到新增的红外码，直接进入正式队列
-                val irCode = CHHub3IRCode(
-                    id,
-                    name,
-                    uuid = viewModel.irRemoteDeviceLiveData.value!!.uuid.uppercase(),
-                    deviceId = viewModel.getCHHub3().deviceId.toString().uppercase()
-                )
-                addIrCode(irCode)
-                postIrCode(irCode)
-                L.d(gTag, "onIRCodeChanged id=" + id + " name=" + name)
-                switchModel(true)
-                showContentView()
-            }
-
-            override fun onIRCodeReceive(
-                device: CHHub3,
-                id: String,
-                name: String
-            ) { // 从设备端接收到列表的红外码，先进入临时队列
-                L.d(gTag, "onIRCodeReceive id:" + id + " _--name:" + name)
-            }
-
-            override fun onIRModeReceive(device: CHHub3, mode: Int) {
-                L.d(gTag, "onIRModeReceive: $mode")
-                bind.topTitle.imgRight.isSelected = mode != MODEL_CONTROL
-                isRegisterMode = mode != MODEL_CONTROL
-            }
-
-            override fun onIRCodeReceiveStart(device: CHHub3) {
-                L.d(gTag, "onIRCodeReceiveStart")
-            }
-
-            override fun onIRCodeReceiveEnd(device: CHHub3) {
-                L.d(gTag, "onIRCodeReceiveEnd")
-            }
-        }
-        viewModel.getCHHub3().multicastDelegate.addDelegate(chHub3Delegate)
-    }
-
-    private fun postIrCode(irCode: CHHub3IRCode) {
+    private fun postIrCode() {
         viewModel.addIRDeviceInfo(
             viewModel.getCHHub3(),
             listCodes,
@@ -428,12 +301,18 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
                 adapter.notifyDataSetChanged()
             }
         }
+        viewModel.irCodeChangedLiveData.observe(viewLifecycleOwner) { irCode ->
+            handleActionOnMainThread {
+                addIrCode(irCode)
+                switchModel(true)
+                showContentView()
+            }
+        }
     }
 
 
     private fun innitDevice() {
         if (isNewDevice) {
-            L.d(gTag, "innitDevice isNewDevice = $isNewDevice")
             showLoadingView()
             viewModel.addIRDeviceInfo(
                 viewModel.getCHHub3(), mutableListOf(),
@@ -453,13 +332,9 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
                 if (isFind) return@handleActionOnMainThread
                 listCodes.add(baseIrCode)
                 if (isRefresh) {
-                    viewModel.matchIrCode(
-                        listCodes,
-                        irRemoteId = viewModel.irRemoteDeviceLiveData.value!!.uuid.uppercase(),
-                        deviceId = viewModel.getCHHub3().deviceId.toString().uppercase()
-                    )
                     adapter.notifyDataSetChanged()
                 }
+                postIrCode()
             }
         }
     }
@@ -525,11 +400,9 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
         super.onDestroy()
         viewModel.runCatching {
             if (isRegisterMode) {
-                getCHHub3().irModeSet(MODEL_CONTROL.toByte()) {}
+                viewModel.exitLearnMode()
             }
-
-            getCHHub3().unsubscribeLearnData()
-
+            viewModel.unsubscribeGetModeTopic()
             if (::chHub3Delegate.isInitialized) {
                 getCHHub3().multicastDelegate.removeDelegate(chHub3Delegate)
             }
@@ -596,6 +469,5 @@ class IrDiy : IrBaseFG<FgIrDiyBinding>() {
             else -> return true
         }
     }
-
 
 }

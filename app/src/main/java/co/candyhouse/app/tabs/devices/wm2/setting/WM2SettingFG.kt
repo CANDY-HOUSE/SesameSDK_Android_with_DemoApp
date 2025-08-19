@@ -60,8 +60,8 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
 
                     bind.recy.post {
                         (bind.recy.adapter as GenericAdapter<*>).notifyDataSetChanged()
-                        bind.devicesEmptyLogo.visibility =
-                            if (mDeviceList.size == 0) View.VISIBLE else View.GONE
+                        bind.devicesEmptyLogo.visibility = if (mDeviceList.size == 0) View.VISIBLE else View.GONE
+                        bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) View.GONE else View.VISIBLE
                     }
                 }
 
@@ -188,7 +188,7 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                     mDeviceList.addAll(device.ssm2KeysMap.map { it.key })
                     bind.devicesEmptyLogo.visibility =
                         if (mDeviceList.size == 0) View.VISIBLE else View.GONE
-
+                    bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) View.GONE else View.VISIBLE
                     adapter = object : GenericAdapter<String>(mDeviceList) {
                         override fun getLayoutId(position: Int, obj: String): Int =
                             R.layout.wm2_key_cell

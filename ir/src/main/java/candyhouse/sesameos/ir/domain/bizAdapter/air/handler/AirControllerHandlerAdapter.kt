@@ -15,6 +15,7 @@ import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallba
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
 import candyhouse.sesameos.ir.ext.Ext
+import candyhouse.sesameos.ir.ext.IROperation
 import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.models.ItemType
 import candyhouse.sesameos.ir.server.CHIRAPIManager
@@ -31,7 +32,6 @@ import kotlinx.coroutines.launch
 class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) :
     HandlerConfigAdapter {
     private val tag = AirControllerHandlerAdapter::class.java.simpleName
-    private val test = false
     val air = AirProcessor()
 
     init {
@@ -43,14 +43,6 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
         device: CHHub3,
         remoteDevice: IrRemote
     ) {
-        if (test) {
-            if (item.type == ItemType.POWER_STATUS_ON) {
-                startTest(device, remoteDevice)
-            } else {
-                stopTest()
-            }
-            return
-        }
         GlobalScope.launch(Dispatchers.IO) {
             val key = getCurrentKey(item)
             val command = buildCommand(key, remoteDevice)
@@ -95,7 +87,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     }
 
     private fun postCommand(deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, hxdCommand = command) {
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT) {
             it.onSuccess {
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
             }
@@ -289,127 +281,4 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
             }
         }
     }
-    val errorList:MutableList<String> = mutableListOf()
-    val successList :MutableList<String> = mutableListOf()
-
-    private fun startTest(device: CHHub3, remoteDevice: IrRemote) {
-        GlobalScope.launch(Dispatchers.IO) {
-            L.d(tag, "=======================start==========================")
-            val list = Ext.parseJsonToDeviceList(context, R.raw.air_control_type)
-//            val irRemoteList = ETIR.getSupportedAirRemoteDevice(list)
-            val size = list.size
-            var index = 0
-            list.forEach {
-                L.d(tag, "testing:index=$index, size=$size  successList=${successList.size}  errorList=${errorList.size}")
-                val command = buildCommand(0x01, it)
-                if (command.isEmpty()) {
-                    errorList.add(it.model+", buildCommand=")
-                } else {
-                    testPostCommand(it,device.deviceId.toString().uppercase(), command)
-                }
-                delay(1000)
-                index++
-            }
-            L.d(tag, "=======================end==========================")
-        }
-    }
-    private fun testPostCommand(irRemote: IrRemote,deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, hxdCommand = command) {
-            it.onSuccess {
-                L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
-                successList.add("\n"+irRemote.model+", code:${irRemote.code}, command:${command}")
-            }
-            it.onFailure {
-
-                if (it is ApiClientException) {
-                    val exception: ApiClientException = it
-                    errorList.add("\n"+irRemote.model+", code:${irRemote.code}, command:${command},  errorCode:${exception.statusCode}")
-//                    if (exception.statusCode == HttpRespondCode.DATA_NOT_ALLOWED) {
-//                        GlobalScope.launch(Dispatchers.Main) {
-//                            Toast.makeText(context, R.string.key_unsupported, Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                    }
-                    L.e(
-                        tag,
-                        "--->emitIRRemoteDeviceKey error :${exception.statusCode}    /// ${it.message}"
-                    )
-                } else {
-                    L.e(tag, "emitIRRemoteDeviceKey error :${it.message}  ")
-                }
-
-            }
-        }
-    }
-
-    private fun stopTest() {
-        L.d(tag, "=======================over==========================")
-        L.d(tag, "errorList:${errorList.size}  successList:${successList.size}")
-        L.d(tag,"errorList:${errorList}")
-        L.d(tag,"successList:${successList}")
-        errorList.add("\n\n"+"errorList:${errorList.size}")
-        successList.add("\n\n"+"successList:${successList.size}")
-        writeToMediaStore(context,errorList.toString(),"ir_error.txt")
-        writeToMediaStore(context,successList.toString(),"ir_success.txt")
-    }
-
-    fun writeToMediaStore(context: Context, content: String, filename: String = "output.txt"): String? {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val values = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-            }
-
-            val uri = context.contentResolver.insert(
-                MediaStore.Files.getContentUri("external"),
-                values
-            )
-
-            uri?.let {
-                context.contentResolver.openOutputStream(it)?.use { os ->
-                    os.write(content.toByteArray())
-                }
-
-                // 获取文件的真实路径
-                val filePath = getFilePathFromUri(context, uri,filename)
-                L.d("FileOutput", "File saved at: $filePath")
-                L.d("FileOutput", "File URI: $uri")
-
-                return filePath
-            }
-        }
-        return null
-    }
-
-    // 获取URI对应的文件路径
-    fun getFilePathFromUri(context: Context, uri: Uri,filename: String): String? {
-        try {
-            // 使用ContentResolver查询文件路径
-            val cursor = context.contentResolver.query(
-                uri,
-                arrayOf(MediaStore.MediaColumns.DATA),
-                null,
-                null,
-                null
-            )
-
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val columnIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
-                    return it.getString(columnIndex)
-                }
-            }
-
-            // 如果上面的方法失败，尝试直接从URI获取路径
-            if (uri.path != null) {
-                // 对于Android 10及以上，文件通常在这个位置
-                return "${Environment.getExternalStorageDirectory().absolutePath}/Download/$filename"
-            }
-        } catch (e: Exception) {
-            L.e("FileOutput", "Error getting file path", e)
-        }
-        return null
-    }
-
 }

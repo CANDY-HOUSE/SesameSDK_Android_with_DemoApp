@@ -146,13 +146,21 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
         viewModel.connectStatusLiveData.observe(viewLifecycleOwner) {
             bind.rlError.visibility = if (it) View.GONE else View.VISIBLE
         }
+        viewModel.matchingLiveData.observe(viewLifecycleOwner) {
+            if (it) {
+                bind.rvMatchRemote.adapter?.let { adapter ->
+                    bind.tvSearching.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
+                }
+            } else {
+                bind.tvSearching.visibility = View.GONE
+            }
+        }
     }
 
     private fun showAutoMatchView(irRemoteList: List<IrMatchRemote>, isSearching: Boolean = false) {
         if (irRemoteList.isEmpty() && !isSearching) {
             Toast.makeText(requireContext(), R.string.air_auto_match_code_fail, Toast.LENGTH_SHORT).show()
         }
-        bind.tvSearching.visibility = if (irRemoteList.isEmpty()) View.VISIBLE else View.GONE
         bind.rvMatchRemote.adapter.let { adapter ->
             if (adapter is IrMatchRemoteAdapter) {
                 adapter.updateData(irRemoteList)

@@ -133,8 +133,8 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                         })
                         add_ssmTextColor()
                         bind.recy.adapter?.notifyDataSetChanged()
-                        bind.devicesEmptyLogo.visibility =
-                            if (mDeviceList.size == 0) View.VISIBLE else View.GONE
+                        bind.devicesEmptyLogo.visibility = if (mDeviceList.size == 0) View.VISIBLE else View.GONE
+                        bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) View.GONE else View.VISIBLE
                     }
                 }
                 val list = arrayListOf<ChSubCfp>()
@@ -275,6 +275,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             add_ssmTextColor()
             bind.devicesEmptyLogo.visibility =
                 if (mDeviceList.size == 0) View.VISIBLE else View.GONE
+            bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) View.GONE else View.VISIBLE
             adapter = object : GenericAdapter<LockDeviceStatus>(mDeviceList) {
                 override fun getLayoutId(position: Int, obj: LockDeviceStatus): Int =
                     R.layout.wm2_key_cell

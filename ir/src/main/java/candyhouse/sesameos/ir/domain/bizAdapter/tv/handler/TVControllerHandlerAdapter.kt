@@ -10,6 +10,7 @@ import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallba
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
 import candyhouse.sesameos.ir.domain.bizAdapter.tv.ui.TVControllerConfigAdapter
+import candyhouse.sesameos.ir.ext.IROperation
 import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.models.ItemType
 import candyhouse.sesameos.ir.server.CHIRAPIManager
@@ -75,7 +76,7 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
     }
 
     private fun postCommand(deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, hxdCommand = command) {
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT) {
             it.onSuccess {
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
             }

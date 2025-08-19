@@ -12,6 +12,7 @@ import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteKeyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceStateRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrLearnedDataAddRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrMatchCodeRequest
+import candyhouse.sesameos.ir.ext.IROperation
 import co.candyhouse.sesame.open.CHConfiguration
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
@@ -194,22 +195,22 @@ object CHIRAPIManager {
     /**
      * 发送IR遥控器按键
      * @param deviceId 设备ID
-     * @param hxdCommand hxd 命令
-     * @param learnedCommand 自学习命令
+     * @param command 命令内容
+    * @param operation 操作类型, 默认为 "emit"{ "remoteEmit" 表示遥控器发送命令, "learnEmit" 表示学习命令，"modelSet" 表示设置模型, "modelGet" 表示获取模型 }
      * @param onResponse 回调,返回结果
      */
     fun emitIRRemoteDeviceKey(
         deviceId: String,
-        hxdCommand: String = "",
-        learnedCommand: String = "",
+        command: String = "",
+        operation: String = "",
         irDeviceUUID: String = "",
         onResponse: CHResult<Any>
     ) {
         makeApiCall(onResponse) {
             try {
                 val requestBody = IrDeviceRemoteKeyRequest(
-                    hxdCommand = hxdCommand,
-                    learnedCommand = learnedCommand,
+                    data = command,
+                    operation = operation,
                     irDeviceUUID = irDeviceUUID,
                 )
                 L.d("CHIRAPIManager", "emitIRRemoteDeviceKey:deviceId=${deviceId} requestBody=${requestBody}")
@@ -366,6 +367,41 @@ object CHIRAPIManager {
             }
         }
         return true
+    }
+
+    /**
+     * 设定IR模式:
+     * @param model 0x01 进入学习模式, 0x00 进入普通控制模式
+     * @param onResponse 回调
+     */
+    fun setIRMode(model: Int, hub3DeviceId:String, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            try {
+                val requestBody = IrDeviceRemoteKeyRequest(IROperation.OPERATION_MODE_SET, model.toString())
+                val res = jpAPIClient.sendIRMode(hub3DeviceId, requestBody)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+            } catch (e: Exception) {
+                L.e("CHIRAPIManager", "Error parsing IR keys", e)
+                onResponse.invoke(Result.failure(e))
+            }
+        }
+    }
+
+    /**
+     * 获取IR模式:
+     * @param onResponse 回调
+     */
+    fun getIRMode(hub3DeviceId:String, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            try {
+                val requestBody = IrDeviceRemoteKeyRequest(IROperation.OPERATION_MODE_GET, "")
+                val res = jpAPIClient.sendIRMode(hub3DeviceId, requestBody)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+            } catch (e: Exception) {
+                L.e("CHIRAPIManager", "Error parsing IR keys", e)
+                onResponse.invoke(Result.failure(e))
+            }
+        }
     }
 
 }

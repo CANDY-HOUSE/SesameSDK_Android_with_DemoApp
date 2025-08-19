@@ -1,5 +1,6 @@
 package co.candyhouse.sesame.ble.os3
 
+import android.adservices.topics.Topic
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import co.candyhouse.sesame.ble.CHDeviceUtil
@@ -321,57 +322,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         }
     }
 
-    override fun irModeSet(mode: Byte, result: CHResult<CHEmpty>) {
-        L.d("------->","irModeSet mode: $mode")
-        if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_MODE_SET.value, byteArrayOf(mode))) { res ->
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-        }
-    }
-
-    override fun irModeGet(result: CHResult<Byte>) {
-        L.d("hcia", "[送]irModeGet")
-        if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_MODE_GET.value, byteArrayOf())) { res ->
-            L.d("hcia", "[收]irModeGet: " + res.payload[0])
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(res.payload[0])))
-        }
-    }
-
-    override fun irCodeEmit(id: String, result: CHResult<CHEmpty>) {
-        if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_CODE_EMIT.value, byteArrayOf(id.hexStringToByteArray()[0]))) { res ->
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-        }
-    }
-
-    override fun irCodeEmit(topic: String, data: ByteArray, result: CHResult<CHEmpty>) {
-        if (!isBleAvailable(result)) return
-        CHIotManager.publishData(topic, data)
-    }
-
-
-    override fun irCodeDelete(topic: String, data: ByteArray) {
-//        if (checkBle(result)) return
-//        CHIotManager.publishData(topic, data)
-    }
-
-    override fun irCodeDelete(id: String, result: CHResult<CHEmpty>) {
-        if (!isBleAvailable(result)) return
-        L.d("hcia", "[送]irCodeDelete: $id")
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_CODE_DELETE.value, byteArrayOf(id.hexStringToByteArray()[0]))) { res ->
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-        }
-    }
-
-    override fun irCodeChange(id: String, name: String, result: CHResult<CHEmpty>) {
-        if (!isBleAvailable(result)) return
-        L.d("hcia", "[送]irCodeChange: $id name: $name")
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_CODE_CHANGE.value, byteArrayOf(id.hexStringToByteArray()[0]) + name.toByteArray())) { res ->
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-        }
-    }
-
     override fun getMatterPairingCode(result: CHResult<ByteArray>) {
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.HUB3_MATTER_PAIRING_CODE.value, byteArrayOf())) { res ->
@@ -383,17 +333,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.HUB3_MATTER_PAIRING_WINDOW.value, byteArrayOf())) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(res.payload[0])))
-        }
-    }
-
-    override fun getIRCodes(result: CHResult<CHEmpty>) {
-        if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM_OS3_IR_CODE_GET.value, byteArrayOf())) { res ->
-            if (res.cmdResultCode == SesameResultCode.success.value) {
-                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-            } else {
-                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "GetIRCodes", res.cmdResultCode.toInt())))
-            }
         }
     }
 
@@ -448,9 +387,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                     mechSetting?.wifiPassWord = String(receivePayload.payload.copyOfRange(32, 96)).trimEnd(0.toChar(), '?'.toChar()) // 32...95 转换为字符串并去除末尾的零字符和问号字符
                 }
                 (delegate as? CHWifiModule2Delegate)?.onAPSettingChanged(this, mechSetting!!)
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onAPSettingChanged(this@CHHub3Device, mechSetting!!)
-                }
             }
 
             SesameItemCode.mechStatus.value -> {
@@ -480,16 +416,10 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 }
                 L.d("hcia", "[3][hub3][存下的ssm清單]" + ssm2KeysMap) //{1120031c-0903-0219-9c00-1400ffffffff=[B@5e481ae}
                 (delegate as? CHHub3Delegate)?.onSSM2KeysChanged(this, ssm2KeysMap)
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onSSM2KeysChanged(this@CHHub3Device, ssm2KeysMap)
-                }
             }
 
             SesameItemCode.moveTo.value -> {
                 (delegate as? CHHub3Delegate)?.onOTAProgress(this, receivePayload.payload.first())
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onOTAProgress(this@CHHub3Device, receivePayload.payload.first())
-                }
             }
 
             SesameItemCode.HUB3_ITEM_CODE_SSID_FIRST.value -> {}
@@ -498,81 +428,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 val ssidRssi = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
                 val ssidStr = String(receivePayload.payload.drop(2).toByteArray())
                 (delegate as? CHWifiModule2Delegate)?.onScanWifiSID(this, ssidStr, ssidRssi)
-                multicastDelegate.invokeAll {
-                    (this as? CHWifiModule2Delegate)?.onScanWifiSID(this@CHHub3Device, ssidStr, ssidRssi)
-                }
-            }
-
-            SesameItemCode.SSM_OS3_IR_CODE_FIRST.value -> {
-                (delegate as? CHHub3Delegate)?.onIRCodeReceiveStart(this)
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onIRCodeReceiveStart(this@CHHub3Device)
-                }
-                L.d("[hub3_say_ir]", "[SSM_OS3_IR_CODE_FIRST]")
-            }
-
-            SesameItemCode.SSM_OS3_IR_CODE_LAST.value -> {
-                (delegate as? CHHub3Delegate)?.onIRCodeReceiveEnd(this)
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onIRCodeReceiveEnd(this@CHHub3Device)
-                }
-                L.d("[hub3_say_ir]", "[SSM_OS3_IR_CODE_LAST]")
-            }
-
-            SesameItemCode.SSM_OS3_IR_CODE_NOTIFY.value -> {
-                L.d("[hub3_say_ir]", "[SSM_OS3_IR_CODE_NOTIFY]: " + receivePayload.payload.toHexString())
-                (delegate as? CHHub3Delegate)?.onIRCodeReceive(
-                    this, String.format("%02X", receivePayload.payload[0]), if (receivePayload.payload.size > 2) {
-                        String(receivePayload.payload.copyOfRange(2, receivePayload.payload.size))
-                    } else {
-                        ""
-                    }
-                )
-                multicastDelegate.invokeAll {
-                    L.d("[hub3_say_ir]", "[SSM_OS3_IR_CODE_NOTIFY]: " + receivePayload.payload.toHexString() + "  " + this.hashCode())
-                    (this as? CHHub3Delegate)?.onIRCodeReceive(
-                        this@CHHub3Device,
-                        String.format("%02X", receivePayload.payload[0]),
-                        if (receivePayload.payload.size > 2) {
-                            String(
-                                receivePayload.payload.copyOfRange(
-                                    2,
-                                    receivePayload.payload.size
-                                )
-                            )
-                        } else {
-                            ""
-                        }
-                    )
-                }
-            }
-
-            SesameItemCode.SSM_OS3_IR_CODE_CHANGE.value -> {
-                L.d("[hub3_say_ir]", "[SSM_OS3_IR_CODE_CHANGE]: " + receivePayload.payload.toHexString())
-                (delegate as? CHHub3Delegate)?.onIRCodeChanged(
-                    this, String.format("%02X", receivePayload.payload[0]), if (receivePayload.payload.size > 2) {
-                        String(receivePayload.payload.copyOfRange(2, receivePayload.payload.size))
-                    } else {
-                        ""
-                    }
-                )
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onIRCodeChanged(
-                        this@CHHub3Device, String.format("%02X", receivePayload.payload[0]), if (receivePayload.payload.size > 2) {
-                            String(receivePayload.payload.copyOfRange(2, receivePayload.payload.size))
-                        } else {
-                            ""
-                        }
-                    )
-                }
-
-            }
-
-            SesameItemCode.SSM_OS3_IR_MODE_GET.value -> {
-                L.d("hcia", "[收]SSM_OS3_IR_MODE_GET:" + receivePayload.payload[0])
-                multicastDelegate.invokeAll {
-                    (this as? CHHub3Delegate)?.onIRModeReceive(this@CHHub3Device, receivePayload.payload[0].toInt())
-                }
             }
 
             Hub3ItemCode.HUB3_ITEM_CODE_LED_DUTY.value -> {
@@ -588,20 +443,17 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         }
     }
 
-    override fun getIrLearnedData(result: CHResult<ByteArray>) {
-        val topic = "hub3/${this.deviceId.toString().uppercase()}/ir/learned/data"
+    override fun subscribeTopic(topic:String, result: CHResult<ByteArray>) {
         L.d("getIrLearnedData", "topic: $topic")
         CHIotManager.subscribeTopic(topic) { it ->
             it.onSuccess {
                 L.d("getIrLearnedData", "收到 " + it.data.size + " 个字节的红外数据")
-                unsubscribeLearnData() // 收到数据后， 取消订阅
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
             }
         }
     }
 
-    override fun unsubscribeLearnData() {
-        val topic = "hub3/${this.deviceId.toString().uppercase()}/ir/learned/data"
+    override fun unsubscribeTopic(topic: String) {
         L.d("unsubscribeLearnData", "topic: $topic")
         CHIotManager.unsubscribeTopic(topic)
     }

@@ -1,23 +1,33 @@
 package candyhouse.sesameos.ir.viewModel
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import candyhouse.sesameos.ir.base.BaseIr
 import candyhouse.sesameos.ir.base.CHHub3IRCode
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
+import candyhouse.sesameos.ir.ext.IROperation
 import candyhouse.sesameos.ir.server.CHIRAPIManager
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.util.UUID
+import kotlin.onFailure
+import kotlin.onSuccess
 
-class IRDeviceViewModel : ViewModel() {
+class IRDeviceViewModel(val context: Context) : ViewModel() {
 
     val irCodeLiveData = MutableLiveData<MutableList<CHHub3IRCode>>()
     val tag = this.javaClass.simpleName
     val irRemoteDeviceLiveData = MutableLiveData<IrRemote>()
+    val irCodeChangedLiveData = MutableLiveData<CHHub3IRCode>()
     lateinit var chHub3 : CHHub3
     var addDeviceSuccess = false
 
@@ -59,42 +69,6 @@ class IRDeviceViewModel : ViewModel() {
         }
     }
 
-    /**
-     * 匹配已存在的按键列表，更新名称
-     */
-    fun matchIrCode(listCodes: MutableList<CHHub3IRCode>,fetchIrCodes:MutableList<CHHub3IRCode>? = irCodeLiveData.value,  irRemoteId: String, deviceId: String) {
-        if (fetchIrCodes.isNullOrEmpty()) {
-            return
-        }
-        L.d(tag, "matchIrCode:deviceId=${deviceId} ${listCodes.toString()}")
-        // 遍历入参列表，更新名称
-        for (i in listCodes.indices) {
-            val code = listCodes[i]
-            val irIDInt = code.irID.toIntOrNull()
-            // 查找匹配的已存在代码
-            val matchingCode = fetchIrCodes.find { fetchIrCode ->
-                val keyUUIDInt = fetchIrCode.irID?.toIntOrNull()
-                if (irIDInt != null && keyUUIDInt != null) {
-                    keyUUIDInt == irIDInt
-                } else {
-                    fetchIrCode.irID == code.irID
-                }
-            }
-            if (null == matchingCode) {
-                L.d(tag, "matchIrCode: is null ")
-                listCodes[i] = CHHub3IRCode(code.irID, code.name, irRemoteId, deviceId)
-            } else {
-                var name = matchingCode.name ?: code.name
-                var uuid = matchingCode.uuid ?: code.uuid
-                L.d(tag, "matchIrCode: ${code.irID} ${name} ${uuid}")
-                listCodes[i] = CHHub3IRCode(code.irID, name, uuid, deviceId)
-            }
-        }
-        listCodes.forEach {
-            L.d(tag, "matchIrCode, haveItem: ${it.toString()}")
-        }
-    }
-
     fun getMatchedIRCode(code: CHHub3IRCode): CHHub3IRCode? {
         val existingCodes = irCodeLiveData.value ?: return null
         val irIDInt = code.irID.toIntOrNull()
@@ -130,7 +104,6 @@ class IRDeviceViewModel : ViewModel() {
             it.onSuccess {
                 L.d(tag, "changeIRCode success")
                 onSuccess()
-//                getIRCodes(item.uuid, onSuccess, onLoadError)
             }
             it.onFailure {
                 onChangeError()
@@ -234,9 +207,8 @@ class IRDeviceViewModel : ViewModel() {
         }
     }
 
-    fun emitIrCode(deviceId: String, code: String, irDeviceUUID: String, onSuccess: () -> Unit={}, onError: (message:String) -> Unit={}) {
-        L.d("tag", "emitIRRemoteDeviceKey deviceId: $deviceId code: $code irDeviceUUID: $irDeviceUUID")
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, learnedCommand = code, irDeviceUUID = irDeviceUUID) {
+    fun emitIrLearnCode(deviceId: String, code: String, irDeviceUUID: String, onSuccess: () -> Unit={}, onError: (message:String) -> Unit={}) {
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = code, operation = IROperation.OPERATION_LEARN_EMIT, irDeviceUUID = irDeviceUUID) {
             it.onSuccess {
                 onSuccess.invoke()
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
@@ -250,10 +222,113 @@ class IRDeviceViewModel : ViewModel() {
         }
     }
 
+    fun setMode(model: Int) {
+        CHIRAPIManager.setIRMode(model, chHub3.deviceId.toString().uppercase()) {
+            it.onFailure {
+                viewModelScope.launch(Dispatchers.Main) {
+                    Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    fun unsubscribeLearnDataTopic() {
+        try {
+            chHub3.unsubscribeTopic(getLeaningDataTopic())
+        } catch (e: Exception) {
+            L.e(tag, "unsubscribeTopic error: ${e.message}")
+        }
+    }
+
+    fun unsubscribeGetModeTopic() {
+        try {
+            chHub3.unsubscribeTopic(getGetModeTopic())
+        } catch (e: Exception) {
+            L.e(tag, "unsubscribeTopic error: ${e.message}")
+        }
+    }
+
+    fun enterLearnMode() {
+        L.d(tag, "enterLearnMode")
+        viewModelScope.launch(Dispatchers.IO) {
+            setMode(IROperation.MODE_REGISTER)
+            try {
+                chHub3.subscribeTopic(getLeaningDataTopic()) { it ->
+                    it.onSuccess {
+                        val irDataNameUUID = UUID.randomUUID().toString() // 新学习的 UUID 格式的红外码的数据， 直接上云。 固件不再存到 Flash 里。
+                        CHIRAPIManager.addHub3LearnedIrData(it.data, chHub3.deviceId.toString().uppercase(), irDataNameUUID, irRemoteDeviceLiveData.value!!.uuid, irDataNameUUID)
+                        val irCode = CHHub3IRCode(irDataNameUUID,"", uuid = irRemoteDeviceLiveData.value!!.uuid.uppercase(), deviceId = chHub3.deviceId.toString().uppercase())
+                        viewModelScope.launch(Dispatchers.Main) { irCodeChangedLiveData.value = irCode }
+                    }
+                }
+            }catch (e: Exception) {
+                L.e(tag, "enterLearnMode error: ${e.message}")
+            }
+        }
+    }
+
+    fun exitLearnMode() {
+        L.d("tag", "exitLearnMode")
+        viewModelScope.launch (Dispatchers.IO ) {
+            setMode(IROperation.MODE_CONTROL)
+            unsubscribeLearnDataTopic()
+        }
+    }
+
+    fun getMode(onResponse: (Byte) -> Unit) {
+        chHub3.subscribeTopic(getGetModeTopic()) { it ->
+            it.onSuccess { data->
+                val jsonString = String(data.data)
+                val mode = extractValueWithJson(jsonString)
+                mode?.let { onResponse(it.toByte()) }
+            }
+        }
+        CHIRAPIManager.getIRMode(chHub3.deviceId.toString().uppercase()) {
+            it.onFailure {
+                viewModelScope.launch(Dispatchers.Main) {
+                    Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+    fun extractValueWithJson(jsonString: String): Int? {
+        return try {
+            val jsonObject = JSONObject(jsonString)
+            jsonObject.optInt("ir_mode")
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override fun onCleared() {
         L.d(tag, "onCleared")
         super.onCleared()
         irCodeLiveData.value = mutableListOf()
     }
+    fun updateLearnDataToServer() {
+        viewModelScope.launch(Dispatchers.IO) {
+            chHub3.subscribeTopic(getLeaningDataTopic()) {
+                it.onSuccess { data ->
+                    unsubscribeLearnDataTopic()
+                    val irDataNameUUID = UUID.randomUUID().toString()
+                    // 旧的数据， 发射一次后， 固件会把数据发到云端， APP接收后， 生成 UUID ， 存到云端， 以后从云端发数据， 而不是发 id。
+                    CHIRAPIManager.addHub3LearnedIrData(data.data, chHub3.deviceId.toString().uppercase(), irDataNameUUID, irRemoteDeviceLiveData.value!!.uuid, irDataNameUUID)
+                }
+            }
+        }
+    }
 
+    private fun getLeaningDataTopic()  = "hub3/${chHub3.deviceId.toString().uppercase()}/ir/learned/data"
+    private fun getGetModeTopic()  = "hub3/${chHub3.deviceId.toString().uppercase()}/ir/mode"
+}
+
+class IRLearnViewModelFactory(
+    val context: Context
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(IRDeviceViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST") return IRDeviceViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

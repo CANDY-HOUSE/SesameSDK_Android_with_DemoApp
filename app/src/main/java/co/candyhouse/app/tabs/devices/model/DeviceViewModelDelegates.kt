@@ -161,26 +161,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                 }
             }
 
-            // CHHub3Delegate methods
-            override fun onIRCodeChanged(device: CHHub3, id: String, name: String) {
-                notifyDelegates(device) {
-                    if (it is CHHub3Delegate) it.onIRCodeChanged(
-                        device,
-                        id,
-                        name
-                    )
-                }
-            }
-
-            override fun onIRModeReceive(device: CHHub3, mode: Int) {
-                notifyDelegates(device) {
-                    if (it is CHHub3Delegate) it.onIRModeReceive(
-                        device,
-                        mode
-                    )
-                }
-            }
-
             override fun onHub3BrightnessReceive(device: CHHub3, brightness: Int) {
                 notifyDelegates(device) {
                     if (it is CHHub3Delegate) it.onHub3BrightnessReceive(
@@ -188,24 +168,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                         brightness
                     )
                 }
-            }
-
-            override fun onIRCodeReceive(device: CHHub3, id: String, name: String) {
-                notifyDelegates(device) {
-                    if (it is CHHub3Delegate) it.onIRCodeReceive(
-                        device,
-                        id,
-                        name
-                    )
-                }
-            }
-
-            override fun onIRCodeReceiveStart(device: CHHub3) {
-                notifyDelegates(device) { if (it is CHHub3Delegate) it.onIRCodeReceiveStart(device) }
-            }
-
-            override fun onIRCodeReceiveEnd(device: CHHub3) {
-                notifyDelegates(device) { if (it is CHHub3Delegate) it.onIRCodeReceiveEnd(device) }
             }
 
             override fun onTriggerDelaySecondReceived(
@@ -259,40 +221,9 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
         }
     }
 
-    override fun onIRCodeChanged(device: CHHub3, id: String, name: String) {
-        vm.viewModelScope.launch {
-            (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onIRCodeChanged(device, id, name)
-        }
-    }
-
-
-    override fun onIRModeReceive(device: CHHub3, mode: Int) {
-        vm.viewModelScope.launch {
-            (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onIRModeReceive(device, mode)
-        }
-    }
-
     override fun onHub3BrightnessReceive(device: CHHub3, brightness: Int) {
         vm.viewModelScope.launch {
             (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onHub3BrightnessReceive(device, brightness)
-        }
-    }
-
-    override fun onIRCodeReceive(device: CHHub3, id: String, name: String) {
-        vm.viewModelScope.launch {
-            (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onIRCodeReceive(device, id, name)
-        }
-    }
-
-    override fun onIRCodeReceiveStart(device: CHHub3) {
-        vm.viewModelScope.launch {
-            (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onIRCodeReceiveStart(device)
-        }
-    }
-
-    override fun onIRCodeReceiveEnd(device: CHHub3) {
-        vm.viewModelScope.launch {
-            (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onIRCodeReceiveEnd(device)
         }
     }
 

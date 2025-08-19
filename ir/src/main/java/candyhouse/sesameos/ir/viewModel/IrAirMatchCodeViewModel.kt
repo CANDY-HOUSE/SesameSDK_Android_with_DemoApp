@@ -13,10 +13,10 @@ import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.base.IrCompanyCode
 import candyhouse.sesameos.ir.base.IrMatchRemote
 import candyhouse.sesameos.ir.base.IrRemote
-import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallback
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
 import candyhouse.sesameos.ir.domain.repository.RemoteRepository
+import candyhouse.sesameos.ir.ext.IROperation
 import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.server.CHIRAPIManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -24,10 +24,9 @@ import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.UUID
 
 
@@ -38,6 +37,8 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
     val irCompanyCodeLiveData = MutableLiveData<IrCompanyCode>()
     val irMatchRemoteListLiveData = MutableLiveData<List<IrMatchRemote>>()
     val connectStatusLiveData = MutableLiveData<Boolean>()
+    val matchingLiveData = MutableLiveData<Boolean>()
+    var isLearningMode = false
 
     fun setupMatchData(productKey: Int) {
         val handlerCallback = object : HandlerCallback {
@@ -66,7 +67,6 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
         L.d(tag, "setIrCompanyCode remoteDevice=${irCompanyCode.code.toString()}")
         this.irCompanyCodeLiveData.value = irCompanyCode
         remoteRepository.setCurrentSate("")
-//        matchIrDeviceCode()
     }
 
     override fun onCleared() {
@@ -81,29 +81,73 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
     }
 
     fun startAutoMatch() {
+        isLearningMode = true
+        startSubscribeIRMode()
         startSubscribeIR()
         enterLearnMode()
     }
+
+    private fun startSubscribeIRMode() {
+        hub3Device.subscribeTopic(getGetModeTopic()){
+
+        }
+        hub3Device.subscribeTopic(getGetModeTopic()) { it ->
+            it.onSuccess { data->
+                if (!isLearningMode) {
+                    return@onSuccess
+                }
+                val jsonString = String(data.data)
+                val mode = extractValueWithJson(jsonString)
+                mode?.let {
+                    if (mode != IROperation.MODE_REGISTER) {
+                        setModel(IROperation.MODE_REGISTER)
+                    }
+                } ?: run {
+                    L.e(tag, "getIRMode failed: Invalid JSON format or missing 'ir_mode' key")
+                }
+            }
+        }
+        CHIRAPIManager.getIRMode(hub3Device.deviceId.toString().uppercase()) {
+            it.onFailure {
+                viewModelScope.launch(Dispatchers.Main) {
+                    Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    fun extractValueWithJson(jsonString: String): Int? {
+        return try {
+            val jsonObject = JSONObject(jsonString)
+            jsonObject.optInt("ir_mode")
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun unsubscribeIRMode() {
+        hub3Device.unsubscribeTopic(getGetModeTopic())
+    }
+
     @OptIn(ExperimentalStdlibApi::class)
     fun startSubscribeIR() {
         viewModelScope.launch {
-            hub3Device.getIrLearnedData {
+            hub3Device.subscribeTopic(getLeaningDataTopic()) {
                 it.onSuccess {
-                    L.d(tag, "getLearnedData success")
+                    viewModelScope.launch(Dispatchers.Main) { matchingLiveData.value = true }
                     if (null == irCompanyCodeLiveData.value) {
-                        irMatchRemoteListLiveData.value = emptyList()
+                        viewModelScope.launch(Dispatchers.Main) { irMatchRemoteListLiveData.value = emptyList() }
                         return@onSuccess
                     }
-                    L.d(tag, "getLearnedData ${getCurrentIrDeviceType()} ${irCompanyCodeLiveData.value!!.name} ")
                     val callResult = CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), irCompanyCodeLiveData.value!!.name) {
                         it.onSuccess { matchCodeResponse ->
-                            L.d(tag, "matchIrCode success: ${matchCodeResponse.data}")
                             startAutoMatch()
                             val irMatchCodeRequest = matchCodeResponse.data
                             val jsonString = Gson().toJson(irMatchCodeRequest)
                             val irMatchList = parseJsonToIrRemoteWithMatchList(jsonString, getCurrentIrDeviceType())
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = irMatchList
+                                matchingLiveData.value = false
                             }
                         }
                         it.onFailure { error ->
@@ -111,6 +155,7 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
                             startAutoMatch()
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = emptyList()
+                                matchingLiveData.value = false
                             }
                         }
                     }
@@ -122,7 +167,7 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
                     }
                 }
                 it.onFailure { // 订阅失败，可能网络问题或设备未连接
-                    connectStatusLiveData.value = false
+                    viewModelScope.launch(Dispatchers.Main) { connectStatusLiveData.value = false }
                 }
             }
         }
@@ -136,27 +181,28 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
                 return@launch
             }
             connectStatusLiveData.value = true
-            viewModelScope.launch(Dispatchers.IO) {
-                hub3Device.irModeSet(0x01) { result ->
-                    result.onSuccess {
-                        L.d(tag, "enterLearnMode success")
-                    }
-                    result.onFailure { error ->
-                        L.e(tag, "enterLearnMode error: ${error.message}")
-                    }
-                }
+            viewModelScope.launch(Dispatchers.IO) { setModel(IROperation.MODE_REGISTER) }
+        }
+    }
+
+    fun setModel(model: Int) {
+        CHIRAPIManager.setIRMode(model, hub3Device.deviceId.toString().uppercase()) {
+            it.onFailure {
+                Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     fun exitMatchMode() {
+        isLearningMode = false
         unsubscribeIR()
-        hub3Device.irModeSet(0x00) { }
+        unsubscribeIRMode()
+        setModel(IROperation.MODE_CONTROL)
     }
 
     fun unsubscribeIR() {
         try {
-            hub3Device.unsubscribeLearnData()
+            hub3Device.unsubscribeTopic(getLeaningDataTopic())
         } catch (e: Exception) {
             L.e(tag, "unsubscribeLearnData error: ${e.message}")
         }
@@ -224,6 +270,9 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
 
         return bluetoothAdapter?.isEnabled == true
     }
+
+    private fun getLeaningDataTopic()  = "hub3/${hub3Device.deviceId.toString().uppercase()}/ir/learned/data"
+    private fun getGetModeTopic()  = "hub3/${hub3Device.deviceId.toString().uppercase()}/ir/mode"
 }
 
 

@@ -131,6 +131,12 @@ internal interface CHIRAPIClient {
         body: IrDeviceRemoteKeyRequest
     ): Any
 
+    @Operation(path = "/device/v2/ir/{device_id}/mode", method = "PUT")
+    fun sendIRMode(
+        @Parameter(name = "device_id", location = "path") deviceId: String,
+        body: IrDeviceRemoteKeyRequest
+    ): Any
+
     @Operation(path = "/device/v2/ir/hub3_match_ir_code", method = "POST")
     fun matchIrCode(
         body: IrMatchCodeRequest
