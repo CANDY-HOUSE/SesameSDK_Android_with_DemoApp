@@ -21,6 +21,7 @@ import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.server.CHIRAPIManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHHub3
+import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -255,7 +256,7 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
     }
 
     fun checkHub3DeviceStatus(): Boolean {
-        return isBluetoothEnabled(context) &&  hub3Device.deviceStatus.value == CHDeviceLoginStatus.Login
+        return (hub3Device.mechStatus as? CHWifiModule2NetWorkStatus)?.isAPWork == true
     }
 
     fun isBluetoothEnabled(context: Context): Boolean {
