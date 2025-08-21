@@ -345,8 +345,8 @@ fun CHDevices.getFirZip(): Int {
     return when (productModel) {
         CHProductModel.SS2 -> R.raw.sesame_221_0_8c080c
         CHProductModel.SS4 -> R.raw.sesame_421_4_50ce5b
-        CHProductModel.SS5 -> R.raw.sesame5_30_5_2a1f8e
-        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_2a1f8e
+        CHProductModel.SS5 -> R.raw.sesame5_30_5_01be3d
+        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_01be3d
         CHProductModel.WM2 -> 0
         CHProductModel.SesameBot1 -> R.raw.sesamebot1_21_2_369eb9
         CHProductModel.BiKeLock -> R.raw.sesamebike1_21_3_d7162a
@@ -358,7 +358,7 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.Remote -> R.raw.remote_30_14_03d244
         CHProductModel.RemoteNano -> R.raw.remoten_30_15_03d244
         CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_01be3d
-        CHProductModel.SS5US -> R.raw.sesame5us_30_16_2a1f8e
+        CHProductModel.SS5US -> R.raw.sesame5us_30_16_01be3d
         CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_ad4096
         CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_f51e28
         CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_f51e28
