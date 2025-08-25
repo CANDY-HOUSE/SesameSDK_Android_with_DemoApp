@@ -15,16 +15,18 @@ import androidx.lifecycle.lifecycleScope
 import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.adapter.IrCompanyAdapter
 import candyhouse.sesameos.ir.base.IrRemote
+import candyhouse.sesameos.ir.base.cache.IrRemoteCacheManager
 import candyhouse.sesameos.ir.databinding.FgIrCpfgBinding
 import candyhouse.sesameos.ir.ext.Config
-import candyhouse.sesameos.ir.ext.Ext
-import candyhouse.sesameos.ir.ext.IRDeviceType
+import candyhouse.sesameos.ir.server.CHIRAPIManager
+import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Collections
 import java.util.Locale
+import java.util.UUID
 
 class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
 
@@ -38,13 +40,34 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
     private lateinit var irAdapter: IrCompanyAdapter
     private var searchJob: Job? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setupIRRemoteCache()
+    }
+
+    private fun setupIRRemoteCache() {
+        IrRemoteCacheManager.init(requireContext())
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupSearchView()
         setupSideBarView()
         setupSearchAnimation()
-        initData()
+        setupRetryView()
+        if (masterList.isEmpty()) {
+            getRemoteList()
+        } else {
+            showContentView()
+            showControlView()
+        }
+    }
+
+    private fun setupRetryView() {
+        bind.errorLayout.setOnClickListener {
+            getRemoteList()
+        }
     }
 
     override fun onDestroyView() {
@@ -53,8 +76,94 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         searchJob = null
     }
 
-    private fun initData() {
-        initIrRemoteData()
+    private fun getRemoteList() {
+        if (masterList.size == 0){
+            showLoadingView()
+        }
+
+        arguments?.getInt(Config.productKey) ?.let { brandType ->
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val cachedList = IrRemoteCacheManager.getValidCache(brandType)
+                if (!cachedList.isNullOrEmpty()) {
+                    synchronized(masterList) {
+                        masterList.clear()
+                        masterList.addAll(cachedList)
+                        view?.post {
+                            showContentView()
+                            showControlView()
+                        }
+                    }
+                    return@launch
+                }
+                fetchRemoteListFromServer(brandType)
+            }
+        }
+    }
+
+    private fun fetchRemoteListFromServer(brandType: Int) {
+        CHIRAPIManager.fetchRemoteList(brandType) {
+            it.onSuccess {
+                val remoteList = swapRemoteList(brandType,it.data)
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    IrRemoteCacheManager.saveCache(brandType, remoteList)
+                }
+                synchronized(masterList) {
+                    masterList.clear()
+                    masterList.addAll(remoteList)
+                    view?.post {
+                        showContentView()
+                        showControlView()
+                    }
+                }
+            }
+            it.onFailure { error ->
+                // 处理错误情况
+                L.e(tag, "Error fetching remote list: ${error.message}")
+                view?.post {
+                    if (masterList.size == 0){
+                        showErrorView()
+                    }
+                }
+
+            }
+        }
+    }
+
+    private fun showLoadingView() {
+        bind.errorLayout.visibility = View.GONE
+        bind.progressBar.visibility = View.VISIBLE
+        bind.indexTb.visibility = View.GONE
+        bind.textviewIrCompanyNotice.visibility = View.GONE
+        bind.linearLayoutResearch.visibility = View.GONE
+        bind.sideBar.visibility = View.GONE
+    }
+
+    private fun showErrorView() {
+        bind.errorLayout.visibility = View.VISIBLE
+        bind.progressBar.visibility = View.GONE
+        bind.indexTb.visibility = View.GONE
+        bind.textviewIrCompanyNotice.visibility = View.GONE
+        bind.linearLayoutResearch.visibility = View.GONE
+        bind.sideBar.visibility = View.GONE
+    }
+
+    private fun showContentView() {
+        bind.errorLayout.visibility = View.GONE
+        bind.progressBar.visibility = View.GONE
+        bind.indexTb.visibility = View.VISIBLE
+        bind.textviewIrCompanyNotice.visibility = View.VISIBLE
+        bind.linearLayoutResearch.visibility = View.VISIBLE
+        bind.sideBar.visibility = View.VISIBLE
+    }
+
+    private fun swapRemoteList(brandType: Int, originList: List<IrRemote>): List<IrRemote> {
+        return originList.map {
+            it.copy(
+                uuid = UUID.randomUUID().toString().uppercase(),
+                timestamp = 0L,
+                type = brandType,
+            )
+        }
     }
 
     private fun setupRecyclerView() {
@@ -157,52 +266,6 @@ class IrCompanyFg : IrBaseFG<FgIrCpfgBinding>() {
         }
         withContext(Dispatchers.Main) {
             bind.sideBar.setDirection(ArrayList(direction))
-        }
-    }
-
-    fun deviceKeyToAttrs(key: Int): Int {
-        var value = R.raw.air_control_type
-        if (key == IRDeviceType.DEVICE_REMOTE_AIR) {
-            value = R.raw.air_control_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_HW) {
-            value = R.array.strs_hw_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_AP) {
-            value = R.array.strs_ap_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_TV) {
-            value = R.raw.tv_control_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_IPTV) {
-            value = R.array.strs_iptv_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_BOX) {
-            value = R.array.strs_stb_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_DVD) {
-            value = R.array.strs_dvd_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_FANS) {
-            value = R.array.strs_fans_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_PJT) {
-            value = R.array.strs_pjt_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_LIGHT) {
-            value = R.raw.light_control_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_DC) {
-            value = R.array.strs_dc_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_AUDIO) {
-            value = R.array.strs_audio_type
-        } else if (key == IRDeviceType.DEVICE_REMOTE_ROBOT) {
-            value = R.array.strs_robot_type
-        }
-        return value
-    }
-
-    private fun initIrRemoteData() {
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            if (masterList.isEmpty()) {
-                synchronized(masterList) {
-                    val key = arguments?.getInt(Config.productKey) ?: -1
-                    masterList.addAll(Ext.parseJsonToDeviceList(requireContext(), deviceKeyToAttrs(key), key))
-                }
-            }
-            withContext(Dispatchers.Main) {
-                showControlView()
-            }
         }
     }
 

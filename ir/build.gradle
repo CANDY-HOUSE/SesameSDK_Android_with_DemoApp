@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     id 'kotlin-parcelize'
+    id("kotlin-kapt")
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -36,4 +38,9 @@ dependencies {
     //崩溃日志收集
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.crashlytics.ktx
+
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    implementation libs.androidx.room.rxjava2
+    ksp libs.androidx.room.compiler
 }

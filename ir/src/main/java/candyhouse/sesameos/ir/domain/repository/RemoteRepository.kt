@@ -125,35 +125,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
         handlerConfigAdapter.modifyIRDeviceInfo(device,remoteDevice,onResponse)
     }
 
-    fun matchRemoteDevice(irRemote: IrRemote) {
-        uiConfigAdapter.matchRemoteDevice(irRemote)
-    }
-
     fun setCurrentSate(state: String?) {
         uiConfigAdapter.setCurrentSate(state)
-    }
-
-    fun getUiConfigAdapter(): UIConfigAdapter {
-        return uiConfigAdapter
-    }
-
-    /**
-     * 获取品牌列表
-     * @return 品牌列表
-     */
-    suspend fun getCompanyCodeList(context: Context): List<IrCompanyCode> {
-        return uiConfigAdapter.getCompanyCodeList(context)
-    }
-
-    fun getMatchUiItemList() : List<IrControlItem> {
-        return uiConfigAdapter.getMatchUiItemList()
-    }
-
-    fun getMatchItem(position: Int,items:List<IrControlItem>): IrControlItem? {
-        return uiConfigAdapter.getMatchItem(position,items)
-    }
-
-    fun initMatchParams() {
-        uiConfigAdapter.initMatchParams()
     }
 }

@@ -109,7 +109,7 @@
     },
     {
       "id": 8,
-      "type": "SWING_VERTICAL",
+      "type": "WIND_DIRECTION",
       "titleIndex": 7,
       "titles": [
         "air_conditioner_wind_vertical_v1",
@@ -126,7 +126,7 @@
     },
     {
       "id": 9,
-      "type": "SWING_HORIZONTAL",
+      "type": "AUTO_WIND_DIRECTION",
       "titleIndex": 8,
       "titles": [
         "air_conditioner_wind_horizontal_auto",

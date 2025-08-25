@@ -38,7 +38,6 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
     private val items: MutableList<IrControlItem> = mutableListOf()
     private var config: UIControlConfig? = null
     val irRemoteDeviceLiveData = MutableLiveData<IrRemote>()
-    private var currentCompanyCode : IrCompanyCode? = null
     private val _isFirstLoad = MutableStateFlow(true)
     val isFirstLoad: StateFlow<Boolean> = _isFirstLoad.asStateFlow()
     val irMatchRemoteListLiveData = MutableLiveData(emptyList<IrMatchRemote>())
@@ -124,8 +123,6 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
     fun setRemoteDevice(remoteDevice: IrRemote) {
         this.irRemoteDeviceLiveData.value = remoteDevice
         remoteRepository.setCurrentSate(remoteDevice.state)
-        matchIrDeviceCode()
-        tryFindCompanyCode()
     }
 
     override fun onCleared() {
@@ -178,17 +175,6 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
         }
     }
 
-    fun matchIrDeviceCode() {
-        if (irRemoteDeviceLiveData.value == null) {
-            return
-        }
-        viewModelScope.launch {
-            irRemoteDeviceLiveData.value?.let { irRemoteDeviceValue ->
-                remoteRepository.matchRemoteDevice(irRemoteDeviceLiveData.value!!)
-            }
-        }
-    }
-
     fun getIrRemoteDevice(): IrRemote? {
        val irRemote = irRemoteDeviceLiveData.value
         irRemote?.let {
@@ -204,33 +190,6 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
 
     fun isDeviceInitialized(): Boolean {
         return ::device.isInitialized
-    }
-
-    fun getCompanyCode(): IrCompanyCode? = currentCompanyCode
-
-    private fun tryFindCompanyCode() {
-        if (currentCompanyCode != null ){
-            return
-        }
-        if (null == this.irRemoteDeviceLiveData.value){
-            return
-        }
-        viewModelScope.launch {
-            val companyCodeList = remoteRepository.getCompanyCodeList(context)
-            if (companyCodeList.isEmpty()) {
-                return@launch
-            }
-            irRemoteDeviceLiveData.value?.let { irRemote ->
-                companyCodeList.forEach({ item ->
-                    if (irRemote.model?.uppercase()?.startsWith(item.name.uppercase()) == true) {
-                        currentCompanyCode = item
-                        L.d(tag, "get companyCode: currentCompanyCode ${currentCompanyCode.toString()}")
-                        return@launch
-                    }
-                })
-
-            }
-        }
     }
 
     fun deleteIrDeviceInfo(device: CHHub3, irRemote: IrRemote) {

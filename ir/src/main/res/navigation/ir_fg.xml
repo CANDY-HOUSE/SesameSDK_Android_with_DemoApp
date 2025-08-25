@@ -22,10 +22,10 @@
         android:name="candyhouse.sesameos.ir.fg.IrCompanyFg">
         <action
             android:id="@+id/action_to_irgridefg"
-            app:destination="@id/IrGridFg" />
+            app:destination="@id/IrControlFG" />
     </fragment>
     <fragment
-        android:id="@+id/IrGridFg"
+        android:id="@+id/IrControlFG"
         android:name="candyhouse.sesameos.ir.fg.IrControlFG">
         <action
             android:id="@+id/action_to_irAirMatchCodeFg"

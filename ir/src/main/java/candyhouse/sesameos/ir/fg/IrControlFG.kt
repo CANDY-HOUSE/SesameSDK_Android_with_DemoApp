@@ -182,16 +182,10 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
         }
         bind.textviewHelp.visibility = View.VISIBLE
         bind.linearLayoutHelp.setOnClickListener({
-            val companyCode = viewModel.getCompanyCode()
-            L.d(tag, "companyCode=${companyCode.toString()}")
-            companyCode?.let {
-                L.d(tag, "go to match company code")
-                safeNavigate(R.id.action_to_irAirMatchCodeFg, Bundle().apply {
-                    this.putInt(Config.productKey, viewModel.getIrRemoteDevice()!!.type)
-                    this.putParcelable(Config.irCompany, it)
-                    this.putParcelableArrayList(Config.irSearchResult, ArrayList(viewModel.getSearchRemoteList()))
-                })
-            }
+            safeNavigate(R.id.action_to_irAirMatchCodeFg, Bundle().apply {
+                this.putParcelable(Config.irDevice, viewModel.getIrRemoteDevice())
+                this.putParcelableArrayList(Config.irSearchResult, ArrayList(viewModel.getSearchRemoteList()))
+            })
         })
     }
 

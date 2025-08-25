@@ -4,7 +4,6 @@ object Config {
 
     val productKey: String = "productKey"
     val productName: String = "productName"
-    val productModelKey: String = "productModelKey"
     val irDevice: String = "irDevice"
     val isNewDevice: String = "isNewDevice"
     val learningIrDeviceResult: String = "learningIrDeviceResult"

@@ -87,6 +87,35 @@
         app:layout_constraintBottom_toTopOf="@+id/tvNofind"
         app:layout_constraintTop_toBottomOf="@id/textview_ir_company_notice" />
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textview_ir_company_notice" />
+
+    <LinearLayout
+        android:id="@+id/errorLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textview_ir_company_notice">
+
+        <include
+            app:layout_constraintTop_toBottomOf="@id/topTitle"
+            android:id="@+id/include_network_retry"
+            layout="@layout/base_network_error" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tvNofind"
         android:layout_width="match_parent"

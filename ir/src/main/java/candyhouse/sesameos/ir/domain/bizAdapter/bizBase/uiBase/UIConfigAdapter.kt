@@ -33,26 +33,11 @@ interface UIConfigAdapter {
      * 设置配置更新回调
      */
     fun setConfigUpdateCallback(uiItemCallback: ConfigUpdateCallback)
-    /**
-     * 匹配远程设备参数
-     */
-    fun matchRemoteDevice(irRemote: IrRemote)
 
     /**
      * 设置当前状态
      */
     fun setCurrentSate(state: String?) {}
-
-    /**
-     * 获取空调品牌列表
-     * @return 空调品牌列表
-     */
-    suspend fun getCompanyCodeList(context: Context): List<IrCompanyCode>
-
-
-    fun getMatchUiItemList(): List<IrControlItem>
-
-    fun getMatchItem(position: Int,items:List<IrControlItem>): IrControlItem?
-    fun initMatchParams()
     fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3): Boolean
+
 }

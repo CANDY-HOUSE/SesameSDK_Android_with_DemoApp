@@ -28,21 +28,21 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     var currentCode = -1
 
     fun setupTable(context: Context) {
-        val jsonString = context.resources.openRawResource(R.raw.tv_table)
-            .bufferedReader()
-            .use { it.readText() }
-        val stringArray = Gson().fromJson(jsonString, Array<Array<String>>::class.java)
-        irTable.addAll(
-            stringArray.map { row ->
-                row.map { str ->
-                    if (str.startsWith("0x") || str.startsWith("0X")) {
-                        str.substring(2).toInt(16).toUInt()
-                    } else {
-                        str.toInt().toUInt()
-                    }
-                }.toTypedArray()
-            }.toTypedArray()
-        )
+//        val jsonString = context.resources.openRawResource(R.raw.tv_table)
+//            .bufferedReader()
+//            .use { it.readText() }
+//        val stringArray = Gson().fromJson(jsonString, Array<Array<String>>::class.java)
+//        irTable.addAll(
+//            stringArray.map { row ->
+//                row.map { str ->
+//                    if (str.startsWith("0x") || str.startsWith("0X")) {
+//                        str.substring(2).toInt(16).toUInt()
+//                    } else {
+//                        str.toInt().toUInt()
+//                    }
+//                }.toTypedArray()
+//            }.toTypedArray()
+//        )
     }
 
     override suspend fun loadConfig(): UIControlConfig {
@@ -70,119 +70,6 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
     override fun setConfigUpdateCallback(uiItemCallback: ConfigUpdateCallback) {
         updateCallback = uiItemCallback
-    }
-
-    override fun matchRemoteDevice(irRemote: IrRemote) {
-        if (irRemote.code > 0) {
-            return
-        }
-        if (irRemote.state.isNullOrEmpty()) {
-            return
-        }
-        irRemote.code = convertToDecimal(irRemote.state!!) ?: 0
-    }
-
-    private fun convertToDecimal(value: String): Int? {
-        return try {
-            if (value.length < 8) {
-                L.Companion.d(tag, "convertToDecimal length < 8")
-                return null
-            }
-            val byte2 = value.substring(4, 6)
-            val byte3 = value.substring(6, 8)
-            if (!isValidHex(byte2) || !isValidHex(byte3)) {
-                L.Companion.d(tag, "convertToDecimal contains invalid hex")
-                return null
-            }
-            (byte2 + byte3).toInt(16)
-        } catch (e: Exception) {
-            L.Companion.d(tag, "convertToDecimal convert failed:${value} ${e.message}")
-            null
-        }
-    }
-
-    private fun isValidHex(str: String): Boolean {
-        return str.matches("[0-9A-Fa-f]+".toRegex())
-    }
-
-    override suspend fun getCompanyCodeList(context: Context): List<IrCompanyCode> {
-        return Ext.parseCompanyTableToList(context, R.raw.tv_conpany_code)
-    }
-
-    override fun getMatchUiItemList(): List<IrControlItem> {
-        isMatched = true
-        val list: MutableList<IrControlItem> = mutableListOf()
-        list.add(
-            IrControlItem(
-                id = 0,
-                type = ItemType.POWER_STATUS_ON,
-                title = context.getString(R.string.ir_remote_power_on),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        list.add(
-            IrControlItem(
-                id = 1,
-                type = ItemType.VOLUME_UP,
-                title = context.getString(R.string.tv_remote_volume_up),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        list.add(
-            IrControlItem(
-                id = 2,
-                type = ItemType.VOLUME_DOWN,
-                title = context.getString(R.string.tv_remote_volume_down),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        list.add(
-            IrControlItem(
-                id = 3,
-                type = ItemType.MUTE,
-                title = context.getString(R.string.tv_remote_mute),
-                iconRes = 0,
-                isSelected = false,
-                value = "",
-                optionCode = ""
-            )
-        )
-        return list
-    }
-
-    override fun getMatchItem(
-        position: Int,
-        items: List<IrControlItem>
-    ): IrControlItem? {
-        return when (position) {
-            0 -> getItemByType(ItemType.POWER_STATUS_ON, items) // 电源
-            1 -> getItemByType(ItemType.VOLUME_UP, items) // 音量+
-            2 -> getItemByType(ItemType.VOLUME_DOWN, items) // 音量-
-            3 -> getItemByType(ItemType.MUTE, items) // 静音
-            else -> throw Exception("Error position:$position")
-        }
-    }
-
-    private fun getItemByType(type: ItemType, items: List<IrControlItem>): IrControlItem? {
-        items.forEach {
-            if (type == it.type) {
-                return it
-            }
-        }
-        return null
-    }
-
-    override fun initMatchParams() {
-
     }
 
     override fun handleItemClick(

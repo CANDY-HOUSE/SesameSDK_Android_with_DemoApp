@@ -31,31 +31,15 @@ import org.json.JSONObject
 import java.util.UUID
 
 
-class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: RemoteRepository) :
+class IrAirMatchCodeViewModel(val context: Context) :
     ViewModel() {
     private val tag = IrAirMatchCodeViewModel::class.java.simpleName
     private lateinit var hub3Device: CHHub3
-    val irCompanyCodeLiveData = MutableLiveData<IrCompanyCode>()
     val irMatchRemoteListLiveData = MutableLiveData<List<IrMatchRemote>>()
+    val originRemoteLiveData = MutableLiveData<IrRemote>()
     val connectStatusLiveData = MutableLiveData<Boolean>()
     val matchingLiveData = MutableLiveData<Boolean>()
     var isLearningMode = false
-
-    fun setupMatchData(productKey: Int) {
-        val handlerCallback = object : HandlerCallback {
-            override fun onItemUpdate(item: IrControlItem) {
-            }
-        }
-
-        val uiItemCallback = object : ConfigUpdateCallback {
-
-            override fun onItemUpdate(item: IrControlItem) {
-            }
-        }
-        remoteRepository.initialize(productKey, uiItemCallback, handlerCallback)
-
-    }
-
     fun setHub3Device(device: CHHub3) {
         this.hub3Device = device
     }
@@ -64,21 +48,17 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
         return ::hub3Device.isInitialized
     }
 
-    fun setIrCompanyCode(irCompanyCode: IrCompanyCode) {
-        L.d(tag, "setIrCompanyCode remoteDevice=${irCompanyCode.code.toString()}")
-        this.irCompanyCodeLiveData.value = irCompanyCode
-        remoteRepository.setCurrentSate("")
+    fun setOriginRemote(irRemote: IrRemote) {
+        this.originRemoteLiveData.value = irRemote
     }
 
     override fun onCleared() {
         super.onCleared()
         unsubscribeIR()
-        remoteRepository.clearConfigCache()
-        remoteRepository.clearHandlerCache()
     }
 
     fun getCurrentIrDeviceType(): Int {
-        return remoteRepository.getCurrentIRDeviceType()
+        return originRemoteLiveData.value!!.type
     }
 
     fun startAutoMatch() {
@@ -89,9 +69,6 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
     }
 
     private fun startSubscribeIRMode() {
-        hub3Device.subscribeTopic(getGetModeTopic()){
-
-        }
         hub3Device.subscribeTopic(getGetModeTopic()) { it ->
             it.onSuccess { data->
                 if (!isLearningMode) {
@@ -136,23 +113,20 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
             hub3Device.subscribeTopic(getLeaningDataTopic()) {
                 it.onSuccess {
                     viewModelScope.launch(Dispatchers.Main) { matchingLiveData.value = true }
-                    if (null == irCompanyCodeLiveData.value) {
-                        viewModelScope.launch(Dispatchers.Main) { irMatchRemoteListLiveData.value = emptyList() }
-                        return@onSuccess
-                    }
-                    val callResult = CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), irCompanyCodeLiveData.value!!.name) {
+                    val callResult = CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), originRemoteLiveData.value!!.model!!) {
                         it.onSuccess { matchCodeResponse ->
                             startAutoMatch()
                             val irMatchCodeRequest = matchCodeResponse.data
                             val jsonString = Gson().toJson(irMatchCodeRequest)
                             val irMatchList = parseJsonToIrRemoteWithMatchList(jsonString, getCurrentIrDeviceType())
+                            L.e(tag, "Success: matchIrCode , list.size=${irMatchList.size}")
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = irMatchList
                                 matchingLiveData.value = false
                             }
                         }
                         it.onFailure { error ->
-                            L.e(tag, "matchIrCode error: ${error.message}")
+                            L.e(tag, "Error: matchIrCode : ${error.message}")
                             startAutoMatch()
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = emptyList()
@@ -168,6 +142,7 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
                     }
                 }
                 it.onFailure { // 订阅失败，可能网络问题或设备未连接
+                    L.e(tag, "Error: subscribe topic:${getLeaningDataTopic()}")
                     viewModelScope.launch(Dispatchers.Main) { connectStatusLiveData.value = false }
                 }
             }
@@ -259,30 +234,15 @@ class IrAirMatchCodeViewModel(val context: Context, val remoteRepository: Remote
         return (hub3Device.mechStatus as? CHWifiModule2NetWorkStatus)?.isAPWork == true
     }
 
-    fun isBluetoothEnabled(context: Context): Boolean {
-        val bluetoothAdapter = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val bluetoothManager =
-                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            bluetoothManager.adapter
-        } else {
-            @Suppress("DEPRECATION")
-            BluetoothAdapter.getDefaultAdapter()
-        }
-
-        return bluetoothAdapter?.isEnabled == true
-    }
-
     private fun getLeaningDataTopic()  = "hub3/${hub3Device.deviceId.toString().uppercase()}/ir/learned/data"
     private fun getGetModeTopic()  = "hub3/${hub3Device.deviceId.toString().uppercase()}/ir/mode"
 }
 
 
-class IrMatchCodeViewModelFactory(
-    val context: Context, val remoteRepository: RemoteRepository
-) : ViewModelProvider.Factory {
+class IrMatchCodeViewModelFactory(val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(IrAirMatchCodeViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST") return IrAirMatchCodeViewModel(context, remoteRepository) as T
+            @Suppress("UNCHECKED_CAST") return IrAirMatchCodeViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

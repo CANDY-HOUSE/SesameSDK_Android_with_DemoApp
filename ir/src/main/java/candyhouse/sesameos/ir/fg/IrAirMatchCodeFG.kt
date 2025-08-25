@@ -31,9 +31,7 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
     private val tag = IrAirMatchCodeFG::class.java.simpleName
     private var selectedIrRemote: IrRemote? = null
     private val viewModel: IrAirMatchCodeViewModel by viewModels {
-        IrMatchCodeViewModelFactory(
-            requireContext(), RemoteRepository(requireContext())
-        )
+        IrMatchCodeViewModelFactory(requireContext())
     }
 
     override fun getViewBinder(): FragmentAirMatchCodeBinding {
@@ -62,30 +60,14 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
             return
         }
         viewModel.setHub3Device(BaseIr.hub3Device.value!!)
-        val irCompanyCode = arguments?.getParcelableCompat<IrCompanyCode>(Config.irCompany)
-        if (null == irCompanyCode) {
-            Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
-            L.d(tag, "ir company code is null")
-            safeNavigateBack()
-            return
-        }
-        if (BaseIr.hub3Device.value == null) {
+        val irRemote = arguments?.getParcelableCompat<IrRemote>(Config.irDevice)
+        if (null == irRemote) {
             Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
             L.d(tag, "hub3 device is null")
             safeNavigateBack()
             return
         }
-        arguments?.let {
-            if (it.containsKey(Config.productKey)) {
-                val productKey = it.getInt(Config.productKey)
-                viewModel.setupMatchData(productKey)
-            } else {
-                L.d(tag, "productKey is null")
-                safeNavigateBack()
-            }
-        }
-        L.d(tag, "irCompanyCode=${irCompanyCode.toString()}")
-        viewModel.setIrCompanyCode(irCompanyCode)
+        viewModel.setOriginRemote(irRemote)
         arguments?.let {
             if (it.containsKey(Config.irSearchResult)) {
                 val searchRemoteList = it.getParcelableArrayListCompat<IrMatchRemote>(Config.irSearchResult)
@@ -97,13 +79,6 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
     }
 
     private fun gotoIrControlView(irRemote: IrRemote) {
-        val initCompanyCode = viewModel.irCompanyCodeLiveData.value
-        if (null == initCompanyCode) {
-            Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
-            L.d(tag, "ir company code is null")
-            safeNavigateBack()
-            return
-        }
         selectedIrRemote = irRemote
         setFragmentResult(
             Config.irAutoSearchResult, bundleOf(
@@ -116,11 +91,11 @@ class IrAirMatchCodeFG : IrBaseFG<FragmentAirMatchCodeBinding>() {
     }
 
     private fun checkInfo(): Boolean {
-        return viewModel.isHub3DeviceInitialized() && null != viewModel.irCompanyCodeLiveData.value
+        return viewModel.isHub3DeviceInitialized()
     }
 
     private fun setupTitleView() {
-        setTitle(viewModel.irCompanyCodeLiveData.value!!.name)
+        setTitle(viewModel.originRemoteLiveData.value!!.model!!)
     }
 
     private fun startAutoMatch() {

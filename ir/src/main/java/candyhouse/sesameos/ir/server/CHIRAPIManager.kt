@@ -206,6 +206,7 @@ object CHIRAPIManager {
         command: String = "",
         operation: String = "",
         irDeviceUUID: String = "",
+        brandType: Int = 0,
         onResponse: CHResult<Any>
     ) {
         makeApiCall(onResponse) {
@@ -214,6 +215,7 @@ object CHIRAPIManager {
                     data = command,
                     operation = operation,
                     irDeviceUUID = irDeviceUUID,
+                    brandType = brandType
                 )
                 L.d("CHIRAPIManager", "emitIRRemoteDeviceKey:deviceId=${deviceId} requestBody=${requestBody}")
                 val res = jpAPIClient.emitIRRemoteDeviceKey(deviceId, requestBody)
@@ -415,6 +417,21 @@ object CHIRAPIManager {
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 L.e("CHIRAPIManager", "Error parsing IR keys", e)
+                onResponse.invoke(Result.failure(e))
+            }
+        }
+    }
+
+    /**
+     *获取遥控器列表
+     */
+    fun fetchRemoteList(brandType: Int, onResponse: CHResult<List<IrRemote>>) {
+        makeApiCall(onResponse) {
+            try {
+                val res = jpAPIClient.fetchRemoteList(brandType)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res.data)))
+            } catch (e: Exception) {
+                L.e("CHIRAPIManager", "fetchIRDevices Error ", e)
                 onResponse.invoke(Result.failure(e))
             }
         }

@@ -1,11 +1,6 @@
 package candyhouse.sesameos.ir.domain.bizAdapter.air.handler
 
-import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.widget.Toast
 import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.base.IrRemote
@@ -14,7 +9,6 @@ import candyhouse.sesameos.ir.domain.bizAdapter.air.ui.AirControllerConfigAdapte
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallback
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
-import candyhouse.sesameos.ir.ext.Ext
 import candyhouse.sesameos.ir.ext.IROperation
 import candyhouse.sesameos.ir.models.IrControlItem
 import candyhouse.sesameos.ir.models.ItemType
@@ -26,17 +20,11 @@ import co.candyhouse.sesame.utils.L
 import com.amazonaws.mobileconnectors.apigateway.ApiClientException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) :
     HandlerConfigAdapter {
     private val tag = AirControllerHandlerAdapter::class.java.simpleName
-    val air = AirProcessor()
-
-    init {
-        air.setupTable(context)
-    }
 
     override fun handleItemClick(
         item: IrControlItem,
@@ -50,12 +38,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
                 L.e(tag, "handleItemClick buildCommand is empty!")
                 return@launch
             }
-            L.d(
-                tag,
-                "handleItemClick buildCommand is:command=${command}, device:${
-                    device.deviceId.toString().uppercase()
-                }"
-            )
+            L.d(tag, "handleItemClick buildCommand is:command=${command}, device:${device.deviceId.toString().uppercase()}")
             uiConfigAdapter.setCurrentSate(command)
             postCommand(device.deviceId.toString().uppercase(), command)
             if (remoteDevice.uuid.isNotEmpty() && remoteDevice.haveSave) {
@@ -91,7 +74,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     }
 
     private fun postCommand(deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT) {
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT, brandType = getCurrentIRDeviceType()){
             it.onSuccess {
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
             }
@@ -104,10 +87,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
                                 .show()
                         }
                     }
-                    L.e(
-                        tag,
-                        "--->emitIRRemoteDeviceKey error :${exception.statusCode}    /// ${it.message}"
-                    )
+                    L.e(tag, "emitIRRemoteDeviceKey error :${exception.statusCode}   ${it.message}")
                 } else {
                     L.e(tag, "emitIRRemoteDeviceKey error :${it.message}  ")
                 }
@@ -119,23 +99,18 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     /**
      * 生成命令。来自hxd格式。
      */
-    @OptIn(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
     private fun buildCommand(
         operationKey: Int,
         remoteDevice: IrRemote
     ): String {
         try {
-            val configAdapter: AirControllerConfigAdapter =
-                uiConfigAdapter as AirControllerConfigAdapter
-            air.buildParamsWithPower(getPower(configAdapter.getPower()))
-                .buildParamsWithModel(getMode(configAdapter.getModeIndex()))
-                .buildParamsWithTemperature(getTemperature(configAdapter.getTemperature()))
-                .buildParamsWithFanSpeed(getFanSpeed(configAdapter.getFanSpeedIndex()))
-                .buildParamsWithWindDirection(getVerticalSwingIndex(configAdapter.getVerticalSwingIndex()))
-                .buildParamsWithAutomaticWindDirection(getHorizontalSwingIndex(configAdapter.getHorizontalSwingIndex()))
-            air.mKey = operationKey
-            val data = air.search(remoteDevice.code)
-            return data.toHexString().uppercase()
+            val configAdapter: AirControllerConfigAdapter = uiConfigAdapter as AirControllerConfigAdapter
+            val command = configAdapter.hxdCommandProcessor.setKey(operationKey)
+                .setCode(remoteDevice.code)
+                .buildAirCommand()
+
+            return command.toHexString().uppercase()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -163,102 +138,6 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     }
 
     /**
-     * 获取空调开关指令
-     * 0x01//开机
-     * 0x00//关机
-     */
-    fun getPower(isPowerOn: Boolean): Int {
-        return if (isPowerOn) {
-            0x01
-        } else {
-            0x00
-        }
-    }
-
-    /**
-     * 获取空调模式指令
-     * 0x01//自动(默认)
-     * 0X02//制冷：
-     * 0X03//抽湿
-     * 0x04//送风
-     * 0x05//制热
-     */
-    fun getMode(mode: Int): Int {
-        return when (mode) {
-            0 -> 0x01
-            1 -> 0x02
-            2 -> 0x03
-            3 -> 0x04
-            4 -> 0x05
-            else -> 0x01
-        }
-    }
-
-    /**
-     * 获取空调风速指引
-     * 风量数据：
-     * 0x01//自动
-     * 0x02//低
-     * 0x03//中
-     * 0x04//高
-     */
-    fun getFanSpeed(index: Int): Int {
-        return when (index) {
-            0 -> 0x01
-            1 -> 0x02
-            2 -> 0x03
-            3 -> 0x04
-            else -> 0x01
-        }
-    }
-
-    /**
-     * 获取空调垂直摆风指引
-     * 手动风向：
-     * 0x01//向上
-     * 0x02//中
-     * 0x03//向下
-     * 默认02,与显示对应;
-     */
-    fun getVerticalSwingIndex(index: Int): Int {
-        return when (index) {
-            0 -> 0x01
-            1 -> 0x02
-            2 -> 0x03
-            else -> 0x02
-        }
-    }
-
-    /**
-     * 获取空调摆风开关指引 （自动/关闭）
-     * 自动风向：
-     * 0x01//打开,
-     * 0x00//关闭,
-     * 默认开:01
-     */
-    fun getHorizontalSwingIndex(index: Int): Int {
-        return when (index) {
-            0 -> 0x01
-            1 -> 0x00
-            else -> 0x01
-        }
-    }
-
-    /**
-     * 获取空调温度
-     * 0x13//19度
-     * 0x14//20度
-     * 0x15//21度
-     * ....
-     * 0x1d//29度
-     * 0x1e//30度
-     * 默认：25度,0x19;
-     */
-    fun getTemperature(temperature: Int): Int {
-        return temperature
-    }
-
-    /**
      * 获取当前按键指令
      * x01//电源
      * 0x02//模式
@@ -277,8 +156,8 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
             ItemType.TEMP_CONTROL_REDUCE -> 0x07
             ItemType.MODE -> 0x02
             ItemType.FAN_SPEED -> 0x03
-            ItemType.SWING_VERTICAL -> 0x04
-            ItemType.SWING_HORIZONTAL -> 0x05
+            ItemType.WIND_DIRECTION -> 0x04
+            ItemType.AUTO_WIND_DIRECTION -> 0x05
             else -> {
                 L.e(tag, "Unknown item type")
                 0x01

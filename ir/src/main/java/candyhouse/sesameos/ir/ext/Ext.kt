@@ -6,18 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.TypedValue
-import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.annotation.RawRes
-import candyhouse.sesameos.ir.R
-import candyhouse.sesameos.ir.adapter.BeanIcon
-import candyhouse.sesameos.ir.base.IrCompanyCode
-import candyhouse.sesameos.ir.base.EmIconType
 import candyhouse.sesameos.ir.base.IrRemote
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.io.Serializable
 import java.util.ArrayList
 import java.util.UUID
 
@@ -29,24 +18,6 @@ object Ext {
             this,
             resources.displayMetrics
         ) / resources.displayMetrics.scaledDensity
-    }
-
-    fun drawImg(item: BeanIcon, tvName: TextView, imgView: ImageView) {
-        if (item.type == EmIconType.SVG) {
-            tvName.visibility = View.GONE
-            imgView.visibility = View.VISIBLE
-            imgView.setImageResource(item.svg!!)
-        } else {
-            tvName.visibility = View.VISIBLE
-            tvName.text = item.msg
-            if (item.msg!!.length > 2) {
-                val size = 22f - item.msg.length * 1.4f
-                tvName.textSize = size.dpToSp(tvName.resources)
-            } else {
-                tvName.textSize = 22f.dpToSp(tvName.resources)
-            }
-            imgView.visibility = View.GONE
-        }
     }
 
     private fun Char.isLetter(): Boolean {
@@ -110,45 +81,6 @@ object Ext {
         return devices.sortedWith(compareBy<IrRemote> { it.direction }.thenBy { it.model })
     }
 
-    fun parseJsonToDeviceList(context: Context, resId: Int, type: Int = 0): List<IrRemote> {
-        val devices = mutableListOf<IrRemote>()
-        try {
-            val jsonString = context.resources.openRawResource(resId)
-                .bufferedReader()
-                .use { it.readText() }
-            val gson = Gson()
-            val listType = object : TypeToken<List<IrRemote>>() {}.type
-            val irRemoteList: List<IrRemote> = gson.fromJson(jsonString, listType)
-
-            irRemoteList.forEach { item ->
-                try {
-                    val newItem = item.copy(
-                        uuid = UUID.randomUUID().toString().uppercase(),
-                        timestamp = 0L,
-                        type = type,
-                    )
-                    devices.add(newItem)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return devices
-    }
-
-
-    inline fun <reified T : Serializable> Bundle.getSerializableCompat(key: String): T? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            getSerializable(key, T::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            getSerializable(key) as? T
-        }
-    }
-
     inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             getParcelable(key, T::class.java)
@@ -165,15 +97,6 @@ object Ext {
             @Suppress("DEPRECATION")
             getParcelableArrayList(key)
         }
-    }
-
-    fun parseCompanyTableToList(context: Context,resId: Int): List<IrCompanyCode> {
-        val jsonString = context.resources.openRawResource(resId)
-            .bufferedReader()
-            .use { it.readText() }
-        val gson = Gson()
-        val listType = object : TypeToken<List<IrCompanyCode>>() {}.type
-        return gson.fromJson(jsonString, listType)
     }
 
 }

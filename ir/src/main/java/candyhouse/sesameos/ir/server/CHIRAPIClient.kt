@@ -10,6 +10,7 @@ import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteKeyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceStateRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrLearnedDataAddRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrMatchCodeRequest
+import candyhouse.sesameos.ir.base.irHttpClientBean.IrRemoteInfoRespond
 import co.candyhouse.sesame2.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
@@ -126,7 +127,7 @@ internal interface CHIRAPIClient {
      * @param body 请求体: operation:具体动作行为  hxd ： hxd 命令 learned 自学习命令
      * @return 设备按键列表响应
      */
-    @Operation(path = "/device/v2/ir/{device_id}/send", method = "POST")
+    @Operation(path = "/device/v2/ir/{device_id}/send", method = "PUT")
     fun emitIRRemoteDeviceKey(
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: IrDeviceRemoteKeyRequest
@@ -148,6 +149,12 @@ internal interface CHIRAPIClient {
     fun matchIrCode(
         body: IrMatchCodeRequest
     ): Any
+
+    /**
+     *获取遥控器列表
+     */
+    @Operation(path = "/device/v2/ir/remote", method = "GET")
+    fun fetchRemoteList(@Parameter(name = "type", location = "query") brandType:Int ): IrRemoteInfoRespond
 
 }
 

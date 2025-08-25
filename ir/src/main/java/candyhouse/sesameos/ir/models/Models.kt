@@ -56,8 +56,8 @@ enum class ItemType {
     TEMP_CONTROL_REDUCE,
     MODE,
     FAN_SPEED,
-    SWING_VERTICAL,
-    SWING_HORIZONTAL,
+    WIND_DIRECTION,
+    AUTO_WIND_DIRECTION,
     // 电视
     MUTE,
     BACK,

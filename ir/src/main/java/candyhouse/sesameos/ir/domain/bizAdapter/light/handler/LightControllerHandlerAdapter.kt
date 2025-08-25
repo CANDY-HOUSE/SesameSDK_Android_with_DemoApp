@@ -4,8 +4,9 @@ import android.content.Context
 import android.widget.Toast
 import candyhouse.sesameos.ir.R
 import candyhouse.sesameos.ir.base.IrRemote
-import candyhouse.sesameos.ir.domain.bizAdapter.air.handler.AirProcessor
+import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HXDCommandProcessor
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
+import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HXDParametersSwapper
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerCallback
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
@@ -24,15 +25,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) : HandlerConfigAdapter {
+class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) :
+    HandlerConfigAdapter {
     private val tag = LightControllerHandlerAdapter::class.java.simpleName
-    val air = AirProcessor()
+    val commandProcess = HXDCommandProcessor()
+    val paramsSwapper = HXDParametersSwapper()
+
     override fun handleItemClick(
         item: IrControlItem, device: CHHub3, remoteDevice: IrRemote
     ) {
         GlobalScope.launch(Dispatchers.IO) {
-            L.d("harry", "handleItemClick: $item + $remoteDevice")
-            val key = getCurrentKey(item)
+            val key = paramsSwapper.getLightKey(item.type)
             val command = buildCommand(key, remoteDevice)
             if (command.isEmpty()) {
                 L.e(tag, "handleItemClick buildCommand is empty!")
@@ -75,7 +78,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
                 iconRes = 0,
                 optionCode = "49153",
             )
-            val keyOn = getCurrentKey(itemOn)
+            val keyOn = paramsSwapper.getLightKey(itemOn.type)
             val onCommand = buildCommand(keyOn, irRemote)
             if (onCommand.isEmpty()) {
                 L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
@@ -93,7 +96,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
                 iconRes = 0,
                 optionCode = "49155",
             )
-            val keyOff = getCurrentKey(itemOff)
+            val keyOff = paramsSwapper.getLightKey(itemOff.type)
             val offCommand = buildCommand(keyOff, irRemote)
             if (offCommand.isEmpty()) {
                 L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
@@ -122,7 +125,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
     }
 
     private fun postCommand(deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT) {
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT, brandType = getCurrentIRDeviceType()) {
             it.onSuccess {
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
             }
@@ -148,26 +151,17 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
     /**
      * 生成命令。来自hxd格式。
      */
-    @OptIn(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
     private fun buildCommand(
-        operationKey: Int, remoteDevice: IrRemote
+        operationKey: Int,
+        remoteDevice: IrRemote
     ): String {
         try {
-            val row = (uiConfigAdapter as LightControllerConfigAdapter).getTableRow(remoteDevice.code)
-            val buf = mutableListOf<UByte>()
-            buf.add(0x30u)
-            buf.add(0x00u)
-            buf.add(row[0].toUByte())
-            buf.add(row[(operationKey - 1) * 2 + 1].toUByte())
-            buf.add(row[(operationKey - 1) * 2 + 2].toUByte())
-            buf.add(row[row.size - 4].toUByte())
-            buf.add(row[row.size - 3].toUByte())
-            buf.add(row[row.size - 2].toUByte())
-            buf.add(row[row.size - 1].toUByte())
-            // 计算校验和（所有字节的和的低8位）
-            val checksum = buf.sumOf { it.toInt() }.toByte().toUByte()
-            buf.add(checksum)
-            return buf.toUByteArray().toHexString()
+            val command = commandProcess.setKey(operationKey)
+                .setCode(remoteDevice.code)
+                .buildNoneAirCommand()
+            return command.toHexString()
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -183,40 +177,11 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
 
     }
 
-    override fun getCurrentState(
-        device: CHHub3, remoteDevice: IrRemote
-    ): String {
+    override fun getCurrentState(device: CHHub3, remoteDevice: IrRemote): String {
         return (uiConfigAdapter as LightControllerConfigAdapter).getCurrentState()
     }
 
     override fun getCurrentIRDeviceType(): Int {
         return IRType.DEVICE_REMOTE_LIGHT
-    }
-
-    /**
-     * /*   	  开灯			关灯				亮度+			亮度-			模式			设置			定时+			定时-		  色温+			色温-			1			2			3			4			5			6			A			B			C			D*/
-     * {0x1d,0x2c,0x25,0x2f,0x26,0x2a,0x23,0x2b,0x22,0x80,0xb9,0x82,0xbb,0xff,0x00,0xff,0x00,0x8b,0xb2,0x8a,0xb3,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x2c,0x52,0x09,0x00},
-     *  POWER_STATUS_ON = 0x01,
-     *  MODE = 0x05,
-     *  POWER_STATUS_OFF = 0x02,
-     *  BRIGHTNESS_UP = 0x03,
-     *  BRIGHTNESS_DOWN = 0x04,
-     *  COLOR_TEMP_UP = 0x09,
-     *  COLOR_TEMP_DOWN = 0x0A,
-     */
-    fun getCurrentKey(item: IrControlItem): Int {
-        return when (item.type) {
-            ItemType.POWER_STATUS_ON -> 0x01
-            ItemType.POWER_STATUS_OFF -> 0x02
-            ItemType.MODE -> 0x05
-            ItemType.BRIGHTNESS_UP -> 0x03
-            ItemType.BRIGHTNESS_DOWN -> 0x04
-            ItemType.COLOR_TEMP_UP -> 0x09
-            ItemType.COLOR_TEMP_DOWN -> 0x0A
-            else -> {
-                L.e(tag, "Unknown item type")
-                0x01
-            }
-        }
     }
 }
