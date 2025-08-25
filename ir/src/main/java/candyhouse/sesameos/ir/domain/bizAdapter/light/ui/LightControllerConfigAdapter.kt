@@ -211,6 +211,12 @@ class LightControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return true
     }
 
+    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3): Boolean {
+        // TODO: 目前不支持添加设备到Matter
+        L.d(tag, "addIrDeviceToMatter: not supported yet")
+        return true
+    }
+
     private fun updatePowerStatus() {
         config?.let { config ->
             // 更新开关机状态

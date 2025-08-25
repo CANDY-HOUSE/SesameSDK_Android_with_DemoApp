@@ -80,6 +80,18 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
         }
     }
 
+    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3){
+        if (!haveInitialized) {
+            L.e("RemoteRepository", "RemoteRepository not initialized")
+            throw Exception("RemoteRepository not initialized")
+        }
+        val handleSuccess = uiConfigAdapter.addIrDeviceToMatter(irRemote, hub3)
+        if (handleSuccess) {
+            handlerConfigAdapter.addIrDeviceToMatter(irRemote, hub3)
+        }
+
+    }
+
     /**
      * 清除临时数据
      */

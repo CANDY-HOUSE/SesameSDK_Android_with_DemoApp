@@ -54,4 +54,5 @@ interface UIConfigAdapter {
 
     fun getMatchItem(position: Int,items:List<IrControlItem>): IrControlItem?
     fun initMatchParams()
+    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3): Boolean
 }

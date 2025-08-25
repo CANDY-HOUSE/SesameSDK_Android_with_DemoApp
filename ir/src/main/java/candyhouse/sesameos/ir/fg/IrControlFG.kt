@@ -24,14 +24,13 @@ import candyhouse.sesameos.ir.domain.repository.RemoteRepository
 import candyhouse.sesameos.ir.ext.Config
 import candyhouse.sesameos.ir.ext.Ext.getParcelableArrayListCompat
 import candyhouse.sesameos.ir.ext.Ext.getParcelableCompat
-import candyhouse.sesameos.ir.ext.IRDeviceType
 import candyhouse.sesameos.ir.models.LayoutSettings
 import candyhouse.sesameos.ir.viewModel.AirControlUiState
 import candyhouse.sesameos.ir.viewModel.AirControlViewModel
 import candyhouse.sesameos.ir.viewModel.AirControlViewModelFactory
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame2.BuildConfig
 import kotlinx.coroutines.launch
-import kotlin.collections.List
 
 /**
  * 红外遥控器控制界面
@@ -63,6 +62,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
             setupRecyclerView()
             setupHelpView()
             setupBackViewListener()
+            setupMatterActionButton()
         }
         viewModel.markAsLoaded()
     }
@@ -82,11 +82,11 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
         if (null == argDevice) {
             Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT)
                 .show()
-            L.d(tag,"remote device is null")
+            L.d(tag, "remote device is null")
             safeNavigateBack()
             return
         }
-        L.d(tag,"argDevice=${argDevice.toString()}")
+        L.d(tag, "argDevice=${argDevice.toString()}")
         if (isNewDevice) {
             argDevice.haveSave = false
         } else {
@@ -98,7 +98,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
         if (BaseIr.hub3Device.value == null) {
             Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT)
                 .show()
-            L.d(tag,"hub3 device is null")
+            L.d(tag, "hub3 device is null")
             safeNavigateBack()
             return
         }
@@ -115,7 +115,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
             return
         }
         if (isNewDevice) {
-            viewModel.irRemoteDeviceLiveData.value!!.alias = viewModel.irRemoteDeviceLiveData.value!!.alias +"\uD83D\uDD8B\uFE0F"
+            viewModel.irRemoteDeviceLiveData.value!!.alias = viewModel.irRemoteDeviceLiveData.value!!.alias + "\uD83D\uDD8B\uFE0F"
         }
         setTitle(viewModel.irRemoteDeviceLiveData.value!!.alias)
         tvTitleOnclick(viewModel.irRemoteDeviceLiveData.value!!.alias) {
@@ -186,7 +186,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
             L.d(tag, "companyCode=${companyCode.toString()}")
             companyCode?.let {
                 L.d(tag, "go to match company code")
-                    safeNavigate(R.id.action_to_irAirMatchCodeFg, Bundle().apply {
+                safeNavigate(R.id.action_to_irAirMatchCodeFg, Bundle().apply {
                     this.putInt(Config.productKey, viewModel.getIrRemoteDevice()!!.type)
                     this.putParcelable(Config.irCompany, it)
                     this.putParcelableArrayList(Config.irSearchResult, ArrayList(viewModel.getSearchRemoteList()))
@@ -207,7 +207,7 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
                 }
             }
         }
-        viewModel.irRemoteDeviceLiveData.observe(viewLifecycleOwner) { value->
+        viewModel.irRemoteDeviceLiveData.observe(viewLifecycleOwner) { value ->
             setTitle(value.alias)
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -302,11 +302,11 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
                 bind.linearLayoutHelp.visibility = View.GONE
             }
         }
-        setFragmentResultListener(Config.irAutoSearchResult) {_, bundle ->
+        setFragmentResultListener(Config.irAutoSearchResult) { _, bundle ->
             if (bundle.containsKey(Config.irMatchSuccess)) {
                 viewModel.setSearchRemoteList(emptyList())
                 val irMatchSuccess = bundle.getBoolean(Config.irMatchSuccess, false)
-                if (!irMatchSuccess){
+                if (!irMatchSuccess) {
                     return@setFragmentResultListener
                 }
                 val searchRemoteList = bundle.getParcelableArrayListCompat<IrMatchRemote>(Config.irSearchResult)
@@ -320,6 +320,21 @@ class IrControlFG : IrBaseFG<FragmentAirControlBinding>() {
                 viewModel.setRemoteDevice(irRemote)
             }
 
+        }
+    }
+
+    private fun setupMatterActionButton() {
+        val fab = bind.fab
+        // TODO: 目前只有debug版本支持把红外设备添加到 Matter
+        if (BuildConfig.DEBUG) {
+            fab.visibility = View.VISIBLE
+            fab.setOnClickListener { view ->
+                L.d(tag, "FAB clicked, adding to Matter + ${viewModel.getIrRemoteDevice()}")
+                Toast.makeText(requireContext(), "添加到Matter", Toast.LENGTH_SHORT).show()
+                viewModel.addIrDeviceToMatter(viewModel.getIrRemoteDevice(), viewModel.getDevice())
+            }
+        } else {
+            fab.visibility = View.GONE
         }
     }
 

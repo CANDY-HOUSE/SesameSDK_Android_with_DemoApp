@@ -19,20 +19,19 @@ import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.server.HttpRespondCode
 import co.candyhouse.sesame.utils.L
 import com.amazonaws.mobileconnectors.apigateway.ApiClientException
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) :
-    HandlerConfigAdapter {
+class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) : HandlerConfigAdapter {
     private val tag = LightControllerHandlerAdapter::class.java.simpleName
     val air = AirProcessor()
     override fun handleItemClick(
-        item: IrControlItem,
-        device: CHHub3,
-        remoteDevice: IrRemote
+        item: IrControlItem, device: CHHub3, remoteDevice: IrRemote
     ) {
         GlobalScope.launch(Dispatchers.IO) {
+            L.d("harry", "handleItemClick: $item + $remoteDevice")
             val key = getCurrentKey(item)
             val command = buildCommand(key, remoteDevice)
             if (command.isEmpty()) {
@@ -40,8 +39,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
                 return@launch
             }
             L.d(
-                tag,
-                "handleItemClick buildCommand is:command=${command}, device:${
+                tag, "handleItemClick buildCommand is:command=${command}, device:${
                     device.deviceId.toString().uppercase()
                 }"
             )
@@ -49,29 +47,77 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
             postCommand(device.deviceId.toString().uppercase(), command)
             if (remoteDevice.uuid.isNotEmpty() && remoteDevice.haveSave) {
                 CHIRAPIManager.updateIRDeviceState(
-                    device.deviceId.toString().uppercase(),
-                    remoteDevice.uuid,
-                    state = command,
-                    onResponse = {
+                    device.deviceId.toString().uppercase(), remoteDevice.uuid, state = command, onResponse = {
                         it.onSuccess {
                             L.d(tag, "updata state success{${remoteDevice.uuid}:${command}}")
                         }
-                    }
-                )
+                    })
             }
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
+        // IrRemote(model=AGLED, alias='AGLED AD9-CH1🖋️', uuid='3C0095A0-C481-4C4C-900C-C1FC6292BD7A', state=300092eeee367600004a, timestamp=1755826008980, type=57344, code=97, keys=[], direction='null')
+        L.d("harry", "addIrDeviceToMatter: ${irRemote?.alias}  ${irRemote?.uuid}")
+        if (irRemote == null || irRemote.uuid.isEmpty()) {
+            L.e(tag, "addIrDeviceToMatter irRemote is null or uuid is empty")
+            return
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            // id=1, type=POWER_STATUS_ON, title=開啟, value=, isSelected=false, iconRes=0, optionCode=49153
+            val itemOn: IrControlItem = IrControlItem(
+                id = 1,
+                type = ItemType.POWER_STATUS_ON,
+                title = "開啟",
+                value = "",
+                isSelected = false,
+                iconRes = 0,
+                optionCode = "49153",
+            )
+            val keyOn = getCurrentKey(itemOn)
+            val onCommand = buildCommand(keyOn, irRemote)
+            if (onCommand.isEmpty()) {
+                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+                return@launch
+            }
+            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${hub3.deviceId.toString().uppercase()}")
+
+            // IrControlItem(id=3, type=POWER_STATUS_OFF, title=關閉, value=, isSelected=true, iconRes=0, optionCode=49155)
+            val itemOff: IrControlItem = IrControlItem(
+                id = 3,
+                type = ItemType.POWER_STATUS_OFF,
+                title = "關閉",
+                value = "",
+                isSelected = true,
+                iconRes = 0,
+                optionCode = "49155",
+            )
+            val keyOff = getCurrentKey(itemOff)
+            val offCommand = buildCommand(keyOff, irRemote)
+            if (offCommand.isEmpty()) {
+                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+                return@launch
+            }
+
+            L.d("harry", "addIrDeviceToMatter buildCommand is: offCommand=${offCommand}, device:${hub3.deviceId.toString().uppercase()}")
+            CHIRAPIManager.addIRRemoteDeviceToMatter(onCommand, offCommand, irRemote, hub3) {
+                it.onSuccess { response ->
+                    L.d("harry", "addIrDeviceToMatter success: ${response.data}")
+                }
+                it.onFailure { error ->
+                    L.e(tag, "addIrDeviceToMatter error: ${error.message}")
+                }
+            }
+        }
+
+    }
+
     override fun modifyIRDeviceInfo(
-        device: CHHub3,
-        remoteDevice: IrRemote,
-        onResponse: CHResult<Any>
+        device: CHHub3, remoteDevice: IrRemote, onResponse: CHResult<Any>
     ) {
         CHIRAPIManager.updateIRDevice(
-            device.deviceId.toString().uppercase(),
-            remoteDevice.uuid,
-            alias = remoteDevice.alias,
-            onResponse = onResponse
+            device.deviceId.toString().uppercase(), remoteDevice.uuid, alias = remoteDevice.alias, onResponse = onResponse
         )
     }
 
@@ -85,13 +131,11 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
                     val exception: ApiClientException = it
                     if (exception.statusCode == HttpRespondCode.DATA_NOT_ALLOWED) {
                         GlobalScope.launch(Dispatchers.Main) {
-                            Toast.makeText(context, R.string.key_unsupported, Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(context, R.string.key_unsupported, Toast.LENGTH_SHORT).show()
                         }
                     }
                     L.e(
-                        tag,
-                        "--->emitIRRemoteDeviceKey error :${exception.statusCode}    /// ${it.message}"
+                        tag, "--->emitIRRemoteDeviceKey error :${exception.statusCode}    /// ${it.message}"
                     )
                 } else {
                     L.e(tag, "emitIRRemoteDeviceKey error :${it.message}  ")
@@ -106,11 +150,10 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
      */
     @OptIn(ExperimentalStdlibApi::class)
     private fun buildCommand(
-        operationKey: Int,
-        remoteDevice: IrRemote
+        operationKey: Int, remoteDevice: IrRemote
     ): String {
         try {
-            val row = (uiConfigAdapter as LightControllerConfigAdapter ).getTableRow(remoteDevice.code)
+            val row = (uiConfigAdapter as LightControllerConfigAdapter).getTableRow(remoteDevice.code)
             val buf = mutableListOf<UByte>()
             buf.add(0x30u)
             buf.add(0x00u)
@@ -141,8 +184,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
     }
 
     override fun getCurrentState(
-        device: CHHub3,
-        remoteDevice: IrRemote
+        device: CHHub3, remoteDevice: IrRemote
     ): String {
         return (uiConfigAdapter as LightControllerConfigAdapter).getCurrentState()
     }

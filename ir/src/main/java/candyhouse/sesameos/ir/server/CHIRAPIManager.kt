@@ -8,10 +8,12 @@ import candyhouse.sesameos.ir.base.irHttpClientBean.IrCodeDeleteRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceAddRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceDeleteRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceModifyRequest
+import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteAddToMatterRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteKeyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceStateRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrLearnedDataAddRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrMatchCodeRequest
+import candyhouse.sesameos.ir.ext.IRDeviceType
 import candyhouse.sesameos.ir.ext.IROperation
 import co.candyhouse.sesame.open.CHConfiguration
 import co.candyhouse.sesame.open.device.CHHub3
@@ -396,6 +398,20 @@ object CHIRAPIManager {
             try {
                 val requestBody = IrDeviceRemoteKeyRequest(IROperation.OPERATION_MODE_GET, "")
                 val res = jpAPIClient.sendIRMode(hub3DeviceId, requestBody)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+            } catch (e: Exception) {
+                L.e("CHIRAPIManager", "Error parsing IR keys", e)
+                onResponse.invoke(Result.failure(e))
+            }
+        }
+    }
+
+    fun addIRRemoteDeviceToMatter(onCommand: String, offCommand: String, irRemote: IrRemote, hub3: CHHub3, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse){
+            try {
+                val requestBody = IrDeviceRemoteAddToMatterRequest(irDeviceType = IRDeviceType.DEVICE_REMOTE_LIGHT,onCommand, offCommand, irRemote.uuid.uppercase())
+                L.d("harry", "addIRRemoteDeviceToMatter: ${requestBody.toString()}")
+                val res = jpAPIClient.addIRRemoteDeviceToMatter(hub3.deviceId.toString().uppercase(), requestBody)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 L.e("CHIRAPIManager", "Error parsing IR keys", e)

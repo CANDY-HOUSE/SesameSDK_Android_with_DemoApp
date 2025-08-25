@@ -73,6 +73,10 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
         }
     }
 
+    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
+        // todo: 添加空调到Matter
+    }
+
     override fun modifyIRDeviceInfo(
         device: CHHub3,
         remoteDevice: IrRemote,

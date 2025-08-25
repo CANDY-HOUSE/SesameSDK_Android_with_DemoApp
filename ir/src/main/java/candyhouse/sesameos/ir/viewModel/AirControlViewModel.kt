@@ -113,6 +113,10 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
         irRemoteDeviceLiveData.value?.let { remoteRepository.handleItemClick(item, device, it) }
     }
 
+    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3){
+        irRemoteDeviceLiveData.value?.let { remoteRepository.addIrDeviceToMatter(irRemote, hub3) }
+    }
+
     fun setDevice(device: CHHub3) {
         this.device = device
     }

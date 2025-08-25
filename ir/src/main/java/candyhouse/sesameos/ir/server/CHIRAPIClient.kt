@@ -5,6 +5,7 @@ import candyhouse.sesameos.ir.base.irHttpClientBean.IrCodeDeleteRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceAddRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceDeleteRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceModifyRequest
+import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteAddToMatterRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceRemoteKeyRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrDeviceStateRequest
 import candyhouse.sesameos.ir.base.irHttpClientBean.IrLearnedDataAddRequest
@@ -129,6 +130,12 @@ internal interface CHIRAPIClient {
     fun emitIRRemoteDeviceKey(
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: IrDeviceRemoteKeyRequest
+    ): Any
+
+    @Operation(path = "/device/v2/ir/{device_id}/matter", method = "POST")
+    fun addIRRemoteDeviceToMatter(
+        @Parameter(name = "device_id", location = "path") deviceId: String,
+        body: IrDeviceRemoteAddToMatterRequest
     ): Any
 
     @Operation(path = "/device/v2/ir/{device_id}/mode", method = "PUT")

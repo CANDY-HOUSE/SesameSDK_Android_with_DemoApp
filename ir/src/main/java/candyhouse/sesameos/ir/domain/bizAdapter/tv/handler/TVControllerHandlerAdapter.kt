@@ -62,6 +62,10 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
         }
     }
 
+    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
+        // todo: 添加红外设备到Matter
+    }
+
     override fun modifyIRDeviceInfo(
         device: CHHub3,
         remoteDevice: IrRemote,
@@ -111,7 +115,7 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
     ): String {
         val key = getCurrentKey(item)
         try {
-            var row = (uiConfigAdapter as TVControllerConfigAdapter ).getTableRow(item,remoteDevice.code)
+            var row = (uiConfigAdapter as TVControllerConfigAdapter).getTableRow(item, remoteDevice.code)
             val buf = mutableListOf<UByte>()
             buf.add(0x30u)
             buf.add(0x00u)
