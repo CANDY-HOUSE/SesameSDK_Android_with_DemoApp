@@ -12,8 +12,7 @@
         "icon_ir_remote_power_on",
         "icon_ir_remote_power_off"
       ],
-      "defaultValue": "",
-      "operateCode": "49153"
+      "defaultValue": ""
     },
     {
       "id": 2,
@@ -23,8 +22,7 @@
       ],
       "icons": [
       ],
-      "defaultValue": "28",
-      "operateCode": "0"
+      "defaultValue": "28"
     },
     {
       "id": 3,
@@ -38,8 +36,7 @@
         "icon_ir_remote_power_off",
         "icon_ir_remote_power_on"
       ],
-      "defaultValue": "",
-      "operateCode": "49153"
+      "defaultValue": ""
     },
     {
       "id": 4,
@@ -51,8 +48,7 @@
       "icons": [
         "icon_air_conditioner_temperature_add"
       ],
-      "defaultValue": "",
-      "operateCode": "49163"
+      "defaultValue": ""
     },
     {
       "id": 5,
@@ -72,8 +68,7 @@
         "icon_air_conditioner_model_wind_04",
         "icon_air_conditioner_model_hot_05"
       ],
-      "defaultValue": "A",
-      "operateCode": "49161"
+      "defaultValue": "A"
     },
     {
       "id": 6,
@@ -85,8 +80,7 @@
       "icons": [
         "icon_air_conditioner_temperature_reduce"
       ],
-      "defaultValue": "",
-      "operateCode": "49162"
+      "defaultValue": ""
     },
     {
       "id": 7,
@@ -104,8 +98,7 @@
         "icon_air_conditioner_wind_speed_v2",
         "icon_air_conditioner_wind_speed_v3"
       ],
-      "defaultValue": "",
-      "operateCode": "49157"
+      "defaultValue": ""
     },
     {
       "id": 8,
@@ -121,8 +114,7 @@
         "icon_air_conditioner_wind_vertical_v2",
         "icon_air_conditioner_wind_vertical_v3"
       ],
-      "defaultValue": "",
-      "operateCode": "49159"
+      "defaultValue": ""
     },
     {
       "id": 9,
@@ -136,8 +128,7 @@
         "icon_air_conditioner_wind_horizontal_stop",
         "icon_air_conditioner_wind_horizontal_auto"
       ],
-      "defaultValue": "",
-      "operateCode": "49161"
+      "defaultValue": ""
     }
   ],
   "settings": {

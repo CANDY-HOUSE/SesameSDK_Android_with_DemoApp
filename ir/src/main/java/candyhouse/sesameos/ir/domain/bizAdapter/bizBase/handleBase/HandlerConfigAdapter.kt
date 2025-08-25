@@ -11,6 +11,6 @@ interface HandlerConfigAdapter {
     fun clearHandlerCache()
     fun setHandlerCallback(handlerCallback: HandlerCallback)
     fun getCurrentState(device: CHHub3, remoteDevice: IrRemote): String
-    fun getCurrentIRDeviceType(): Int
+    fun getCurrentIRType(): Int
     fun addIrDeviceToMatter(irRemote: candyhouse.sesameos.ir.base.IrRemote?, hub3: co.candyhouse.sesame.open.device.CHHub3)
 }

@@ -75,8 +75,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
                 title = "開啟",
                 value = "",
                 isSelected = false,
-                iconRes = 0,
-                optionCode = "49153",
+                iconRes = 0
             )
             val keyOn = paramsSwapper.getLightKey(itemOn.type)
             val onCommand = buildCommand(keyOn, irRemote)
@@ -93,8 +92,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
                 title = "關閉",
                 value = "",
                 isSelected = true,
-                iconRes = 0,
-                optionCode = "49155",
+                iconRes = 0
             )
             val keyOff = paramsSwapper.getLightKey(itemOff.type)
             val offCommand = buildCommand(keyOff, irRemote)
@@ -125,7 +123,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
     }
 
     private fun postCommand(deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT, brandType = getCurrentIRDeviceType()) {
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT, irType = getCurrentIRType()) {
             it.onSuccess {
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
             }
@@ -181,7 +179,7 @@ class LightControllerHandlerAdapter(val context: Context, val uiConfigAdapter: U
         return (uiConfigAdapter as LightControllerConfigAdapter).getCurrentState()
     }
 
-    override fun getCurrentIRDeviceType(): Int {
+    override fun getCurrentIRType(): Int {
         return IRType.DEVICE_REMOTE_LIGHT
     }
 }

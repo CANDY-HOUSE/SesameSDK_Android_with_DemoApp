@@ -206,7 +206,7 @@ object CHIRAPIManager {
         command: String = "",
         operation: String = "",
         irDeviceUUID: String = "",
-        brandType: Int = 0,
+        irType: Int = 0,
         onResponse: CHResult<Any>
     ) {
         makeApiCall(onResponse) {
@@ -215,7 +215,7 @@ object CHIRAPIManager {
                     data = command,
                     operation = operation,
                     irDeviceUUID = irDeviceUUID,
-                    brandType = brandType
+                    irType = irType
                 )
                 L.d("CHIRAPIManager", "emitIRRemoteDeviceKey:deviceId=${deviceId} requestBody=${requestBody}")
                 val res = jpAPIClient.emitIRRemoteDeviceKey(deviceId, requestBody)

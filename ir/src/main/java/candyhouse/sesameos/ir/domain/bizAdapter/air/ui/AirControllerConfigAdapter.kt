@@ -150,8 +150,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getStringByIndex(context, controlConfig, resId),
             value = controlConfig.defaultValue,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
-            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
-            optionCode = controlConfig.operateCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -169,8 +168,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = item.title,
             value = item.value,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
-            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
-            optionCode = controlConfig.operateCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -187,8 +185,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getStringByIndex(context, controlConfig, resId),
             value = controlConfig.defaultValue,
             isSelected = isItemSelected(ItemType.POWER_STATUS_OFF),
-            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
-            optionCode = controlConfig.operateCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -205,8 +202,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = item.title,
             value = item.value,
             isSelected = isItemSelected(ItemType.POWER_STATUS_ON),
-            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId),
-            optionCode = controlConfig.operateCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, resId)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -228,8 +224,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getTemperatureString(context, getTemperature()),
             value = getValueForType(ItemType.TEMPERATURE_VALUE),
             isSelected = isItemSelected(ItemType.TEMPERATURE_VALUE),
-            iconRes = 0,
-            optionCode = controlConfig.operateCode
+            iconRes = 0
         )
         updateCallback?.onItemUpdate(newItem)
         return true
@@ -261,8 +256,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getTemperatureString( context, getTemperature()),
             value = getValueForType(ItemType.TEMPERATURE_VALUE),
             isSelected = isItemSelected(ItemType.TEMPERATURE_VALUE),
-            iconRes = 0,
-            optionCode = controlConfig.operateCode
+            iconRes = 0
         )
         updateCallback?.onItemUpdate(item)
         return true
@@ -281,8 +275,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getStringByIndex(context, controlConfig, currentModeIndex),
             value = item.value,
             isSelected = false,
-            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentModeIndex),
-            optionCode = controlConfig.operateCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentModeIndex)
         )
         L.d(tag, "cycleMode: newItem is ${newItem.toString()}")
         updateCallback?.onItemUpdate(newItem)
@@ -302,8 +295,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getStringByIndex(context, itemConfig, currentFanSpeedIndex),
             value = item.value,
             isSelected = false,
-            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentFanSpeedIndex),
-            optionCode = item.optionCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, currentFanSpeedIndex)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -322,8 +314,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getStringByIndex(context, itemConfig, windDirection),
             value = item.value,
             isSelected = false,
-            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, windDirection),
-            optionCode = item.optionCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, windDirection)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -341,8 +332,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
             title = UIResourceExtension.getStringByIndex(context, itemConfig, autoWindDirection),
             value = item.value,
             isSelected = false,
-            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, autoWindDirection),
-            optionCode = item.optionCode
+            iconRes = UIResourceExtension.getResourceByIndex(context, itemConfig, autoWindDirection)
         )
         updateCallback?.onItemUpdate(newItem)
     }
@@ -360,8 +350,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                         title = UIResourceExtension.getTemperatureString( context, getTemperature()),
                         value = getValueForType(type),
                         isSelected = isItemSelected(type),
-                        iconRes = 0,
-                        optionCode = controlConfig.operateCode
+                        iconRes = 0
                     )
                 }
 
@@ -372,8 +361,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                         title = UIResourceExtension.getStringByIndex(context, controlConfig, currentIndex),
                         value = getValueForType(type),
                         isSelected = isItemSelected(type),
-                        iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentIndex),
-                        optionCode = controlConfig.operateCode
+                        iconRes = UIResourceExtension.getResourceByIndex(context, controlConfig, currentIndex)
                     )
                 }
             }

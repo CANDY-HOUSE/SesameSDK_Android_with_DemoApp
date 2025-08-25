@@ -11,11 +11,10 @@ data class ControlConfig(
     val titleIndex: Int,
     val titles: List<String> = emptyList(),
     val icons: List<String> = emptyList(),
-    val defaultValue: String = "",
-    val operateCode:String
+    val defaultValue: String = ""
 ){
     override fun toString(): String {
-        return "ControlConfig(id=$id, type='$type', titleIndex=$titleIndex, titles=$titles, icons=$icons, defaultValue='$defaultValue', optionCode='$operateCode')"
+        return "ControlConfig(id=$id, type='$type', titleIndex=$titleIndex, titles=$titles, icons=$icons, defaultValue='$defaultValue')"
     }
 }
 
@@ -86,6 +85,5 @@ data class IrControlItem(
     val title: String,
     val value: String = "",
     val isSelected: Boolean = false,
-    val iconRes: Int,
-    val optionCode:String
+    val iconRes: Int
 )

@@ -11,7 +11,7 @@ data class IrRemote(
     var state: String?, // 状态编码
     val timestamp: Long,
     val type: Int,     // 类型设备
-    var code: Int = -1, // 设备类型code，默认为-1，0:学习，其他：空调
+    var code: Int = -1, // 设备类型code，默认为-1，0:学习，其他：具体码组Code
     val keys: Array<String>? = emptyArray(), // 键值列表
     val direction: String?,  // 索引
     var haveSave:Boolean = true // 是否已保存,默认为true

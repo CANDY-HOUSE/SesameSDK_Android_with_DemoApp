@@ -74,7 +74,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     }
 
     private fun postCommand(deviceId: String, command: String) {
-        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT, brandType = getCurrentIRDeviceType()){
+        CHIRAPIManager.emitIRRemoteDeviceKey(deviceId, command = command, operation = IROperation.OPERATION_REMOTE_EMIT, irType = getCurrentIRType()){
             it.onSuccess {
                 L.d(tag, "emitIRRemoteDeviceKey success  ${it.data}")
             }
@@ -133,7 +133,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
         return (uiConfigAdapter as AirControllerConfigAdapter).getCurrentState()
     }
 
-    override fun getCurrentIRDeviceType(): Int {
+    override fun getCurrentIRType(): Int {
         return IRType.DEVICE_REMOTE_AIR
     }
 

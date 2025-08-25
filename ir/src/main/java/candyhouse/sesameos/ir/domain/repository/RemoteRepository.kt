@@ -2,7 +2,6 @@ package candyhouse.sesameos.ir.domain.repository
 
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
-import candyhouse.sesameos.ir.base.IrCompanyCode
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
@@ -117,8 +116,8 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
        return handlerConfigAdapter.getCurrentState(hub3,remoteDevice)
     }
 
-    fun getCurrentIRDeviceType(): Int {
-        return handlerConfigAdapter.getCurrentIRDeviceType()
+    fun getCurrentIRType(): Int {
+        return handlerConfigAdapter.getCurrentIRType()
     }
 
     fun modifyRemoteIrDeviceInfo(device: CHHub3,remoteDevice: IrRemote,onResponse: CHResult<Any>) {

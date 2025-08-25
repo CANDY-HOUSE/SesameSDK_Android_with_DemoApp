@@ -126,8 +126,7 @@ class LightControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                 ItemType.POWER_STATUS_OFF -> !isPowerOn
                 else -> false
             },
-            iconRes = UIResourceExtension.getResource(context, controlConfig),
-            optionCode = controlConfig.operateCode
+            iconRes = UIResourceExtension.getResource(context, controlConfig)
         )
         updateCallback?.onItemUpdate(item)
     }
@@ -145,8 +144,7 @@ class LightControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                     ItemType.POWER_STATUS_OFF -> !isPowerOn
                     else -> false
                 },
-                iconRes = UIResourceExtension.getResource(context, controlConfig),
-                optionCode = controlConfig.operateCode
+                iconRes = UIResourceExtension.getResource(context, controlConfig)
             )
         }
     }

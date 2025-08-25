@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import candyhouse.sesameos.ir.base.IrCompanyCode
 import candyhouse.sesameos.ir.base.IrMatchRemote
 import candyhouse.sesameos.ir.base.IrRemote
 import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
@@ -134,7 +133,7 @@ class AirControlViewModel(val context: Context, val remoteRepository: RemoteRepo
     fun addIRDeviceInfo(hub3: CHHub3, remoteDevice: IrRemote ,block: (isSuccess:Boolean) -> Unit = {}) {
         viewModelScope.launch {
             val state = remoteRepository.getCurrentState( hub3, remoteDevice)
-            val irDeviceType = remoteRepository.getCurrentIRDeviceType()
+            val irDeviceType = remoteRepository.getCurrentIRType()
             CHIRAPIManager.addIRDevice(hub3,remoteDevice,state,irDeviceType, mutableListOf()){ it ->
                 it.onSuccess { result ->
                     viewModelScope.launch(Dispatchers.Main) {

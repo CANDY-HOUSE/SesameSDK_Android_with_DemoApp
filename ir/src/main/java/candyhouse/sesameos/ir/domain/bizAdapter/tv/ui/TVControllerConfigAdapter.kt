@@ -96,8 +96,7 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
                 title = UIResourceExtension.getStringByIndex(context, controlConfig, 0),
                 value = "",
                 isSelected = true,
-                iconRes = UIResourceExtension.getResource(context, controlConfig),
-                optionCode = controlConfig.operateCode
+                iconRes = UIResourceExtension.getResource(context, controlConfig)
             )
         }
     }
