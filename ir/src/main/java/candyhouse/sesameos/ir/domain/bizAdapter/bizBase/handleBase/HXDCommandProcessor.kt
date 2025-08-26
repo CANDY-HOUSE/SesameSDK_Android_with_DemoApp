@@ -49,15 +49,17 @@ class HXDCommandProcessor {
     }
 
     @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
-    fun buildKeyData(prefixCodeArray: ByteArray, code: Int, arcTable:MutableList<UInt>): UByteArray {
+    fun buildKeyData(prefixCodeArray: ByteArray, code: Int, table:MutableList<UInt>): UByteArray {
+        val indexTable:MutableList<UInt> = mutableListOf()
+        indexTable.addAll(table)
         val buf = mutableListOf<UByte>()
         buf.addAll(prefixCodeArray.map { it.toUByte() })
         buf.addAll(decimalToTwoHexInts(code).map { it.toUByte() })
         buf.addAll(UByteArray(7) { 0u })
         val sb = StringBuilder()
-        arcTable.forEach { sb.append(it.toUByte().toHexString()+"   ") }
-        arcTable[0] = arcTable[0] + 1u
-        buf.addAll(arcTable.map { it.toUByte() })
+        indexTable.forEach { sb.append(it.toUByte().toHexString()+"   ") }
+        indexTable[0] = table[0] + 1u
+        buf.addAll(indexTable.map { it.toUByte() })
         buf.add(0xFF.toUByte())
         buf.add(0u)
         return buf.toUByteArray()
