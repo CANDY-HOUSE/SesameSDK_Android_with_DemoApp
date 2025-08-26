@@ -18,6 +18,7 @@ import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHSesame2MechStatus
 import co.candyhouse.sesame.open.device.CHSesame5MechSettings
 import co.candyhouse.sesame.open.device.CHSesame5MechStatus
 import co.candyhouse.sesame.open.device.CHSesameBike2
@@ -59,8 +60,13 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
 
                 if (isConnectedByWM2) {
                     resource.data.state.reported.mechst?.let { mechShadow ->
-                        mechStatus = CHSesameBike2MechStatus(mechShadow.hexStringToByteArray().sliceArray(0..2))
-                        L.d("hcia", "[bike2]mechStatus isInUnlockRange: " + mechStatus!!.isInUnlockRange.toString())
+                        L.d("harry", "[bike2][iot] mechShadow【${mechShadow.hexStringToByteArray().size}】: $mechShadow ")
+                        if (mechShadow.hexStringToByteArray().size >= 7) {
+                            mechStatus = CHSesame5MechStatus(CHSesame2MechStatus(mechShadow.hexStringToByteArray()).ss5Adapter())
+                        } else {
+                            mechStatus = CHSesameBike2MechStatus(mechShadow.hexStringToByteArray().sliceArray(0..2))
+                        }
+                        L.d("harry", "[bike2]mechStatus isInLockRange: " + mechStatus!!.isInLockRange.toString())
                     }
 
                     deviceShadowStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
@@ -165,6 +171,7 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
                 // 旧固件， mechStatus 只有 3 个字节
                 mechStatus = CHSesameBike2MechStatus(receivePayload.payload)
             }
+            L.d("harry", "[bike2]mechStatus isInLockRange: ${mechStatus!!.isInLockRange}")
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
         }
     }
