@@ -127,7 +127,7 @@ internal interface CHIRAPIClient {
      * @param body 请求体: operation:具体动作行为  hxd ： hxd 命令 learned 自学习命令
      * @return 设备按键列表响应
      */
-    @Operation(path = "/device/v2/ir/{device_id}/send", method = "PUT")
+    @Operation(path = "/device/v2/ir/{device_id}/send", method = "POST")
     fun emitIRRemoteDeviceKey(
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: IrDeviceRemoteKeyRequest

@@ -164,7 +164,9 @@ class IrAirMatchCodeViewModel(val context: Context) :
     fun setModel(model: Int) {
         CHIRAPIManager.setIRMode(model, hub3Device.deviceId.toString().uppercase()) {
             it.onFailure {
-                Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                viewModelScope.launch(Dispatchers.Main) {
+                    Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
