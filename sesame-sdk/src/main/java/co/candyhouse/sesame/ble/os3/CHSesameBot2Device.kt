@@ -59,7 +59,14 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                 }
                 if (isConnectedByWM2) {
                     resource.data.state.reported.mechst?.let { mechShadow ->
-                        mechStatus = CHSesameBot2MechStatus(mechShadow.hexStringToByteArray().sliceArray(0..2))
+                        L.d("harry", "[bot2][iot]mechShadow[${mechShadow.hexStringToByteArray().size}]: $mechShadow")
+                        if(mechShadow.hexStringToByteArray().size >= 7){
+                            // 新固件， mechStatus 统一成 SS5 格式 的 7个字节, IoT 返回 SS4 格式的 8 个字节
+                            mechStatus = CHSesame5MechStatus(CHSesame2MechStatus(mechShadow.hexStringToByteArray()).ss5Adapter())
+                        } else if (mechShadow.hexStringToByteArray().size == 3) {
+                            // 旧固件， mechStatus 只有 3 个字节
+                            mechStatus = CHSesameBot2MechStatus(mechShadow.hexStringToByteArray().sliceArray(0..2))
+                        }
                     }
                     deviceShadowStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
 
