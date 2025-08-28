@@ -3,7 +3,7 @@ package co.candyhouse.app.base
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.preference.PreferenceManager
-import candyhouse.sesameos.ir.server.CHIRAPIManager
+import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.ext.AppLifecycleObserver
 import co.candyhouse.app.ext.aws.AWSStatus

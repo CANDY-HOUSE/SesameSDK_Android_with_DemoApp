@@ -326,4 +326,7 @@
     <string name="card_id">Card ID</string>
     <string name="hint_enter_card_id_hex">Please enter Card ID (0-9, A-F, a-f)</string>
     <string name="hint_enter_card_id">Please enter Card ID</string>
+
+    <string name="network_retry">Network error, please tap to retry</string>
+
 </resources>

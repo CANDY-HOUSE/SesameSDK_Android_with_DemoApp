@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import candyhouse.sesameos.ir.ext.setDebouncedClick
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
@@ -32,6 +31,7 @@ import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHSesame5
 import co.candyhouse.sesame.open.device.CHSesame5History
+import co.utils.setDebouncedClick
 
 class MainRoomSS5FG : BaseDeviceFG<FgRoomSs5MainBinding>() {
     private var cursor: Long? = null

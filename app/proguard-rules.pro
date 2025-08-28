@@ -82,12 +82,11 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 # 数据模型类
--keep class candyhouse.sesameos.ir.base.IrRemote { *; }
--keepclassmembers class candyhouse.sesameos.ir.base.IrRemote { *; }
--keep class candyhouse.sesameos.ir.models.** { *; }
--keep class candyhouse.sesameos.ir.base.** { *; }
-# 红外请求模型类
--keep class candyhouse.sesameos.ir.base.irHttpClientBean.** { *; }
+-keep class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote { *; }
+-keepclassmembers class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote { *; }
+
+-keep interface co.candyhouse.server.CHIRAPIClient { *; }
+-keep class co.candyhouse.server.dto.** { *; }
 
 # AWS相关
 -keep class com.amazonaws.services.cognitoidentityprovider.** { *; }

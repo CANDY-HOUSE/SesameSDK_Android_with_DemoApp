@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/irIrFg"
+    app:startDestination="@id/remoteTypeListFg">
+
+    <!--“红外设备”入口-->
+    <fragment
+        android:id="@+id/remoteTypeListFg"
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteDeviceTypes.RemoteTypeListFg">
+        <action
+            android:id="@+id/action_to_remoteList"
+            app:destination="@id/RemoteListFg" />
+        <action
+            android:id="@+id/action_to_learn"
+            app:destination="@id/remoteLearnFg" />
+    </fragment>
+
+    <!--其他fragment-->
+    <fragment
+        android:id="@+id/RemoteListFg"
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.remotes.RemoteListFg">
+        <action
+            android:id="@+id/action_to_remoteControlFg"
+            app:destination="@id/remoteControlFG" />
+    </fragment>
+    <fragment
+        android:id="@+id/remoteControlFG"
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.RemoteControlFG">
+        <action
+            android:id="@+id/action_to_remoteMatchCodeFg"
+            app:destination="@id/remoteMatchCodeFg" />
+    </fragment>
+    <fragment
+        android:id="@+id/remoteLearnFg"
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.learn.RemoteLearnFG" />
+    <fragment
+        android:id="@+id/remoteMatchCodeFg"
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteMatch.RemoteMatchCodeFG" >
+    </fragment>
+
+</navigation>

@@ -6,7 +6,7 @@
     app:startDestination="@+id/deviceListPG">
 
     <!--红外线模块-->
-    <include app:graph="@navigation/ir_fg" />
+    <include app:graph="@navigation/remote_ng" />
 
     <!--“芝麻”界面入口-->
     <fragment
@@ -72,10 +72,10 @@
     <!--其他fragment-->
     <fragment
         android:id="@+id/IrDiy2"
-        android:name="candyhouse.sesameos.ir.fg.IrDiy" />
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.learn.RemoteLearnFG" />
     <fragment
         android:id="@+id/IrGridFg2"
-        android:name="candyhouse.sesameos.ir.fg.IrControlFG" />
+        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.RemoteControlFG" />
     <!--Hub3界面入口-->
     <fragment
         android:id="@+id/Hub3SettingFG"
@@ -107,7 +107,7 @@
             android:id="@+id/action_to_irdiy3"
             app:destination="@id/IrDiy2" />
         <action
-            android:id="@+id/action_to_irgridefg"
+            android:id="@+id/action_to_remoteControlFg"
             app:destination="@id/IrGridFg2" />
     </fragment>
     <fragment

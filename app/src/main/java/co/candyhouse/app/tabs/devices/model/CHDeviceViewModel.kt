@@ -12,8 +12,8 @@ import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import candyhouse.sesameos.ir.base.IrRemote
-import candyhouse.sesameos.ir.server.CHIRAPIManager
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.app.R
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.MainActivity

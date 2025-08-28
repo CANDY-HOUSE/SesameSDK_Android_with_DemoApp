@@ -1,6 +1,5 @@
 package co.candyhouse.sesame.ble.os3
 
-import android.adservices.topics.Topic
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import co.candyhouse.sesame.ble.CHDeviceUtil
@@ -52,11 +51,6 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.experimental.and
 
-class CHHub3IRCode(data: ByteArray) {
-    val irCodeID = data[0].toString()
-    private val nameLength = data[1]
-    val irCodeName = String(data.sliceArray(2 + 1..2 + nameLength))
-}
 
 @Suppress("DEPRECATION")
 @SuppressLint("MissingPermission")

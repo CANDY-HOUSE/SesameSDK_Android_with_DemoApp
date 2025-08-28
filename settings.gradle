@@ -29,4 +29,3 @@ dependencyResolutionManagement {
 
 include ':app'
 include ':sesame-sdk'
-include ':ir'

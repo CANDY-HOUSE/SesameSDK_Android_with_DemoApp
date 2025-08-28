@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
@@ -13,14 +12,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import candyhouse.sesameos.ir.base.BaseIr.Companion.hub3Device
-import candyhouse.sesameos.ir.base.IrRemote
-import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
-import candyhouse.sesameos.ir.ext.Config
-import candyhouse.sesameos.ir.ext.Ext.getParcelableCompat
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.tabs.HomeFragment
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -28,6 +25,7 @@ import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.utils.L
+import co.utils.getParcelableCompat
 import co.utils.recycle.DeviceListAdapter
 import co.utils.recycle.GenericAdapter
 import co.utils.recycle.SimpleItemTouchHelperCallback
@@ -236,18 +234,12 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
 
     private fun handleCallBackHub3(hub3: CHHub3, irRemote: IrRemote) {
         L.d(tag, "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
-        hub3Device.value = hub3
-        //增加hub3Device.value空判断，如果为空提示用户下拉刷新
-        if (hub3Device.value == null) {
-            Toast.makeText(context, "Unexpected error. Pull to refresh.", Toast.LENGTH_SHORT).show()
-            return
-        }
         when (irRemote.type) {
             IRType.DEVICE_REMOTE_CUSTOM -> {
                 //学习
                 val bundle = Bundle().apply {
-                    putParcelable(Config.irDevice, irRemote)
-                    putBoolean(Config.editable, false)
+                    putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
+                    putBoolean(RemoteBundleKeyConfig.editable, false)
                 }
                 safeNavigate(R.id.action_to_irdiy2, bundle)
             }
@@ -255,9 +247,9 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV -> {
                 //空调
                 safeNavigate(R.id.action_to_irgridefg2, Bundle().apply {
-                    this.putParcelable(Config.irDevice, irRemote)
-                    this.putBoolean(Config.isNewDevice, false)
-                    putBoolean(Config.editable, false)
+                    this.putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
+                    this.putBoolean(RemoteBundleKeyConfig.isNewDevice, false)
+                    putBoolean(RemoteBundleKeyConfig.editable, false)
                 })
             }
 
@@ -304,14 +296,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     }
 
     private fun setupBackViewListener() {
-        setFragmentResultListener(Config.controlIrDeviceResult) { _, bundle ->
+        setFragmentResultListener(RemoteBundleKeyConfig.controlIrDeviceResult) { _, bundle ->
             var irRemote: IrRemote? = null
             var chDeviceId: String? = null
-            if (bundle.containsKey(Config.irDevice)) {
-                irRemote = bundle.getParcelableCompat<IrRemote>(Config.irDevice)
+            if (bundle.containsKey(RemoteBundleKeyConfig.irDevice)) {
+                irRemote = bundle.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
             }
-            if (bundle.containsKey(Config.chDeviceId)) {
-                chDeviceId = bundle.getString(Config.chDeviceId)
+            if (bundle.containsKey(RemoteBundleKeyConfig.chDeviceId)) {
+                chDeviceId = bundle.getString(RemoteBundleKeyConfig.chDeviceId)
             }
             if (irRemote != null && !chDeviceId.isNullOrEmpty()) {
                 mDeviceViewModel.updateHub3IrDevice(irRemote, chDeviceId)

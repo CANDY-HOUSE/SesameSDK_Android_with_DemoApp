@@ -10,19 +10,16 @@ import android.widget.TextView
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import candyhouse.sesameos.ir.base.BaseIr.Companion.hub3Device
-import candyhouse.sesameos.ir.base.IrRemote
-import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
-import candyhouse.sesameos.ir.ext.Config
-import candyhouse.sesameos.ir.ext.Ext.getParcelableCompat
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgHub3SettingBinding
-import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.hub3.adapter.Hub3IrAdapter
 import co.candyhouse.app.tabs.devices.hub3.adapter.Ssm2DevicesAdapter
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Hub3IrAdapterProvider
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Ssm2DevicesAdapterProvider
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -34,6 +31,7 @@ import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.L
+import co.utils.getParcelableCompat
 import co.utils.safeNavigate
 import co.utils.safeNavigateBack
 import com.warkiz.widget.IndicatorSeekBar
@@ -145,11 +143,10 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         bind.rlIrAdd.setOnClickListener {
             mDeviceViewModel.ssmLockLiveData.value?.apply {
                 if (this is CHHub3) {
-                    hub3Device.value = this
                     val bundle = Bundle()
                     if (irRemote != null) {
                         bundle.apply {
-                            putParcelable(Config.irDevice, irRemote)
+                            putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
                         }
                     }
                     safeNavigate(R.id.action_to_irfg, bundle)
@@ -514,14 +511,14 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     }
 
     private fun setupBackViewListener() {
-        setFragmentResultListener(Config.controlIrDeviceResult) { _, bundle ->
+        setFragmentResultListener(RemoteBundleKeyConfig.controlIrDeviceResult) { _, bundle ->
             var irRemote: IrRemote? = null
             var chDeviceId: String? = null
-            if (bundle.containsKey(Config.irDevice)) {
-                irRemote = bundle.getParcelableCompat<IrRemote>(Config.irDevice)
+            if (bundle.containsKey(RemoteBundleKeyConfig.irDevice)) {
+                irRemote = bundle.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
             }
-            if (bundle.containsKey(Config.chDeviceId)) {
-                chDeviceId = bundle.getString(Config.chDeviceId)
+            if (bundle.containsKey(RemoteBundleKeyConfig.chDeviceId)) {
+                chDeviceId = bundle.getString(RemoteBundleKeyConfig.chDeviceId)
             }
             if (irRemote != null && !chDeviceId.isNullOrEmpty()) {
                 mDeviceViewModel.updateHub3IrDevice(irRemote, chDeviceId)
@@ -545,9 +542,8 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     override fun performStudy(data: IrRemote) {
         mDeviceViewModel.ssmLockLiveData.value?.apply {
             if (this is CHHub3) {
-                hub3Device.value = this
                 val bundle = Bundle().apply {
-                    putParcelable(Config.irDevice, data)
+                    putParcelable(RemoteBundleKeyConfig.irDevice, data)
                 }
                 safeNavigate(
                     R.id.action_to_irdiy3,
@@ -560,16 +556,15 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     override fun performAirControl(data: IrRemote) {
         mDeviceViewModel.ssmLockLiveData.value?.apply {
             if (this is CHHub3) {
-                hub3Device.value = this
                 safeNavigate(
-                    R.id.action_to_irgridefg,
+                    R.id.action_to_remoteControlFg,
                     Bundle().apply {
                         this.putParcelable(
-                            Config.irDevice,
+                            RemoteBundleKeyConfig.irDevice,
                             data
                         )
                         this.putBoolean(
-                            Config.isNewDevice,
+                            RemoteBundleKeyConfig.isNewDevice,
                             false
                         )
                     })

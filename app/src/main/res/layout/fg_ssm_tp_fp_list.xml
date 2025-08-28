@@ -82,7 +82,7 @@
         android:layout_below="@id/menu"
         android:background="#f2f2f7"
         android:layout_height="wrap_content">
-        <candyhouse.sesameos.ir.widget.GifMovieView
+        <co.utils.GifMovieView
             android:layout_width="100dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

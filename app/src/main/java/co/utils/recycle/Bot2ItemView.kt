@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import candyhouse.sesameos.ir.R
+import co.candyhouse.app.R
 
 data class BotItem(val name:String,val id:Int)
 class Bot2ItemView(val list:MutableList<BotItem>,val callback:(bot2:BotItem)->Unit): RecyclerView.Adapter<Bot2ItemView.ViewHolder>() {

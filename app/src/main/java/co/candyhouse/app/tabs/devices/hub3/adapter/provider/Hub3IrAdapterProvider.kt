@@ -1,6 +1,6 @@
 package co.candyhouse.app.tabs.devices.hub3.adapter.provider
 
-import candyhouse.sesameos.ir.base.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 
 /**
  *

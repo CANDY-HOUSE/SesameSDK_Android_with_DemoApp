@@ -11,6 +11,9 @@ import co.candyhouse.server.CHResultState
 import android.location.Location
 import androidx.core.app.ActivityCompat
 import android.Manifest
+import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
@@ -93,4 +96,22 @@ fun getLastKnownLocation(contex: Context, onResponse: CHResult<Location?>) {
 
 fun convertStringToColor(text: String): String {
     return String.format("#FF%06X", 0xFFFFFF and text.hashCode())
+}
+
+inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelable(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getParcelable(key)
+    }
+}
+
+inline fun <reified T : Parcelable> Bundle.getParcelableArrayListCompat(key: String): ArrayList<T>? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelableArrayList(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getParcelableArrayList(key)
+    }
 }

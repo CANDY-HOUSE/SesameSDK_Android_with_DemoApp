@@ -33,20 +33,6 @@ class AWSStatus {
             return isLogin
         }
 
-        fun checkIsCompany(): Boolean {
-            if (isLogin) {
-                val email = AWSMobileClient.getInstance()?.username ?: return false
-                if (email.isNotEmpty()) {
-                    return listOf(
-                        "@candyhouse.co",
-                        "@cn.candyhouse.co",
-                        "@b.b"
-                    ).any { email.lowercase().endsWith(it) }
-                }
-            }
-            return false
-        }
-
         /**
          * 初始化AWSMobileClient
          */

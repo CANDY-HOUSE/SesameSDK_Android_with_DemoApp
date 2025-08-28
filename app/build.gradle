@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics.gradle)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -134,7 +135,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation project(':ir')
     implementation project(':sesame-sdk')
 
     implementation libs.androidx.work.runtime
@@ -161,4 +161,9 @@ dependencies {
     implementation libs.firebase.analytics.ktx
     implementation libs.firebase.messaging.ktx
     implementation libs.firebase.crashlytics.ktx
+
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    implementation libs.androidx.room.rxjava2
+    ksp libs.androidx.room.compiler
 }

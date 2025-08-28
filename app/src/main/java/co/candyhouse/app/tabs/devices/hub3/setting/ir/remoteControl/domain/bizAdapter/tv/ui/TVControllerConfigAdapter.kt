@@ -1,0 +1,89 @@
+package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.tv.ui
+
+import android.content.Context
+import co.candyhouse.app.R
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.UIResourceExtension
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.ItemType
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
+import co.candyhouse.sesame.open.device.CHHub3
+import co.candyhouse.sesame.utils.L
+import com.google.gson.Gson
+
+
+class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
+    private val tag = javaClass.simpleName
+    private val gson = Gson()
+    private var config: UIControlConfig? = null
+    private var updateCallback: ConfigUpdateCallback? = null
+    var irTable: MutableList<Array<UInt>> = mutableListOf()
+    var irRow: Array<UInt> = arrayOf()
+
+
+    override suspend fun loadConfig(): UIControlConfig {
+        if (config == null) {
+            val jsonString = context.resources.openRawResource(R.raw.tv_control_config)
+                .bufferedReader()
+                .use { it.readText() }
+            config = gson.fromJson(jsonString, UIControlConfig::class.java)
+        }
+        if (null == config) {
+            throw Exception("config is null")
+        }
+        return config!!
+    }
+
+    override suspend fun loadUIParams(): MutableList<IrControlItem> {
+        return createControlItems(config!!).toMutableList()
+    }
+
+    override fun clearConfigCache() {
+        config = null
+        irTable.clear()
+        irRow = arrayOf()
+    }
+
+    override fun setConfigUpdateCallback(uiItemCallback: ConfigUpdateCallback) {
+        updateCallback = uiItemCallback
+    }
+
+    override fun handleItemClick(
+        item: IrControlItem,
+        device: CHHub3,
+        remoteDevice: IrRemote
+    ): Boolean {
+        // 不做显示上的处理
+        return true
+    }
+
+    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) :Boolean {
+        // TODO: 目前不支持添加设备到Matter
+        L.d(tag, "addIrDeviceToMatter: not supported yet")
+        return false
+    }
+
+    private fun createControlItems(config: UIControlConfig): List<IrControlItem> {
+        return config.controls.map { controlConfig ->
+            val type = ItemType.valueOf(controlConfig.type)
+            IrControlItem(
+                id = controlConfig.id,
+                type = type,
+                title = UIResourceExtension.getStringByIndex(context, controlConfig, 0),
+                value = "",
+                isSelected = true,
+                iconRes = UIResourceExtension.getResource(context, controlConfig)
+            )
+        }
+    }
+
+    /**
+     * 获取当前State
+     */
+    fun getCurrentState(): String {
+        return ""
+    }
+}
+

@@ -6,11 +6,11 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import candyhouse.sesameos.ir.base.IrRemote
-import candyhouse.sesameos.ir.domain.bizAdapter.bizBase.IRType
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity.Companion.activity
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Hub3IrAdapterProvider
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle

@@ -317,6 +317,9 @@
     <string name="card_id">カードID</string>
     <string name="hint_enter_card_id_hex">カードIDを入力してください（0-9,A-F,a-f）</string>
     <string name="hint_enter_card_id">カードIDを入力してください</string>
+
+    <string name="network_retry">通信エラーが発生しました。タップして再試行してください</string>
+
 </resources>
 
 
