@@ -8,8 +8,9 @@ data class IrDeviceRemoteAddToMatterRequest(
     @SerializedName("cmdOn") val cmdOn: String?,
     @SerializedName("cmdOff") val cmdOff: String?,
     @SerializedName("irDeviceUUID") val irDeviceUUID: String? = "",
+    @SerializedName("irDeviceName") val irDeviceName: String? = "",
 ){
     override fun toString(): String {
-        return "IrDeviceRemoteAddToMatterRequest(irDeviceType='$irDeviceType', cmdOn='$cmdOn', cmdOff='$cmdOff', irDeviceUUID='$irDeviceUUID')"
+        return "IrDeviceRemoteAddToMatterRequest(irDeviceType='$irDeviceType', cmdOn='$cmdOn', cmdOff='$cmdOff', irDeviceUUID='$irDeviceUUID', irDeviceName='$irDeviceName')"
     }
 }

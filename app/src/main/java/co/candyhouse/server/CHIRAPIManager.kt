@@ -406,7 +406,7 @@ object CHIRAPIManager {
     fun addIRRemoteDeviceToMatter(onCommand: String, offCommand: String, irRemote: IrRemote, hub3: CHHub3, onResponse: CHResult<Any>) {
         makeApiCall(onResponse){
             try {
-                val requestBody = IrDeviceRemoteAddToMatterRequest(irDeviceType = IRType.DEVICE_REMOTE_LIGHT, onCommand, offCommand, irRemote.uuid.uppercase())
+                val requestBody = IrDeviceRemoteAddToMatterRequest(irDeviceType = IRType.DEVICE_REMOTE_LIGHT, onCommand, offCommand, irRemote.uuid.uppercase(), irRemote.alias)
                 L.d("harry", "addIRRemoteDeviceToMatter: ${requestBody.toString()}")
                 val res = jpAPIClient.addIRRemoteDeviceToMatter(hub3.deviceId.toString().uppercase(), requestBody)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
