@@ -52,12 +52,13 @@
 -dontwarn co.candyhouse.sesame.**
 
 -keep class co.candyhouse.server.** { *; }
--keep class candyhouse.sesameos.ir.server.** { *; }
--dontwarn candyhouse.sesameos.ir.server.**-keep
 
 -keep class org.eclipse.paho.client.mqttv3.** { *; }
 -keep class com.amazonaws.** { *; }
 -dontwarn co.candyhouse.server.**-keep
+-dontwarn co.candyhouse.server.dto.**-keep
+-keep class co.candyhouse.server.dto.** { *; }
+
 
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken
@@ -82,11 +83,9 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 # 数据模型类
--keep class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote { *; }
--keepclassmembers class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote { *; }
+-keep class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.** { *; }
+-keepclassmembers class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.** { *; }
 
--keep interface co.candyhouse.server.CHIRAPIClient { *; }
--keep class co.candyhouse.server.dto.** { *; }
 
 # AWS相关
 -keep class com.amazonaws.services.cognitoidentityprovider.** { *; }
