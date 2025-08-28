@@ -159,7 +159,7 @@ class RemoteLearnFG : BaseNFG<FgRemoteLearnBinding>() {
             }
         }
         bind.topTitle.imgRight.visibility = if (editable) View.VISIBLE else View.GONE
-        bind.topTitle.imgRight.setImageResource(R.drawable.ic_icons_outlined_addoutline)
+        bind.topTitle.imgRight.setImageResource(R.drawable.selector_img_add_del)
         bind.topTitle.imgRight.setOnClickListener { mView ->
             switchModel(mView.isSelected)
         }
