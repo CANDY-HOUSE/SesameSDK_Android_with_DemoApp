@@ -95,7 +95,6 @@ class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
                             showControlView()
                         }
                     }
-                    return@launch
                 }
                 fetchRemoteListFromServer(brandType)
             }
