@@ -19,13 +19,11 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     private val gson = Gson()
     private var config: UIControlConfig? = null
     private var updateCallback: ConfigUpdateCallback? = null
-    var irTable: MutableList<Array<UInt>> = mutableListOf()
-    var irRow: Array<UInt> = arrayOf()
 
 
     override suspend fun loadConfig(): UIControlConfig {
         if (config == null) {
-            val jsonString = context.resources.openRawResource(R.raw.tv_control_config)
+            val jsonString = context.assets.open("config/tv_control_config.json")
                 .bufferedReader()
                 .use { it.readText() }
             config = gson.fromJson(jsonString, UIControlConfig::class.java)
@@ -42,8 +40,6 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
     override fun clearConfigCache() {
         config = null
-        irTable.clear()
-        irRow = arrayOf()
     }
 
     override fun setConfigUpdateCallback(uiItemCallback: ConfigUpdateCallback) {

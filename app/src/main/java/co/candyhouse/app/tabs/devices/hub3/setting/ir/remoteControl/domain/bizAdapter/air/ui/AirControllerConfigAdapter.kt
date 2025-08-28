@@ -29,7 +29,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
     override suspend fun loadConfig(): UIControlConfig {
         if (config == null) {
-            val jsonString = context.resources.openRawResource(R.raw.air_control_config)
+            val jsonString = context.assets.open("config/air_control_config.json")
                 .bufferedReader()
                 .use { it.readText() }
             config = gson.fromJson(jsonString, UIControlConfig::class.java)

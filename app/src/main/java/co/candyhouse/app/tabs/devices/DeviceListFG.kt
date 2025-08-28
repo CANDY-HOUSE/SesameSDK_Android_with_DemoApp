@@ -237,15 +237,17 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         when (irRemote.type) {
             IRType.DEVICE_REMOTE_CUSTOM -> {
                 //学习
+                mDeviceViewModel.ssmLockLiveData.value = hub3
                 val bundle = Bundle().apply {
                     putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
                     putBoolean(RemoteBundleKeyConfig.editable, false)
                 }
-                safeNavigate(R.id.action_to_irdiy2, bundle)
+                safeNavigate(R.id.remoteLearnFg, bundle)
             }
 
             IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV -> {
                 //空调
+                mDeviceViewModel.ssmLockLiveData.value = hub3
                 safeNavigate(R.id.action_to_irgridefg2, Bundle().apply {
                     this.putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
                     this.putBoolean(RemoteBundleKeyConfig.isNewDevice, false)

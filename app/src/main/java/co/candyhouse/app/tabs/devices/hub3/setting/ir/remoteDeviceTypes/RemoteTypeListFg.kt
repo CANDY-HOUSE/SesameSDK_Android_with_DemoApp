@@ -6,16 +6,16 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
-import co.candyhouse.sesame.BaseFG
 import co.candyhouse.sesame.utils.L
 import co.utils.safeNavigate
 import com.skydoves.balloon.dp2Px
 import co.candyhouse.app.R
+import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgRemoteTypeListBinding
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.utils.getParcelableCompat
 
-class RemoteTypeListFg : BaseFG<FgRemoteTypeListBinding>() {
+class RemoteTypeListFg : BaseNFG<FgRemoteTypeListBinding>() {
 
     private val tag = RemoteTypeListFg::class.java.simpleName
 

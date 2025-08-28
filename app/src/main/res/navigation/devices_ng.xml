@@ -62,8 +62,8 @@
             android:id="@+id/to_SesameBot2SettingFG"
             app:destination="@id/SesameBot2SettingFG" />
         <action
-            android:id="@+id/action_to_irdiy2"
-            app:destination="@id/IrDiy2" />
+            android:id="@+id/remoteLearnFg"
+            app:destination="@id/remoteLearnFg" />
         <action
             android:id="@+id/action_to_irgridefg2"
             app:destination="@id/IrGridFg2" />
@@ -71,7 +71,7 @@
 
     <!--其他fragment-->
     <fragment
-        android:id="@+id/IrDiy2"
+        android:id="@+id/remoteLearnFg"
         android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.learn.RemoteLearnFG" />
     <fragment
         android:id="@+id/IrGridFg2"
@@ -105,7 +105,7 @@
             app:destination="@id/Hub3MatterFG" />
         <action
             android:id="@+id/action_to_irdiy3"
-            app:destination="@id/IrDiy2" />
+            app:destination="@id/remoteLearnFg" />
         <action
             android:id="@+id/action_to_remoteControlFg"
             app:destination="@id/IrGridFg2" />
