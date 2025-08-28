@@ -287,92 +287,43 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      * 连接到IoT服务
      */
     override fun goIOT() {
-        L.d("hcia", "[stp]goIOT:")
-
-        if (productModel === CHProductModel.Remote || productModel === CHProductModel.RemoteNano) {
-            goIoTWithRemote()
-            return
-        }
-
-        if (productModel === CHProductModel.SSMOpenSensor) {
+        val iotDeviceModels = setOf(
+            CHProductModel.Remote,
+            CHProductModel.RemoteNano,
+            CHProductModel.SSMTouch,
+            CHProductModel.SSMTouchPro,
+            CHProductModel.SSMFace,
+            CHProductModel.SSMFaceAI,
+            CHProductModel.SSMFacePro,
+            CHProductModel.SSMFaceProAI
+        )
+        if (productModel == CHProductModel.SSMOpenSensor) {
             goIoTWithOpenSensor()
-            return
+        } else if (productModel in iotDeviceModels) {
+            goIoTWithDevices()
         }
-
-        CHIotManager.subscribeSesame2Shadow(this) { result ->
-            result.onSuccess { resource ->
-                L.d("hcia", "[stp][iot]")
-                L.d("hcia", "resource.data.state.reported.wm2s:" + resource.data.state.reported.wm2s)
-
-                resource.data.state.reported.wm2s?.let { wm2s ->
-                    isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
-                    L.d("hcia", "[ss5][wm2s: $wm2s][isConnectedByWM2: $isConnectedByWM2]")
-                }
-
-                if (isConnectedByWM2) {
-                    deviceShadowStatus = CHDeviceStatus.IotConnected
-                } else {
-                    deviceShadowStatus = null
-                }
-            }
-        }
-
-
     }
 
-    /**
-     * 处理OpenSensor的IoT连接
-     */
     private fun goIoTWithOpenSensor() {
-        if (productModel != CHProductModel.SSMOpenSensor) return
-
-        L.d("hcia", "[stp]goIoTWithOpenSensor:")
         val topic = "opensensor/${deviceId.toString().uppercase()}"
 
         CHIotManager.subscribeTopic(topic) {
-            it.onSuccess {
-                val openSensorData = OpenSensorData.fromByteArray(it.data)
+            it.onSuccess { result ->
+                val openSensorData = OpenSensorData.fromByteArray(result.data)
                 mechStatus = CHSesameOpenSensorMechStatus(openSensorData)
             }
         }
-
-        getLatestState {
-            it.onSuccess { result ->
-                mechStatus = CHSesameOpenSensorMechStatus(result.data)
-            }
-        }
     }
 
-    private fun goIoTWithRemote() {
-        L.d("hcia", "[stp]goIoTWithOpenSensor:")
-        val topic = "remote/${deviceId.toString().uppercase()}"
+    private fun goIoTWithDevices() {
+        val topic = "battery/${deviceId.toString().uppercase()}"
 
         CHIotManager.subscribeTopic(topic) {
-            it.onSuccess {
-                val jsonStr = String(it.data)
-                val jsonObject  = Gson().fromJson(jsonStr, Map::class.java)
+            it.onSuccess { result ->
+                val jsonStr = String(result.data)
+                val jsonObject = Gson().fromJson(jsonStr, Map::class.java)
                 val lightLoadVoltage = jsonObject["lightLoadBatteryVoltage_mV"]
-                L.d("harry", "Parsed lightLoadBatteryVoltage: $lightLoadVoltage")
                 mechStatus = CHSesameTouchProMechStatus((lightLoadVoltage as Number).toInt().toUInt().toShort().toReverseBytes())
-            }
-        }
-
-        // TODO: 首次打开APP，去云端拿电池电量，用于设备列表页显示
-        // getLatestState {
-        //     it.onSuccess { result ->
-        //         mechStatus = CHSesameOpenSensorMechStatus(result.data)
-        //     }
-        // }
-    }
-
-    /**
-     * 获取最新状态
-     */
-    private fun getLatestState(result: CHResult<OpenSensorData>) {
-        CHAccountManager.openSensorHistoryGet(sesame2KeyData!!.deviceUUID.uppercase()) { it ->
-            it.onSuccess {
-                val openSensorData = OpenSensorData.fromByteArray(it.data.toString().toByteArray())
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(openSensorData)))
             }
         }
     }
@@ -413,4 +364,3 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     }
 
 }
-

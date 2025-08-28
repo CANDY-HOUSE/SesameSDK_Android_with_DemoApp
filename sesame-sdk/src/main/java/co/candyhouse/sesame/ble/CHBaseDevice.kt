@@ -54,14 +54,11 @@ internal interface CHDeviceUtil {
             if (field != value) {
                 field = value
 
-                L.d("打印tis",this.javaClass.name)
-                if (this is CHDevices){
-                    val device:CHDevices =this as CHDevices
+                if (this is CHDevices) {
+                    val device: CHDevices = this
                     delegate?.onBleDeviceStatusChanged(device, deviceStatus, device.deviceShadowStatus)
                     notifyBleDeviceStatusChanged()
                 }
-
-              //  delegate?.onBleDeviceStatusChanged(this as CHDevices, deviceStatus, field)
             }
         }
     var deviceStatus: CHDeviceStatus = CHDeviceStatus.NoBleSignal
@@ -69,13 +66,11 @@ internal interface CHDeviceUtil {
             if (field != value) {
                 field = value
 
-                if (this is CHDevices){
-
-                    val device:CHDevices =this as CHDevices
+                if (this is CHDevices) {
+                    val device: CHDevices = this
                     delegate?.onBleDeviceStatusChanged(device, device.deviceStatus, device.deviceShadowStatus)
                 }
                 notifyBleDeviceStatusChanged()
-              //  delegate?.onBleDeviceStatusChanged(this as CHDevices, deviceStatus, deviceShadowStatus)
             }
         }
     var sesame2KeyData: CHDevice? = null

@@ -12,8 +12,6 @@ import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.app.R
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.MainActivity
@@ -21,15 +19,16 @@ import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.account.userKeyToCHKey
 import co.candyhouse.app.tabs.devices.hub3.bean.IrRemoteRepository
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
 import co.candyhouse.app.tabs.devices.ssm2.uiPriority
+import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.server.CHResultState
-import co.candyhouse.server.CHUserKey
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.CHScanStatus
@@ -43,6 +42,7 @@ import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.receiver.widget.SesameReceiver
@@ -51,6 +51,7 @@ import co.utils.JsonUtil.parseList
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
+import co.utils.userKeyRef
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -70,7 +71,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class BeanDevices(
     val list: List<CHDevices>,
-    val postion: Int = -1
+    val deviceId: String? = null
 )
 
 data class LockDeviceStatus(var id: String, var model: Byte, var status: Byte)
@@ -146,7 +147,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     private fun syncDeviceFromServer() {
-        CHLoginAPIManager.getKeys {
+        CHLoginAPIManager.getDevicesList {
             receiveKeysFromServer(it)
             SharedPreferencesUtils.isNeedFreshDevice = false
         }
@@ -158,17 +159,15 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             userKeys.addAll(result.data.map { it.deviceUUID.lowercase() })
 
             viewModelScope.launch {
+                val userKeyMap = result.data.associateBy { it.deviceUUID.lowercase() }
+
                 result.data.forEach { userKey ->
-                    SharedPreferencesUtils.preferences.edit() {
-                        putString(userKey.deviceUUID.lowercase(), userKey.deviceName)
-                    }
-                    SharedPreferencesUtils.preferences.edit() {
-                        putInt("l" + userKey.deviceUUID.lowercase(), userKey.keyLevel)
-                    }
-                    userKey.rank?.let { rank ->
-                        SharedPreferencesUtils.preferences.edit() {
-                            putInt("ra" + userKey.deviceUUID.lowercase(), rank)
-                        }
+                    val deviceId = userKey.deviceUUID.lowercase()
+
+                    SharedPreferencesUtils.preferences.edit {
+                        putString(deviceId, userKey.deviceName)
+                        putInt("l$deviceId", userKey.keyLevel)
+                        userKey.rank?.let { putInt("ra$deviceId", it) }
                     }
                 }
                 val userks = result.data.mapNotNull { userKey ->
@@ -180,8 +179,14 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     }
                 }
                 CHDeviceManager.receiveCHDeviceKeys(userks) { response ->
-                    response.onSuccess {
-                        updateDevices(it.data)
+                    response.onSuccess { deviceResponse ->
+                        deviceResponse.data.forEach { device ->
+                            val deviceId = device.deviceId?.toString()?.lowercase()
+                            deviceId?.let { id ->
+                                device.userKeyRef = userKeyMap[id]
+                            }
+                        }
+                        updateDevices(deviceResponse.data)
                     }
                     response.onFailure {
                         updateDevices()
@@ -191,6 +196,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         }
         it.onFailure {
             updateDevices()
+            L.e("receiveKeysFromServer", "onFailure ${it.message}")
         }
     }
 
@@ -245,23 +251,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     // 【ID1001306】【Android】【app】关掉手机蓝牙，设备列表中的Sesame设备蓝牙图标不会自动置灰显示或置灰速度慢,需手动刷新才置灰(ios端正常)
     private fun updateNeeRefresh(device: CHDevices) {
         MainScope().launch {
-            val devices = myChDevices.value ?: emptyList()
-            val index = devices.indexOf(device)
-
-            // 如果 device 不在 devices 中，提供一个默认值或处理逻辑
-            val safeIndex = if (index == -1) {
-                // 根据业务逻辑选择合适的默认值，这里假设为 -1
-                -1
-            } else {
-                index
-            }
-
-            neeReflesh.setValue(
-                BeanDevices(
-                    devices, // 使用实际的设备列表，而不是空列表
-                    safeIndex
-                )
-            )
+            neeReflesh.value = BeanDevices(myChDevices.value, device.deviceId.toString())
         }
     }
 

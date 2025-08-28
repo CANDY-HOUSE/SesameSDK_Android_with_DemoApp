@@ -140,13 +140,6 @@ object CHAccountManager {
         }
     }
 
-    internal fun openSensorHistoryGet(deviceUUID: String, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIclient.openSensorHistoryGet(deviceUUID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
     internal fun setCardName(cardNameRequest: CHCardNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setCardName(cardNameRequest)

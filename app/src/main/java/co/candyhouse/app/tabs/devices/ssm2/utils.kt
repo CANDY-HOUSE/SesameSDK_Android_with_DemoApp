@@ -317,7 +317,6 @@ fun CHDevices.setNickname(name: String) {
 
 fun CHDevices.getNickname(): String {
     try {
-        SharedPreferencesUtils.preferences
         val deviceIdString = this.deviceId?.toString() ?: return productModel.modelName()
         return SharedPreferencesUtils.preferences.getString(deviceIdString, productModel.modelName()) ?: productModel.modelName()
     }catch (e:NullPointerException){

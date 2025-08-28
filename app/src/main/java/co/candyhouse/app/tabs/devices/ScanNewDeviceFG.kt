@@ -22,10 +22,7 @@ import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
 import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.sesame.ble.os3.biometric.face.CHSesameFace
-import co.candyhouse.sesame.ble.os3.biometric.facePro.CHSesameFacePro
-import co.candyhouse.sesame.ble.os3.biometric.touch.CHSesameTouch
-import co.candyhouse.sesame.ble.os3.biometric.touchPro.CHSesameTouchPro
+import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManagerDelegate
 import co.candyhouse.sesame.open.device.CHDeviceStatus
@@ -208,14 +205,10 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                     device.configureLockPosition(0, 90) {}
                     safeNavigate(R.id.action_to_SSM2SetAngleFG)
                 }
-
                 is CHSesame5 -> safeNavigate(R.id.action_to_SSM2SetAngleFG)
-                is CHSesameTouchPro -> safeNavigate(R.id.to_SesameTouchProSettingFG)
                 is CHHub3 -> safeNavigate(R.id.to_Hub3SettingFG)
                 is CHWifiModule2 -> safeNavigate(R.id.to_WM2SettingFG)
-                is CHSesameTouch -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-                is CHSesameFace -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-                is CHSesameFacePro -> safeNavigate(R.id.to_SesameTouchProSettingFG)
+                is CHSesameBiometricDevice -> safeNavigate(actionId = R.id.to_SesameTouchProSettingFG)
             }
         }
     }

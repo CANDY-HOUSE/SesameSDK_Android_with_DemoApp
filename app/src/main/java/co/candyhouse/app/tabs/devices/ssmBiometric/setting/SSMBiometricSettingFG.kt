@@ -16,18 +16,15 @@ import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.app.tabs.devices.ssm2.setting.remotenanoSecondSettingValue
+import co.candyhouse.sesame.ble.os3.BiometricCapability
 import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
+import co.candyhouse.sesame.ble.os3.hasBiometricCapability
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.face.CHFaceCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.fingerPrint.CHFingerPrintCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.palm.CHPalmCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode.CHPassCodeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.ChSubCfp
@@ -431,7 +428,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setupCardZoneView() {
-        if (mDeviceModel.ssmLockLiveData.value is CHCardCapable) {
+        if (mDeviceModel.ssmLockLiveData.value?.hasBiometricCapability(BiometricCapability.CARD) == true) {
             bind.cardsZone.visibility = View.VISIBLE
             bind.cardsZone.setOnClickListener {
                 safeNavigate(R.id.to_SesameKeyboardCards)
@@ -442,7 +439,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setupFingerprintZoneView() {
-        if (mDeviceModel.ssmLockLiveData.value is CHFingerPrintCapable) {
+        if (mDeviceModel.ssmLockLiveData.value?.hasBiometricCapability(BiometricCapability.FINGERPRINT) == true) {
             bind.fpZone.visibility = View.VISIBLE
             bind.fpZone.setOnClickListener {
                 safeNavigate(R.id.to_SesameKeyboardFingerprint)
@@ -453,7 +450,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setupPasswordZoneView() {
-        if (mDeviceModel.ssmLockLiveData.value is CHPassCodeCapable) {
+        if (mDeviceModel.ssmLockLiveData.value?.hasBiometricCapability(BiometricCapability.PASSCODE) == true) {
             bind.passwordZone.visibility = View.VISIBLE
             bind.passwordZone.setOnClickListener {
                 safeNavigate(R.id.to_SesameKeyboardPassword)
@@ -464,7 +461,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setupFaceZoneView() {
-        if (mDeviceModel.ssmLockLiveData.value is CHFaceCapable) {
+        if (mDeviceModel.ssmLockLiveData.value?.hasBiometricCapability(BiometricCapability.FACE) == true) {
             bind.faceZone.visibility = View.VISIBLE
             bind.faceZone.setOnClickListener {
                 safeNavigate(R.id.to_SesameFaceProFaces)
@@ -475,7 +472,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setupPalmZoneView() {
-        if (mDeviceModel.ssmLockLiveData.value is CHPalmCapable) {
+        if (mDeviceModel.ssmLockLiveData.value?.hasBiometricCapability(BiometricCapability.PALM) == true) {
             bind.facePalm.visibility = View.VISIBLE
             bind.facePalm.setOnClickListener {
                 safeNavigate(R.id.to_FacePalm)

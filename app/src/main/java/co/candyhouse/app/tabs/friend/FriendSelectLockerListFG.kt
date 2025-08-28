@@ -6,12 +6,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-//import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgFriendSelectLockerListBinding
-//import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
@@ -19,11 +17,11 @@ import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHUser
-import co.candyhouse.server.CHUserKey
 import co.candyhouse.server.CHUserKeyFriendID
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
@@ -31,9 +29,9 @@ import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
-
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class FriendSelectLockerListFG : BaseDeviceFG<FgFriendSelectLockerListBinding>(), CHWifiModule2Delegate {
 

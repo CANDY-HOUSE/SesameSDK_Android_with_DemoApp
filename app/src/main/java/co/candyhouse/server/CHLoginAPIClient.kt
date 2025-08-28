@@ -1,6 +1,7 @@
 package co.candyhouse.server
 
 import co.candyhouse.app.BuildConfig
+import co.candyhouse.sesame.server.dto.CHUserKey
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
 import com.amazonaws.mobileconnectors.apigateway.annotation.Service
@@ -16,8 +17,8 @@ import com.amazonaws.mobileconnectors.apigateway.annotation.Service
     @Operation(path = "/device", method = "PUT")
     fun putKey(body: CHUserKey): Any
 
-    @Operation(path = "/device", method = "GET")
-    fun getKeys(): Array<CHUserKey>
+    @Operation(path = "/device/list", method = "GET")
+    fun getDevicesList(): Array<CHUserKey>
 
     @Operation(path = "/device", method = "DELETE")
     fun removeKey(body: String): Any
@@ -48,20 +49,6 @@ import com.amazonaws.mobileconnectors.apigateway.annotation.Service
     fun uploadDeviceToken(body: Any): Any
 }
 
-
-data class CHUserKey(var deviceUUID: String, val deviceModel: String,
-                     val keyIndex: String, val secretKey: String, val sesame2PublicKey: String, var deviceName: String?,
-                     var keyLevel: Int, var rank: Int? = null
-){
-    fun isEqual(other: CHUserKey): Boolean {
-        return this.deviceUUID == other.deviceUUID &&
-                this.secretKey == other.secretKey &&
-                this.sesame2PublicKey == other.sesame2PublicKey &&
-                this.deviceName == other.deviceName &&
-                this.keyLevel == other.keyLevel &&
-                this.rank == other.rank
-    }
-}
 data class CHUserKeyFriendID(val key: CHUserKey, val sub: String)
 data class CHDeviceIDFriendID(val deviceUUID: String, val sub: String)
 data class CHDeviceInfor(var deviceUUID: String, val deviceModel: String, val longitude: String, val latitude: String)

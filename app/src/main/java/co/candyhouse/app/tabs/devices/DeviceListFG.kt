@@ -84,7 +84,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     }
 
     override fun setupListeners() {
-        //下拉刷新
         bind.swiperefresh.setOnRefreshListener {
             L.d(tag, "下拉刷新...")
             bind.swiperefresh.isRefreshing = true
@@ -188,11 +187,10 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             }
         }
         // 刷新列表
-        mDeviceViewModel.neeReflesh.observe(viewLifecycleOwner) { isR ->
+        mDeviceViewModel.neeReflesh.observe(viewLifecycleOwner) { beanDevices ->
             CHDeviceManager.isRefresh.set(false)
             bind.swiperefresh.isRefreshing = false
 
-            L.d(tag, "neeReflesh... ${isR.postion}")
             val displayList = if (mDeviceViewModel.searchQuery.value.isEmpty()) {
                 mDeviceViewModel.myChDevices.value
             } else {
@@ -205,7 +203,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 })
             }
 
-            adapter.updateList(displayList, isR.postion)
+            // 根据 deviceId 计算位置
+            val actualPosition = beanDevices.deviceId?.let { id ->
+                displayList.indexOfFirst { it.deviceId.toString() == id }
+            } ?: -1
+
+            L.d(tag, "actualPosition=$actualPosition")
+
+            adapter.updateList(displayList, actualPosition)
         }
         // 监听过滤后的列表
         lifecycleScope.launch {
@@ -265,9 +270,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         if (!bind.leaderboardList.isComputingLayout && !bind.leaderboardList.isLayoutFrozen) {
             call.invoke()
         } else {
-            bind.leaderboardList.post {
-                call.invoke()
-            }
+            bind.leaderboardList.post { call.invoke() }
         }
     }
 

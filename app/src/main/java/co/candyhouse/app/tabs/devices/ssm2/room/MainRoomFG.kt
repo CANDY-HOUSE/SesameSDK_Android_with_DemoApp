@@ -49,7 +49,6 @@ class MainRoomFG : BaseDeviceFG<FgRoomMainBinding>() {
             // Update the UI
             if (ssm2 is CHSesame2) {
                 bind.menuTitle.text = ssm2.getNickname()
-                bind.ssmView.setLock(ssm2)
                 bind.ssmView.setLockImage(ssm2)
                 bind.ssmView.setOnClickListener { ssm2.toggle() {} }
             }
@@ -198,7 +197,7 @@ class MainRoomFG : BaseDeviceFG<FgRoomMainBinding>() {
                 override fun onMechStatus(device: CHDevices) {
 
                     if (mDeviceModel.ssmLockLiveData.value is CHSesame2) {
-                        bind.ssmView?.setLock(mDeviceModel.ssmLockLiveData.value as CHSesame2)
+                        bind.ssmView?.setLockImage(mDeviceModel.ssmLockLiveData.value as CHSesame2)
 
                         if (device.deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
                             lifecycleScope.launch {

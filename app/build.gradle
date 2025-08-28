@@ -157,13 +157,10 @@ dependencies {
     implementation libs.play.services.maps
 
     implementation platform(libs.firebase.bom)
-    implementation(libs.firebase.config.ktx)
+    implementation libs.firebase.config.ktx
     implementation libs.firebase.analytics.ktx
     implementation libs.firebase.messaging.ktx
     implementation libs.firebase.crashlytics.ktx
 
-    implementation libs.androidx.room.runtime
-    implementation libs.androidx.room.ktx
-    implementation libs.androidx.room.rxjava2
     ksp libs.androidx.room.compiler
 }

@@ -1,35 +1,21 @@
 package co.utils.recycle
 
-import android.annotation.SuppressLint
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.databinding.SesameDevicesListLayoutBinding
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.hub3.recycle.Hub3ItemView
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.app.tabs.devices.ssm2.getTestLoginCount
 import co.candyhouse.app.tabs.devices.ssm2.parseOpensensorState
 import co.candyhouse.app.tabs.devices.ssm2.setRank
-import co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeCellView
-import co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMCellView
 import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.sesame.ble.os3.biometric.face.CHSesameFace
-import co.candyhouse.sesame.ble.os3.biometric.facePro.CHSesameFacePro
-import co.candyhouse.sesame.ble.os3.biometric.touch.CHSesameTouch
-import co.candyhouse.sesame.ble.os3.biometric.touchPro.CHSesameTouchPro
+import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
@@ -46,13 +32,12 @@ import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
-import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
+import co.utils.stateInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Date
 import java.util.Locale
 
 class DeviceListAdapter(
@@ -78,21 +63,11 @@ class DeviceListAdapter(
     }
 
     override fun getLayoutId(position: Int, obj: CHDevices): Int {
-        return when (obj) {
-            is CHHub3 -> R.layout.hub3_layout
-            is CHWifiModule2 -> R.layout.wm2_layout
-            is CHSesame5, is CHSesame2 -> R.layout.sesame_layout
-            else -> R.layout.ssmbike_layout
-        }
+        return R.layout.sesame_devices_list_layout
     }
 
     override fun getViewHolder(view: View, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            R.layout.wm2_layout -> Wm2ViewHolder(view)
-            R.layout.sesame_layout -> SesameViewHolder(view)
-            R.layout.hub3_layout -> Hub3ViewHolder(view)
-            else -> SsmBikeViewHolder(view)
-        }
+        return SesameViewHolder(view)
     }
 
     companion object {
@@ -112,325 +87,244 @@ class DeviceListAdapter(
         }
     }
 
-    inner class Hub3ViewHolder(val view: View) : RecyclerView.ViewHolder(view), Binder<CHHub3> {
-        private val customName: TextView = view.findViewById(R.id.title)
-        private val wifiImg: ImageView = view.findViewById(R.id.wifi_img)
-        private val imageArrow: ImageView = view.findViewById(R.id.imageArrow)
-        private val flView1: FrameLayout = view.findViewById(R.id.flView1)
-        private val hub3_ll_title: LinearLayout = view.findViewById(R.id.hub3_ll_title)
-        private val hub3_rv: RecyclerView = view.findViewById(R.id.hub3_rv)
+    inner class SesameViewHolder(val view: View) : RecyclerView.ViewHolder(view), Binder<CHDevices> {
+        private val binding = SesameDevicesListLayoutBinding.bind(view)
 
-        override fun bind(data: CHHub3, pos: Int) {
-            setViewData(data)
+        override fun bind(device: CHDevices, pos: Int) {
+            bindDevice(device)
+            view.setOnClickListener { onDeviceClick(device) }
         }
 
-        private fun setViewData(hub3Device: CHHub3) {
-            customName.text = hub3Device.getNickname()
-            hub3_ll_title.setOnClickListener { onDeviceClick(hub3Device) }
-            val isWifiConnect =
-                (hub3Device.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork == true
-            wifiImg.setImageResource(if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey)
+        private fun bindDevice(device: CHDevices) {
+            resetViews()
 
-            val param = hub3Device.deviceId.toString().uppercase(Locale.getDefault())
-            val irRemoteList = mDeviceViewModel.getIrRemoteList(param)
-            hub3_rv.adapter = Hub3ItemView(irRemoteList) { bot2Item ->
-                L.d("sf", "首页红外线列表子控件：" + bot2Item.alias + " " + bot2Item.uuid)
-                callBackHub3(hub3Device, bot2Item)
+            binding.nickName.text = device.getNickname()
+
+            when (device) {
+                is CHHub3 -> configureHub3(device)
+                is CHWifiModule2 -> configureWifiModule2(device)
+                is CHSesame5, is CHSesame2 -> configureLock(device)
+                else -> configureDefault(device)
             }
-            dispatchExpanded(hub3Device)
-            flView1.setOnClickListener {
-                hub3Device.let { device ->
+        }
+
+        private fun resetViews() {
+            binding.apply {
+                bleStatus.visibility = View.GONE
+                expandFL.visibility = View.GONE
+                expandFLSubView.visibility = View.GONE
+                ssmLockView.visibility = View.GONE
+                ssmBikeView.visibility = View.GONE
+                openSensorStatus.visibility = View.GONE
+            }
+        }
+
+        private fun configureHub3(device: CHHub3) {
+            binding.apply {
+                blImg.visibility = View.GONE
+                updateWifiStatus(device)
+
+                setBatteryStatus(device.stateInfo?.batteryPercentage ?: -1, true)
+
+                setupExpandableView(device, 35) {
+                    val param = device.deviceId.toString().uppercase(Locale.getDefault())
+                    val irRemoteList = mDeviceViewModel.getIrRemoteList(param)
+                    Hub3ItemView(irRemoteList) { bot2Item ->
+                        callBackHub3(device, bot2Item)
+                    }
+                }
+            }
+        }
+
+        private fun configureWifiModule2(device: CHWifiModule2) {
+            binding.apply {
+                blImg.visibility = View.GONE
+                updateWifiStatus(device)
+                batteryContain.visibility = View.GONE
+                batteryPercent.visibility = View.GONE
+            }
+        }
+
+        private fun configureLock(device: CHDevices) {
+            binding.apply {
+                updateConnectionStatus(device)
+
+                updateBatteryStatus(device)
+
+                ssmLockView.visibility = View.VISIBLE
+                ssmLockView.setLockImage(device)
+                ssmLockView.setOnClickListener {
+                    CHDeviceManager.vibrateDevice(view)
+                    when (device) {
+                        is CHSesame5 -> device.toggle(historytag = UserUtils.getUserIdWithByte()) {
+                            it.onSuccess { }
+                        }
+
+                        is CHSesame2 -> device.toggle() { it.onSuccess { } }
+                    }
+                }
+
+                updateBleStatusVisibility(device)
+            }
+        }
+
+        private fun configureDefault(device: CHDevices) {
+            binding.apply {
+                if (device.getLevel() == 2) {
+                    device.deviceShadowStatus = null
+                }
+
+                updateConnectionStatus(device)
+
+                updateBatteryStatus(device)
+
+                updateBleStatusVisibility(device)
+
+                if (device.productModel == CHProductModel.SesameBot2) {
+                    setupExpandableView(device, 90) {
+                        Bot2ItemView(getScriptList(view, device as CHSesameBot2)) { bot2Item ->
+                            device.click(bot2Item.id.toUByte()) { }
+                        }
+                    }
+                }
+
+                ssmBikeView.visibility = View.VISIBLE
+                ssmBikeView.setLockImage(device)
+                ssmBikeView.setOnClickListener {
+                    CHDeviceManager.vibrateDevice(view)
+                    handleBikeViewClick(device)
+                }
+
+                if (device is CHSesameBiometricDevice) {
+                    handleBiometricDevice(device)
+                }
+            }
+        }
+
+        private fun updateWifiStatus(device: CHDevices) {
+            val isWifiConnect = device.stateInfo?.wm2State
+                ?: (device.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork
+                ?: false
+
+            binding.wifiImg.setImageResource(
+                if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey
+            )
+        }
+
+        private fun updateConnectionStatus(device: CHDevices) {
+            binding.apply {
+                blImg.visibility = View.VISIBLE
+                val isBleConnect = device.deviceStatus.value == CHDeviceLoginStatus.Login
+                blImg.setImageResource(
+                    if (isBleConnect) R.drawable.bl_green else R.drawable.bl_grey
+                )
+
+                val isWifiConnect = device.stateInfo?.wm2State ?: (device.deviceShadowStatus?.value == CHDeviceLoginStatus.Login)
+                wifiImg.setImageResource(
+                    if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey
+                )
+            }
+        }
+
+        private fun updateBatteryStatus(device: CHDevices) {
+            val batteryLevel = device.stateInfo?.batteryPercentage ?: device.mechStatus?.getBatteryPrecentage() ?: -1
+            setBatteryStatus(batteryLevel, false)
+        }
+
+        private fun setBatteryStatus(level: Int, isHub3: Boolean) {
+            binding.apply {
+                val visibility = if (level == -1) View.GONE else View.VISIBLE
+                batteryContain.visibility = visibility
+                batteryPercent.visibility = visibility
+
+                batteryPercent.text = "$level%"
+                btnPecent.apply {
+                    progressDrawable = ContextCompat.getDrawable(
+                        itemView.context,
+                        if (!isHub3 && level < 15) R.drawable.progress_red else R.drawable.progress_blue
+                    )
+                    progress = level
+                }
+            }
+        }
+
+        private fun updateBleStatusVisibility(device: CHDevices) {
+            binding.bleStatus.text = device.deviceStatus.toString()
+            binding.bleStatus.visibility = when {
+                device is CHSesameConnector -> {
+                    if (device.deviceStatus.value == CHDeviceLoginStatus.Login ||
+                        device.deviceStatus == CHDeviceStatus.NoBleSignal ||
+                        device.deviceStatus == CHDeviceStatus.ReceivedAdV
+                    ) View.GONE else View.VISIBLE
+                }
+
+                else -> {
+                    if (device.deviceStatus.value == CHDeviceLoginStatus.Login ||
+                        device.deviceStatus == CHDeviceStatus.NoBleSignal
+                    ) View.GONE else View.VISIBLE
+                }
+            }
+        }
+
+        private fun setupExpandableView(
+            device: CHDevices,
+            heightDp: Int,
+            adapterProvider: () -> RecyclerView.Adapter<*>
+        ) {
+            binding.apply {
+                expandFLSubView.adapter = adapterProvider()
+                expandFL.visibility = View.VISIBLE
+                expandFL.layoutParams.height = (heightDp * expandFL.resources.displayMetrics.density).toInt()
+                dispatchExpanded(device)
+                expandFL.setOnClickListener {
                     device.setExpandState(!device.expanded)
                     dispatchExpanded(device)
                 }
             }
         }
 
-        private fun dispatchExpanded(hub3Device: CHHub3) {
-            if (hub3Device.expanded) {
-                imageArrow.rotation = 90f
-                hub3_rv.visibility = VISIBLE
-            } else {
-                imageArrow.rotation = 0f
-                hub3_rv.visibility = GONE
-            }
-        }
-    }
-
-    inner class Wm2ViewHolder(val view: View) : RecyclerView.ViewHolder(view),
-        Binder<CHWifiModule2> {
-        private val customName: TextView = view.findViewById(R.id.title)
-        private val wifiImg: ImageView = view.findViewById(R.id.wifi_img)
-
-        override fun bind(data: CHWifiModule2, pos: Int) {
-            setupWm2(data)
-            view.setOnClickListener { onDeviceClick(data) }
-        }
-
-        private fun setupWm2(wm2: CHWifiModule2) {
-            val ls = (wm2.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork == true
-            L.d("updateHub3", wm2.getNickname() + "---" + this.hashCode() + "---" + ls)
-            customName.text = wm2.getNickname()
-            wifiImg.setImageResource(
-                if ((wm2.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork == true)
-                    R.drawable.wifi_green else R.drawable.wifi_grey
-            )
-        }
-    }
-
-    inner class SesameViewHolder(val view: View) : RecyclerView.ViewHolder(view),
-        Binder<CHDevices> {
-        private val ssmView: SSMCellView = view.findViewById(R.id.ssmView)
-        private val customName: TextView = view.findViewById(R.id.title)
-        private val sesame2Status: TextView = view.findViewById(R.id.sub_title)
-        private val shadowStatusTxt: TextView = view.findViewById(R.id.sub_title_2)
-        private val batteryPercent: TextView = view.findViewById(R.id.battery_percent)
-        private val battery: ImageView = view.findViewById(R.id.battery)
-        private val blImg: ImageView = view.findViewById(R.id.bl_img)
-        private val wifiImg: ImageView = view.findViewById(R.id.wifi_img)
-        private val btnPercent: ProgressBar = view.findViewById(R.id.btn_pecent)
-        private val battery_contain: View = view.findViewById(R.id.battery_contain)
-
-        override fun bind(data: CHDevices, pos: Int) {
-            setupSSMCell(data)
-            view.setOnClickListener { onDeviceClick(data) }
-
-        }
-
-        @SuppressLint("SetTextI18n")
-        private fun setupSSMCell(sesame: CHDevices) {
-            ssmView.visibility = View.VISIBLE
-            ssmView.setOnClickListener {
-                CHDeviceManager.vibrateDevice(view)
-                (sesame as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {
-                    L.d("sf", "CHSesame5")
-                    it.onSuccess { }
-                }
-                (sesame as? CHSesame2)?.toggle() {
-                    it.onSuccess { }
-                    L.d("sf", "CHSesame2")
-                }
-            }
-            ssmView.setLockImage(sesame)
-            val isBleConnect = sesame.deviceStatus.value == CHDeviceLoginStatus.Login
-            val isWifiConnect = sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.Login
-            blImg.setImageResource(if (isBleConnect) R.drawable.bl_green else R.drawable.bl_grey)
-            wifiImg.setImageResource(if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey)
-            batteryPercent.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
-            batteryPercent.text = sesame.mechStatus?.getBatteryPrecentage().toString() + "%"
-            battery.visibility = if (sesame.mechStatus == null) View.GONE else View.VISIBLE
-            btnPercent.progressDrawable = ContextCompat.getDrawable(
-                itemView.context,
-                if ((sesame.mechStatus?.getBatteryPrecentage()
-                        ?: 0) < 15
-                ) R.drawable.progress_red else R.drawable.progress_blue
-            )
-            btnPercent.progress = sesame.mechStatus?.getBatteryPrecentage() ?: 0
-            if (!isBleConnect && !isWifiConnect) {
-                battery_contain.visibility = View.GONE
-                batteryPercent.visibility = View.GONE
-            } else {
-                battery_contain.visibility = View.VISIBLE
-                batteryPercent.visibility = View.VISIBLE
-            }
-            customName.text = sesame.getNickname()
-            sesame2Status.text = sesame.deviceStatus.toString()
-            sesame2Status.visibility =
-                if (sesame.deviceStatus.value == CHDeviceLoginStatus.Login || sesame.deviceStatus == CHDeviceStatus.NoBleSignal) View.GONE else View.VISIBLE
-            shadowStatusTxt.text = sesame.deviceShadowStatus.toString()
-            shadowStatusTxt.setTextColor(
-                ContextCompat.getColor(
-                    view.context,
-                    if (sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.Login) R.color.unlock_blue else R.color.lock_red
-                )
-            )
-            if (BuildConfig.DEBUG) {
-                sesame2Status.visibility = View.VISIBLE
-                if (sesame.loginTimestamp != null) {
-                    val testct = sesame.getTestLoginCount()
-                    val timeMinus = sesame.loginTimestamp!!.minus(sesame.deviceTimestamp!!)
-                    sesame2Status.text =
-                        "[login:${testct}][gap:${timeMinus}]" + Date(sesame.deviceTimestamp!! * 1000).toLocaleString() + "  ${sesame.deviceStatus}"
+        private fun handleBikeViewClick(device: CHDevices) {
+            when (device) {
+                is CHSesameBike -> device.unlock { it.onSuccess { } }
+                is CHSesameBike2 -> device.unlock { it.onSuccess { } }
+                is CHSesameBot -> device.click { it.onSuccess { } }
+                is CHSesameBot2 -> {
+                    val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"
+                    val index = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
+                    device.click(index.toUByte()) {}
                 }
             }
         }
-    }
 
-    inner class SsmBikeViewHolder(val view: View) : RecyclerView.ViewHolder(view),
-        Binder<CHDevices> {
-        private val ssmView: SSMBikeCellView = view.findViewById(R.id.ssmView)
-        private val customName: TextView = view.findViewById(R.id.title)
-        private val sesame2Status: TextView = view.findViewById(R.id.sub_title)
-        private val shadowStatusTxt: TextView = view.findViewById(R.id.sub_title_2)
-        private val batteryPercent: TextView = view.findViewById(R.id.battery_percent)
-        private val blImg: ImageView = view.findViewById(R.id.bl_img)
-        private val imageArrow: ImageView = view.findViewById(R.id.imageArrow)
-        private val wifiImg: ImageView = view.findViewById(R.id.wifi_img)
-        private val btnPercent: ProgressBar = view.findViewById(R.id.btn_pecent)
-        private val battery_contain: View = view.findViewById(R.id.battery_contain)
-        private val llview1: RecyclerView = view.findViewById(R.id.llview1)
-        private val flView1: FrameLayout = view.findViewById(R.id.flView1)
-        private val centerText: TextView = view.findViewById(R.id.centerText)
+        private fun handleBiometricDevice(device: CHSesameBiometricDevice) {
+            binding.apply {
+                blImg.visibility = View.GONE
+
+                if (device.productModel == CHProductModel.SSMOpenSensor) {
+                    val statusText = device.stateInfo?.CHSesame2Status
+                        ?: (device.mechStatus as? CHSesameOpenSensorMechStatus)?.let { parseOpensensorState(it) }
+
+                    statusText?.let {
+                        openSensorStatus.text = it
+                        openSensorStatus.visibility = View.VISIBLE
+                    }
+                } else {
+                    openSensorStatus.visibility = View.GONE
+                }
+            }
+        }
 
         private fun getScriptList(view: View, data: CHSesameBot2): MutableList<BotItem> {
-            return data.scripts.events.mapIndexed { index, chSesamebot2Event ->
-                val script = "${view.resources.getString(R.string.click_script)} ${
-                    String(
-                        chSesamebot2Event.name,
-                        Charsets.UTF_8
-                    )
-                }"
+            return data.scripts.events.mapIndexed { index, event ->
+                val script = "${view.resources.getString(R.string.click_script)} ${String(event.name, Charsets.UTF_8)}"
                 BotItem(script, index)
             }.toMutableList()
         }
 
-        override fun bind(data: CHDevices, pos: Int) {
-            setDevice(data)
-            view.setOnClickListener {
-                onDeviceClick(data)
-                if (data.productModel === CHProductModel.SesameBot2) {
-                    data.setExpandState(false)
-                }
-            }
-        }
-
-        private fun setDevice(chDevice: CHDevices) {
-            imageArrow.visibility =
-                if (chDevice.productModel == CHProductModel.SesameBot2) View.VISIBLE else View.GONE
-            llview1.visibility = View.GONE
-            if (chDevice.productModel === CHProductModel.SesameBot2) {
-                imageArrow.rotation = if (chDevice.expanded) 90f else 0f
-                llview1.visibility = if (imageArrow.rotation == 90f) View.VISIBLE else View.GONE
-                if (chDevice is CHSesameBot2) {
-                    llview1.adapter =
-                        Bot2ItemView(getScriptList(view, chDevice)) { bot2Item ->
-                            chDevice.click(bot2Item.id.toUByte()) { }
-                        }
-                    imageArrow.visibility = VISIBLE
-                } else {
-                    L.d("ssmBike", "ssmBike is not CHSesameBot2")
-                    imageArrow.visibility = GONE
-                }
-                flView1.setOnClickListener {
-                    (chDevice as? CHSesameBot2)?.let {
-                        it.setExpandState(!it.expanded)
-                        imageArrow.rotation = if (chDevice.expanded) 90f else 0f
-                        llview1.visibility =
-                            if (imageArrow.rotation == 90f) View.VISIBLE else View.GONE
-                    }
-                }
-            }
-            ssmView.visibility = View.VISIBLE
-            ssmView.setOnClickListener {
-                CHDeviceManager.vibrateDevice(view)
-                (chDevice as? CHSesameBike)?.unlock { it.onSuccess { } }
-                (chDevice as? CHSesameBike2)?.unlock { it.onSuccess { } }
-                (chDevice as? CHSesameBot)?.click { it.onSuccess { } }
-                (chDevice as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) { it.onSuccess { } }
-                (chDevice as? CHSesame2)?.toggle() { it.onSuccess { } }
-                (chDevice as? CHSesameBot2)?.let { sesameBot2 ->
-                    val bot2ScriptCurIndexKey = sesameBot2.deviceId.toString() + "_ScriptIndex"
-                    sesameBot2.click(
-                        SharedPreferencesUtils.preferences.getInt(
-                            bot2ScriptCurIndexKey,
-                            0
-                        ).toUByte()
-                    ) {}
-                }
-            }
-            (chDevice.mechStatus as? CHSesameOpenSensorMechStatus)?.let { it ->
-                val fullText = parseOpensensorState(it)
-                fullText?.let {
-                    centerText.text = it
-                }
-            }
-            sesame2Status.text = chDevice.deviceStatus.toString()
-            val isBleConnect = chDevice.deviceStatus.value == CHDeviceLoginStatus.Login
-            blImg.setImageResource(if (isBleConnect) R.drawable.bl_green else R.drawable.bl_grey)
-            customName.text = chDevice.getNickname()
-            ssmView.setLockImage(chDevice)
-            if (chDevice.productModel != CHProductModel.Hub3) {
-                batteryPercent.text = chDevice.mechStatus?.getBatteryPrecentage().toString() + "%"
-                btnPercent.progressDrawable = ContextCompat.getDrawable(
-                    itemView.context,
-                    if ((chDevice.mechStatus?.getBatteryPrecentage()
-                            ?: 0) < 15
-                    ) R.drawable.progress_red else R.drawable.progress_blue
-                )
-                btnPercent.progress = chDevice.mechStatus?.getBatteryPrecentage() ?: 0
-            }
-            batteryPercent.visibility = if (chDevice.mechStatus == null) View.GONE else View.VISIBLE
-            battery_contain.visibility =
-                if (chDevice.mechStatus == null) View.GONE else View.VISIBLE
-            sesame2Status.text = chDevice.deviceStatus.toString()
-            if (chDevice is CHSesameConnector) {
-                sesame2Status.visibility =
-                    if (chDevice.deviceStatus.value == CHDeviceLoginStatus.Login || chDevice.deviceStatus == CHDeviceStatus.NoBleSignal || chDevice.deviceStatus == CHDeviceStatus.ReceivedAdV) View.GONE else View.VISIBLE
-            } else {
-                sesame2Status.visibility =
-                    if (chDevice.deviceStatus.value == CHDeviceLoginStatus.Login || chDevice.deviceStatus == CHDeviceStatus.NoBleSignal) View.GONE else View.VISIBLE
-            }
-            shadowStatusTxt.text = chDevice.deviceShadowStatus.toString()
-            if (chDevice.getLevel() == 2) {
-                chDevice.deviceShadowStatus = null
-            }
-            val isWifiConnect = if (chDevice.productModel == CHProductModel.Hub3) {
-                (chDevice.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork == true
-            } else {
-                chDevice.deviceShadowStatus?.value == CHDeviceLoginStatus.Login
-            }
-            wifiImg.setImageResource(if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey)
-            //customName.text = ssmBike.getNickname()
-            if (chDevice.productModel != CHProductModel.Hub3) {
-                btnPercent.progressDrawable = ContextCompat.getDrawable(
-                    itemView.context,
-                    if ((chDevice.mechStatus?.getBatteryPrecentage()
-                            ?: 0) < 15
-                    ) R.drawable.progress_red else R.drawable.progress_blue
-                )
-                btnPercent.progress = chDevice.mechStatus?.getBatteryPrecentage() ?: 0
-            }
-            blImg.visibility = View.VISIBLE
-            batteryPercent.visibility = View.VISIBLE
-            btnPercent.visibility = View.VISIBLE
-            battery_contain.visibility = View.VISIBLE
-            if (!isBleConnect && !isWifiConnect) {
-                battery_contain.visibility = View.GONE
-                batteryPercent.visibility = View.GONE
-            } else {
-                battery_contain.visibility = View.VISIBLE
-                batteryPercent.visibility = View.VISIBLE
-            }
-            centerText.visibility = View.GONE
-            when (chDevice) {
-                is CHSesameTouchPro, is CHHub3, is CHSesameTouch, is CHSesameTouchPro, is CHSesameFacePro, is CHSesameFace -> {
-                    blImg.visibility = View.GONE
-                    val opensensorDecide =
-                        if (centerText.text.isNullOrEmpty()) View.GONE else View.VISIBLE
-                    val shouldShow =
-                        if (chDevice.productModel == CHProductModel.SSMOpenSensor) opensensorDecide else View.GONE
-                    batteryPercent.visibility = shouldShow
-                    btnPercent.visibility = shouldShow
-                    battery_contain.visibility = shouldShow
-                    centerText.visibility = shouldShow
-                }
-            }
-
-            // 从锁历史标签中获取 Remote/RemoteNano 这两个机型的 电池数据， 如果有的话，显示出来。
-            // 云端收到锁的历史后， 发布消息到 IoT 主题。 goIoTWithRemote 函数订阅此主题， 解析电池电压。
-            if (BuildConfig.DEBUG) {
-                if ((chDevice.productModel == CHProductModel.Remote) || (chDevice.productModel == CHProductModel.RemoteNano)) {
-                    if(chDevice.mechStatus?.getBatteryPrecentage().toString() != "null") {
-                        battery_contain.visibility = View.VISIBLE
-                        batteryPercent.visibility = View.VISIBLE
-                        btnPercent.visibility = View.VISIBLE
-                        btnPercent.progressDrawable = ContextCompat.getDrawable(
-                            itemView.context,
-                            if ((chDevice.mechStatus?.getBatteryPrecentage() ?: 0) < 15) R.drawable.progress_red else R.drawable.progress_blue
-                        )
-                        btnPercent.progress = chDevice.mechStatus?.getBatteryPrecentage() ?: 0
-                    }
-                }
+        private fun dispatchExpanded(device: CHDevices) {
+            binding.apply {
+                imageArrow.rotation = if (device.expanded) 90f else 0f
+                expandFLSubView.visibility = if (device.expanded) View.VISIBLE else View.GONE
             }
         }
     }

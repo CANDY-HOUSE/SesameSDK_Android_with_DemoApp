@@ -114,11 +114,6 @@ internal interface CHPrivateAPIClient {
     @Operation(path = "/device/v1/cfp", method = "POST")
     fun postCfp(body: CHcfp): Any
 
-    @Operation(path = "/device/v2/opensensor/{device_id}/history", method = "GET")
-    fun openSensorHistoryGet(
-        @Parameter(name = "device_id", location = "path") deviceId: String
-    ): Any
-
     @Operation(path = "/device/v2/card/name", method = "PUT")
     fun setCardName(
         body: CHCardNameRequest,

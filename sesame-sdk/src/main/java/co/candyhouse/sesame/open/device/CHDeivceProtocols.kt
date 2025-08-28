@@ -5,15 +5,14 @@ import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.ble.os2.CHSesame2Device
 import co.candyhouse.sesame.ble.os2.CHSesameBikeDevice
 import co.candyhouse.sesame.ble.os2.CHSesameBotDevice
+import co.candyhouse.sesame.ble.os3.BiometricDeviceType
 import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHSesame5Device
 import co.candyhouse.sesame.ble.os3.CHSesameBike2Device
+import co.candyhouse.sesame.ble.os3.CHSesameBiometricDeviceImpl
 import co.candyhouse.sesame.ble.os3.CHSesameBot2Device
 import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
-import co.candyhouse.sesame.ble.os3.biometric.face.CHSesameFaceDevice
-import co.candyhouse.sesame.ble.os3.biometric.facePro.CHSesameFaceProDevice
-import co.candyhouse.sesame.ble.os3.biometric.touch.CHSesameTouchDevice
-import co.candyhouse.sesame.ble.os3.biometric.touchPro.CHSesameTouchProDevice
+import co.candyhouse.sesame.ble.os3.DeviceProfiles
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHAccountManager
@@ -96,19 +95,20 @@ enum class CHProductModel {
         override fun productType() = 8
         override fun deviceModel() = "open_sensor_1" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Open Sensor 1"
-        override fun deviceFactory() = CHSesameTouchProDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.OPEN_SENSOR, setOf())
     },
     SSMTouchPro {
         override fun productType() = 9
         override fun deviceModel() = "ssm_touch_pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Touch 1 Pro"
-        override fun deviceFactory() = CHSesameTouchProDevice()
+        override fun deviceFactory() =
+            CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH_PRO, DeviceProfiles.SESAME_TOUCH_PRO)
     },
     SSMTouch {
         override fun productType() = 10
         override fun deviceModel() = "ssm_touch" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Touch 1"
-        override fun deviceFactory() = CHSesameTouchDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH, DeviceProfiles.SESAME_TOUCH)
     },
     BLEConnector {
         override fun productType() = 11
@@ -126,13 +126,13 @@ enum class CHProductModel {
         override fun productType() = 14
         override fun deviceModel() = "remote" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Remote"
-        override fun deviceFactory() = CHSesameTouchProDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.REMOTE, setOf())
     },
     RemoteNano {
         override fun productType() = 15
         override fun deviceModel() = "remote_nano" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Remote Nano"
-        override fun deviceFactory() = CHSesameTouchProDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.REMOTE, setOf())
     },
     SS5US {
         override fun productType() = 16
@@ -151,13 +151,13 @@ enum class CHProductModel {
         override fun productType() = 18
         override fun deviceModel() = "sesame_face_Pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1 Pro"
-        override fun deviceFactory() = CHSesameFaceProDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO, DeviceProfiles.SESAME_FACE_PRO)
     },
     SSMFace {
         override fun productType() = 19
         override fun deviceModel() = "sesame_face" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1"
-        override fun deviceFactory() = CHSesameFaceDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE, DeviceProfiles.SESAME_FACE)
     },
     SS6Pro {
         override fun productType() = 21
@@ -169,13 +169,13 @@ enum class CHProductModel {
         override fun productType() = 22
         override fun deviceModel() = "sesame_face_pro_ai" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1 Pro AI"
-        override fun deviceFactory() = CHSesameFaceProDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO_AI, DeviceProfiles.SESAME_FACE_PRO_AI)
     },
     SSMFaceAI {
         override fun productType() = 23
         override fun deviceModel() = "sesame_face_ai" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1 AI"
-        override fun deviceFactory() = CHSesameFaceProDevice()
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_AI, DeviceProfiles.SESAME_FACE_AI)
     };
 
     abstract fun productType(): Int

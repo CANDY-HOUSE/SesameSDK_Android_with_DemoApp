@@ -1,6 +1,6 @@
 package co.candyhouse.server
 
-import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.utils.SharedPreferencesUtils
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.mobile.client.AWSMobileClient
@@ -71,10 +71,9 @@ object CHLoginAPIManager {
         }
     }
 
-
-    fun getKeys(onResponse: CHResult<Array<CHUserKey>>) {
+    fun getDevicesList(onResponse: CHResult<Array<CHUserKey>>) {
         makeApiCall(onResponse) {
-            val res = jpAPIClient.getKeys()
+            val res = jpAPIClient.getDevicesList()
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }

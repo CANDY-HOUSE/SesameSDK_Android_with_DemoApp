@@ -2,34 +2,27 @@ package co.candyhouse.app.tabs.friend
 
 
 import android.os.Bundle
-
 import android.view.View
-
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgFriendDetailBinding
-import co.candyhouse.app.tabs.devices.ssm2.level2Tag
 import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
+import co.candyhouse.app.tabs.devices.ssm2.level2Tag
 import co.candyhouse.server.CHDeviceIDFriendID
 import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.server.CHUserKey
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 class FriendDetailFG : BaseNFG<FgFriendDetailBinding>() {

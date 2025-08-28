@@ -154,10 +154,6 @@ class SSMCellView @JvmOverloads constructor(
         lockState(ssm)
     }
 
-    fun setLock(sesame: CHDevices) {
-        setLockImage(sesame)
-    }
-
     private fun startAnim(old: Float, newValue: Float) {
         if (CHDeviceManager.isRefresh.get() || CHDeviceManager.isScroll.get()) {
             angle = newValue

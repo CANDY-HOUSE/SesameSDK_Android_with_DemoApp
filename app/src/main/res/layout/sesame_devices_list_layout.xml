@@ -8,7 +8,6 @@
     android:orientation="horizontal">
 
     <RelativeLayout
-        android:id="@+id/rlview1"
         android:layout_width="wrap_content"
         android:layout_height="16dp"
         android:layout_alignParentTop="true"
@@ -29,7 +28,7 @@
             android:layout_height="14dp"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
-            android:layout_toRightOf="@+id/bl_img"
+            android:layout_toEndOf="@+id/bl_img"
             android:src="@drawable/wifi_green" />
 
         <RelativeLayout
@@ -37,7 +36,7 @@
             android:layout_width="14dp"
             android:layout_height="14dp"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/wifi_img">
+            android:layout_toEndOf="@+id/wifi_img">
 
             <ImageView
                 android:id="@+id/battery"
@@ -52,10 +51,9 @@
                 android:layout_width="12dp"
                 android:layout_height="6.5dp"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="1.5dp"
-                android:layout_marginRight="3dp"
+                android:layout_marginStart="1.5dp"
+                android:layout_marginEnd="3dp"
                 android:max="100"
-                android:progress="100"
                 android:progressDrawable="@drawable/progress_blue" />
         </RelativeLayout>
 
@@ -64,11 +62,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="2dp"
-            android:layout_toRightOf="@+id/battery_contain"
+            android:layout_marginStart="2dp"
+            android:layout_toEndOf="@+id/battery_contain"
             android:gravity="center"
             android:paddingBottom="1dp"
-            android:text="100%"
             android:textSize="9dp" />
 
     </RelativeLayout>
@@ -76,18 +73,19 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="26dp"
+        android:layout_marginStart="26dp"
         android:layout_marginTop="30dp"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/nickName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="left"
             android:lines="1"
             android:textColor="@color/black"
             android:textSize="20sp"
+            tools:ignore="RtlHardcoded"
             tools:text="name" />
 
         <LinearLayout
@@ -96,34 +94,36 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/sub_title"
+                android:id="@+id/bleStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text=""
                 android:textColor="@color/text_hint"
-                android:textSize="11dp" />
+                android:textSize="11sp" />
 
             <TextView
-                android:id="@+id/sub_title_2"
+                android:id="@+id/shadowStatus"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
                 android:gravity="center"
-                android:text=""
                 android:textColor="@color/text_hint"
-                android:textSize="11dp"
+                android:textSize="11sp"
                 android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/flView1"
+        android:id="@+id/expandFL"
         android:layout_width="100dp"
-        android:layout_height="26dp"
+        android:layout_height="30dp"
         android:layout_marginTop="30dp"
+        android:clickable="true"
+        android:focusable="true"
         android:paddingVertical="4dp"
-        android:paddingLeft="8dp">
+        android:paddingStart="8dp"
+        tools:ignore="RtlSymmetry">
 
         <ImageView
             android:id="@+id/imageArrow"
@@ -133,42 +133,53 @@
     </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/llview1"
+        android:id="@+id/expandFLSubView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/ssmContainer"
+        android:layout_below="@+id/expandFL"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/adp_bot_item_view" />
 
     <RelativeLayout
-        android:id="@+id/ssmContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="16dp">
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp">
 
-        <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeCellView
-            android:id="@+id/ssmView"
+        <FrameLayout
+            android:id="@+id/viewContainer"
             android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:visibility="gone" />
+            android:layout_height="120dp">
+
+            <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeCellView
+                android:id="@+id/ssmBikeView"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:visibility="gone" />
+
+            <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMCellView
+                android:id="@+id/ssmLockView"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
         <TextView
-            android:id="@+id/centerText"
+            android:id="@+id/openSensorStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="@android:color/black"
+            android:layout_alignStart="@+id/viewContainer"
+            android:layout_alignTop="@+id/viewContainer"
+            android:layout_alignEnd="@+id/viewContainer"
+            android:layout_alignBottom="@+id/viewContainer"
+            android:layout_marginBottom="50dp"
+            android:gravity="center"
+            android:textColor="@color/gray1"
             android:textSize="16sp"
             android:visibility="gone" />
+
     </RelativeLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/ryView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 </RelativeLayout>

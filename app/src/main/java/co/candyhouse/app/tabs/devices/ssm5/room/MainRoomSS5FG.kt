@@ -205,7 +205,6 @@ class MainRoomSS5FG : BaseDeviceFG<FgRoomSs5MainBinding>() {
                     if (device.deviceStatus == CHDeviceStatus.ReceivedAdV) {
                         device.connect {}
                     }
-                    bind.ssmView.setLock(device)
                     bind.ssmView.setLockImage(device)
                     if (isTest) {
                         if (device.deviceStatus == CHDeviceStatus.NoBleSignal) {
@@ -234,7 +233,6 @@ class MainRoomSS5FG : BaseDeviceFG<FgRoomSs5MainBinding>() {
 
                 override fun onMechStatus(device: CHDevices) {
                     // L.d("hcia", "[ui][ss5][his] onMechStatusChanged:")
-                    bind.ssmView.setLock(device)
                     bind.ssmView.setLockImage(device)
                     // L.d("postSSHistory", "onMechStatus")
                     if (device.mechStatus?.isStop == true) {
