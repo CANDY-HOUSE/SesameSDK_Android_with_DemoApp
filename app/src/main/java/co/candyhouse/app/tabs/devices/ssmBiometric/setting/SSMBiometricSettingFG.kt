@@ -396,7 +396,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setBattery(view: View?, device: CHDevices) {
-        val batteryLevel = device.stateInfo?.batteryPercentage ?: device.mechStatus?.getBatteryPrecentage()
+        val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.stateInfo?.batteryPercentage
         view?.findViewById<TextView>(R.id.battery)?.post {
             view.findViewById<TextView>(R.id.battery)?.text = batteryLevel?.let { "$it%" } ?: ""
         }
