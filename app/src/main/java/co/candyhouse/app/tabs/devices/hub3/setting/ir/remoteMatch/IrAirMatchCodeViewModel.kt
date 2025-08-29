@@ -95,7 +95,11 @@ class IrAirMatchCodeViewModel(val context: Context) :
     }
 
     private fun unsubscribeIRMode() {
-        hub3Device.unsubscribeTopic(getGetModeTopic())
+        try {
+            hub3Device.unsubscribeTopic(getGetModeTopic())
+        } catch (e: Exception) {
+            L.e(tag, "unsubscribeIRMode error: ${e.message}")
+        }
     }
 
     @OptIn(ExperimentalStdlibApi::class)
