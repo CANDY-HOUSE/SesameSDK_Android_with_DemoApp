@@ -152,8 +152,8 @@
             android:layout_width="120dp"
             android:layout_height="120dp">
 
-            <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeCellView
-                android:id="@+id/ssmBikeView"
+            <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSMBikeBotCellView
+                android:id="@+id/ssmBikeBotView"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:visibility="gone" />

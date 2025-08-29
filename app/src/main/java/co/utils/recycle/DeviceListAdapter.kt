@@ -114,7 +114,7 @@ class DeviceListAdapter(
                 expandFL.visibility = View.GONE
                 expandFLSubView.visibility = View.GONE
                 ssmLockView.visibility = View.GONE
-                ssmBikeView.visibility = View.GONE
+                ssmBikeBotView.visibility = View.GONE
                 openSensorStatus.visibility = View.GONE
             }
         }
@@ -188,15 +188,15 @@ class DeviceListAdapter(
                     }
                 }
 
-                ssmBikeView.visibility = View.VISIBLE
-                ssmBikeView.setLockImage(device)
-                ssmBikeView.setOnClickListener {
-                    CHDeviceManager.vibrateDevice(view)
-                    handleBikeViewClick(device)
-                }
-
                 if (device is CHSesameBiometricDevice) {
                     handleBiometricDevice(device)
+                } else {
+                    ssmBikeBotView.visibility = View.VISIBLE
+                    ssmBikeBotView.setLockImage(device)
+                    ssmBikeBotView.setOnClickListener {
+                        CHDeviceManager.vibrateDevice(view)
+                        handleBikeBotViewClick(device)
+                    }
                 }
             }
         }
@@ -283,7 +283,7 @@ class DeviceListAdapter(
             }
         }
 
-        private fun handleBikeViewClick(device: CHDevices) {
+        private fun handleBikeBotViewClick(device: CHDevices) {
             when (device) {
                 is CHSesameBike -> device.unlock { it.onSuccess { } }
                 is CHSesameBike2 -> device.unlock { it.onSuccess { } }
@@ -299,6 +299,7 @@ class DeviceListAdapter(
         private fun handleBiometricDevice(device: CHSesameBiometricDevice) {
             binding.apply {
                 blImg.visibility = View.GONE
+                ssmBikeBotView.visibility = View.GONE
 
                 if (device.productModel == CHProductModel.SSMOpenSensor) {
                     val statusText = device.stateInfo?.CHSesame2Status

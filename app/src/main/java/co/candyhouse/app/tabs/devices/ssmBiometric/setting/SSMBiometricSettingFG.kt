@@ -35,6 +35,7 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
+import co.utils.stateInfo
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -106,10 +107,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             }
 
             override fun onMechStatus(device: CHDevices) {
-                view?.findViewById<TextView>(R.id.battery)?.post {
-                    view?.findViewById<TextView>(R.id.battery)?.text =
-                        "${device.mechStatus?.getBatteryPrecentage() ?: 0} %"
-                }
+                setBattery(view, device)
             }
 
             override fun onRadarReceive(device: CHSesameConnector, payload: ByteArray) {
@@ -394,10 +392,13 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             navigateNext(mDeviceList, R.id.to_SesameKeyboardSelectLockerListFG)
         }
 
-        view.findViewById<TextView>(R.id.battery)?.post {
-            view.findViewById<TextView>(R.id.battery)?.text =
-                (mDeviceModel.ssmLockLiveData.value as CHSesameConnector).mechStatus?.getBatteryPrecentage()
-                    ?.let { "$it%" } ?: ""
+        setBattery(view, device)
+    }
+
+    private fun setBattery(view: View?, device: CHDevices) {
+        val batteryLevel = device.stateInfo?.batteryPercentage ?: device.mechStatus?.getBatteryPrecentage()
+        view?.findViewById<TextView>(R.id.battery)?.post {
+            view.findViewById<TextView>(R.id.battery)?.text = batteryLevel?.let { "$it%" } ?: ""
         }
     }
 
