@@ -30,6 +30,7 @@ import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.objects.AlertAction
 import co.utils.getParcelableCompat
+import co.utils.safeNavigateBack
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,6 +52,9 @@ class RemoteLearnFG : BaseNFG<FgRemoteLearnBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+            safeNavigateBack()
+        }
         arguments?.let {
             if (it.containsKey(RemoteBundleKeyConfig.isNewDevice)) {
                 isNewDevice = it.getBoolean(RemoteBundleKeyConfig.isNewDevice, false)

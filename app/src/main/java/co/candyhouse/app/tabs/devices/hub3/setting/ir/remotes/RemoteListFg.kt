@@ -19,8 +19,10 @@ import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgRemoteListBinding
+import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import co.utils.safeNavigate
+import co.utils.safeNavigateBack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -45,6 +47,9 @@ class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupIRRemoteCache()
+        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+            safeNavigateBack()
+        }
     }
 
     private fun setupIRRemoteCache() {

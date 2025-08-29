@@ -51,7 +51,6 @@ class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
 
     private fun setupParams() {
         if (mDeviceViewModel.ssmLockLiveData.value == null) {
-            L.Companion.d(tag, "hub3 device is null, set hub3 device")
             safeNavigateBack()
             return
         }
@@ -87,6 +86,10 @@ class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
     }
 
     private fun checkInfo(): Boolean {
+        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+            safeNavigateBack()
+            return false
+        }
         return viewModel.isHub3DeviceInitialized()
     }
 

@@ -72,6 +72,10 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
     }
 
     private fun initParams() {
+        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+            safeNavigateBack()
+            return
+        }
         val device = mDeviceViewModel.ssmLockLiveData.value!! as CHHub3
         viewModel.setDevice(device)
         arguments?.let {
@@ -108,6 +112,9 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
     }
 
     private fun checkInfo(): Boolean {
+        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+            safeNavigateBack()
+        }
         return viewModel.isDeviceInitialized() && viewModel.irRemoteDeviceLiveData.value != null
     }
 

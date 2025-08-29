@@ -13,7 +13,9 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgRemoteTypeListBinding
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
+import co.candyhouse.sesame.open.device.CHHub3
 import co.utils.getParcelableCompat
+import co.utils.safeNavigateBack
 
 class RemoteTypeListFg : BaseNFG<FgRemoteTypeListBinding>() {
 
@@ -27,6 +29,9 @@ class RemoteTypeListFg : BaseNFG<FgRemoteTypeListBinding>() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupBackViewListener()
+        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+            safeNavigateBack()
+        }
     }
 
     private fun setupRecyclerView() {
