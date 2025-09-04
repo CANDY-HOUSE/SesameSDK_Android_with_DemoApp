@@ -2,20 +2,35 @@ package co.candyhouse.sesame.ble
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.Keep
 import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.*
+import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.device.*
-import co.candyhouse.sesame.server.dto.*
-import co.candyhouse.sesame.utils.*
-import java.util.*
+import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.device.CHSesameProtocolMechStatus
+import co.candyhouse.sesame.open.device.CHWifiModule2
+import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
+import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.dto.CHUserKey
+import co.candyhouse.sesame.utils.CHMulticastDelegate
+import co.candyhouse.sesame.utils.L
+import java.util.UUID
 
 internal interface CHDeviceUtil {
     var advertisement: CHadv?//廣播
@@ -40,6 +55,14 @@ internal interface CHDeviceUtil {
     var rssi: Int? = 0
     var mBluetoothGatt: BluetoothGatt? = null //[gatt] 控制藍芽連線的全局物件
     var isNeedAuthFromServer: Boolean? = false
+    var userKey: CHUserKey? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                delegate?.onMechStatus(this as CHDevices)
+                notifyMechStatusChanged()
+            }
+        }
     var mechStatus: CHSesameProtocolMechStatus? = null
         set(value) {
             if (field != value) {
@@ -165,6 +188,9 @@ internal fun <T> CHDevices.isBleAvailable(result: CHResult<T>): Boolean {
 
 internal fun CHBaseDevice.toCHDevices(): CHDevices {
     return object : CHDevices {
+        override var userKey: CHUserKey?
+            get() = this@toCHDevices.userKey
+            set(value) { this@toCHDevices.userKey = value }
         override var mechStatus: CHSesameProtocolMechStatus?
             get() = this@toCHDevices.mechStatus
             set(value) { this@toCHDevices.mechStatus = value }

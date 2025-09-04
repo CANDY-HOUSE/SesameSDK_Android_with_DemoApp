@@ -35,7 +35,6 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
-import co.utils.stateInfo
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -396,7 +395,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun setBattery(view: View?, device: CHDevices) {
-        val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.stateInfo?.batteryPercentage
+        val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.userKey?.stateInfo?.batteryPercentage
         view?.findViewById<TextView>(R.id.battery)?.post {
             view.findViewById<TextView>(R.id.battery)?.text = batteryLevel?.let { "$it%" } ?: ""
         }

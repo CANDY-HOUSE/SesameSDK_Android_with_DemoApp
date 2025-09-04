@@ -20,7 +20,10 @@ import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.device.CHSesame2MechStatus
+import co.candyhouse.sesame.open.device.CHSesame5MechStatus
 import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
+import co.candyhouse.sesame.open.device.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.open.device.CHSesameTouchProMechStatus
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.open.device.OpenSensorData
@@ -50,6 +53,8 @@ import com.google.gson.Gson
 
 internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometricBase, CHCapabilitySupport, CHDeviceUtil, CHRemoteNanoCapable by CHRemoteNanoCapableImpl() {
 
+    private val tag = "CHSesameBiometricBaseDevice"
+
     // 基本属性
     override var ssm2KeysMap: MutableMap<String, ByteArray> = mutableMapOf()
     override var advertisement: CHadv? = null
@@ -77,6 +82,31 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     init {
         deviceConnectCapability = CHDeviceConnectCapableImpl()
         deviceConnectCapability.setSupport(this)
+    }
+
+    companion object {
+        private val IOT_BATTERY_DEVICE_MODELS = setOf(
+            CHProductModel.Remote,
+            CHProductModel.RemoteNano,
+            CHProductModel.SSMTouch,
+            CHProductModel.SSMTouchPro,
+            CHProductModel.SSMFace,
+            CHProductModel.SSMFaceAI,
+            CHProductModel.SSMFacePro,
+            CHProductModel.SSMFaceProAI
+        )
+
+        private val IOT_DEVICE_MODELS = setOf(
+            CHProductModel.SSMTouch,
+            CHProductModel.SSMTouchPro,
+            CHProductModel.SSMFace,
+            CHProductModel.SSMFaceAI,
+            CHProductModel.SSMFacePro,
+            CHProductModel.SSMFaceProAI
+        )
+
+        private const val TOPIC_OPENSENSOR_PREFIX = "opensensor/"
+        private const val TOPIC_BATTERY_PREFIX = "battery/"
     }
 
     /**
@@ -287,44 +317,91 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      * 连接到IoT服务
      */
     override fun goIOT() {
-        val iotDeviceModels = setOf(
-            CHProductModel.Remote,
-            CHProductModel.RemoteNano,
-            CHProductModel.SSMTouch,
-            CHProductModel.SSMTouchPro,
-            CHProductModel.SSMFace,
-            CHProductModel.SSMFaceAI,
-            CHProductModel.SSMFacePro,
-            CHProductModel.SSMFaceProAI
-        )
-        if (productModel == CHProductModel.SSMOpenSensor) {
-            goIoTWithOpenSensor()
-        } else if (productModel in iotDeviceModels) {
-            goIoTWithDevices()
-        }
-    }
+        when {
+            productModel == CHProductModel.SSMOpenSensor -> {
+                subscribeOpenSensor()
+            }
 
-    private fun goIoTWithOpenSensor() {
-        val topic = "opensensor/${deviceId.toString().uppercase()}"
-
-        CHIotManager.subscribeTopic(topic) {
-            it.onSuccess { result ->
-                val openSensorData = OpenSensorData.fromByteArray(result.data)
-                mechStatus = CHSesameOpenSensorMechStatus(openSensorData)
+            productModel in IOT_BATTERY_DEVICE_MODELS -> {
+                subscribeBatteryStatus()
+                if (productModel in IOT_DEVICE_MODELS) {
+                    subscribeDeviceShadow()
+                }
             }
         }
     }
 
-    private fun goIoTWithDevices() {
-        val topic = "battery/${deviceId.toString().uppercase()}"
+    private fun subscribeOpenSensor() {
+        val topic = "$TOPIC_OPENSENSOR_PREFIX${deviceId.toString().uppercase()}"
 
-        CHIotManager.subscribeTopic(topic) {
-            it.onSuccess { result ->
-                val jsonStr = String(result.data)
-                val jsonObject = Gson().fromJson(jsonStr, Map::class.java)
-                val lightLoadVoltage = jsonObject["lightLoadBatteryVoltage_mV"]
-                mechStatus = CHSesameTouchProMechStatus((lightLoadVoltage as Number).toInt().toUInt().toShort().toReverseBytes())
+        CHIotManager.subscribeTopic(topic) { result ->
+            result
+                .onSuccess { data ->
+                    mechStatus = CHSesameOpenSensorMechStatus(OpenSensorData.fromByteArray(data.data))
+                    L.d(tag, "subscribeOpenSensor $productModel = ${mechStatus?.getBatteryPrecentage()}")
+                }
+                .onFailure { error ->
+                    L.e(tag, "Failed to subscribe open sensor topic: ${error.message}")
+                }
+        }
+    }
+
+    private fun subscribeBatteryStatus() {
+        val topic = "$TOPIC_BATTERY_PREFIX${deviceId.toString().uppercase()}"
+        L.d(tag, "Subscribing to battery topic: $productModel || $topic")
+
+        CHIotManager.subscribeTopic(topic) { result ->
+            result
+                .onSuccess { data ->
+                    processBatteryData(data.data)
+                }
+                .onFailure { error ->
+                    L.e(tag, "Failed to subscribe battery topic: ${error.message}")
+                }
+        }
+    }
+
+    private fun processBatteryData(data: ByteArray) {
+        try {
+            val jsonStr = String(data)
+            val jsonObject = Gson().fromJson(jsonStr, Map::class.java)
+            val lightLoadVoltage = jsonObject["lightLoadBatteryVoltage_mV"] as? Number
+
+            lightLoadVoltage?.let { voltage ->
+                mechStatus = CHSesameTouchProMechStatus(voltage.toInt().toUInt().toShort().toReverseBytes())
+                L.d(tag, "$productModel battery = ${mechStatus?.getBatteryPrecentage()}")
+            } ?: run {
+                L.e(tag, "lightLoadBatteryVoltage_mV not found in battery data")
             }
+        } catch (e: Exception) {
+            L.e(tag, "Failed to parse battery data: ${e.message}")
+        }
+    }
+
+    private fun subscribeDeviceShadow() {
+        CHIotManager.subscribeSesame2Shadow(this) { result ->
+            result
+                .onSuccess { resource ->
+                    L.d(tag, "[$productModel] resource.data.state.reported:" + resource.data.state.reported.wm2s + "||" + resource.data.state.reported.mechst)
+
+                    resource.data.state.reported.apply {
+                        val isConnectedByWM2 = wm2s?.hasWM2Connection() ?: false
+                        L.d(tag, "[isConnectedByWM2: $isConnectedByWM2]")
+
+                        if (isConnectedByWM2) {
+                            mechst?.let {
+                                mechStatus = it.toMechStatus() as CHSesameProtocolMechStatus?
+                                L.d(tag, "[subscribeDeviceShadow]mechStatus: ${mechStatus?.getBatteryPrecentage()}")
+                            }
+                            deviceShadowStatus = CHDeviceStatus.IotConnected
+                        } else {
+                            deviceShadowStatus = null
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    L.e(tag, "Failed to subscribe device shadow: ${error.message}")
+                }
         }
     }
 
@@ -363,4 +440,17 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         deviceConnectCapability.setRadarSensitivity(payload, result)
     }
 
+    private fun Map<*, String>.hasWM2Connection(): Boolean =
+        any { (_, value) -> value.hexStringToByteArray().firstOrNull()?.toInt() == 1 }
+
+    private fun String.toMechStatus(): Any? {
+        val bytes = hexStringToByteArray()
+        return when {
+            bytes.size >= 7 -> CHSesame5MechStatus(CHSesame2MechStatus(bytes).ss5Adapter())
+                .also { L.d(tag, "[subscribeDeviceShadow]mechStatus: CHSesame5MechStatus") }
+
+            else -> CHSesameTouchProMechStatus(bytes.sliceArray(0..2))
+                .also { L.d(tag, "[subscribeDeviceShadow]mechStatus: CHSesameTouchProMechStatus") }
+        }
+    }
 }

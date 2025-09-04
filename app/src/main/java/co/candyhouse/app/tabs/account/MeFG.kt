@@ -257,10 +257,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
     private suspend fun loadUserNickname() {
         runCatching {
             val mailName = bind.mail.text.split("@").first()
-            SharedPreferencesUtils.nickname =
-                AWSMobileClient.getInstance()
-                    .getUserAttributes()["nickname"]
-                    ?: mailName
+            SharedPreferencesUtils.nickname = AWSMobileClient.getInstance().getUserAttributes()["nickname"] ?: mailName
             //L.d("hcia", "設定名字:" + SharedPreferencesUtils.nickname)
         }.onFailure {
             withContext(Dispatchers.Main) {
@@ -289,8 +286,7 @@ fun cheyKeyToUserKey(key: CHDevice, level: Int, nickName: String, rank: Int? = n
 }
 
 fun userKeyToCHKey(key: CHUserKey, historyTag: ByteArray? = null): CHDevice {
-    val deviceModel =
-        key.deviceModel
+    val deviceModel = key.deviceModel
 
     return CHDevice(
         key.deviceUUID,
@@ -303,6 +299,5 @@ fun userKeyToCHKey(key: CHUserKey, historyTag: ByteArray? = null): CHDevice {
 }
 
 fun getHistoryTag(): ByteArray {
-    return SharedPreferencesUtils.nickname?.toByteArray()
-        ?: MainActivity.activity!!.getString(R.string.unLoginHistoryTag).toByteArray()
+    return SharedPreferencesUtils.nickname?.toByteArray() ?: MainActivity.activity!!.getString(R.string.unLoginHistoryTag).toByteArray()
 }

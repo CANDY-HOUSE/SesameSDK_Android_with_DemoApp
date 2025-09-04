@@ -9,10 +9,10 @@ import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.hub3.recycle.Hub3ItemView
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
+import co.candyhouse.app.tabs.devices.ssm2.createOpensensorStateText
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.app.tabs.devices.ssm2.parseOpensensorState
 import co.candyhouse.app.tabs.devices.ssm2.setRank
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
@@ -32,9 +32,9 @@ import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.open.device.OpenSensorData
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
-import co.utils.stateInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -124,7 +124,7 @@ class DeviceListAdapter(
                 blImg.visibility = View.GONE
                 updateWifiStatus(device)
 
-                setBatteryStatus(device.stateInfo?.batteryPercentage ?: -1, true)
+                setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage ?: -1, true)
 
                 setupExpandableView(device, 35) {
                     val param = device.deviceId.toString().uppercase(Locale.getDefault())
@@ -202,9 +202,7 @@ class DeviceListAdapter(
         }
 
         private fun updateWifiStatus(device: CHDevices) {
-            val isWifiConnect = device.stateInfo?.wm2State
-                ?: (device.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork
-                ?: false
+            val isWifiConnect = (device.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork ?: false
 
             binding.wifiImg.setImageResource(
                 if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey
@@ -219,7 +217,7 @@ class DeviceListAdapter(
                     if (isBleConnect) R.drawable.bl_green else R.drawable.bl_grey
                 )
 
-                val isWifiConnect = device.stateInfo?.wm2State ?: (device.deviceShadowStatus?.value == CHDeviceLoginStatus.Login)
+                val isWifiConnect = device.deviceShadowStatus?.let { it.value == CHDeviceLoginStatus.Login } ?: false
                 wifiImg.setImageResource(
                     if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey
                 )
@@ -227,7 +225,7 @@ class DeviceListAdapter(
         }
 
         private fun updateBatteryStatus(device: CHDevices) {
-            val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.stateInfo?.batteryPercentage ?: -1
+            val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.userKey?.stateInfo?.batteryPercentage ?: -1
             setBatteryStatus(batteryLevel, false)
         }
 
@@ -302,8 +300,20 @@ class DeviceListAdapter(
                 ssmBikeBotView.visibility = View.GONE
 
                 if (device.productModel == CHProductModel.SSMOpenSensor) {
-                    val statusText = device.stateInfo?.CHSesame2Status
-                        ?: (device.mechStatus as? CHSesameOpenSensorMechStatus)?.let { parseOpensensorState(it) }
+                    val statusText = (device.mechStatus as? CHSesameOpenSensorMechStatus)?.data?.let { data ->
+                        runCatching {
+                            val sensorData = OpenSensorData.fromByteArray(data)
+                            createOpensensorStateText(sensorData.Status, sensorData.TimeStamp)
+                        }.getOrNull()
+                    } ?: device.userKey?.stateInfo?.let { info ->
+                        val status = info.CHSesame2Status
+                        val timestamp = info.timestamp
+                        if (status != null && timestamp != null) {
+                            createOpensensorStateText(status, timestamp)
+                        } else {
+                            null
+                        }
+                    }
 
                     statusText?.let {
                         openSensorStatus.text = it

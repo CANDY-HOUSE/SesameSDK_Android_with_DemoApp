@@ -1,12 +1,14 @@
 package co.candyhouse.app.tabs.devices.ssm2
 
-import android.graphics.Color
+import android.graphics.Typeface
 import android.text.Layout
 import android.text.SpannableStringBuilder
+import android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 import android.text.style.AlignmentSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
@@ -16,8 +18,6 @@ import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesameBot
 import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHSesameLock
-import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
-import co.candyhouse.sesame.open.device.OpenSensorData
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import java.text.SimpleDateFormat
@@ -94,46 +94,33 @@ fun ssm5UIParser(device: CHSesameBot2): Int {
 
 }
 
-fun parseOpensensorState(mechStatus: CHSesameOpenSensorMechStatus?): SpannableStringBuilder? {
-    mechStatus?.data?.let { data ->
-        try {
-            val state = OpenSensorData.fromByteArray(data)
-            val status = state.Status ?: return null
-            val statusLen = if (status.isEmpty()) 0 else status.length
-            val timeStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(state.TimeStamp))
-            val (dateString, timeString) = timeStr.split(" ")
-            return SpannableStringBuilder().apply {
-                append("$status\n$dateString\n$timeString")
-                setSpan(
-                    AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
-                    0,
-                    length,
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                setSpan(
-                    StyleSpan(android.graphics.Typeface.BOLD),
-                    0,
-                    statusLen,
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                setSpan(
-                    RelativeSizeSpan(20f / 17f), // 20sp relative to 17sp
-                    0,
-                    statusLen,
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                setSpan(
-                    ForegroundColorSpan(Color.parseColor("#E4E3E3")),
-                    0,
-                    length,
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+fun createOpensensorStateText(status: String, timeStamp: Long): SpannableStringBuilder? {
+    return runCatching {
+        val statusLength = status.length
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val (dateString, timeString) = dateFormat.format(Date(timeStamp)).split(" ")
+
+        val text = buildString {
+            if (status.isNotEmpty()) {
+                append(status)
+                append("\n")
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+            append(dateString)
+            append("\n")
+            append(timeString)
         }
-    }
-    return null
+
+        SpannableStringBuilder(text).apply {
+            setSpan(AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, length, SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(ForegroundColorSpan("#E4E3E3".toColorInt()), 0, length, SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            if (statusLength > 0) {
+                setSpan(StyleSpan(Typeface.BOLD), 0, statusLength, SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(RelativeSizeSpan(20f / 17f), 0, statusLength, SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+    }.getOrNull()
 }
 
 fun ssm5UIParser(device: CHDevices): Int {

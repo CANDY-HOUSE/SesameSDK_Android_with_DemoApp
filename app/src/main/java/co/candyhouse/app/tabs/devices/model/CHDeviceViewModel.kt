@@ -51,7 +51,6 @@ import co.utils.JsonUtil.parseList
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
-import co.utils.userKeyRef
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -183,7 +182,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         deviceResponse.data.forEach { device ->
                             val deviceId = device.deviceId?.toString()?.lowercase()
                             deviceId?.let { id ->
-                                device.userKeyRef = userKeyMap[id]
+                                device.userKey = userKeyMap[id]
                             }
                         }
                         updateDevices(deviceResponse.data)

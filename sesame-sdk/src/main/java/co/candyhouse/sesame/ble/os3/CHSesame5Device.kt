@@ -57,13 +57,10 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     var isHistory: Boolean = false
         set(value) {
             if (deviceStatus.value == CHDeviceLoginStatus.Login) {
-//                if (field != value) {
                 field = value
-//                    L.d("hcia", "[ss5] isHistory!!:" + isHistory)
                 if (field) {
                     readHistoryCommand()
                 }
-//                }
             }
         }
 
@@ -79,10 +76,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             parceADV(value)
             value?.let {
                 /** 保留廣播通訊 */
-//                isHistory = it.adv_tag_b1
-                if (it.deviceID == currentDeviceUUID) {
-                    isHistory = it.adv_tag_b1
-                }
+                isHistory = it.adv_tag_b1
             }
         }
 
