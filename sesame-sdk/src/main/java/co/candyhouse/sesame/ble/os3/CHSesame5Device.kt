@@ -341,12 +341,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         }
     }
 
-    private var isReadHistoryCommandRunning: Boolean = false
     private fun readHistoryCommand() {
-        if (isReadHistoryCommandRunning) {
-            L.d("hcia", "[ss5][his][read] readHistoryCommand is already running")
-            return
-        }
         val isConnectNET = isInternetAvailable()
         sendCommand(SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)), DeviceSegmentType.cipher) { res -> // 01: 从设备读取最旧的历史记录
             L.d("hcia", "[ss5][his][ResultCode]:" + res.cmdResultCode)
@@ -369,7 +364,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                     }
                 }
             }
-            isReadHistoryCommandRunning = false
         }
     }
 
