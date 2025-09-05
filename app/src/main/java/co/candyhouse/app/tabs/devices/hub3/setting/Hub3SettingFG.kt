@@ -463,6 +463,11 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
 
     private fun updateHub3List(data: List<IrRemote>) {
         L.d("sf", "更新列表……")
+
+        // Hub3 的 Matter 只支持3个红外设备
+        val irDeviceNumbers = data.size
+        bind.rlIrAdd.visibility = if (irDeviceNumbers < 3) VISIBLE else GONE
+
         val mutableList: MutableList<IrRemote> = data as java.util.ArrayList
         bind.recyIR.apply {
             adapter = Hub3IrAdapter(context, mutableList, this@Hub3SettingFG)
