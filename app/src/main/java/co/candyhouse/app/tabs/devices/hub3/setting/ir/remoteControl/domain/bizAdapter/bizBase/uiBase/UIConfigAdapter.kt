@@ -36,6 +36,4 @@ interface UIConfigAdapter {
      * 设置当前状态
      */
     fun setCurrentSate(state: String?) {}
-    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3): Boolean
-
 }

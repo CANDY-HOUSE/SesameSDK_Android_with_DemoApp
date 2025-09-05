@@ -102,12 +102,6 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return true
     }
 
-    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3): Boolean {
-        // TODO: 目前不支持添加空调设备到Matter
-        L.d(tag, "addIrDeviceToMatter: not supported for air conditioner")
-        return false
-    }
-
     private fun getCurrentIndexForType(type: ItemType): Int {
         return when (type) {
             ItemType.MODE -> getModeIndex()

@@ -2,8 +2,8 @@ package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.repo
 
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerCallback
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
@@ -30,7 +30,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
     fun initialize(type: Int, uiItemCallback: ConfigUpdateCallback, handlerCallback: HandlerCallback) {
         val factory = RemoteAdapterFactoryManager.getFactory(type)
         uiConfigAdapter = factory.createUIConfigAdapter(context)
-        handlerConfigAdapter = factory.createHandlerConfigAdapter(context,uiConfigAdapter)
+        handlerConfigAdapter = factory.createHandlerConfigAdapter(context, uiConfigAdapter)
         uiConfigAdapter.setConfigUpdateCallback(uiItemCallback)
         handlerConfigAdapter.setHandlerCallback(handlerCallback)
         haveInitialized = true
@@ -50,6 +50,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
         }
         return uiConfigAdapter.loadConfig()
     }
+
     /**
      * 加载界面参数
      * @return  UI 界面列表，
@@ -73,22 +74,18 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        val handleSuccess = uiConfigAdapter.handleItemClick(item,device,remoteDevice)
+        val handleSuccess = uiConfigAdapter.handleItemClick(item, device, remoteDevice)
         if (handleSuccess) {
             handlerConfigAdapter.handleItemClick(item, device, remoteDevice)
         }
     }
 
-    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3){
+    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
         if (!haveInitialized) {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        val handleSuccess = uiConfigAdapter.addIrDeviceToMatter(irRemote, hub3)
-        if (handleSuccess) {
-            handlerConfigAdapter.addIrDeviceToMatter(irRemote, hub3)
-        }
-
+        handlerConfigAdapter.addIrDeviceToMatter(irRemote, hub3)
     }
 
     /**
@@ -101,6 +98,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
         }
         uiConfigAdapter.clearConfigCache()
     }
+
     /**
      * 清除临时数据
      */
@@ -113,15 +111,15 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
     }
 
     fun getCurrentState(hub3: CHHub3, remoteDevice: IrRemote): String {
-       return handlerConfigAdapter.getCurrentState(hub3,remoteDevice)
+        return handlerConfigAdapter.getCurrentState(hub3, remoteDevice)
     }
 
     fun getCurrentIRType(): Int {
         return handlerConfigAdapter.getCurrentIRType()
     }
 
-    fun modifyRemoteIrDeviceInfo(device: CHHub3,remoteDevice: IrRemote,onResponse: CHResult<Any>) {
-        handlerConfigAdapter.modifyIRDeviceInfo(device,remoteDevice,onResponse)
+    fun modifyRemoteIrDeviceInfo(device: CHHub3, remoteDevice: IrRemote, onResponse: CHResult<Any>) {
+        handlerConfigAdapter.modifyIRDeviceInfo(device, remoteDevice, onResponse)
     }
 
     fun setCurrentSate(state: String?) {

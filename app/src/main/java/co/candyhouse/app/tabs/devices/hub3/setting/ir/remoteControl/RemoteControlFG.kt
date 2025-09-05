@@ -66,7 +66,6 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
             setupRecyclerView()
             setupHelpView()
             setupBackViewListener()
-            setupMatterActionButton()
         }
         viewModel.markAsLoaded()
     }
@@ -165,6 +164,9 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
                     bind.linearLayoutHelp.visibility = View.GONE
                 }
             }
+
+            // TODO: 把这个功能移植到云端
+            viewModel.addIrDeviceToMatter(viewModel.getIrRemoteDevice(), viewModel.getDevice())
         }
     }
 
@@ -306,21 +308,6 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
                 viewModel.setRemoteDevice(irRemote)
             }
 
-        }
-    }
-
-    private fun setupMatterActionButton() {
-        val fab = bind.fab
-        // TODO: 目前只有debug版本支持把红外设备添加到 Matter
-        if (BuildConfig.DEBUG) {
-            fab.visibility = View.VISIBLE
-            fab.setOnClickListener { view ->
-                L.Companion.d(tag, "FAB clicked, adding to Matter + ${viewModel.getIrRemoteDevice()}")
-                Toast.makeText(requireContext(), "添加到Matter", Toast.LENGTH_SHORT).show()
-                viewModel.addIrDeviceToMatter(viewModel.getIrRemoteDevice(), viewModel.getDevice())
-            }
-        } else {
-            fab.visibility = View.GONE
         }
     }
 
