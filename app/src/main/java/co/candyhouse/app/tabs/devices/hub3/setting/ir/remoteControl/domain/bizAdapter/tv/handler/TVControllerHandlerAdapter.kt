@@ -6,6 +6,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IROperation
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.ItemType
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDCommandProcessor
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDParametersSwapper
@@ -65,7 +66,55 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
     }
 
     override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
-        // todo: 添加红外设备到Matter
+
+        // IrRemote(model=AGLED, alias='AGLED AD9-CH1🖋️', uuid='3C0095A0-C481-4C4C-900C-C1FC6292BD7A', state=300092eeee367600004a, timestamp=1755826008980, type=57344, code=97, keys=[], direction='null')
+        L.d("harry", "addIrDeviceToMatter: ${irRemote?.alias}  ${irRemote?.uuid}")
+        if (irRemote == null || irRemote.uuid.isEmpty()) {
+            L.e(tag, "addIrDeviceToMatter irRemote is null or uuid is empty")
+            return
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            // IrControlItem(id=1, type=POWER_STATUS_ON, title=電源, value=, isSelected=true, iconRes=0)
+            val itemOn: IrControlItem = IrControlItem(
+                id = 1,
+                type = ItemType.POWER_STATUS_ON,
+                title = "電源",
+                value = "",
+                isSelected = false,
+                iconRes = 0
+            )
+            val onCommand = buildCommand(itemOn, irRemote)
+            if (onCommand.isEmpty()) {
+                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+                return@launch
+            }
+            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${hub3.deviceId.toString().uppercase()}")
+
+            val itemOff: IrControlItem = IrControlItem(
+                id = 1,
+                type = ItemType.POWER_STATUS_OFF,
+                title = "電源",
+                value = "",
+                isSelected = true,
+                iconRes = 0
+            )
+            val offCommand = buildCommand(itemOff, irRemote)
+            if (offCommand.isEmpty()) {
+                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+                return@launch
+            }
+
+            L.d("harry", "addIrDeviceToMatter buildCommand is: offCommand=${offCommand}, device:${hub3.deviceId.toString().uppercase()}")
+            CHIRAPIManager.addIRRemoteDeviceToMatter(onCommand, offCommand, irRemote, hub3) {
+                it.onSuccess { response ->
+                    L.d("harry", "addIrDeviceToMatter success: ${response.data}")
+                }
+                it.onFailure { error ->
+                    L.e(tag, "addIrDeviceToMatter error: ${error.message}")
+                }
+            }
+        }
+
     }
 
     override fun modifyIRDeviceInfo(
@@ -114,6 +163,7 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
         item: IrControlItem,
         remoteDevice: IrRemote
     ): String {
+        L.d("harry", "buildCommand item:${item}, remoteDevice:${remoteDevice}")
         val key = paramsSwapper.getTVKey(item.type)
         try {
             val command = commandProcess.setKey(key)
