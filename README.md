@@ -38,7 +38,6 @@
 ### 1. ライブラリーの依存
 1.1 ソースコード統合
 ```svg
-   implementation project(':ir')
    implementation project(':sesame-sdk')
 ```
 1.2 JitPack統合
@@ -53,8 +52,7 @@
 
    // build.gradle
    dependencies {
-       implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:ir:v3.0.266-429'
-       implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesame-sdk:v3.0.266-429'
+       implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesame-sdk:Tag'
 	}
 ```
 最新バージョンを確認：[https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp](https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp)
