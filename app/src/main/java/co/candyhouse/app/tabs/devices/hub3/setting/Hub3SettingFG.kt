@@ -144,11 +144,12 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
             mDeviceViewModel.ssmLockLiveData.value?.apply {
                 if (this is CHHub3) {
                     val hub3Device: CHHub3 = this
-                    val bundle = Bundle()
+                    val bundle = Bundle().also {
+                        it.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
+                    }
                     if (irRemote != null) {
                         bundle.apply {
                             putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
-                            this.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
                         }
                     }
                     safeNavigate(R.id.action_to_irfg, bundle)
