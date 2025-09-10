@@ -41,11 +41,6 @@ class Hub3IrAdapter(
                 val title = itemView.findViewById<TextView>(R.id.title)
                 title.text = data.alias
 
-                // 学习类型保存
-                if (data.type == IRType.DEVICE_REMOTE_CUSTOM) {
-                    hub3IrAdapterProvider.setIrRemote(data)
-                }
-
                 itemView.setOnClickListener {
                     AlertView(
                         title.text.toString(),

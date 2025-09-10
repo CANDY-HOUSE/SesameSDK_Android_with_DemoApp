@@ -49,7 +49,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     private var netVersionTag = ""
 
     private var currentProgress = 0
-    private var irRemote: IrRemote? = null
 
     private var mDeviceList = ArrayList<LockDeviceStatus>()
 
@@ -147,11 +146,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
                     val bundle = Bundle().also {
                         it.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
                     }
-                    if (irRemote != null) {
-                        bundle.apply {
-                            putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
-                        }
-                    }
                     safeNavigate(R.id.action_to_irfg, bundle)
                 }
             }
@@ -224,12 +218,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
             mDeviceViewModel.channel.collect { type ->
                 // 处理消息
                 L.d("sf", "type= $type")
-
-                if (type == IRType.DEVICE_REMOTE_CUSTOM) {
-                    // 删除"自学习"遥控临时数据
-                    L.d("sf", "clear DEVICE_REMOTE_CUSTOM data...")
-                    irRemote = null
-                }
                 // 加载红外线数据
                 val device = mDeviceViewModel.ssmLockLiveData.value
                 if (device is CHHub3) {
@@ -540,11 +528,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
 
     override fun removeSesame(id: String) {
         (mDeviceViewModel.ssmLockLiveData.value!! as CHHub3).removeSesame(id) {}
-    }
-
-    override fun setIrRemote(data: IrRemote) {
-        L.d("sf", "add DEVICE_REMOTE_CUSTOM IrRemote")
-        irRemote = data
     }
 
     override fun performStudy(data: IrRemote) {
