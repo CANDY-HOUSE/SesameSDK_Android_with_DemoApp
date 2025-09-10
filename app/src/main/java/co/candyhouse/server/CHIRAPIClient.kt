@@ -154,7 +154,7 @@ internal interface CHIRAPIClient {
      *获取遥控器列表
      */
     @Operation(path = "/device/v2/ir/remote", method = "GET")
-    fun fetchRemoteList(@Parameter(name = "type", location = "query") brandType:Int ): IrRemoteInfoRespond
+    fun fetchRemoteList(@Parameter(name = "type", location = "query") irType:Int ): IrRemoteInfoRespond
 
 }
 

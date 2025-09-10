@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken
 @TypeConverters(IrRemoteListConverter::class)
 data class RemoteCacheEntity(
     @PrimaryKey
-    val brandType: Int,
+    val irType: Int,
     val remoteList: List<IrRemote>,
     val timestamp: Long = System.currentTimeMillis()
 )

@@ -31,7 +31,7 @@ class HXDCommandProcessor {
         buf[buf.size - 2] = 0xFF.toByte().toUByte()
         val checkSum = buf.dropLast(1).sumOf { it.toInt() }
         buf[buf.size - 1] = checkSum.toByte().toUByte()
-        L.Companion.d(tag, "buildAirCommand: ${buf.toUByteArray().toHexString()}")
+        L.d(tag, "buildAirCommand: ${buf.toUByteArray().toHexString()}")
         return buf
     }
 
@@ -44,7 +44,7 @@ class HXDCommandProcessor {
         buf[buf.size - 2] = 0xFF.toByte().toUByte()
         val checkSum = buf.dropLast(1).sumOf { it.toInt() }
         buf[buf.size - 1] = checkSum.toByte().toUByte()
-        L.Companion.d(tag, "buildCommonCommand: ${buf.toUByteArray().toHexString()}")
+        L.d(tag, "buildCommonCommand: ${buf.toUByteArray().toHexString()}")
         return buf
     }
 
@@ -134,11 +134,11 @@ class HXDCommandProcessor {
     @OptIn(ExperimentalUnsignedTypes::class)
     fun parseAirData(state: String):Boolean {
         if (state.isEmpty()) {
-            L.Companion.d("","Error: Empty input")
+            L.d("","Error: Empty input")
             return false
         }
         if (!state.matches("[0-9A-Fa-f]+".toRegex())) {
-            L.Companion.d("","Error: Invalid hex characters in input")
+            L.d("","Error: Invalid hex characters in input")
             return false
         }
         val data = state.chunked(2).map { it.toInt(16).toUByte() }.toUByteArray()
@@ -153,7 +153,7 @@ class HXDCommandProcessor {
             autoWindDirection = data[7].toInt()
             power = data[8].toInt()
             mode = data[10].toInt()
-            L.Companion.d("parseAirData", "temperature: $temperature, windRate: $fanSpeed, windDirection: $windDirection, automaticWindDirection: $autoWindDirection, power: $power, mode: $mode")
+            L.d("parseAirData", "temperature: $temperature, windRate: $fanSpeed, windDirection: $windDirection, automaticWindDirection: $autoWindDirection, power: $power, mode: $mode")
             return true
         } catch (e: Exception) {
             e.printStackTrace()

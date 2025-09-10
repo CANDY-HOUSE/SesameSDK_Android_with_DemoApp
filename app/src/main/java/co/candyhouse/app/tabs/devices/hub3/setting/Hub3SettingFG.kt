@@ -143,10 +143,12 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         bind.rlIrAdd.setOnClickListener {
             mDeviceViewModel.ssmLockLiveData.value?.apply {
                 if (this is CHHub3) {
+                    val hub3Device: CHHub3 = this
                     val bundle = Bundle()
                     if (irRemote != null) {
                         bundle.apply {
                             putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
+                            this.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
                         }
                     }
                     safeNavigate(R.id.action_to_irfg, bundle)
@@ -522,8 +524,8 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
             if (bundle.containsKey(RemoteBundleKeyConfig.irDevice)) {
                 irRemote = bundle.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
             }
-            if (bundle.containsKey(RemoteBundleKeyConfig.chDeviceId)) {
-                chDeviceId = bundle.getString(RemoteBundleKeyConfig.chDeviceId)
+            if (bundle.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
+                chDeviceId = bundle.getString(RemoteBundleKeyConfig.hub3DeviceId)
             }
             if (irRemote != null && !chDeviceId.isNullOrEmpty()) {
                 mDeviceViewModel.updateHub3IrDevice(irRemote, chDeviceId)
@@ -547,13 +549,12 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     override fun performStudy(data: IrRemote) {
         mDeviceViewModel.ssmLockLiveData.value?.apply {
             if (this is CHHub3) {
+                val hub3Device: CHHub3 = this
                 val bundle = Bundle().apply {
                     putParcelable(RemoteBundleKeyConfig.irDevice, data)
+                    putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
                 }
-                safeNavigate(
-                    R.id.action_to_irdiy3,
-                    bundle
-                )
+                safeNavigate(R.id.action_to_irdiy3, bundle)
             }
         }
     }
@@ -561,17 +562,13 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     override fun performAirControl(data: IrRemote) {
         mDeviceViewModel.ssmLockLiveData.value?.apply {
             if (this is CHHub3) {
+                val hub3Device: CHHub3 = this
                 safeNavigate(
                     R.id.action_to_remoteControlFg,
                     Bundle().apply {
-                        this.putParcelable(
-                            RemoteBundleKeyConfig.irDevice,
-                            data
-                        )
-                        this.putBoolean(
-                            RemoteBundleKeyConfig.isNewDevice,
-                            false
-                        )
+                        this.putParcelable(RemoteBundleKeyConfig.irDevice, data)
+                        this.putBoolean( RemoteBundleKeyConfig.isNewDevice, false)
+                        this.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
                     })
             }
         }

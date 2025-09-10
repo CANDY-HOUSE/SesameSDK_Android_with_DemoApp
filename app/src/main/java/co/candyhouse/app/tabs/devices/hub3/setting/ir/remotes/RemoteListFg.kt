@@ -12,14 +12,13 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remotes.cache.IrRemoteCacheManager
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
-import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgRemoteListBinding
-import co.candyhouse.sesame.open.device.CHHub3
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.BaseIRFG
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remotes.cache.IrRemoteCacheManager
+import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.sesame.utils.L
 import co.utils.safeNavigate
 import co.utils.safeNavigateBack
@@ -30,9 +29,8 @@ import kotlinx.coroutines.withContext
 import java.util.Collections
 import java.util.Locale
 import java.util.UUID
-import kotlin.collections.isNullOrEmpty
 
-class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
+class RemoteListFg : BaseIRFG<FgRemoteListBinding>() {
 
     override fun getViewBinder() = FgRemoteListBinding.inflate(layoutInflater)
     private val tag: String = RemoteListFg::class.java.simpleName
@@ -43,17 +41,42 @@ class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
     private var currentDisplayList: List<IrRemote> = emptyList()
     private lateinit var irAdapter: RemoteListAdapter
     private var searchJob: Job? = null
+    private var hub3DeviceId: String = ""
+    private var productKey: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupIRRemoteCache()
-        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
-            safeNavigateBack()
-        }
+        initParams()
     }
 
     private fun setupIRRemoteCache() {
         IrRemoteCacheManager.init(requireContext())
+    }
+
+    private fun initParams() {
+        arguments?.let {args->
+            hub3DeviceId = if (args.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
+                args.getString(RemoteBundleKeyConfig.hub3DeviceId, "")
+            } else {
+                ""
+            }
+            if (hub3DeviceId.isEmpty()) {
+                L.d(tag, "hub3 device id not match")
+                safeNavigateBack()
+                return
+            }
+            productKey = if (args.containsKey(RemoteBundleKeyConfig.productKey)) {
+                args.getInt(RemoteBundleKeyConfig.productKey)
+            } else {
+                -1
+            }
+            if (productKey < 0) {
+                L.d(tag, "productKey is ${productKey}")
+                safeNavigateBack()
+                return
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,34 +107,31 @@ class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
     }
 
     private fun getRemoteList() {
-        if (masterList.isEmpty()){
+        if (masterList.isEmpty()) {
             showLoadingView()
         }
-
-        arguments?.getInt(RemoteBundleKeyConfig.productKey) ?.let { brandType ->
-            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                val cachedList = IrRemoteCacheManager.getValidCache(brandType)
-                if (!cachedList.isNullOrEmpty()) {
-                    synchronized(masterList) {
-                        masterList.clear()
-                        masterList.addAll(cachedList)
-                        view?.post {
-                            showContentView()
-                            showControlView()
-                        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            val cachedList = IrRemoteCacheManager.getCache(productKey)
+            if (!cachedList.isNullOrEmpty()) {
+                synchronized(masterList) {
+                    masterList.clear()
+                    masterList.addAll(cachedList)
+                    view?.post {
+                        showContentView()
+                        showControlView()
                     }
                 }
-                fetchRemoteListFromServer(brandType)
             }
+            fetchRemoteListFromServer(productKey)
         }
     }
 
-    private fun fetchRemoteListFromServer(brandType: Int) {
-        CHIRAPIManager.fetchRemoteList(brandType) {
+    private fun fetchRemoteListFromServer(irType: Int) {
+        CHIRAPIManager.fetchRemoteList(irType) {
             it.onSuccess {
-                val remoteList = swapRemoteList(brandType,it.data)
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    IrRemoteCacheManager.saveCache(brandType, remoteList)
+                val remoteList = swapRemoteList(irType,it.data)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    IrRemoteCacheManager.saveCache(irType, remoteList)
                 }
                 synchronized(masterList) {
                     masterList.clear()
@@ -162,12 +182,12 @@ class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
         bind.sideBar.visibility = View.VISIBLE
     }
 
-    private fun swapRemoteList(brandType: Int, originList: List<IrRemote>): List<IrRemote> {
+    private fun swapRemoteList(irType: Int, originList: List<IrRemote>): List<IrRemote> {
         return originList.map {
             it.copy(
                 uuid = UUID.randomUUID().toString().uppercase(),
                 timestamp = 0L,
-                type = brandType,
+                type = irType,
             )
         }
     }
@@ -197,9 +217,10 @@ class RemoteListFg : BaseNFG<FgRemoteListBinding>() {
     private fun gotoIrControlView(irRemoteDevice: IrRemote) {
         updateRemoteDevice(irRemoteDevice)
         safeNavigate(R.id.action_to_remoteControlFg, Bundle().apply {
-            this.putInt(RemoteBundleKeyConfig.productKey, arguments?.getInt(RemoteBundleKeyConfig.productKey) ?: -1)
+            this.putInt(RemoteBundleKeyConfig.productKey, productKey)
             this.putParcelable(RemoteBundleKeyConfig.irDevice, irRemoteDevice)
             this.putBoolean(RemoteBundleKeyConfig.isNewDevice, true)
+            this.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3DeviceId)
         })
     }
 

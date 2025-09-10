@@ -3,14 +3,13 @@ package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizA
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.server.CHResult
-import co.candyhouse.sesame.open.device.CHHub3
 
 interface HandlerConfigAdapter {
-    fun handleItemClick(item: IrControlItem, device: CHHub3, remoteDevice: IrRemote)
-    fun modifyIRDeviceInfo(device: CHHub3, remoteDevice: IrRemote,onResponse: CHResult<Any>)
+    fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote)
+    fun modifyIRDeviceInfo(hub3DeviceId: String, remoteDevice: IrRemote, onResponse: CHResult<Any>)
     fun clearHandlerCache()
     fun setHandlerCallback(handlerCallback: HandlerCallback)
-    fun getCurrentState(device: CHHub3, remoteDevice: IrRemote): String
+    fun getCurrentState(hub3DeviceId: String, remoteDevice: IrRemote): String
     fun getCurrentIRType(): Int
-    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3)
+    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3DeviceId: String)
 }

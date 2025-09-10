@@ -1,15 +1,15 @@
 package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.tv.ui
 
 import android.content.Context
-import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.UIResourceExtension
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.ItemType
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDCommandProcessor
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDParametersSwapper
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 
@@ -19,7 +19,8 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     private val gson = Gson()
     private var config: UIControlConfig? = null
     private var updateCallback: ConfigUpdateCallback? = null
-
+    val commandProcess = HXDCommandProcessor()
+    val paramsSwapper = HXDParametersSwapper()
 
     override suspend fun loadConfig(): UIControlConfig {
         if (config == null) {
@@ -46,11 +47,7 @@ class TVControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback = uiItemCallback
     }
 
-    override fun handleItemClick(
-        item: IrControlItem,
-        device: CHHub3,
-        remoteDevice: IrRemote
-    ): Boolean {
+    override fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote): Boolean {
         // 不做显示上的处理
         return true
     }

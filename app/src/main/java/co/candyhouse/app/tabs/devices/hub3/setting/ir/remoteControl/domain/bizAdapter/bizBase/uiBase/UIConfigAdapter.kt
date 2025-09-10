@@ -3,7 +3,6 @@ package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizA
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
-import co.candyhouse.sesame.open.device.CHHub3
 
 interface UIConfigAdapter {
 
@@ -26,7 +25,7 @@ interface UIConfigAdapter {
     /**
      * 处理点击事件
      */
-    fun handleItemClick(item: IrControlItem, device: CHHub3, remoteDevice: IrRemote): Boolean
+    fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote): Boolean
     /**
      * 设置配置更新回调
      */

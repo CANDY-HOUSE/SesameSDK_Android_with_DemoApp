@@ -4,33 +4,45 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import co.candyhouse.app.R
+import co.candyhouse.app.databinding.FgRemoteTypeListBinding
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.BaseIRFG
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
-import co.candyhouse.sesame.utils.L
-import co.utils.safeNavigate
-import com.skydoves.balloon.dp2Px
-import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseNFG
-import co.candyhouse.app.databinding.FgRemoteTypeListBinding
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
-import co.candyhouse.sesame.open.device.CHHub3
+import co.candyhouse.sesame.utils.L
 import co.utils.getParcelableCompat
+import co.utils.safeNavigate
 import co.utils.safeNavigateBack
+import com.skydoves.balloon.dp2Px
 
-class RemoteTypeListFg : BaseNFG<FgRemoteTypeListBinding>() {
+class RemoteTypeListFg : BaseIRFG<FgRemoteTypeListBinding>() {
 
     private val tag = RemoteTypeListFg::class.java.simpleName
 
     override fun getViewBinder() = FgRemoteTypeListBinding.inflate(layoutInflater)
 
     private var learnRemote: IrRemote? = null
+    private var hub3DeviceId: String = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initParams()
         setupRecyclerView()
         setupBackViewListener()
-        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
-            safeNavigateBack()
+    }
+
+    private fun initParams() {
+        arguments?.let {args->
+            hub3DeviceId = if (args.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
+                args.getString(RemoteBundleKeyConfig.hub3DeviceId, "")
+            } else {
+                ""
+            }
+            if (hub3DeviceId.isEmpty()) {
+                L.d(tag, "hub3 device id not match")
+                safeNavigateBack()
+            }
         }
     }
 
@@ -46,10 +58,12 @@ class RemoteTypeListFg : BaseNFG<FgRemoteTypeListBinding>() {
             if (it.key == IRType.DEVICE_REMOTE_DIY) {
                 safeNavigate(R.id.action_to_learn, Bundle().apply {
                     this.putBoolean(RemoteBundleKeyConfig.isNewDevice, true)
+                    this.putString(RemoteBundleKeyConfig.hub3DeviceId, arguments?.getString(RemoteBundleKeyConfig.hub3DeviceId, ""))
                 })
             } else {
                 safeNavigate(R.id.action_to_remoteList, Bundle().apply {
                     this.putInt(RemoteBundleKeyConfig.productKey, it.key)
+                    this.putString(RemoteBundleKeyConfig.hub3DeviceId, arguments?.getString(RemoteBundleKeyConfig.hub3DeviceId, ""))
                 })
             }
         }

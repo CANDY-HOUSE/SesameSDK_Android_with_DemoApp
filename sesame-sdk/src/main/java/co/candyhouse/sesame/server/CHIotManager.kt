@@ -332,3 +332,15 @@ internal object CHIotManager {
     }
 
 }
+
+public object IoTSubscriptionManager {
+
+    fun subscribeTopic(topic: String, callback: CHResult<ByteArray>) {
+        CHIotManager.subscribeTopic(topic, callback)
+    }
+
+    fun unsubscribeTopic(topic: String) {
+        CHIotManager.unsubscribeTopic(topic)
+    }
+
+}

@@ -26,10 +26,10 @@ object IrRemoteCacheManager {
     }
 
     // 保存缓存
-    suspend fun saveCache(brandType: Int, remoteList: List<IrRemote>) {
+    suspend fun saveCache(irType: Int, remoteList: List<IrRemote>) {
         ensureInitialized()
         val entity = RemoteCacheEntity(
-            brandType = brandType,
+            irType = irType,
             remoteList = remoteList,
             timestamp = System.currentTimeMillis()
         )
@@ -37,10 +37,9 @@ object IrRemoteCacheManager {
     }
 
     // 获取有效缓存
-    suspend fun getValidCache(brandType: Int): List<IrRemote>? {
+    suspend fun getCache(irType: Int): List<IrRemote>? {
         ensureInitialized()
-        val expiryTime = System.currentTimeMillis() - CACHE_EXPIRY_TIME
-        val cache = cacheDao?.getValidCache(brandType, expiryTime)
+        val cache = cacheDao?.getCacheByIRType(irType)
         return cache?.remoteList
     }
 

@@ -8,12 +8,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseNFG
+import co.candyhouse.app.databinding.FgRemoteMatchCodeBinding
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.BaseIRFG
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrMatchRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
-import co.candyhouse.app.databinding.FgRemoteMatchCodeBinding
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import co.utils.getParcelableArrayListCompat
 import co.utils.getParcelableCompat
@@ -23,7 +22,7 @@ import co.utils.safeNavigateBack
  * 遥控器自动适配界面
  * add by wuying@cn.candyhouse.co
  */
-class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
+class RemoteMatchCodeFG : BaseIRFG<FgRemoteMatchCodeBinding>() {
     private val tag = RemoteMatchCodeFG::class.java.simpleName
     private var selectedIrRemote: IrRemote? = null
     private val viewModel: IrAirMatchCodeViewModel by viewModels {
@@ -36,7 +35,7 @@ class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupParams()
+        initParams()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,27 +44,38 @@ class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
             observeUiState()
             setupTitleView()
             setupRecyclerView()
+            startAutoMatch()
         }
-        startAutoMatch()
     }
 
-    private fun setupParams() {
-        if (mDeviceViewModel.ssmLockLiveData.value == null) {
-            safeNavigateBack()
-            return
-        }
-        viewModel.setHub3Device(mDeviceViewModel.ssmLockLiveData.value!! as CHHub3)
-        val irRemote = arguments?.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
-        if (null == irRemote) {
-            Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
-            L.Companion.d(tag, "hub3 device is null")
-            safeNavigateBack()
-            return
-        }
-        viewModel.setOriginRemote(irRemote)
-        arguments?.let {
-            if (it.containsKey(RemoteBundleKeyConfig.irSearchResult)) {
-                val searchRemoteList = it.getParcelableArrayListCompat<IrMatchRemote>(RemoteBundleKeyConfig.irSearchResult)
+    private fun initParams() {
+        arguments?.let {args->
+            val hub3DeviceId = if (args.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
+                args.getString(RemoteBundleKeyConfig.hub3DeviceId, "")
+            } else {
+                ""
+            }
+            if (hub3DeviceId.isNullOrEmpty()) {
+                L.d(tag, "hub3 device id not match")
+                safeNavigateBack()
+                return
+            }
+            viewModel.setHub3DeviceId(hub3DeviceId)
+
+            val argDevice = if (args.containsKey(RemoteBundleKeyConfig.irDevice)) {
+                args.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
+            } else {
+                null
+            }
+            if (null == argDevice) {
+                Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
+                L.d(tag, "remote device is null")
+                safeNavigateBack()
+                return
+            }
+            viewModel.setOriginRemote(argDevice)
+            if (args.containsKey(RemoteBundleKeyConfig.irSearchResult)) {
+                val searchRemoteList = args.getParcelableArrayListCompat<IrMatchRemote>(RemoteBundleKeyConfig.irSearchResult)
                 if(!searchRemoteList.isNullOrEmpty()) {
                     viewModel.setSearchRemoteList(searchRemoteList)
                 }
@@ -86,11 +96,11 @@ class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
     }
 
     private fun checkInfo(): Boolean {
-        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+        if (viewModel.getHub3DeviceId().isEmpty()) {
             safeNavigateBack()
             return false
         }
-        return viewModel.isHub3DeviceInitialized()
+        return true
     }
 
     private fun setupTitleView() {
@@ -158,10 +168,6 @@ class RemoteMatchCodeFG : BaseNFG<FgRemoteMatchCodeBinding>() {
                 )
             )
         }
-    }
-
-    fun setTitle(name: String) {
-        view?.findViewById<TextView>(R.id.tvTitle)?.text = name
     }
 
 }

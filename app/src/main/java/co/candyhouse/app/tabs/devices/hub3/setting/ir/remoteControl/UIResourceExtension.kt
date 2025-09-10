@@ -124,7 +124,7 @@ object UIResourceExtension {
             val resId = stringMap[key] ?: return key
             context.getString(resId)
         } catch (e: Exception) {
-            L.Companion.e("StringResourceMapper", "Error getting string for key: $key", e)
+            L.e("StringResourceMapper", "Error getting string for key: $key", e)
             key
         }
     }

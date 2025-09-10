@@ -1,7 +1,5 @@
 package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl
 
-import android.Manifest
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -19,16 +17,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import co.candyhouse.app.BuildConfig
+import co.candyhouse.app.R
+import co.candyhouse.app.databinding.FgRemoteControlBinding
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.BaseIRFG
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrMatchRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseNFG
-import co.candyhouse.app.databinding.FgRemoteControlBinding
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.LayoutSettings
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.repository.RemoteRepository
-import co.candyhouse.sesame.open.device.CHHub3
-
 import co.candyhouse.sesame.utils.L
 import co.utils.getParcelableArrayListCompat
 import co.utils.getParcelableCompat
@@ -40,10 +36,11 @@ import kotlinx.coroutines.launch
  * 红外遥控器控制界面
  * add by wuying@cn.candyhouse.co
  */
-class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
+class RemoteControlFG : BaseIRFG<FgRemoteControlBinding>() {
     private val tag = RemoteControlFG::class.java.simpleName
     var isNewDevice = false
     var editable = true
+
     private val viewModel: RemoteControlViewModel by viewModels {
         RemoteControlViewModelFactory(
             requireContext(),
@@ -55,7 +52,7 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initParams()
+        initParams(savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,63 +64,64 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
             setupHelpView()
             setupBackViewListener()
         }
-        viewModel.markAsLoaded()
     }
 
-    private fun initParams() {
-        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
-            safeNavigateBack()
-            return
-        }
-        val device = mDeviceViewModel.ssmLockLiveData.value!! as CHHub3
-        viewModel.setDevice(device)
-        arguments?.let {
-            if (it.containsKey(RemoteBundleKeyConfig.isNewDevice)) {
-                isNewDevice = it.getBoolean(RemoteBundleKeyConfig.isNewDevice, false)
+    private fun initParams(saveBundle: Bundle?) {
+        arguments?.let { args ->
+            val hub3DeviceId = if (args.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
+                args.getString(RemoteBundleKeyConfig.hub3DeviceId, "")
+            } else {
+                ""
             }
-            if (it.containsKey(RemoteBundleKeyConfig.editable)) {
-                editable = it.getBoolean(RemoteBundleKeyConfig.editable, true)
+            if (hub3DeviceId.isNullOrEmpty()) {
+                L.d(tag, "hub3 device id not match")
+                safeNavigateBack()
+                return
             }
-        }
+            viewModel.setHub3DeviceId(hub3DeviceId)
 
-        val argDevice = arguments?.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
-        if (null == argDevice) {
-            Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
-            L.d(tag, "remote device is null")
-            safeNavigateBack()
-            return
-        }
-        L.Companion.d(tag, "argDevice=${argDevice.toString()}")
-        if (isNewDevice) {
-            argDevice.haveSave = false
-        } else {
-            argDevice.haveSave = true
-        }
-        viewModel.initConfig(argDevice.type)
-        viewModel.setRemoteDevice(argDevice.clone())
+            isNewDevice = if (args.containsKey(RemoteBundleKeyConfig.isNewDevice)) {
+                args.getBoolean(RemoteBundleKeyConfig.isNewDevice, false)
+            } else {
+                false
+            }
 
-        if (mDeviceViewModel.ssmLockLiveData.value == null) {
-            Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
-            L.Companion.d(tag, "hub3 device is null")
-            safeNavigateBack()
-            return
+            editable = if (args.containsKey(RemoteBundleKeyConfig.editable)) {
+                args.getBoolean(RemoteBundleKeyConfig.editable, true)
+            } else {
+                true
+            }
+
+            val argDevice = if (args.containsKey(RemoteBundleKeyConfig.irDevice)) {
+                args.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
+            } else {
+                null
+            }
+            if (null == argDevice) {
+                Toast.makeText(requireContext(), R.string.ir_device_info_empty, Toast.LENGTH_SHORT).show()
+                L.d(tag, "remote device is null")
+                safeNavigateBack()
+                return
+            }
+            val irRemote = argDevice.clone()
+            irRemote.haveSave = !isNewDevice
+            viewModel.initConfig(irRemote.type)
+            if (isNewDevice) {
+                irRemote.alias = irRemote.alias + "\uD83D\uDD8B\uFE0F"
+            }
+            viewModel.setRemoteDevice(irRemote)
         }
     }
 
     private fun checkInfo(): Boolean {
-        if (mDeviceViewModel.ssmLockLiveData.value == null || mDeviceViewModel.ssmLockLiveData.value !is CHHub3) {
+        if (viewModel.getHub3DeviceId().isEmpty()) {
             safeNavigateBack()
         }
-        return viewModel.isDeviceInitialized() && viewModel.irRemoteDeviceLiveData.value != null
+        return viewModel.irRemoteDeviceLiveData.value != null
     }
 
     private fun setupTitleView() {
-        if (!viewModel.isFirstLoad.value) {
-            return
-        }
-        if (isNewDevice) {
-            viewModel.irRemoteDeviceLiveData.value!!.alias = viewModel.irRemoteDeviceLiveData.value!!.alias + "\uD83D\uDD8B\uFE0F"
-        }
+
         setTitle(viewModel.irRemoteDeviceLiveData.value!!.alias)
         tvTitleOnclick(viewModel.irRemoteDeviceLiveData.value!!.alias) {
             if (!editable) {
@@ -156,7 +154,7 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
             getString(R.string.ir_edit_limit)
         ) { value ->
             viewModel.irRemoteDeviceLiveData.value!!.alias = value
-            viewModel.addIRDeviceInfo(viewModel.getDevice(), viewModel.irRemoteDeviceLiveData.value!!) {
+            viewModel.addIRDeviceInfo(viewModel.irRemoteDeviceLiveData.value!!) {
                 if (it) {
                     setTitle(value)
                     setRightTextView("")
@@ -166,7 +164,7 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
             }
 
             // TODO: 把这个功能移植到云端
-            viewModel.addIrDeviceToMatter(viewModel.getIrRemoteDevice(), viewModel.getDevice())
+            viewModel.addIrDeviceToMatter(viewModel.getIrRemoteDevice())
         }
     }
 
@@ -193,6 +191,7 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
         bind.textviewHelp.visibility = View.VISIBLE
         bind.linearLayoutHelp.setOnClickListener({
             safeNavigate(R.id.action_to_remoteMatchCodeFg, Bundle().apply {
+                this.putString(RemoteBundleKeyConfig.hub3DeviceId, viewModel.getHub3DeviceId())
                 this.putParcelable(RemoteBundleKeyConfig.irDevice, viewModel.getIrRemoteDevice())
                 this.putParcelableArrayList(RemoteBundleKeyConfig.irSearchResult, ArrayList(viewModel.getSearchRemoteList()))
             })
@@ -213,11 +212,6 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
         }
         viewModel.irRemoteDeviceLiveData.observe(viewLifecycleOwner) { value ->
             setTitle(value.alias)
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isFirstLoad.collect { isFirst ->
-
-            }
         }
     }
 
@@ -264,28 +258,9 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
             setFragmentResult(
                 RemoteBundleKeyConfig.controlIrDeviceResult, bundleOf(
                     RemoteBundleKeyConfig.irDevice to remote,
-                    RemoteBundleKeyConfig.chDeviceId to viewModel.getDevice().deviceId.toString().uppercase()
+                    RemoteBundleKeyConfig.hub3DeviceId to viewModel.getHub3DeviceId()
                 )
             )
-        }
-    }
-
-    private fun requestStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13 及以上
-            val permissions = arrayOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO,
-                Manifest.permission.READ_MEDIA_AUDIO
-            )
-            requestPermissions(permissions, 1001)
-        } else {
-            // Android 13 以下
-            val permissions = arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            requestPermissions(permissions, 1001)
         }
     }
 
@@ -311,66 +286,4 @@ class RemoteControlFG : BaseNFG<FgRemoteControlBinding>() {
         }
     }
 
-    fun setRightTextView(name: String, block: () -> Unit = {}) {
-        view?.findViewById<TextView>(R.id.tvRight)?.apply {
-            if (name.isEmpty()) {
-                visibility = View.GONE
-                return
-            }
-            visibility = View.VISIBLE
-            text = name
-            setOnClickListener { block() }
-        }
-    }
-    fun setTitle(name: String) {
-        view?.findViewById<TextView>(R.id.tvTitle)?.text = name
-    }
-
-    fun tvTitleOnclick(name: String, block: () -> Unit) {
-        view?.findViewById<TextView>(R.id.tvTitle)?.apply {
-            text = name
-            setOnClickListener { block() }
-        }
-    }
-
-    fun getTitleName(): String {
-        return view?.findViewById<TextView>(R.id.tvTitle)?.text?.toString() ?: ""
-    }
-
-    fun showCustomDialog(dialogTitle: String, editText: String = "", tips:String = "",callOK: (String) -> Unit = {}) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-
-        val inflater = this.layoutInflater
-        val dialogView: View = inflater.inflate(R.layout.fg_remote_control_save_dialog, null)
-
-        builder.setView(dialogView)
-
-        val dialog: AlertDialog = builder.create()
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        dialog.show()
-
-        val title = dialogView.findViewById<TextView>(R.id.dialog_title)
-        val edtName = dialogView.findViewById<EditText>(R.id.edtName)
-        val tipsTextView = dialogView.findViewById<TextView>(R.id.ir_edit_tips)
-        dialogView.findViewById<TextView>(R.id.tvCancel).setOnClickListener {
-            dialog.dismiss()
-        }
-        dialogView.findViewById<TextView>(R.id.tvOk).setOnClickListener {
-            dialog.dismiss()
-            val name = edtName.text.toString()
-            callOK(name)
-
-        }
-        edtName.setText(editText)
-        title.text = dialogTitle
-        if (tips.isNotEmpty()) {
-            tipsTextView.text = tips
-        }
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.75).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-    }
 }

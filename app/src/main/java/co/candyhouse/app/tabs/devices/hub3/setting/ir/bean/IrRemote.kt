@@ -17,7 +17,7 @@ data class IrRemote(
     var haveSave:Boolean = true // 是否已保存,默认为true
 ) : Parcelable {
     override fun toString(): String {
-        return "IrRemote(model=$model, alias='$alias', uuid='$uuid', state=$state, timestamp=$timestamp, type=$type, code=$code, keys=${keys?.contentToString()?:""}, direction='$direction')"
+        return "IrRemote(model=$model, alias='$alias', uuid='$uuid', state=$state, timestamp=$timestamp, type=$type, code=$code, keys=${keys?.contentToString()?:""}, direction='$direction', haveSave=$haveSave)"
     }
 
     fun clone(): IrRemote {

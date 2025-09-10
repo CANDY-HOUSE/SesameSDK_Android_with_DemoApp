@@ -10,7 +10,6 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAd
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
 import co.candyhouse.server.CHResult
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 
 /**
@@ -66,26 +65,26 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
     /**
      * 处理按键点击事件
      * @param item 点击的按键
-     * @param device hub3宿主
+     * @param hub3DeviceId hub3 设备ID
      * @param remoteDevice 遥控器设备
      */
-    fun handleItemClick(item: IrControlItem, device: CHHub3, remoteDevice: IrRemote) {
+    fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote) {
         if (!haveInitialized) {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        val handleSuccess = uiConfigAdapter.handleItemClick(item, device, remoteDevice)
+        val handleSuccess = uiConfigAdapter.handleItemClick(item, hub3DeviceId, remoteDevice)
         if (handleSuccess) {
-            handlerConfigAdapter.handleItemClick(item, device, remoteDevice)
+            handlerConfigAdapter.handleItemClick(item, hub3DeviceId, remoteDevice)
         }
     }
 
-    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
+    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3DeviceId: String) {
         if (!haveInitialized) {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        handlerConfigAdapter.addIrDeviceToMatter(irRemote, hub3)
+        handlerConfigAdapter.addIrDeviceToMatter(irRemote, hub3DeviceId)
     }
 
     /**
@@ -110,15 +109,15 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
         handlerConfigAdapter.clearHandlerCache()
     }
 
-    fun getCurrentState(hub3: CHHub3, remoteDevice: IrRemote): String {
-        return handlerConfigAdapter.getCurrentState(hub3, remoteDevice)
+    fun getCurrentState(hub3DeviceId: String, remoteDevice: IrRemote): String {
+        return handlerConfigAdapter.getCurrentState(hub3DeviceId, remoteDevice)
     }
 
     fun getCurrentIRType(): Int {
         return handlerConfigAdapter.getCurrentIRType()
     }
 
-    fun modifyRemoteIrDeviceInfo(device: CHHub3, remoteDevice: IrRemote, onResponse: CHResult<Any>) {
+    fun modifyRemoteIrDeviceInfo(device: String, remoteDevice: IrRemote, onResponse: CHResult<Any>) {
         handlerConfigAdapter.modifyIRDeviceInfo(device, remoteDevice, onResponse)
     }
 

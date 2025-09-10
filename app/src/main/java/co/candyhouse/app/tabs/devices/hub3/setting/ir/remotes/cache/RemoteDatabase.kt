@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 
-@Database( entities = [ RemoteCacheEntity::class], version = 1, exportSchema = false)
+@Database( entities = [ RemoteCacheEntity::class], version = 2, exportSchema = false)
 @TypeConverters(IrRemoteListConverter::class)
 abstract class RemoteDatabase : RoomDatabase() {
     abstract fun remoteCacheDao(): RemoteCacheDao

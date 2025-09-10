@@ -6,14 +6,14 @@ import co.candyhouse.sesame.db.model.base.BaseDao
 @Dao
 interface RemoteCacheDao : BaseDao<RemoteCacheEntity> {
 
-    @Query("SELECT * FROM remote_cache WHERE brandType = :brandType")
-    suspend fun getCacheByBrandType(brandType: Int): RemoteCacheEntity?
+    @Query("SELECT * FROM remote_cache WHERE irType = :irType")
+    suspend fun getCacheByIRType(irType: Int): RemoteCacheEntity?
 
-    @Query("SELECT * FROM remote_cache WHERE brandType = :brandType")
-    fun getCacheByBrandTypeSync(brandType: Int): RemoteCacheEntity?
+    @Query("SELECT * FROM remote_cache WHERE irType = :irType")
+    fun getCacheByIRTypeSync(irType: Int): RemoteCacheEntity?
 
-    @Query("DELETE FROM remote_cache WHERE brandType = :brandType")
-    suspend fun deleteCacheByBrandType(brandType: Int)
+    @Query("DELETE FROM remote_cache WHERE irType = :irType")
+    suspend fun deleteCacheByIRType(irType: Int)
 
     @Query("SELECT * FROM remote_cache")
     override fun getAll(): List<RemoteCacheEntity>
@@ -26,6 +26,6 @@ interface RemoteCacheDao : BaseDao<RemoteCacheEntity> {
 
 
     // 获取未过期的缓存
-    @Query("SELECT * FROM remote_cache WHERE brandType = :brandType AND timestamp > :expiryTime")
-    suspend fun getValidCache(brandType: Int, expiryTime: Long): RemoteCacheEntity?
+    @Query("SELECT * FROM remote_cache WHERE irType = :irType AND timestamp > :expiryTime")
+    suspend fun getValidCache(irType: Int, expiryTime: Long): RemoteCacheEntity?
 }

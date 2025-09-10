@@ -71,7 +71,7 @@ class RemoteListAdapter(
 
         // 设置点击事件
         holder.itemView.setOnClickListener {
-            L.Companion.d("IRRemoteDeviceAdapter", "onItemClick: $childItem")
+            L.d("IRRemoteDeviceAdapter", "onItemClick: $childItem")
             onclick(childItem, position)
         }
     }

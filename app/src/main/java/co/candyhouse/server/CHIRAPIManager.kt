@@ -1,7 +1,7 @@
 package co.candyhouse.server
 
 import android.content.Context
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.CHHub3IRCode
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IRCode
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IROperation
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
@@ -16,7 +16,6 @@ import co.candyhouse.server.dto.IrDeviceStateRequest
 import co.candyhouse.server.dto.IrLearnedDataAddRequest
 import co.candyhouse.server.dto.IrMatchCodeRequest
 import co.candyhouse.sesame.open.CHConfiguration
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.getClientRegion
 import co.candyhouse.sesame.utils.toHexString
@@ -86,14 +85,14 @@ object CHIRAPIManager {
     fun getIRCodes(
         hubDeviceUuid: String,
         irDeviceUuid: String,
-        onResponse: CHResult<List<CHHub3IRCode>>
+        onResponse: CHResult<List<IRCode>>
     ) {
         makeApiCall(onResponse) {
             try {
                 val res = jpAPIClient.getIRCodes(hubDeviceUuid, irDeviceUuid)
                 val jsonString = Gson().toJson(res)
-                val type = object : TypeToken<List<CHHub3IRCode>>() {}.type
-                val irKeyResponses = Gson().fromJson<List<CHHub3IRCode>>(jsonString, type)
+                val type = object : TypeToken<List<IRCode>>() {}.type
+                val irKeyResponses = Gson().fromJson<List<IRCode>>(jsonString, type)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(irKeyResponses)))
             } catch (e: Exception) {
                 L.e("CHIRAPIManager", "Error parsing IR keys", e)
@@ -108,7 +107,7 @@ object CHIRAPIManager {
      * @param name 新名称
      * @param onResponse 回调
      */
-    fun changeIRCode(baseIrCode: CHHub3IRCode, name: String, onResponse: CHResult<Any>) {
+    fun changeIRCode(baseIrCode: IRCode, name: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             try {
                 val requestBody = IrCodeChangeRequest(baseIrCode.uuid, baseIrCode.irID, name)
@@ -127,7 +126,7 @@ object CHIRAPIManager {
      * @param baseIrCode IR设备 key
      * @param onResponse 回调
      */
-    fun deleteIRCode(baseIrCode: CHHub3IRCode, onResponse: CHResult<Any>) {
+    fun deleteIRCode(baseIrCode: IRCode, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             try {
                 val requestBody = IrCodeDeleteRequest(baseIrCode.uuid, baseIrCode.irID)
@@ -258,17 +257,9 @@ object CHIRAPIManager {
     /**
      *添加IR遥控器
      */
-    fun addIRDevice(
-        hub3: CHHub3,
-        remoteDevice: IrRemote,
-        state: String,
-        irDeviceType: Int,
-        irCodes: List<CHHub3IRCode>,
-        onResponse: CHResult<Any>
-    ) {
+    fun addIRDevice(hub3DeviceId: String, remoteDevice: IrRemote, state: String, irDeviceType: Int, irCodes: List<IRCode>, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             try {
-                val hub3DdeviceId = hub3.deviceId.toString().uppercase()
                 val model: String = if (null != remoteDevice.model) {
                     remoteDevice.model!!
                 } else {
@@ -276,25 +267,11 @@ object CHIRAPIManager {
                 }
                 var keys: Array<Map<String, String>> = emptyArray()
                 if (irCodes.isNotEmpty()) {
-                    keys = irCodes.map {
-                        mapOf(
-                            "keyUUID" to it.irID,
-                            "name" to it.name
-                        )
-                    }.toTypedArray()
+                    keys = irCodes.map { mapOf( "keyUUID" to it.irID, "name" to it.name) }.toTypedArray()
                 }
-                val requestBody = IrDeviceAddRequest(
-                    uuid = remoteDevice.uuid,
-                    model = model,
-                    state = state,
-                    alias = remoteDevice.alias,
-                    type = irDeviceType,
-                    deviceId = hub3DdeviceId,
-                    code = remoteDevice.code,
-                    keys = keys
-                )
+                val requestBody = IrDeviceAddRequest(uuid = remoteDevice.uuid, model = model, state = state, alias = remoteDevice.alias, type = irDeviceType, deviceId = hub3DeviceId, code = remoteDevice.code, keys = keys)
                 L.d("addIRDevice", "addIRDevice: ${requestBody.toString()}")
-                val res = jpAPIClient.addIRDeviceInfo(hub3DdeviceId, requestBody)
+                val res = jpAPIClient.addIRDeviceInfo(hub3DeviceId, requestBody)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 L.e("sf", "addIRDevice Error ", e)
@@ -302,13 +279,6 @@ object CHIRAPIManager {
                 onResponse.invoke(Result.failure(e))
             }
         }
-    }
-
-    private fun formatToUUID(hex: String): String {
-        if (hex.length != 32) {
-            throw IllegalArgumentException("Invalid UUID hex string length: ${hex.length}")
-        }
-        return "${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}"
     }
 
     // 定义常量以提高可读性和可维护性
@@ -344,7 +314,7 @@ object CHIRAPIManager {
     }
 
 
-    fun matchIrCode(data: ByteArray, type:Int, branchName:String, onResponse: CHResult<Any>): Boolean {
+    fun matchIrCode(data: ByteArray, type:Int, brandName:String, onResponse: CHResult<Any>): Boolean {
 
         if (data.size < DATA_SIZE_MIN_NUM) {
             L.e("matchIrCode", "Invalid data length: ${data.size}")
@@ -356,7 +326,7 @@ object CHIRAPIManager {
                     irWave = data.toHexString(),
                     irWaveLength = data.size,
                     type = type,
-                    brandName = branchName
+                    brandName = brandName
                 )
                 val res = jpAPIClient.matchIrCode(requestBody)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
@@ -403,12 +373,12 @@ object CHIRAPIManager {
         }
     }
 
-    fun addIRRemoteDeviceToMatter(onCommand: String, offCommand: String, irRemote: IrRemote, hub3: CHHub3, onResponse: CHResult<Any>) {
+    fun addIRRemoteDeviceToMatter(onCommand: String, offCommand: String, irRemote: IrRemote, hub3DeviceId: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse){
             try {
                 val requestBody = IrDeviceRemoteAddToMatterRequest(irRemote.type, onCommand, offCommand, irRemote.uuid.uppercase(), irRemote.alias)
                 L.d("harry", "addIRRemoteDeviceToMatter: ${requestBody.toString()}")
-                val res = jpAPIClient.addIRRemoteDeviceToMatter(hub3.deviceId.toString().uppercase(), requestBody)
+                val res = jpAPIClient.addIRRemoteDeviceToMatter(hub3DeviceId, requestBody)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 L.e("CHIRAPIManager", "Error parsing IR keys", e)
@@ -420,10 +390,10 @@ object CHIRAPIManager {
     /**
      *获取遥控器列表
      */
-    fun fetchRemoteList(brandType: Int, onResponse: CHResult<List<IrRemote>>) {
+    fun fetchRemoteList(irType: Int, onResponse: CHResult<List<IrRemote>>) {
         makeApiCall(onResponse) {
             try {
-                val res = jpAPIClient.fetchRemoteList(brandType)
+                val res = jpAPIClient.fetchRemoteList(irType)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res.data)))
             } catch (e: Exception) {
                 L.e("CHIRAPIManager", "fetchIRDevices Error ", e)

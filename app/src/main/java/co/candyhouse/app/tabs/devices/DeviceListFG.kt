@@ -246,6 +246,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 val bundle = Bundle().apply {
                     putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
                     putBoolean(RemoteBundleKeyConfig.editable, false)
+                    putString(RemoteBundleKeyConfig.hub3DeviceId, hub3.deviceId.toString().uppercase())
                 }
                 safeNavigate(R.id.remoteLearnFg, bundle)
             }
@@ -254,8 +255,9 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 //空调
                 mDeviceViewModel.ssmLockLiveData.value = hub3
                 safeNavigate(R.id.action_to_irgridefg2, Bundle().apply {
-                    this.putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
-                    this.putBoolean(RemoteBundleKeyConfig.isNewDevice, false)
+                    putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
+                    putBoolean(RemoteBundleKeyConfig.isNewDevice, false)
+                    putString(RemoteBundleKeyConfig.hub3DeviceId, hub3.deviceId.toString().uppercase())
                     putBoolean(RemoteBundleKeyConfig.editable, false)
                 })
             }
@@ -307,8 +309,8 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             if (bundle.containsKey(RemoteBundleKeyConfig.irDevice)) {
                 irRemote = bundle.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
             }
-            if (bundle.containsKey(RemoteBundleKeyConfig.chDeviceId)) {
-                chDeviceId = bundle.getString(RemoteBundleKeyConfig.chDeviceId)
+            if (bundle.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
+                chDeviceId = bundle.getString(RemoteBundleKeyConfig.hub3DeviceId,"")
             }
             if (irRemote != null && !chDeviceId.isNullOrEmpty()) {
                 mDeviceViewModel.updateHub3IrDevice(irRemote, chDeviceId)

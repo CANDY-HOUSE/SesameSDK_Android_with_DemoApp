@@ -3,20 +3,17 @@ package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizA
 import android.content.Context
 import android.widget.Toast
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IROperation
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.ItemType
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDCommandProcessor
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDParametersSwapper
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerCallback
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.tv.ui.TVControllerConfigAdapter
 import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHResult
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.server.HttpRespondCode
 import co.candyhouse.sesame.utils.L
 import com.amazonaws.mobileconnectors.apigateway.ApiClientException
@@ -28,31 +25,20 @@ import kotlinx.coroutines.launch
 class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) :
     HandlerConfigAdapter {
     private val tag = TVControllerHandlerAdapter::class.java.simpleName
-    val commandProcess = HXDCommandProcessor()
-    val paramsSwapper = HXDParametersSwapper()
 
-    override fun handleItemClick(
-        item: IrControlItem,
-        device: CHHub3,
-        remoteDevice: IrRemote
-    ) {
+    override fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote) {
         GlobalScope.launch(Dispatchers.IO) {
             val command = buildCommand(item, remoteDevice)
             if (command.isEmpty()) {
                 L.e(tag, "handleItemClick buildCommand is empty!")
                 return@launch
             }
-            L.d(
-                tag,
-                "handleItemClick buildCommand is:command=${command}, device:${
-                    device.deviceId.toString().uppercase()
-                }"
-            )
+            L.d(tag,"handleItemClick buildCommand is:command=${command}, device:${ hub3DeviceId }")
             uiConfigAdapter.setCurrentSate(command)
-            postCommand(device.deviceId.toString().uppercase(), command)
+            postCommand(hub3DeviceId, command)
             if (remoteDevice.uuid.isNotEmpty() && remoteDevice.haveSave) {
                 CHIRAPIManager.updateIRDeviceState(
-                    device.deviceId.toString().uppercase(),
+                    hub3DeviceId,
                     remoteDevice.uuid,
                     state = command,
                     onResponse = {
@@ -65,7 +51,7 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
         }
     }
 
-    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3) {
+    override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3DeviceId: String) {
 
         // IrRemote(model=AGLED, alias='AGLED AD9-CH1🖋️', uuid='3C0095A0-C481-4C4C-900C-C1FC6292BD7A', state=300092eeee367600004a, timestamp=1755826008980, type=57344, code=97, keys=[], direction='null')
         L.d("harry", "addIrDeviceToMatter: ${irRemote?.alias}  ${irRemote?.uuid}")
@@ -88,7 +74,7 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
                 L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
                 return@launch
             }
-            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${hub3.deviceId.toString().uppercase()}")
+            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${ hub3DeviceId }")
 
             val itemOff: IrControlItem = IrControlItem(
                 id = 1,
@@ -104,8 +90,8 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
                 return@launch
             }
 
-            L.d("harry", "addIrDeviceToMatter buildCommand is: offCommand=${offCommand}, device:${hub3.deviceId.toString().uppercase()}")
-            CHIRAPIManager.addIRRemoteDeviceToMatter(onCommand, offCommand, irRemote, hub3) {
+            L.d("harry", "addIrDeviceToMatter buildCommand is: offCommand=${offCommand}, device:${hub3DeviceId}")
+            CHIRAPIManager.addIRRemoteDeviceToMatter(onCommand, offCommand, irRemote, hub3DeviceId) {
                 it.onSuccess { response ->
                     L.d("harry", "addIrDeviceToMatter success: ${response.data}")
                 }
@@ -117,17 +103,8 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
 
     }
 
-    override fun modifyIRDeviceInfo(
-        device: CHHub3,
-        remoteDevice: IrRemote,
-        onResponse: CHResult<Any>
-    ) {
-        CHIRAPIManager.updateIRDevice(
-            device.deviceId.toString().uppercase(),
-            remoteDevice.uuid,
-            alias = remoteDevice.alias,
-            onResponse = onResponse
-        )
+    override fun modifyIRDeviceInfo(hub3DeviceId: String, remoteDevice: IrRemote, onResponse: CHResult<Any>) {
+        CHIRAPIManager.updateIRDevice(hub3DeviceId, remoteDevice.uuid, alias = remoteDevice.alias, onResponse = onResponse)
     }
 
     private fun postCommand(deviceId: String, command: String) {
@@ -159,14 +136,11 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
      * 生成命令。来自hxd格式。
      */
     @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
-    private fun buildCommand(
-        item: IrControlItem,
-        remoteDevice: IrRemote
-    ): String {
-        L.d("harry", "buildCommand item:${item}, remoteDevice:${remoteDevice}")
-        val key = paramsSwapper.getTVKey(item.type)
+    private fun buildCommand(item: IrControlItem, remoteDevice: IrRemote): String {
+        val configAdapter: TVControllerConfigAdapter = uiConfigAdapter as TVControllerConfigAdapter
+        val key = configAdapter.paramsSwapper.getTVKey(item.type)
         try {
-            val command = commandProcess.setKey(key)
+            val command = configAdapter.commandProcess.setKey(key)
                 .setCode(remoteDevice.code)
                 .buildNoneAirCommand()
             return command.toHexString()
@@ -184,10 +158,7 @@ class TVControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UICo
 
     }
 
-    override fun getCurrentState(
-        device: CHHub3,
-        remoteDevice: IrRemote
-    ): String {
+    override fun getCurrentState(hub3DeviceId: String, remoteDevice: IrRemote): String {
         return (uiConfigAdapter as TVControllerConfigAdapter).getCurrentState()
     }
 

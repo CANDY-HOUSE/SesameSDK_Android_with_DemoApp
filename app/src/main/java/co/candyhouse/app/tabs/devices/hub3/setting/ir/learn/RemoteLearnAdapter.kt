@@ -7,15 +7,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.CHHub3IRCode
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IRCode
 import co.utils.setDebouncedClickListener
 
 class RemoteLearnAdapter(
     private val context: Context,
-    private val mData: List<CHHub3IRCode>,
+    private val mData: List<IRCode>,
     private val editable: Boolean = true,
-    private val onClickItem: (CHHub3IRCode) -> Unit,
-    private val onLongClickItem: (Int, CHHub3IRCode) -> Unit,
+    private val onClickItem: (IRCode) -> Unit,
+    private val onLongClickItem: (Int, IRCode) -> Unit,
 ) : RecyclerView.Adapter<RemoteLearnAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,7 +36,7 @@ class RemoteLearnAdapter(
         private val lr: View = itemView.findViewById(R.id.lr)
         private val lb: View = itemView.findViewById(R.id.lb)
 
-        fun bind(item: CHHub3IRCode) {
+        fun bind(item: IRCode) {
             tvName.text = if (item.name.isEmpty()) {
                 val logClickEdit: String = context.getString(R.string.ir_long_click_edit)
                 val clickSend: String = context.getString(R.string.ir_click_send)

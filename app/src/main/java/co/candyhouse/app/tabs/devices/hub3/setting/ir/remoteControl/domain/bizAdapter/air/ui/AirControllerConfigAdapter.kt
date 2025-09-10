@@ -13,7 +13,6 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAd
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDParametersSwapper
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 
@@ -24,8 +23,8 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     private var updateCallback: ConfigUpdateCallback? = null
     private var currentState: String = ""
 
-    val hxdCommandProcessor = HXDCommandProcessor()
-    val airParametersSwapper = HXDParametersSwapper()
+    val commandProcessor = HXDCommandProcessor()
+    val parametersSwapper = HXDParametersSwapper()
 
     override suspend fun loadConfig(): UIControlConfig {
         if (config == null) {
@@ -61,7 +60,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     }
 
     private fun updateUIConfig() {
-        val parseSuccess = hxdCommandProcessor.parseAirData(currentState)
+        val parseSuccess = commandProcessor.parseAirData(currentState)
         if (!parseSuccess) {
             L.e(tag, "updateUIConfig: failed to parse state")
             return
@@ -75,26 +74,26 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         }
     }
 
-    override fun handleItemClick(item: IrControlItem, device: CHHub3, remoteDevice: IrRemote): Boolean {
+    override fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote): Boolean {
         when (item.type) {
             ItemType.POWER_STATUS_ON -> {
-                hxdCommandProcessor.setPower(getPowerValue(true))
-                togglePowerOn(item, device)
-                togglePowerOff(device)
+                commandProcessor.setPower(getPowerValue(true))
+                togglePowerOn(item)
+                togglePowerOff()
             }
 
             ItemType.POWER_STATUS_OFF -> {
-                hxdCommandProcessor.setPower(getPowerValue(false))
-                togglePowerOn(device)
-                togglePowerOff(item, device)
+                commandProcessor.setPower(getPowerValue(false))
+                togglePowerOn()
+                togglePowerOff(item)
             }
 
-            ItemType.TEMP_CONTROL_ADD -> return adjustTemperatureAdd(item, device)
-            ItemType.TEMP_CONTROL_REDUCE -> return adjustTemperatureReduce(item, device)
-            ItemType.MODE -> cycleMode(item, device)
-            ItemType.FAN_SPEED -> cycleFanSpeed(item, device)
-            ItemType.WIND_DIRECTION -> cycleVerticalSwing(item, device)
-            ItemType.AUTO_WIND_DIRECTION -> cycleSwingSwitch(item, device)
+            ItemType.TEMP_CONTROL_ADD -> return adjustTemperatureAdd()
+            ItemType.TEMP_CONTROL_REDUCE -> return adjustTemperatureReduce()
+            ItemType.MODE -> cycleMode(item)
+            ItemType.FAN_SPEED -> cycleFanSpeed(item)
+            ItemType.WIND_DIRECTION -> cycleVerticalSwing(item)
+            ItemType.AUTO_WIND_DIRECTION -> cycleSwingSwitch(item)
             else -> {
                 L.e(tag, "Unknown item type")
             }
@@ -115,7 +114,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
     private fun getValueForType(type: ItemType): String {
         return when (type) {
-            ItemType.TEMPERATURE_VALUE -> "${airParametersSwapper.getTemperature(hxdCommandProcessor.getTemperature())}°C"
+            ItemType.TEMPERATURE_VALUE -> "${parametersSwapper.getTemperature(commandProcessor.getTemperature())}°C"
             else -> ""
         }
     }
@@ -132,7 +131,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return config != null && config!!.controls.isNotEmpty()
     }
 
-    private fun togglePowerOn(device: CHHub3) {
+    private fun togglePowerOn() {
         val resId = if (getPowerIndex()) 0 else 1
         if (!checkConfig()) {
             return
@@ -150,7 +149,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     }
 
 
-    private fun togglePowerOn(item: IrControlItem, device: CHHub3) {
+    private fun togglePowerOn(item: IrControlItem) {
         val resId = if (getPowerIndex()) 0 else 1
         if (!checkConfig()) {
             return
@@ -167,7 +166,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun togglePowerOff(device: CHHub3) {
+    private fun togglePowerOff() {
         val resId = if (getPowerIndex()) 0 else 1
         if (!checkConfig()) {
             return
@@ -184,7 +183,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun togglePowerOff(item: IrControlItem, device: CHHub3) {
+    private fun togglePowerOff(item: IrControlItem) {
         var resId = if (getPowerIndex()) 0 else 1
         if (!checkConfig()) {
             return
@@ -201,7 +200,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun adjustTemperatureAdd(item: IrControlItem, device: CHHub3): Boolean {
+    private fun adjustTemperatureAdd(): Boolean {
         if (!checkConfig()) {
             return false
         }
@@ -233,7 +232,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return currentModeIndex == 0 || currentModeIndex == 1 || currentModeIndex == 4
     }
 
-    private fun adjustTemperatureReduce(item: IrControlItem, device: CHHub3): Boolean {
+    private fun adjustTemperatureReduce(): Boolean {
         if (!checkConfig()) {
             return false
         }
@@ -256,7 +255,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         return true
     }
 
-    private fun cycleMode(item: IrControlItem, device: CHHub3) {
+    private fun cycleMode(item: IrControlItem) {
         if (!checkConfig()) {
             return
         }
@@ -275,7 +274,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun cycleFanSpeed(item: IrControlItem, device: CHHub3) {
+    private fun cycleFanSpeed(item: IrControlItem) {
 
         if (!checkConfig()) {
             return
@@ -294,7 +293,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun cycleVerticalSwing(item: IrControlItem, device: CHHub3) {
+    private fun cycleVerticalSwing(item: IrControlItem) {
 
         if (!checkConfig()) {
             return
@@ -313,7 +312,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
         updateCallback?.onItemUpdate(newItem)
     }
 
-    private fun cycleSwingSwitch(item: IrControlItem, device: CHHub3) {
+    private fun cycleSwingSwitch(item: IrControlItem) {
         if (!checkConfig()) {
             return
         }
@@ -363,51 +362,51 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
     }
 
     private fun getPowerIndex(): Boolean {
-        return airParametersSwapper.getPowerIndex(hxdCommandProcessor.getPower())
+        return parametersSwapper.getPowerIndex(commandProcessor.getPower())
     }
 
     private fun getPowerValue(isPowerOn: Boolean): Int {
-        return airParametersSwapper.getPowerValue(isPowerOn)
+        return parametersSwapper.getPowerValue(isPowerOn)
     }
 
     private fun getTemperature(): Int {
-        return airParametersSwapper.getTemperature(hxdCommandProcessor.getTemperature())
+        return parametersSwapper.getTemperature(commandProcessor.getTemperature())
     }
 
     private fun setTemperature(temperature: Int) {
-        hxdCommandProcessor.setTemperature(airParametersSwapper.getTemperature(temperature))
+        commandProcessor.setTemperature(parametersSwapper.getTemperature(temperature))
     }
 
     private fun getModeIndex(): Int {
-        return airParametersSwapper.getModeIndex(hxdCommandProcessor.getModel())
+        return parametersSwapper.getModeIndex(commandProcessor.getModel())
     }
 
     private fun setModel(index: Int) {
-        hxdCommandProcessor.setModel(airParametersSwapper.getModeValue(index))
+        commandProcessor.setModel(parametersSwapper.getModeValue(index))
     }
 
     private fun getFanSpeedIndex(): Int {
-        return  airParametersSwapper.getFanSpeedIndex(hxdCommandProcessor.getFanSpeed())
+        return  parametersSwapper.getFanSpeedIndex(commandProcessor.getFanSpeed())
     }
 
     private fun setFanSpeed(index: Int) {
-        hxdCommandProcessor.setFanSpeed(airParametersSwapper.getFanSpeedValue(index))
+        commandProcessor.setFanSpeed(parametersSwapper.getFanSpeedValue(index))
     }
 
     private fun getWindDirection(): Int {
-        return airParametersSwapper.getWindDirectionIndex(hxdCommandProcessor.getWindDirection())
+        return parametersSwapper.getWindDirectionIndex(commandProcessor.getWindDirection())
     }
 
     private fun setWindDirection(index: Int) {
-        hxdCommandProcessor.setWindDirection(airParametersSwapper.getWindDirectionValue(index))
+        commandProcessor.setWindDirection(parametersSwapper.getWindDirectionValue(index))
     }
 
     private fun getAutomaticWindDirection(): Int {
-        return airParametersSwapper.getAutoWindDirectionIndex(hxdCommandProcessor.getAutoDirection())
+        return parametersSwapper.getAutoWindDirectionIndex(commandProcessor.getAutoDirection())
     }
 
     private fun setAutoWindDirection(index: Int) {
-        hxdCommandProcessor.setAutoWindDirection(airParametersSwapper.getAutoWindDirectionValue(index))
+        commandProcessor.setAutoWindDirection(parametersSwapper.getAutoWindDirectionValue(index))
     }
 
     /**

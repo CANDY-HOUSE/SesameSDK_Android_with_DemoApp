@@ -33,12 +33,10 @@ class RemoteControlViewModel(val context: Context, val remoteRepository: RemoteR
     private val tag = RemoteControlViewModel::class.java.simpleName
     private val _uiState = MutableStateFlow<AirControlUiState>(AirControlUiState.Loading)
     val uiState: StateFlow<AirControlUiState> = _uiState.asStateFlow()
-    private lateinit var hub3Device: CHHub3
+    private var hub3DeviceId: String = ""
     private val items: MutableList<IrControlItem> = mutableListOf()
     private var config: UIControlConfig? = null
     val irRemoteDeviceLiveData = MutableLiveData<IrRemote>()
-    private val _isFirstLoad = MutableStateFlow(true)
-    val isFirstLoad: StateFlow<Boolean> = _isFirstLoad.asStateFlow()
     val irMatchRemoteListLiveData = MutableLiveData(emptyList<IrMatchRemote>())
 
 
@@ -108,15 +106,15 @@ class RemoteControlViewModel(val context: Context, val remoteRepository: RemoteR
     }
 
     fun handleItemClick(item: IrControlItem) {
-        irRemoteDeviceLiveData.value?.let { remoteRepository.handleItemClick(item, hub3Device, it) }
+        irRemoteDeviceLiveData.value?.let { remoteRepository.handleItemClick(item, hub3DeviceId, it) }
     }
 
-    fun addIrDeviceToMatter(irRemote: IrRemote?, hub3: CHHub3){
-        irRemoteDeviceLiveData.value?.let { remoteRepository.addIrDeviceToMatter(irRemote, hub3) }
+    fun addIrDeviceToMatter(irRemote: IrRemote?){
+        irRemoteDeviceLiveData.value?.let { remoteRepository.addIrDeviceToMatter(irRemote, hub3DeviceId) }
     }
 
-    fun setDevice(device: CHHub3) {
-        this.hub3Device = device
+    fun setHub3DeviceId(hub3DeviceId: String) {
+        this.hub3DeviceId = hub3DeviceId
     }
 
     fun setRemoteDevice(remoteDevice: IrRemote) {
@@ -130,11 +128,11 @@ class RemoteControlViewModel(val context: Context, val remoteRepository: RemoteR
         remoteRepository.clearHandlerCache()
     }
 
-    fun addIRDeviceInfo(hub3: CHHub3, remoteDevice: IrRemote ,block: (isSuccess:Boolean) -> Unit = {}) {
+    fun addIRDeviceInfo(remoteDevice: IrRemote ,block: (isSuccess:Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            val state = remoteRepository.getCurrentState( hub3, remoteDevice)
+            val state = remoteRepository.getCurrentState( hub3DeviceId, remoteDevice)
             val irDeviceType = remoteRepository.getCurrentIRType()
-            CHIRAPIManager.addIRDevice(hub3,remoteDevice,state,irDeviceType, mutableListOf()){ it ->
+            CHIRAPIManager.addIRDevice(hub3DeviceId,remoteDevice,state,irDeviceType, mutableListOf()){ it ->
                 it.onSuccess { result ->
                     viewModelScope.launch(Dispatchers.Main) {
                         irRemoteDeviceLiveData.value!!.haveSave = true
@@ -158,7 +156,7 @@ class RemoteControlViewModel(val context: Context, val remoteRepository: RemoteR
             irRemoteDeviceLiveData.value?.let { irRemoteDeviceValue ->
                 val newIrRemote = irRemoteDeviceValue.clone()
                 newIrRemote.alias = alias
-                remoteRepository.modifyRemoteIrDeviceInfo(hub3Device,newIrRemote){
+                remoteRepository.modifyRemoteIrDeviceInfo(hub3DeviceId,newIrRemote){
                     it.onSuccess { result ->
                         viewModelScope.launch(Dispatchers.Main) {
                             irRemoteDeviceLiveData.value = newIrRemote
@@ -177,36 +175,14 @@ class RemoteControlViewModel(val context: Context, val remoteRepository: RemoteR
     fun getIrRemoteDevice(): IrRemote? {
        val irRemote = irRemoteDeviceLiveData.value
         irRemote?.let {
-            it.state = remoteRepository.getCurrentState(hub3Device,it)
+            it.state = remoteRepository.getCurrentState(hub3DeviceId,it)
         }
         L.d(tag,"getIrRemoteDevice irRemote=${irRemote.toString()}")
         return irRemote
     }
 
-    fun getDevice(): CHHub3 {
-        return hub3Device
-    }
-
-    fun isDeviceInitialized(): Boolean {
-        return ::hub3Device.isInitialized
-    }
-
-    fun deleteIrDeviceInfo(device: CHHub3, irRemote: IrRemote) {
-        viewModelScope.launch {
-            CHIRAPIManager.deleteIRDevice(device.deviceId.toString().uppercase(),irRemote.uuid){
-                it.onSuccess {
-                    L.d(tag, "deleteIrDeviceInfo success")
-                }
-                it.onFailure {
-                    L.d(tag, "deleteIrDeviceInfo fail!")
-                    it.printStackTrace()
-                }
-            }
-        }
-    }
-
-    fun markAsLoaded() {
-        _isFirstLoad.value = false
+    fun getHub3DeviceId(): String {
+        return hub3DeviceId
     }
 
     fun setSearchRemoteList(list: List<IrMatchRemote>) {

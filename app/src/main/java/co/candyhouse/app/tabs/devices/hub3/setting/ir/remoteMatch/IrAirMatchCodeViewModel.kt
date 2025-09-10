@@ -11,8 +11,9 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrMatchRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IROperation
 import co.candyhouse.server.CHIRAPIManager
-import co.candyhouse.sesame.open.device.CHHub3
-import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.server.IoTSubscriptionManager
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -25,18 +26,18 @@ import java.util.UUID
 class IrAirMatchCodeViewModel(val context: Context) :
     ViewModel() {
     private val tag = IrAirMatchCodeViewModel::class.java.simpleName
-    private lateinit var hub3Device: CHHub3
+    private var hub3DeviceId: String = ""
     val irMatchRemoteListLiveData = MutableLiveData<List<IrMatchRemote>>()
     val originRemoteLiveData = MutableLiveData<IrRemote>()
     val connectStatusLiveData = MutableLiveData<Boolean>()
     val matchingLiveData = MutableLiveData<Boolean>()
     var isLearningMode = false
-    fun setHub3Device(device: CHHub3) {
-        this.hub3Device = device
+    fun setHub3DeviceId(device: String) {
+        this.hub3DeviceId = device
     }
 
-    fun isHub3DeviceInitialized(): Boolean {
-        return ::hub3Device.isInitialized
+    fun getHub3DeviceId(): String {
+        return this.hub3DeviceId
     }
 
     fun setOriginRemote(irRemote: IrRemote) {
@@ -60,7 +61,7 @@ class IrAirMatchCodeViewModel(val context: Context) :
     }
 
     private fun startSubscribeIRMode() {
-        hub3Device.subscribeTopic(getGetModeTopic()) { it ->
+        subscribeTopic(getGetModeTopic()) { it ->
             it.onSuccess { data->
                 if (!isLearningMode) {
                     return@onSuccess
@@ -76,7 +77,7 @@ class IrAirMatchCodeViewModel(val context: Context) :
                 }
             }
         }
-        CHIRAPIManager.getIRMode(hub3Device.deviceId.toString().uppercase()) {
+        CHIRAPIManager.getIRMode(hub3DeviceId) {
             it.onFailure {
                 viewModelScope.launch(Dispatchers.Main) {
                     Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
@@ -96,7 +97,7 @@ class IrAirMatchCodeViewModel(val context: Context) :
 
     private fun unsubscribeIRMode() {
         try {
-            hub3Device.unsubscribeTopic(getGetModeTopic())
+            unsubscribeTopic(getGetModeTopic())
         } catch (e: Exception) {
             L.e(tag, "unsubscribeIRMode error: ${e.message}")
         }
@@ -105,7 +106,7 @@ class IrAirMatchCodeViewModel(val context: Context) :
     @OptIn(ExperimentalStdlibApi::class)
     fun startSubscribeIR() {
         viewModelScope.launch {
-            hub3Device.subscribeTopic(getLeaningDataTopic()) {
+            subscribeTopic(getLeaningDataTopic()) {
                 it.onSuccess {
                     viewModelScope.launch(Dispatchers.Main) { matchingLiveData.value = true }
                     val callResult = CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), originRemoteLiveData.value!!.model!!) {
@@ -147,17 +148,13 @@ class IrAirMatchCodeViewModel(val context: Context) :
     fun enterLearnMode() {
         L.d(tag, "enterLearnMode")
         viewModelScope.launch(Dispatchers.Main) {
-            if (!checkHub3DeviceStatus()) {
-                connectStatusLiveData.value = false
-                return@launch
-            }
             connectStatusLiveData.value = true
             viewModelScope.launch(Dispatchers.IO) { setModel(IROperation.MODE_REGISTER) }
         }
     }
 
     fun setModel(model: Int) {
-        CHIRAPIManager.setIRMode(model, hub3Device.deviceId.toString().uppercase()) {
+        CHIRAPIManager.setIRMode(model, hub3DeviceId) {
             it.onFailure {
                 viewModelScope.launch(Dispatchers.Main) {
                     Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
@@ -175,7 +172,7 @@ class IrAirMatchCodeViewModel(val context: Context) :
 
     fun unsubscribeIR() {
         try {
-            hub3Device.unsubscribeTopic(getLeaningDataTopic())
+            unsubscribeTopic(getLeaningDataTopic())
         } catch (e: Exception) {
             L.e(tag, "unsubscribeLearnData error: ${e.message}")
         }
@@ -227,12 +224,23 @@ class IrAirMatchCodeViewModel(val context: Context) :
         irMatchRemoteListLiveData.value = remotes
     }
 
-    fun checkHub3DeviceStatus(): Boolean {
-        return (hub3Device.mechStatus as? CHWifiModule2NetWorkStatus)?.isAPWork == true
+    private fun getLeaningDataTopic()  = "hub3/${hub3DeviceId}/ir/learned/data"
+    private fun getGetModeTopic()  = "hub3/${hub3DeviceId}/ir/mode"
+
+    fun unsubscribeTopic(topic: String) {
+        L.d("unsubscribeLearnData", "topic: $topic")
+        IoTSubscriptionManager.unsubscribeTopic(topic)
     }
 
-    private fun getLeaningDataTopic()  = "hub3/${hub3Device.deviceId.toString().uppercase()}/ir/learned/data"
-    private fun getGetModeTopic()  = "hub3/${hub3Device.deviceId.toString().uppercase()}/ir/mode"
+    fun subscribeTopic(topic:String, result: CHResult<ByteArray>) {
+        L.d("getIrLearnedData", "topic: $topic")
+        IoTSubscriptionManager.subscribeTopic(topic) { it ->
+            it.onSuccess {
+                L.d("getIrLearnedData", "收到 " + it.data.size + " 个字节的红外数据")
+                result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
+            }
+        }
+    }
 }
 
 
