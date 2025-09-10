@@ -6,6 +6,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IROperation
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.ItemType
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.air.ui.AirControllerConfigAdapter
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerCallback
@@ -44,7 +45,43 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     }
 
     override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3DeviceId: String) {
-        // todo: 添加空调到Matter
+        L.d("harry", "addIrDeviceToMatter: ${irRemote?.alias}  ${irRemote?.uuid}")
+        if (irRemote == null || irRemote.uuid.isEmpty()) {
+            L.e(tag, "addIrDeviceToMatter irRemote is null or uuid is empty")
+            return
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            // IrControlItem(id=1, type=POWER_STATUS_ON, title=開啟, value=, isSelected=false, iconRes=2131231013)
+            val itemOn: IrControlItem = IrControlItem(
+                id = 1, type = ItemType.POWER_STATUS_ON, title = "開啟", value = "", isSelected = false, iconRes = 2131231013
+            )
+            val onCommand = buildCommand(itemOn, irRemote)
+            if (onCommand.isEmpty()) {
+                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+                return@launch
+            }
+            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${hub3DeviceId}")
+
+            // IrControlItem(id=3, type=POWER_STATUS_OFF, title=關閉, value=, isSelected=false, iconRes=2131231013)
+            val itemOff: IrControlItem = IrControlItem(
+                id = 3, type = ItemType.POWER_STATUS_OFF, title = "關閉", value = "", isSelected = false, iconRes = 2131231013
+            )
+            val offCommand = buildCommand(itemOff, irRemote)
+            if (offCommand.isEmpty()) {
+                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+                return@launch
+            }
+
+            L.d("harry", "addIrDeviceToMatter buildCommand is: offCommand=${offCommand}, device:${hub3DeviceId}")
+            CHIRAPIManager.addIRRemoteDeviceToMatter(onCommand, offCommand, irRemote, hub3DeviceId) {
+                it.onSuccess { response ->
+                    L.d("harry", "addIrDeviceToMatter success: ${response.data}")
+                }
+                it.onFailure { error ->
+                    L.e(tag, "addIrDeviceToMatter error: ${error.message}")
+                }
+            }
+        }
     }
 
     override fun modifyIRDeviceInfo(
@@ -82,6 +119,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
      */
     @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
     private fun buildCommand(item: IrControlItem, remoteDevice: IrRemote): String {
+        L.d("harry", "buildCommand item: $item , remoteDevice: $remoteDevice")
         try {
             val configAdapter: AirControllerConfigAdapter = uiConfigAdapter as AirControllerConfigAdapter
             val key = configAdapter.parametersSwapper.getAirKey(item.type)
@@ -103,7 +141,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
 
     }
 
-    override fun getCurrentState( hub3DeviceId: String, remoteDevice: IrRemote): String {
+    override fun getCurrentState(hub3DeviceId: String, remoteDevice: IrRemote): String {
         return (uiConfigAdapter as AirControllerConfigAdapter).getCurrentState()
     }
 
