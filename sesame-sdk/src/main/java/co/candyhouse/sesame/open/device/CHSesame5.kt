@@ -19,6 +19,7 @@ interface CHSesame5 : CHSesameLock {
     fun autolock(delay: Int, result: CHResult<Int>)
     fun history(cursor: Long?, uuid: UUID, subUUID: String?, result: CHResult<Pair<List<CHSesame5History>, Long?>>)
     fun opSensorControl(isEnable: Int, result: CHResult<Int>)
+    fun onHistoryReceived(historyData: ByteArray){}
 }
 
 class CHSesame5MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {

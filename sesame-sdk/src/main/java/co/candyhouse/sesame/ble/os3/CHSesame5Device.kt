@@ -53,7 +53,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     private lateinit var HistoryTagWithUUID: ByteArray
 
     /** 其他功能: history  */
-    private var historyCallback: CHResult<Pair<List<CHSesame5History>, Long?>>? = null
     var isHistory: Boolean = false
         set(value) {
             if (deviceStatus.value == CHDeviceLoginStatus.Login) {
@@ -169,7 +168,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     //    override fun history(cursor: Long?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
     override fun history(cursor: Long?, uuid: UUID, subUUID: String?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
         currentDeviceUUID = uuid
-        historyCallback = result
         CHAccountManager.getHistory(this, cursor, subUUID) {
 
             L.d("historyType", "uuid:${uuid}")
@@ -340,6 +338,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         sendCommand(SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)), DeviceSegmentType.cipher) { res -> // 01: 从设备读取最旧的历史记录
             L.d("hcia", "[ss5][his][ResultCode]:" + res.cmdResultCode)
             val hisPaylaod = res.payload
+            onHistoryReceived(hisPaylaod)
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 // 改为 uuid 格式的 hisTag， APP不再兼容旧固件的历史记录， 若有客诉历史记录问题， 请升级锁的固件。
                 if (isConnectNET && !isConnectedByWM2) {

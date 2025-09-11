@@ -38,8 +38,6 @@ internal enum class CHError(val value: NSError) {
     private var mResultRegister: CHResult<CHEmpty>? = null
     var isConnectedByWM2: Boolean = false
 
-    private var historyCallback: CHResult<Pair<List<CHSesame2History>, Long?>>? = null
-
     override fun goIOT() {
 //        L.d("hcia", "goIOT:" +this.deviceId)
         CHIotManager.subscribeSesame2Shadow(this) { result ->
@@ -537,7 +535,6 @@ internal enum class CHError(val value: NSError) {
     }
 
     override fun getHistories(cursor: Long?, result: CHResult<Pair<List<CHSesame2History>, Long?>>) {
-        historyCallback = result
         CHAccountManager.getHistory(this, cursor, null) {
             it.onSuccess {
                 val chHistorysToUI = ArrayList<CHSesame2History>()
@@ -587,6 +584,7 @@ internal enum class CHError(val value: NSError) {
 
         L.d("sendEncryptCommand","readHistoryCommand")
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.history, if (isInternetAvailable()) byteArrayOf(0x01) else byteArrayOf(0x00))) { res ->
+            onHistoryReceived(res.payload)
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 if (res.payload.size >= 13) {  // 添加边界检查
                     val recordId = res.payload.sliceArray(0..3).toBigLong().toInt()
@@ -644,13 +642,7 @@ internal enum class CHError(val value: NSError) {
                             readHistoryCommand {  }
                         }
                     }
-
-                    // historyCallback?.invoke(Result.success(CHResultState.CHResultStateBLE(Pair(chHistorysToUI.toList(), null))))
-                } else {
-                    historyCallback?.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "Payload too small", res.cmdResultCode.toInt())))
                 }
-            } else {
-                historyCallback?.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
         }
     }

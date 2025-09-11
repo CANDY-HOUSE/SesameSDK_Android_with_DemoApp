@@ -16,6 +16,7 @@ interface CHSesame2 : CHSesameLock { // CHProductModel.SS2,CHProductModel.SS4
     fun enableAutolock(delay: Int, historytag: ByteArray? = null, result: CHResult<Int>)
     fun disableAutolock(historytag: ByteArray? = null, result: CHResult<Int>)
     fun getHistories(cursor: Long?, result: CHResult<Pair<List<CHSesame2History>, Long?>>)
+    fun onHistoryReceived(historyData: ByteArray){}
 }
 
 
