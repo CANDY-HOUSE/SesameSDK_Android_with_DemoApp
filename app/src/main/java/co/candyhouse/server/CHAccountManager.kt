@@ -1,10 +1,13 @@
 package co.candyhouse.server
 
 import co.candyhouse.sesame.server.dto.CHUserKey
+import co.utils.JsonUtil
 import co.utils.SharedPreferencesUtils
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
+import com.google.gson.Gson
+import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
@@ -28,9 +31,9 @@ object CHLoginAPIManager {
     }
 
 
-        private fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, block: T.() -> R) {
+        private fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, requireSignIn: Boolean = true, block: T.() -> R) {
 
-            if (!AWSMobileClient.getInstance().isSignedIn) {
+            if (requireSignIn && !AWSMobileClient.getInstance().isSignedIn) {
                 onResponse.invoke(Result.failure(Throwable("isSignedIn???")))
                 return
             }
@@ -145,6 +148,21 @@ object CHLoginAPIManager {
 
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             SharedPreferencesUtils.isUploadDeveceToken = true
+        }
+    }
+
+    fun getWebUrlByScene(scene: String, extInfo: Map<String, String>? = null, onResponse: CHResult<Any>,) {
+        makeApiCall(onResponse, requireSignIn = false) {
+            val token = if (AWSMobileClient.getInstance().isSignedIn) {
+                AWSMobileClient.getInstance().tokens.idToken.tokenString
+            } else null
+
+            val requestBody = ScenePayload(scene = scene, token = token, extInfo = extInfo)
+            val response = jpAPIClient.getWebUrlByScene(requestBody)
+
+            val urlString = Gson().toJsonTree(response).asJsonObject.get("url").asString
+
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(data = urlString)))
         }
     }
 

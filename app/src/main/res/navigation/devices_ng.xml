@@ -67,6 +67,9 @@
         <action
             android:id="@+id/action_to_irgridefg2"
             app:destination="@id/IrGridFg2" />
+        <action
+            android:id="@+id/to_historyWebView"
+            app:destination="@id/webViewFragment" />
     </fragment>
 
     <!--其他fragment-->
@@ -383,7 +386,14 @@
     <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
-        android:name="co.candyhouse.app.tabs.menu.WebViewFG"
-        android:label="WebView" />
+        android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
+        android:label="WebView">
+        <action
+            android:id="@+id/action_mainRoomFG_to_SSM2SettingFG"
+            app:destination="@id/SSM2SettingFG" />
+        <action
+            android:id="@+id/action_mainRoomSS5FG_to_SSM5SettingFG"
+            app:destination="@id/SSM5SettingFG" />
+    </fragment>
 
 </navigation>

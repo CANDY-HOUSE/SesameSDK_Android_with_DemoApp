@@ -64,7 +64,7 @@
     <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
-        android:name="co.candyhouse.app.tabs.menu.WebViewFG"
+        android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
         android:label="WebView" />
 
 </navigation>

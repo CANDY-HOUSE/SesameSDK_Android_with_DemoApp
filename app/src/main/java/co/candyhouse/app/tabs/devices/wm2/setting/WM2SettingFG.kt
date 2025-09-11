@@ -74,9 +74,7 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                 }
 
                 override fun onMechStatus(device: CHDevices) {
-                    val status: CHWifiModule2NetWorkStatus =
-                        device.mechStatus as CHWifiModule2NetWorkStatus
-                    bind.apIcon.isSelected = status.isAPWork == true
+                    val status = device.mechStatus as? CHWifiModule2NetWorkStatus ?: return
                     bind.iotOkLine.visibility =
                         if (status.isIOTWork == true) View.VISIBLE else View.GONE
                     bind.netOkLine.visibility =

@@ -356,7 +356,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
 
     private fun handleNotificationIntent(intent: Intent) {
         if (intent.action == Intent.ACTION_MAIN) {
-            when (val action = intent.getStringExtra("notification_action")) {
+            when (val action = intent.getStringExtra(CHDeviceManager.NOTIFICATION_ACTION)) {
                 "open_webview" -> {
                     val url = intent.getStringExtra("url")
                     url?.let {
@@ -378,7 +378,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         try {
             val bundle = Bundle().apply {
                 putString("url", url)
-                putString("where", "notification")
+                putString("where", CHDeviceManager.NOTIFICATION_FLAG)
             }
             navController.navigate(R.id.webViewFragment, bundle)
         } catch (e: Exception) {

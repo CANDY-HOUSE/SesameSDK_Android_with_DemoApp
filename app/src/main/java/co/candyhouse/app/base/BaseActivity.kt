@@ -32,6 +32,7 @@ import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.utils.SharedPreferencesUtils
+import co.utils.applyInsetsPadding
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.UserState
@@ -92,11 +93,9 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
         setContentView(R.layout.activity_main)
 
-        // 处理顶部内容区域
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_container)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, systemBars.top, 0, 0)
-            insets
+        // 解决Android 16以上边到边问题，增加顶部距离
+        findViewById<View>(R.id.main_container)?.let {
+            applyInsetsPadding(it, top = true)
         }
 
         // 初始化视图

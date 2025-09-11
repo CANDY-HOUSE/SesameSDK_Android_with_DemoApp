@@ -28,6 +28,10 @@ object CHDeviceManager {
     val listDevices = mutableListOf<CHDevices>()
     var lockStates = mutableMapOf<String, LockDeviceState>()
 
+    const val NOTIFICATION_FLAG = "notification"
+
+    const val NOTIFICATION_ACTION = "notification_action"
+
     init {
         CHIotManager
     }

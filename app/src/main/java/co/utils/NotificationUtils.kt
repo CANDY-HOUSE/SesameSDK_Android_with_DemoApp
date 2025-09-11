@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import com.bumptech.glide.Glide
 
@@ -40,7 +41,7 @@ object NotificationUtils {
         val intent = Intent(context, MainActivity::class.java).apply {
             this.action = Intent.ACTION_MAIN
             addCategory(Intent.CATEGORY_LAUNCHER)
-            putExtra("notification_action", messageAction)
+            putExtra(CHDeviceManager.NOTIFICATION_ACTION, messageAction)
             putExtra("url", url)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }

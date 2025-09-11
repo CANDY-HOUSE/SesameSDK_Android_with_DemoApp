@@ -5,6 +5,7 @@ import co.candyhouse.sesame.server.dto.CHUserKey
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
 import com.amazonaws.mobileconnectors.apigateway.annotation.Service
+import java.io.InputStream
 
 @Service(endpoint = BuildConfig.ch_user_server) internal interface CHLoginAPIClient {
 
@@ -47,9 +48,18 @@ import com.amazonaws.mobileconnectors.apigateway.annotation.Service
 
     @Operation(path = "/friend/token", method = "POST")
     fun uploadDeviceToken(body: Any): Any
+
+    @Operation(path = "/web_route", method = "POST")
+    fun getWebUrlByScene(body: ScenePayload): Any
 }
 
 data class CHUserKeyFriendID(val key: CHUserKey, val sub: String)
 data class CHDeviceIDFriendID(val deviceUUID: String, val sub: String)
 data class CHDeviceInfor(var deviceUUID: String, val deviceModel: String, val longitude: String, val latitude: String)
 data class CHUser(var sub: String, val email: String, var nickname: String?, var keyLevel: Int?, var gtag: String?)
+
+data class ScenePayload(
+    val scene: String,
+    val token: String? = null,
+    val extInfo: Map<String, String>? = null
+)

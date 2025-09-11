@@ -1,11 +1,13 @@
 package co.utils
 
 import android.os.Bundle
+import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import co.candyhouse.app.R
 import co.candyhouse.sesame.utils.L
 
 private fun NavController.hasAction(actionId: Int): Boolean {
@@ -38,10 +40,38 @@ fun Fragment.safeNavigate(actionId: Int, bundle: Bundle?) {
     }
 }
 
-fun Fragment.applyBottomInsets() {
-    ViewCompat.setOnApplyWindowInsetsListener(requireView()) { v, insets ->
+fun applyInsetsPadding(
+    view: View,
+    top: Boolean = false,
+    bottom: Boolean = false,
+    left: Boolean = false,
+    right: Boolean = false
+) {
+    ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
         val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        v.setPadding(0, 0, 0, systemBars.bottom)
+        v.setPadding(
+            if (left) systemBars.left else 0,
+            if (top) systemBars.top else 0,
+            if (right) systemBars.right else 0,
+            if (bottom) systemBars.bottom else 0
+        )
         insets
     }
+}
+
+fun Fragment.clearContainerTopPadding() {
+    activity?.findViewById<View>(R.id.main_container)?.let { container ->
+        container.setPadding(0, 0, 0, 0)
+        applyInsetsPadding(container)
+    }
+}
+
+fun Fragment.restoreContainerTopPadding() {
+    activity?.findViewById<View>(R.id.main_container)?.let { container ->
+        applyInsetsPadding(container, top = true)
+    }
+}
+
+fun Fragment.applyBottomInsets() {
+    applyInsetsPadding(requireView(), bottom = true)
 }

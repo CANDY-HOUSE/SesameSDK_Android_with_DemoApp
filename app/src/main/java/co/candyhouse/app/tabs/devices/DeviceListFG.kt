@@ -12,11 +12,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.tabs.HomeFragment
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -280,13 +280,33 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         mDeviceViewModel.ssmLockLiveData.value = device
         when (device.productModel) {
             CHProductModel.WM2 -> safeNavigate(R.id.to_WM2SettingFG)
-            CHProductModel.SS2, CHProductModel.SS4 -> safeNavigate(if (device.getLevel() == 2) R.id.action_deviceListPG_to_SSM2SettingFG else R.id.action_deviceListPG_to_mainRoomFG)
+            CHProductModel.SS2, CHProductModel.SS4 -> {
+                if (device.getLevel() == 2) {
+                    safeNavigate(R.id.action_deviceListPG_to_SSM2SettingFG)
+                } else {
+                    safeNavigate(R.id.to_historyWebView, Bundle().apply {
+                        putString("scene", "history")
+                        putString("title", device.getNickname())
+                        putString("deviceId", device.deviceId.toString().uppercase())
+                        putString("where", "device_history_old")
+                    })
+                }
+            }
             CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
             CHProductModel.BiKeLock -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
             CHProductModel.BiKeLock2 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
-            CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro, CHProductModel.BLEConnector -> safeNavigate(
-                if (device.getLevel() == 2) R.id.to_Sesame5SettingFG else R.id.action_deviceListPG_to_mainRoomSS5FG
-            )
+            CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro, CHProductModel.BLEConnector -> {
+                if (device.getLevel() == 2) {
+                    safeNavigate(R.id.to_Sesame5SettingFG)
+                } else {
+                    safeNavigate(R.id.to_historyWebView, Bundle().apply {
+                        putString("scene", "history")
+                        putString("title", device.getNickname())
+                        putString("deviceId", device.deviceId.toString().uppercase())
+                        putString("where", "device_history_new")
+                    })
+                }
+            }
 
             CHProductModel.SSMOpenSensor -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.SSMTouchPro -> safeNavigate(R.id.to_SesameTouchProSettingFG)
