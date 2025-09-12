@@ -16,10 +16,12 @@ import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.sesame.server.HttpRespondCode
 import co.candyhouse.sesame.utils.L
+import co.utils.hexStringToByteArray
 import com.amazonaws.mobileconnectors.apigateway.ApiClientException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.text.toHexString
 
 class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) : HandlerConfigAdapter {
     private val tag = AirControllerHandlerAdapter::class.java.simpleName
@@ -44,6 +46,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     override fun addIrDeviceToMatter(irRemote: IrRemote?, hub3DeviceId: String) {
         L.d("harry", "addIrDeviceToMatter: ${irRemote?.alias}  ${irRemote?.uuid}")
         if (irRemote == null || irRemote.uuid.isEmpty()) {
@@ -51,28 +54,48 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
             return
         }
         GlobalScope.launch(Dispatchers.IO) {
-            // IrControlItem(id=1, type=POWER_STATUS_ON, title=開啟, value=, isSelected=false, iconRes=2131231013)
-            val itemOn: IrControlItem = IrControlItem(
-                id = 1, type = ItemType.POWER_STATUS_ON, title = "開啟", value = "", isSelected = false, iconRes = 2131231013
-            )
-            val onCommand = buildCommand(itemOn, irRemote)
-            if (onCommand.isEmpty()) {
-                L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
-                return@launch
-            }
-            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${hub3DeviceId}")
+            // 默认是 off 状态， 不确定用户保存此遥控器时， UI 当前是什么状态
+            // TODO: buildCommand 需要改进， 不要依赖于 UI 上的状态, 希望只根据 ItemType 来生成命令
+
+            // 假定是 off 状态，生成 on 和 off 命令
 
             // IrControlItem(id=3, type=POWER_STATUS_OFF, title=關閉, value=, isSelected=false, iconRes=2131231013)
             val itemOff: IrControlItem = IrControlItem(
                 id = 3, type = ItemType.POWER_STATUS_OFF, title = "關閉", value = "", isSelected = false, iconRes = 2131231013
             )
-            val offCommand = buildCommand(itemOff, irRemote)
+            var offCommand = buildCommand(itemOff, irRemote)
             if (offCommand.isEmpty()) {
                 L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
                 return@launch
             }
 
+            // UI可能是 on 状态，那么此时的 offCommand 实际是 onCommand, 确保改成 off
+            val offCommandBuf = offCommand.hexStringToByteArray()
+            offCommandBuf[8] = 0x00
+
+            // 重新计算校验和
+            offCommandBuf[15] = (offCommandBuf.dropLast(1).sumOf { it.toUByte().toInt() } and 0xFF).toByte()
+            offCommand = offCommandBuf.toHexString().uppercase()
             L.d("harry", "addIrDeviceToMatter buildCommand is: offCommand=${offCommand}, device:${hub3DeviceId}")
+
+            // IrControlItem(id=1, type=POWER_STATUS_ON, title=開啟, value=, isSelected=false, iconRes=2131231013)
+            // val itemOn: IrControlItem = IrControlItem(
+            //     id = 1, type = ItemType.POWER_STATUS_ON, title = "開啟", value = "", isSelected = false, iconRes = 2131231013
+            // )
+            // val onCommand = buildCommand(itemOn, irRemote)
+            // if (onCommand.isEmpty()) {
+            //     L.e(tag, "addIrDeviceToMatter buildCommand is empty!")
+            //     return@launch
+            // }
+
+            // offCommand=300102CE19010201000102010000FF21, onCommand=300102CE19010201010102010000FF22
+            // 根据 offCommand 生成 onCommand，
+            val onCommandBuf = offCommand.hexStringToByteArray()
+            onCommandBuf[8] = 0x01
+            onCommandBuf[15] = (onCommandBuf.dropLast(1).sumOf { it.toUByte().toInt() } and 0xFF).toByte()
+            val onCommand = onCommandBuf.toHexString().uppercase()
+            L.d("harry", "addIrDeviceToMatter buildCommand is: onCommand=${onCommand}, device:${hub3DeviceId}")
+
             CHIRAPIManager.addIRRemoteDeviceToMatter(onCommand, offCommand, irRemote, hub3DeviceId) {
                 it.onSuccess { response ->
                     L.d("harry", "addIrDeviceToMatter success: ${response.data}")
