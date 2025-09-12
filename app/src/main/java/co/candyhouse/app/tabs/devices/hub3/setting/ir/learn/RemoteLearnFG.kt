@@ -67,6 +67,8 @@ class RemoteLearnFG : BaseIRFG<FgRemoteLearnBinding>() {
                 val defaultName = getString(R.string.ir_study)
                 argDevice = IrRemote( model = "", alias = defaultName, uuid = UUID.randomUUID().toString().uppercase(), state = "", timestamp = 0L,
                     type = IRType.DEVICE_REMOTE_CUSTOM, code = 0,direction = "", haveSave = false)
+            } else {
+                argDevice.haveSave = true
             }
             viewModel.setRemoteDevice(argDevice)
         }
