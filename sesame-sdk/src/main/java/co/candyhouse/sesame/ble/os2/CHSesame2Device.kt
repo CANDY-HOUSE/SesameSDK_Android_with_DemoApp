@@ -2,10 +2,26 @@ package co.candyhouse.sesame.ble.os2
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
 import android.os.Build
-import co.candyhouse.sesame.ble.*
+import co.candyhouse.sesame.ble.CHDeviceUtil
+import co.candyhouse.sesame.ble.CHadv
+import co.candyhouse.sesame.ble.DeviceSegmentType
+import co.candyhouse.sesame.ble.SSM2OpCode
+import co.candyhouse.sesame.ble.SSM2ResponsePayload
+import co.candyhouse.sesame.ble.SSM3PublishPayload
+import co.candyhouse.sesame.ble.Sesame2Chracs
+import co.candyhouse.sesame.ble.SesameBleTransmit
+import co.candyhouse.sesame.ble.SesameItemCode
+import co.candyhouse.sesame.ble.SesameNotifypayload
+import co.candyhouse.sesame.ble.SesameResultCode
+import co.candyhouse.sesame.ble.isBleAvailable
 import co.candyhouse.sesame.ble.os2.base.CHSesameOS2
 import co.candyhouse.sesame.ble.os2.base.SSM2Payload
 import co.candyhouse.sesame.ble.os2.base.SesameOS2BleCipher
@@ -14,20 +30,42 @@ import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.db.model.createHistag
 import co.candyhouse.sesame.db.model.hisTagC
-import co.candyhouse.sesame.open.*
+import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
+import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHSesame2
+import co.candyhouse.sesame.open.device.CHSesame2MechSettings
+import co.candyhouse.sesame.open.device.CHSesame2MechStatus
+import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.open.isInternetAvailable
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.*
-import co.candyhouse.sesame.utils.*
+import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
+import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
+import co.candyhouse.sesame.server.dto.CHSS2RegisterReqSig1
+import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
+import co.candyhouse.sesame.utils.EccKey
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
+import co.candyhouse.sesame.utils.base64Encode
+import co.candyhouse.sesame.utils.base64decodeByteArray
+import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.toBigLong
+import co.candyhouse.sesame.utils.toHexString
+import co.candyhouse.sesame.utils.toReverseBytes
+import co.candyhouse.sesame.utils.toUInt32ByteArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import kotlin.math.abs
 
 internal enum class CHError(val value: NSError) {
@@ -534,138 +572,30 @@ internal enum class CHError(val value: NSError) {
         }
     }
 
-    override fun getHistories(cursor: Long?, result: CHResult<Pair<List<CHSesame2History>, Long?>>) {
-        CHAccountManager.getHistory(this, cursor, null) {
-            it.onSuccess {
-                val chHistorysToUI = ArrayList<CHSesame2History>()
-                it.data.histories.forEach {
-                    val historyType = Sesame2HistoryTypeEnum.getByValue(it.type)
-                    val ts = it.timeStamp
-                    val recordID = it.recordID
-                    val histag = it.historyTag?.base64decodeByteArray()
-//                    val params = it.parameter?.base64decodeByteArray()
-                    val tmphis = eventToHistory(historyType, ts, recordID, histag)
-                    if (tmphis != null) {
-                        chHistorysToUI.add(tmphis)
-                    }
-                }
-//                L.d("bbtig", "Response-Cursor: ${it.data.cursor}")
-
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(Pair(chHistorysToUI.toList(), it.data.cursor))))
-            }
-            it.onFailure {
-                result.invoke(Result.failure(it))
-            }
-        } //end getHistory
-    }
-
-    private fun eventToHistory(historyType: Sesame2HistoryTypeEnum?, ts: Long, recordID: Int, histag: ByteArray?): CHSesame2History? {
-        when (historyType) { //            Sesame2HistoryTypeEnum.NONE -> return CHSesame2History.None(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.DRIVE_UNLOCKED -> return CHSesame2History.DriveUnLocked(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.DRIVE_LOCKED -> return CHSesame2History.DriveLocked(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.MANUAL_ELSE -> return CHSesame2History.ManualElse(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.MANUAL_UNLOCKED -> return CHSesame2History.ManualUnlocked(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.MANUAL_LOCKED -> return CHSesame2History.ManualLocked(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.WM2_LOCK -> return CHSesame2History.WM2Lock(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.WM2_UNLOCK -> return CHSesame2History.WM2Unlock(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.BLE_LOCK -> return CHSesame2History.BLELock(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.BLE_UNLOCK -> return CHSesame2History.BLEUnlock(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.WEB_LOCK -> return CHSesame2History.WEBLock(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.WEB_UNLOCK -> return CHSesame2History.WEBUnlock(ts, recordID, histag)
-            Sesame2HistoryTypeEnum.AUTOLOCK -> return CHSesame2History.AutoLock(ts, recordID, histag)
-            else -> return null
-        }
-    }
-
-
-
     private fun readHistoryCommand(result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
 
-        L.d("sendEncryptCommand","readHistoryCommand")
-        sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.history, if (isInternetAvailable()) byteArrayOf(0x01) else byteArrayOf(0x00))) { res ->
+        L.d("sendEncryptCommand", "readHistoryCommand")
+        sendEncryptCommand(
+            SSM2Payload(
+                SSM2OpCode.read,
+                SesameItemCode.history,
+                if (isInternetAvailable()) byteArrayOf(0x01) else byteArrayOf(0x00)
+            )
+        ) { res ->
             onHistoryReceived(res.payload)
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 if (res.payload.size >= 13) {  // 添加边界检查
-                    val recordId = res.payload.sliceArray(0..3).toBigLong().toInt()
-                    var historyType = Sesame2HistoryTypeEnum.getByValue(res.payload[4]) ?: Sesame2HistoryTypeEnum.NONE
-                    val newTime = res.payload.sliceArray(5..12).toBigLong() //4
-                    val historyContent = res.payload.sliceArray(13..res.payload.size - 1)
-
-                    if (historyType == Sesame2HistoryTypeEnum.BLE_LOCK || historyType == Sesame2HistoryTypeEnum.BLE_UNLOCK) {
-                        if (historyContent.size >= 40) {  // 添加边界检查
-                            val payload22 = historyContent.sliceArray(18..39)
-                            val locktype = payload22[0] / 30
-                            if (locktype == 1 || locktype == 2) {
-                                historyType = if (historyType == Sesame2HistoryTypeEnum.BLE_LOCK) {
-                                    Sesame2HistoryTypeEnum.WEB_LOCK
-                                } else {
-                                    Sesame2HistoryTypeEnum.WEB_UNLOCK
-                                }
-                            }
-                            historyContent[18] = (payload22[0] % 30).toByte()
-                        }
-                    }
-                    var updata=res.payload.toHexString()
-
-
-
-                    L.d("postSSHistory", "当前设备${historyType}----${res.payload.size}"+"---"+updata.length)
-                    L.d("sendEncryptCommand", "当前设备${historyType}----${res.payload.size}"+"---"+updata.length)
-
-
-                    val chHistoryEvent: CHHistoryEvent = parseHistoryContent(historyType, historyContent, newTime, recordId)
-                    val historyEventToUpload: ArrayList<CHHistoryEvent> = ArrayList()
-
-                    historyEventToUpload.add(chHistoryEvent)
-                    val chHistorysToUI = ArrayList<CHSesame2History>()
-
-
-                    historyEventToUpload.forEach {
-                        val ss2historyType = Sesame2HistoryTypeEnum.getByValue(it.type) ?: Sesame2HistoryTypeEnum.NONE
-                        val ts = it.timeStamp
-                        val recordID = it.recordID
-                        val histag = it.historyTag?.base64decodeByteArray()
-                        val tmphis = eventToHistory(ss2historyType, ts, recordID, histag)
-                        if (tmphis != null) {
-                            chHistorysToUI.add(tmphis)
-                        }
-                    }
-                    if (historyType == Sesame2HistoryTypeEnum.DRIVE_LOCKED || historyType == Sesame2HistoryTypeEnum.DRIVE_UNLOCKED) {
-                        readHistoryCommand({})
-
-                        return@sendEncryptCommand
-
-                    }else{
-                        if (isInternetAvailable()) {
-                            CHAccountManager.postSS2History(deviceId.toString().uppercase(), updata) {}
-                            readHistoryCommand {  }
-                        }
+                    val data = res.payload.toHexString()
+                    if (isInternetAvailable()) {
+                        CHAccountManager.postSS2History(deviceId.toString().uppercase(), data) {}
                     }
                 }
             }
         }
     }
-
-
-
 }
-internal fun parseHistoryContent(historyType: Sesame2HistoryTypeEnum, hisContent_: ByteArray, time: Long, recordId: Int): CHHistoryEvent {
-//        L.d("hcia", "recordId:$recordId:---->historyType:" + historyType)
-    val historyItem = CHHistoryEvent(recordId, null, historyType.value, time, null, null, null)
-    when (historyType) {
-        Sesame2HistoryTypeEnum.BLE_LOCK, Sesame2HistoryTypeEnum.BLE_UNLOCK, Sesame2HistoryTypeEnum.WM2_UNLOCK, Sesame2HistoryTypeEnum.WM2_LOCK -> {
-            val key_idx = hisContent_.sliceArray(0..1).toBigLong()
-            val device16 = hisContent_.sliceArray(2..17)
-            val payload22 = hisContent_.sliceArray(18..39)
-            historyItem.keyidx = key_idx
-            historyItem.devicePk = device16.toHexString()
-            historyItem.historyTag = payload22.toCutedHistag()?.base64Encode()
-        }
-        else -> {}
-    }
-    return historyItem
-}
+
 internal class SSM2LoginResponsePayload(loginPayload: ByteArray) {
     var systemTime = loginPayload.sliceArray(0..3).toBigLong()
     var fw_version = loginPayload[4]

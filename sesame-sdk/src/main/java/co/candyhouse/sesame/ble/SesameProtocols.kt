@@ -1,6 +1,5 @@
 package co.candyhouse.sesame.ble
 
-import co.candyhouse.sesame.utils.bytesToUShort
 import java.util.UUID
 
 class SSM3PublishPayload(val data: ByteArray) {
@@ -68,18 +67,6 @@ internal enum class StpItemCode(val value: UByte) {
     STP_ITEM_CODE_CARDS_ADD(182u), STP_ITEM_CODE_CARDS_DELETE(183u), STP_ITEM_CODE_PASSCODES_ADD(184u), STP_ITEM_CODE_PASSCODES_DELETE(185u),
 }
 
-internal enum class Sesame2HistoryTypeEnum(var value: Byte) {
-
-    NONE(0), BLE_LOCK(1), BLE_UNLOCK(2), TIME_CHANGED(3), AUTOLOCK_UPDATED(4), MECH_SETTING_UPDATED(5), AUTOLOCK(6), MANUAL_LOCKED(7), MANUAL_UNLOCKED(8), MANUAL_ELSE(9), DRIVE_LOCKED(10), DRIVE_UNLOCKED(11), DRIVE_FAILED(12), BLE_ADV_PARAM_UPDATED(13), WM2_LOCK(14), WM2_UNLOCK(15), WEB_LOCK(16), WEB_UNLOCK(17),
-    DOOR_OPEN(90), DOOR_CLOSE(91), ;
-
-    companion object {
-        private val values = values()
-        fun getByValue(value: Byte) = values.firstOrNull { it.value == value }
-    }
-
-}
-
 enum class UUID4HistoryTagTypeEnum(val value: UShort) {
     NAME_UUID_TYPE_ANDROID_USER_BLE_UUID(14U),
     NAME_UUID_TYPE_ANDROID_USER_WIFI_UUID(16U),
@@ -88,53 +75,6 @@ enum class UUID4HistoryTagTypeEnum(val value: UShort) {
     companion object {
         private val values = UUID4HistoryTagTypeEnum.entries.toTypedArray()
         fun getByValue(value: UShort) = values.firstOrNull { it.value == value }
-    }
-}
-
-@OptIn(ExperimentalStdlibApi::class)
-class UUID4HistoryTag(val data: ByteArray) {
-
-    private var uuid4HistoryTagType: UUID4HistoryTagTypeEnum? = null
-
-    private var uuid4HistoryTagValue: ByteArray = byteArrayOf()
-    init {
-
-        uuid4HistoryTagType = UUID4HistoryTagTypeEnum.getByValue(bytesToUShort(data[1], data[0]))
-        uuid4HistoryTagValue = if (data.size == 18) data.sliceArray(2..17) else byteArrayOf()
-    }
-
-
-
-
-    fun getTagType(): UUID4HistoryTagTypeEnum? {
-        return uuid4HistoryTagType
-    }
-
-    fun getTagValue(): ByteArray {
-        return uuid4HistoryTagValue
-    }
-
-    fun isUUID4HistoryTag(): Boolean {
-
-        if (uuid4HistoryTagValue.size != 16) {
-            return false
-        }
-        if (uuid4HistoryTagValue[6].toInt() and 0xF0 != 0x40) {
-            return false
-        }
-        if (uuid4HistoryTagValue[8].toInt() and 0xC0 != 0x80) {
-            return false
-        }
-
-        return true
-    }
-
-    @OptIn(ExperimentalStdlibApi::class)
-    fun isDefineHistoryTagType(): Boolean {
-        if (uuid4HistoryTagType != null) {
-            return true
-        }
-        return false
     }
 }
 

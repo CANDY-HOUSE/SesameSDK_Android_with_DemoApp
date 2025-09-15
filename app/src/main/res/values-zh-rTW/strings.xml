@@ -3,52 +3,32 @@
     <string name="launching_why_need_location_permission">
         如果您使用的是 Android 6.0 或更高版本，為了讓藍牙正常運作，需要允許應用程式訪問位置資訊。否則，該應用程式將無法找到Sesame。</string>
     <string name="app_name">芝麻</string>
-    <string name="select_an_avatar">選擇一個頭像</string>
-    <string name="name">名稱</string>
     <string name="email">電子信箱</string>
-    <string name="new_password">設定新密碼</string>
-    <string name="sign_up">註冊</string>
     <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="second2">秒</string>
-    <string name="choosetime">選擇時間</string>
-    <string name="timePrompt">請選擇時間</string>
-    <string name="scriptPrompt">選擇腳本</string>
-    <string name="wins">Wins</string>
     <string name="pleaseemail">請輸入對方的郵箱號</string>
     <string name="clickaction">點擊⊕添加動作。\n如果秒數為「永遠」並被執行，除非切換到其他劇本並執行，否則SesameBot2的動作不會停止。\n馬達正反轉速度有公差，請讓按下時間比返回稍長一些。</string>
     <string name="delete_account">刪除帳號</string>
-    <string name="facial">人臉</string>
-    <string name="done">完成</string>
     <string name="matterMsg">已進入Matter配網模式，請於十五分鐘內完成配網，萬一失敗請重新進入此頁以重新進入Matter配網模式</string>
     <string name="qrcodeNotSupport">該二維碼不支持</string>
     <string name="DelFace">删除人臉</string>
     <string name="sesamefaceMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入人臉。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
     <string name="sesamepalmMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入掌靜脈。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
-    <string name="title_about">關於</string>
     <string name="title_friends">通訊錄</string>
-    <string name="title_registered">已註冊</string>
     <string name="title_me">我</string>
     <string name="title_list">芝麻</string>
-    <string name="title_detail">Profile</string>
-    <string name="cd_home">家!!</string>
-    <string name="cd_list">列表</string>
-    <string name="cd_form">Form</string>
     <string name="forever">永远</string>
     <string name="logout">登出</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string> <!--?-->
+    <!--?-->
     <string name="hub3_hint_ir">添加距離此Hub3 5米內要連接的紅外設備：</string>
     <string name="addFail">添加失敗</string>
     <string name="cameraError">相機錯誤</string>
     <string name="qrhint">使用 芝麻app 掃描此QR code\n添加我為聯絡人</string>
 <!--    更新Ssm名稱用↓-->
-    <string name="change_sesame_name">編輯芝麻名</string>
     <string name="change_sesame_angle">設定角度</string>
     <string name="ssm_update">SesameOS更新＆重開機</string>
     <string name="autolock">倒數自動上鎖</string>
-    <string name="ds_delay">延遲</string>
     <string name="ssm_delete">刪除</string>
-    <string name="ssm_add_to_matter_as_doorlock">Add this Sesame to Matter as DoorLock</string>
-    <string name="ssm_add_to_matter_as_switch">Add this Sesame to Matter as switch</string>
 
     <string name="door_lock">Door Lock</string>
     <string name="on_off_switch">Switch</string>
@@ -58,21 +38,10 @@
     <string name="first_name">名</string>
 
     <string name="delete_friend">刪除聯絡人</string>
-    <string name="manual_operated">旋鈕有動靜</string>
-    <string name="forget_password">忘記密碼了嗎？</string>
-    <string name="verification">前往驗證</string>
-    <string name="verification_code">驗證碼</string>
-    <string name="send_verification_code">發送驗證碼</string>
-    <string name="re_send_verification_code">重發驗證碼</string>
     <string name="set_lock_position">設置上鎖角度</string>
     <string name="set_unlock_position">設置解鎖角度</string>
     <string name="second">後</string>
-    <string name="member">成員</string>
-    <string name="delete_member">刪除成員</string>
-    <string name="add_member">添加成員</string>
     <string name="edit_name">修改名稱</string>
-    <string name="manua_lock">手轉上鎖</string>
-    <string name="manua_unlock">手轉解鎖</string>
 
     <string name="please_configure">請設置開鎖角度與關鎖角度</string>
     <string name="please_complete">請手轉芝麻設備至 完全上鎖/完全解鎖 位置，\n
@@ -84,7 +53,6 @@
     <string name="no_new_devices">從⊕開始註冊新設備，或掃描QR碼獲取已註冊設備的使用權限</string> <!--?-->
     <string name="no_scan_devices">附近沒有藍牙設備</string>
 
-    <string name="onProgressChanged">DFU模式變換中…</string>
     <string name="onDeviceDisconnecting">DFU中斷連接中…</string>
     <string name="onDeviceDisconnected">DFU未連接</string>
     <string name="onDeviceConnected">DFU已連接</string>
@@ -97,10 +65,6 @@
     <string name="onDfuProcessStarted">DFU已啟動</string>
     <string name="toastBleNotReadyForDFU">"請靠近讓藍牙連接後，再試一次"</string>
     <string name="BleTooManyConnections">"android連了太多藍芽而不靈光了,請重開android藍芽"</string>
-
-    <string name="onError">DFU錯誤</string>
-    <string name="too_close">上鎖角度與解鎖角度太接近啦😅</string>
-    <string name="transfer_owner">轉讓擁有者給成員</string>
 
     <string name="reset_the_sesame">重置芝麻設備並丟棄鑰匙</string>
     <string name="trash_key">刪除芝麻鑰匙</string>
@@ -161,7 +125,6 @@
     <string name="wm2_update">軟體更新＆重開機</string>
     <string name="wm2_pwk">WiFi 密碼</string>
     <string name="wm2_pwk_hint">請輸入 WiFi 密碼</string>
-    <string name="hub3_ir_title">IR Control</string>
     <string name="wm2_ssid">WiFi SSID</string>
     <string name="shareSesameToFriends">點擊以共享設備</string>
     <string name="revoke">撤銷</string>
@@ -175,7 +138,6 @@
     <string name="ResetHub3">重置Hub3並丟棄鑰匙</string>
     <string name="TrashTheWifiModule2Key">刪除 WiFi模組</string>
     <string name="TrashTheHub3Module2Key">刪除 Hub3</string>
-    <string name="TrashTheOpenSensorKey">刪除 開關傳感器</string>
 
     <string name="addSesameTo">添加芝麻設備…</string>
     <string name="wm2NetworkConnectionStatus">網路狀態</string>
@@ -185,7 +147,6 @@
     <string name="click_script">劇本</string>
     <string name="Wm2WifiOK">WiFi模組已連接到網路</string>
     <string name="BotModeNormal">下壓後歸位</string>
-    <string name="BotModeReverse">反向下壓後歸位</string>
     <string name="BotModeCell">繞一圈</string>
     <string name="PressModeCell">放開後歸位</string>
 
@@ -209,11 +170,9 @@
     <string name="historyMANUAL_LOCKED">手轉上鎖</string>
     <string name="historyMANUAL_UNLOCKED">手轉解鎖</string>
     <string name="historyAUTOLOCK_UPDATED">自動上鎖設置被更新</string>
-    <string name="historyMECH_SETTING_UPDATED">角度設置被更新</string>
     <string name="historyAUTOLOCK">自動上鎖</string>
 
 
-    <string name="WigetToggle">芝麻開門</string>
     <string name="WigetOpenAll">全部上鎖</string>
     <string name="WigetCloseAll">全部解鎖</string>
 
@@ -253,18 +212,12 @@
         >現在網路狀態不太穩定，下拉刷新或登出可能導致芝麻設備清單消失。</string>
 
     <string name="TouchEmptyFingerHint">靠近%1$s連藍牙, 點擊 ⊕, 將手指放在%2$s上以添加指紋。添加後點擊 X。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
-    <string name="TouchEmptyFingerHintFace">靠近Sesame Face連藍牙, 點擊 ⊕, 將手指放在Sesame Face上以添加指紋。添加後點擊 X。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
     <string name="TouchEmptyNFCHint">靠近%1$s連藍牙, 點擊 ⊕, 將NFC卡放在%2$s上以添加NFC卡。添加後點擊 X。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
-    <string name="TouchEmptyNFCFaceHint">靠近Sesame Face連藍牙, 點擊 ⊕, 將NFC卡放在Sesame Face上以添加NFC卡。添加後點擊 X。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
     <string name="TouchEmptyPasscodeHint">靠近%1$s連藍牙, 點擊 ⊕, 輸入數字密碼並以上鎖或解鎖按鈕添加數字密碼。添加後點擊 X。</string>
-    <string name="HUB3EmptyIRCodeHint">靠近智聯中心3連藍牙, 點擊 ⊕, 將遙控器指向智聯中心3，按下遙控器上的按鈕以發送紅外線信號。</string>
 
     <string name="TouchProCardRename">修改 NFC卡 的名稱🖊️</string>
     <string name="TouchProFaceRename">修改 人臉 的名稱🖊️</string>
-    <string name="TouchProCardModify">Modify the NFC card number🖊️</string>
-    <string name="TouchProCardMove">Move to …</string>
     <string name="TouchProCardDelete">刪除此 NFC卡</string>
-    <string name="TouchProCardAdd">Add NFC card</string>
 
     <string name="nfcCard">管理NFC卡</string>
     <string name="fingerprint">管理指紋</string>
@@ -278,21 +231,14 @@
     <string name="TouchProFingerModify">修改此指紋名稱🖊️</string>
     <string name="TouchProFingerDelete">刪除此指紋</string>
     <string name="TouchProPWDRename">修改此數字密碼名稱🖊️</string>
-    <string name="TouchProPWDModify">Modify the passcode value🖊️</string>
-    <string name="TouchProPWDAdd">Add Passcode</string>
     <string name="MatterSettings">Matter Settings</string>
     <string name="SkipMatterSettings">跳過Matter設定</string>
     <string name="OpenMatterPairingWindow">Open MATTER Pairing Window</string>
 
     <string name="TouchProPWDDelete">刪除此數字密碼</string>
     <string name="trash_device_key">刪除此 %1$s</string>
-    <string name="reset_device_key">重置並刪除此 %1$s</string>
     <string name="default_passcode_name">數字密碼🖊️</string>
     <string name="default_fingerprint_name">指紋🖊️</string>
-    <string name="default_ircode_name">IRcode🖊️</string>
-    <string name="HUB3IRCodeRename">Rename the IR code🖊️</string>
-    <string name="HUB3IRCodeEmit">Emit the IR code🖊️</string>
-    <string name="HUB3IRCodeDel">刪除紅外線代碼</string>
     <string name="TouchProPalmRename">重新命名掌靜脈🖊️</string>
     <string name="DelPalm">删除掌靜脈</string>
 
@@ -307,7 +253,6 @@
 
     <string name="android_notifica_permis_on">已獲得 安卓的 通知權限</string>
     <string name="android_notifica_permis_off">未獲得 安卓的 通知權限(按這裡)</string>
-    <string name="addOpenSensorToHub3">将这个開關傳感器綁定到Hub3…</string>
     <string name="hub3_addSesameTo">添加紅外線數據...</string>
     <string name="login_fg_input_mail_warn">請輸入正確的電子郵件</string>
 

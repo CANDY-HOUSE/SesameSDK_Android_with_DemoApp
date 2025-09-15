@@ -7,7 +7,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
-import co.candyhouse.app.databinding.FgRoomMainBinding
 import co.candyhouse.app.databinding.GuestkeyListBinding
 import co.candyhouse.sesame.server.dto.CHGuestKeyCut
 import co.candyhouse.sesame.utils.L

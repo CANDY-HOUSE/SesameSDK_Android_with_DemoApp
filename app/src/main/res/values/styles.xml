@@ -25,10 +25,6 @@
 
     </style>
 
-    <style name="AppTheme.FlatDialog.Animation">
-        <item name="android:windowEnterAnimation">@anim/modal_in</item>
-        <item name="android:windowExitAnimation">@anim/modal_out</item>
-    </style>
     <style name="CustomBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
     </style>
@@ -36,10 +32,7 @@
     <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
     </style>
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
-        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
-    </style>
+
     <style name="Normal">
         <item name="android:windowEnterAnimation">@anim/show_up_center</item>
         <item name="android:windowExitAnimation">@anim/show_down_center</item>

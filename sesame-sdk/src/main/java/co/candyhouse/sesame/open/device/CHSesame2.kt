@@ -5,7 +5,7 @@ import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.toReverseBytes
-import java.util.Date
+
 interface CHSesame2 : CHSesameLock { // CHProductModel.SS2,CHProductModel.SS4
     var mechSetting: CHSesame2MechSettings?
     fun lock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
@@ -15,7 +15,6 @@ interface CHSesame2 : CHSesameLock { // CHProductModel.SS2,CHProductModel.SS4
     fun getAutolockSetting(result: CHResult<Int>)
     fun enableAutolock(delay: Int, historytag: ByteArray? = null, result: CHResult<Int>)
     fun disableAutolock(historytag: ByteArray? = null, result: CHResult<Int>)
-    fun getHistories(cursor: Long?, result: CHResult<Pair<List<CHSesame2History>, Long?>>)
     fun onHistoryReceived(historyData: ByteArray){}
 }
 
@@ -52,42 +51,4 @@ class CHSesame2MechStatus(override val data: ByteArray) : CHSesameProtocolMechSt
 
         return bat.toReverseBytes() + data.sliceArray(2..3) + position.toReverseBytes() + data.sliceArray(7..7)
     }
-}
-
-sealed class CHSesame2History(timestamp: Long, val recordID: Int, val historyTag: ByteArray?) {
-    var date: Date = Date(timestamp)
-
-    //    open class None(timestamp: Int, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-    open class DriveLocked(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-    open class DriveUnLocked(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-    open class ManualElse(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-    open class ManualLocked(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-    open class ManualUnlocked(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-    open class BLELock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag) {
-        var isCheck = false
-    }
-
-    open class BLEUnlock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag) {
-        var isCheck = false
-    }
-
-    open class WM2Unlock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag) {
-        var isCheck = false
-    }
-
-    open class WM2Lock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag) {
-        var isCheck = false
-    }
-
-    open class WEBUnlock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag) {
-        var isCheck = false
-    }
-
-    open class WEBLock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag) {
-        var isCheck = false
-    }
-
-    open class AutoLock(timestamp: Long, recordID: Int, histag: ByteArray?) : CHSesame2History(timestamp, recordID, histag)
-
-
 }

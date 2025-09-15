@@ -10,9 +10,7 @@
     <color name="black">#000000</color>
     <color name="gray0">#eeeeee</color>
     <color name="gray1">#cccccc</color>
-    <color name="gray2">#999999</color>
     <color name="gray3">#666666</color>
-    <color name="gray4">#333333</color>
     <color name="gray5">#88eeeeee</color>
     <color name="blue">#0000ff</color>
     <color name="blue0">#3366FF</color>
@@ -29,7 +27,6 @@
     <color name="warning_btn_bg_color">#DD6B55</color>
     <color name="warning_btn_bg_pressed_color">#CD5B55</color>
 
-    <color name="lightGray">#F5F5F5</color>
     <color name="darkGray">#424242</color>
     <color name="darkerGray">#424242</color>
     <color name="green">#43A047</color>
@@ -42,8 +39,6 @@
     <color name="light_blue">#68c6c8</color>
     <color name="no_grey">@color/gray1</color>
     <color name="yellow_light">#fdea8e</color>
-    <color name="yellow_mid">#fce15e</color>
-    <color name="yellow_heavy">#d8bf55</color>
 
     <color name="text_blue">#28aeb1</color>
 

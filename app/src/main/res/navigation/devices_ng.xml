@@ -23,14 +23,8 @@
             android:id="@+id/to_scan"
             app:destination="@id/scanFG" />
         <action
-            android:id="@+id/action_deviceListPG_to_mainRoomFG"
-            app:destination="@id/mainRoomFG" />
-        <action
             android:id="@+id/action_deviceListPG_to_FriendDetailFG"
             app:destination="@id/FriendDetailFG" />
-        <action
-            android:id="@+id/action_deviceListPG_to_mainRoomSS5FG"
-            app:destination="@id/mainRoomSS5FG" />
         <action
             android:id="@+id/action_to_SSM2SetAngleFG"
             app:destination="@id/SSM2SetAngleFG" />
@@ -179,22 +173,6 @@
         android:id="@+id/scanFG"
         android:name="co.candyhouse.app.tabs.menu.ScanQRcodeFG"
         android:label="ScanFG" />
-    <fragment
-        android:id="@+id/mainRoomFG"
-        android:name="co.candyhouse.app.tabs.devices.ssm2.room.MainRoomFG"
-        android:label="MainRoomFG">
-        <action
-            android:id="@+id/action_mainRoomFG_to_SSM2SettingFG"
-            app:destination="@id/SSM2SettingFG" />
-    </fragment>
-    <fragment
-        android:id="@+id/mainRoomSS5FG"
-        android:name="co.candyhouse.app.tabs.devices.ssm5.room.MainRoomSS5FG"
-        android:label="MainRoomSS5FG">
-        <action
-            android:id="@+id/action_mainRoomSS5FG_to_SSM5SettingFG"
-            app:destination="@id/SSM5SettingFG" />
-    </fragment>
     <fragment
         android:id="@+id/SSM2SettingFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.SSM2SettingFG"

@@ -157,7 +157,6 @@ dependencies {
     implementation libs.easypermissions
     implementation libs.material
     implementation libs.dfu
-    implementation libs.stickyheaders
     implementation libs.wheelpicker
     implementation libs.autoresizeedittext
     implementation libs.indicatorseekbar

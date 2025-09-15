@@ -17,7 +17,6 @@ import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.CHGuestKey
 import co.candyhouse.sesame.server.dto.CHGuestKeyCut
-import co.candyhouse.sesame.server.dto.CHHistoryEventV2
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
@@ -236,60 +235,16 @@ object CHAccountManager {
         L.d("postSSHistory", "2--${devieID}---${hisHex}")
         makeApiCall(onResponse) {
             val chHistoryUploadRes = jpAPIclient.feedHistory(CHSSMHisUploadRequest(devieID, hisHex))
-//            L.d("hcia", "chHistoryUploadRes:" + chHistoryUploadRes)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(chHistoryUploadRes)))
         }
     }
 
     internal fun postSS5History(devieID: String, hisHex: String, onResponse: CHResult<Any>) {
-//        try {
-//            // 强制抛出一个异常
-//            throw Exception("Forced exception")
-//        } catch (exception: Exception) {
-//            // 在捕获到异常时，调用 onFailure 回调函数
-//            onResponse.invoke(Result.failure(exception))
-//        }
         makeApiCall(onResponse) {
             L.d("postSSHistory", "5--${devieID}---${hisHex}")
             val chHistoryUploadRes = jpAPIclient.feedHistory(CHSS5HisUploadRequest(devieID, hisHex, "5"))
-            L.d("hcia", "[ss5][postSS5History]:" + chHistoryUploadRes)
+            L.d("hcia", "[ss5][postSS5History]:$chHistoryUploadRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(chHistoryUploadRes)))
-        }
-    }
-
-    internal fun getHistory(ss2: CHDevices, cursor: Long?, subUUID: String?, onResponse: CHResult<CHHistoryEventV2>) {
-        makeApiCall(onResponse) {
-            val ssm2ID = ss2.deviceId.toString().uppercase()
-//            L.d("hcia", "(ss2 as CHDevicesUtil).sesame2KeyData!!.secretKey:" + (ss2 as CHDevicesUtil).sesame2KeyData!!.secretKey)
-//            L.d("hcia", "(ss2 as CHDevicesUtil).sesame2KeyData!!.secretKey:" + (ss2 as CHDevicesUtil).sesame2KeyData!!.deviceUUID)
-//            L.d("hcia", "(ss2 as CHDevicesUtil).sesame2KeyData!!.secretKey:" + (ss2 as CHDevicesUtil).sesame2KeyData!!.deviceUUID.uppercase())
-
-//            L.d("hcia", "ss2.getKey().sesame2PublicKey.length:" + ss2.getKey().sesame2PublicKey.length)
-            var checkTagStr: String
-            if (ss2.getKey().sesame2PublicKey.length == 8) {
-                ///ss5 用公鑰驗證
-                checkTagStr = ss2.getKey().sesame2PublicKey
-//                L.d("hcia", "sesame2PublicKey :" + ss2.getKey().sesame2PublicKey)
-//                L.d("hcia", "checkTagStr:" + checkTagStr)
-            } else {
-                ///ss4 用私鑰簽名
-                val keyCheck = (AesCmac((ss2 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(System.currentTimeMillis().toUInt24ByteArray())!!).sliceArray(0..3)
-                checkTagStr = keyCheck.toHexString()
-            }
-            L.d("reqHistory", "res:" + ssm2ID + "---" + cursor + "---" + checkTagStr)
-            val res = jpAPIclient.getHistory(ssm2ID, cursor, 15, checkTagStr, subUUID)
-            L.d("hcia", "res:" + res)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun sdkAuthIOT(ss2: CHDevices, onResponse: CHResult<CHEmpty>) {
-
-        makeApiCall(onResponse) {
-            val msg = System.currentTimeMillis().toUInt24ByteArray()
-            val keyCheck = (AesCmac((ss2 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(msg)!!).sliceArray(0..3)
-            jpAPIclient.sdkAuthIOT(ss2.deviceId.toString().uppercase(), keyCheck.toHexString())
-            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
     }
 

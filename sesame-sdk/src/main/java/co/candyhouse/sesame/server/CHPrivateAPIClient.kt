@@ -7,7 +7,6 @@ import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.CHGuestKey
 import co.candyhouse.sesame.server.dto.CHGuestKeyCut
-import co.candyhouse.sesame.server.dto.CHHistoryEventV2
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
@@ -17,7 +16,6 @@ import co.candyhouse.sesame.server.dto.CHSS2Infor
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
-import co.candyhouse.sesame.server.dto.CHcfp
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame2.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
@@ -31,12 +29,6 @@ internal interface CHPrivateAPIClient {
     fun ss2CommandToWM2Post(
         @Parameter(name = "device_id", location = "path") model: String?,
         body: CHSS2WebCMDReq
-    ): Any
-
-    @Operation(path = "/device/v1/iot/sesame2/{device_id}", method = "GET")
-    fun sdkAuthIOT(
-        @Parameter(name = "device_id", location = "path") model: String?,
-        @Parameter(name = "a", location = "query") a: String
     ): Any
 
     @Operation(path = "/device/v1/sesame2/{device_id}", method = "PUT")
@@ -59,15 +51,6 @@ internal interface CHPrivateAPIClient {
 
     @Operation(path = "/device/v1/sesame2/historys", method = "POST")
     fun feedHistory(body: Any): Any
-
-    @Operation(path = "/device/v2/sesame2/{device_id}/history", method = "GET")
-    fun getHistory(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-        @Parameter(name = "cursor", location = "query") cursor: Long?,
-        @Parameter(name = "lg", location = "query") lg: Int,
-        @Parameter(name = "a", location = "query") a: String,
-        @Parameter(name = "subUUID", location = "query") subUUID: String?
-    ): CHHistoryEventV2
 
     @Operation(path = "/device/v1/sesame2/{device_id}/guestkey", method = "POST")
     fun guestKeyPost(
@@ -110,9 +93,6 @@ internal interface CHPrivateAPIClient {
 
     @Operation(path = "/device/v1/version", method = "GET")
     fun getVersion(): Any
-
-    @Operation(path = "/device/v1/cfp", method = "POST")
-    fun postCfp(body: CHcfp): Any
 
     @Operation(path = "/device/v2/card/name", method = "PUT")
     fun setCardName(
@@ -178,17 +158,6 @@ internal interface CHPrivateAPIClient {
         @Parameter(name = "subUUID", location = "query") subUUID: String,
         @Parameter(name = "stpDeviceUUID", location = "query") stpDeviceUUID: String,
     ): String
-
-    @Operation(path = "/device/v2/touchpro/{device_id}/passcode", method = "POST")
-    fun sendKeyBoardPassCodeDataGetCmd(
-        @Parameter(name = "device_id", location = "path") deviceId: String
-    ): Any
-
-    @Operation(path = "/device/v2/touchpro/{device_id}/passcode", method = "GET")
-    fun getKeyBoardPassCodeDataFromIot(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-        @Parameter(name = "request_id", location = "query") requestId: String
-    ): Any
 
     @Operation(path = "/device/v2/hub3/{device_id}/status", method = "GET")
     fun getHub3StatusFromIot(

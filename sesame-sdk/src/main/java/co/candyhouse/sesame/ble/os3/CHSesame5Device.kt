@@ -5,7 +5,6 @@ import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
 import co.candyhouse.sesame.ble.SSM3PublishPayload
-import co.candyhouse.sesame.ble.Sesame2HistoryTypeEnum
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.ble.SesameResultCode
 import co.candyhouse.sesame.ble.isBleAvailable
@@ -24,7 +23,6 @@ import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
 import co.candyhouse.sesame.open.device.CHSesame5
-import co.candyhouse.sesame.open.device.CHSesame5History
 import co.candyhouse.sesame.open.device.CHSesame5MechSettings
 import co.candyhouse.sesame.open.device.CHSesame5MechStatus
 import co.candyhouse.sesame.open.device.CHSesame5OpsSettings
@@ -36,7 +34,6 @@ import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
-import co.candyhouse.sesame.utils.base64decodeByteArray
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
@@ -49,7 +46,6 @@ import kotlin.math.abs
 
 @SuppressLint("MissingPermission")
 internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
-    private var currentDeviceUUID: UUID? = null
     private lateinit var HistoryTagWithUUID: ByteArray
 
     /** 其他功能: history  */
@@ -146,59 +142,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         sendCommand(SesameOS3Payload(SesameItemCode.magnet.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
-    }
-
-    private fun eventToHistory(historyType: Sesame2HistoryTypeEnum?, ts: Long, recordID: Int, mechStatus: CHSesame5MechStatus?, histag: ByteArray?): CHSesame5History? {
-        return when (historyType) {
-            Sesame2HistoryTypeEnum.MANUAL_UNLOCKED -> CHSesame5History.ManualUnlocked(ts, recordID, mechStatus, null)
-            Sesame2HistoryTypeEnum.MANUAL_LOCKED -> CHSesame5History.ManualLocked(ts, recordID, mechStatus, null)
-            Sesame2HistoryTypeEnum.BLE_LOCK -> CHSesame5History.BLELock(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.BLE_UNLOCK -> CHSesame5History.BLEUnlock(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.AUTOLOCK -> CHSesame5History.AutoLock(ts, recordID, mechStatus, null)
-            Sesame2HistoryTypeEnum.WM2_LOCK -> CHSesame5History.WM2Lock(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.WM2_UNLOCK -> CHSesame5History.WM2Unlock(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.WEB_LOCK -> CHSesame5History.WEBLock(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.WEB_UNLOCK -> CHSesame5History.WEBUnlock(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.DOOR_OPEN -> CHSesame5History.DoorOpen(ts, recordID, mechStatus, histag)
-            Sesame2HistoryTypeEnum.DOOR_CLOSE -> CHSesame5History.DoorClose(ts, recordID, mechStatus, histag)
-            else -> null
-        }
-    }
-
-    //    override fun history(cursor: Long?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
-    override fun history(cursor: Long?, uuid: UUID, subUUID: String?, result: CHResult<Pair<List<CHSesame5History>, Long?>>) {
-        currentDeviceUUID = uuid
-        CHAccountManager.getHistory(this, cursor, subUUID) {
-
-            L.d("historyType", "uuid:${uuid}")
-            it.onSuccess {
-                val chHistorysToUI = ArrayList<CHSesame5History>()
-//                L.d("hcia", "it.data:" + it.data)
-
-                it.data.histories.forEach {
-                    val historyType = Sesame2HistoryTypeEnum.getByValue(it.type)
-                    val ts = it.timeStamp
-                    val recordID = it.recordID
-                    val histag = it.historyTag?.base64decodeByteArray()
-                    val params = it.parameter?.base64decodeByteArray()
-                    var mechStatus: CHSesame5MechStatus? = null
-                    if (params != null) {
-                        mechStatus = CHSesame5MechStatus(params)
-                    }
-                    val tmphis = eventToHistory(historyType, ts, recordID, mechStatus, histag)
-                    if (tmphis != null) {
-                        chHistorysToUI.add(tmphis)
-                    }
-                }
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(Pair(chHistorysToUI.toList(), it.data.cursor))))
-            }
-            it.onFailure {
-
-                L.d("historyType", "uuid:${uuid} fial")
-                L.d("hcia", "it:" + it)
-                result.invoke(Result.failure(it))
-            }
-        } // end getHistory
     }
 
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
