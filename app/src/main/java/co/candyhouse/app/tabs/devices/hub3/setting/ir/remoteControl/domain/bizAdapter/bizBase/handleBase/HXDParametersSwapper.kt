@@ -202,5 +202,24 @@ class HXDParametersSwapper {
         }
     }
 
+    /*开关      开/风速  摇头    风类(模式）    定时     灯光   负离子   1  2   3   4   5   6   7   8   9   睡眠    制冷    风量    低速    中速   高速        */
+
+    fun getFanKey(type: ItemType): Int {
+        return when (type) {
+            ItemType.POWER_STATUS_ON -> 0x01
+            ItemType.POWER_STATUS_OFF -> 0x01
+            ItemType.FAN_SPEED -> 0x02
+            ItemType.SHAKE_HEAD -> 0x03
+            ItemType.MODE -> 0x04
+            ItemType.LOW -> 0x14
+            ItemType.MIDDLE -> 0x15
+            ItemType.HIGH -> 0x16
+            else -> {
+                L.e(tag, "Unknown item type")
+                0x01
+            }
+        }
+    }
+
 
 }

@@ -4,7 +4,7 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
 
-interface UIConfigAdapter {
+interface RemoteUIAdapter {
 
     /**
      * 加载界面配置

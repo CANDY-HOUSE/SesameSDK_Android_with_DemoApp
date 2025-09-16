@@ -77,7 +77,13 @@ enum class ItemType {
     COLOR_TEMP_UP,
     COLOR_TEMP_DOWN,
 
-    POWER
+    POWER,
+
+    SHAKE_HEAD,
+    HIGH,
+    LOW,
+    MIDDLE
+
 }
 data class IrControlItem(
     val id: Int,

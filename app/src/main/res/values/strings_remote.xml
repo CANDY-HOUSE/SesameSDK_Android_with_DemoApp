@@ -99,5 +99,10 @@
     <string name="ir_wave_too_short">The Remote Control data read is too short, please try again</string>
     <string name="air_auto_match_introduction">Point the Remote Control to the LED side of Hub3, then press the power　ON button.</string>
     <string name="air_auto_match_code_fail">Failed to find data for this Remote Control model, please try again</string>
+    <string name="shake_head">Swing</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+    <string name="middle">Medium</string>
+    <string name="fan_speed">Fan Speed</string>
 
 </resources>

@@ -12,11 +12,12 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDCommandProcessor
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HXDParametersSwapper
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIType
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 
-class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
+class AirUIAdapter(val context: Context, val uiType: RemoteUIType) : RemoteUIAdapter {
     private val tag = javaClass.simpleName
     private val gson = Gson()
     private var config: UIControlConfig? = null
@@ -28,9 +29,7 @@ class AirControllerConfigAdapter(val context: Context) : UIConfigAdapter {
 
     override suspend fun loadConfig(): UIControlConfig {
         if (config == null) {
-            val jsonString = context.assets.open("config/air_control_config.json")
-                .bufferedReader()
-                .use { it.readText() }
+            val jsonString = context.assets.open(uiType.configPath).bufferedReader().use { it.readText() }
             config = gson.fromJson(jsonString, UIControlConfig::class.java)
         }
         if (null == config) {

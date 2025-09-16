@@ -1,8 +1,9 @@
 package co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase
 
 import android.content.Context
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.RemoteHandlerAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIType
 
 /**
  * RemoteAdapterFactory
@@ -12,7 +13,7 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAd
 
 interface RemoteAdapterFactory {
     // 创建界面配置适配器
-    fun createUIConfigAdapter(context: Context): UIConfigAdapter
+    fun createUIAdapter(context: Context, uiType: RemoteUIType ): RemoteUIAdapter
     // 创建业务处理适配器
-    fun createHandlerConfigAdapter(context: Context, uiConfigAdapter: UIConfigAdapter): HandlerConfigAdapter
+    fun createHandlerAdapter(context: Context, uiAdapter: RemoteUIAdapter): RemoteHandlerAdapter
 }

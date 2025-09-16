@@ -51,6 +51,7 @@ class RemoteTypeListFg : BaseIRFG<FgRemoteTypeListBinding>() {
             IRTypeBean(key = IRType.DEVICE_REMOTE_AIR),
             IRTypeBean(key = IRType.DEVICE_REMOTE_TV),
             IRTypeBean(key = IRType.DEVICE_REMOTE_LIGHT),
+            IRTypeBean(key = IRType.DEVICE_REMOTE_FANS),
             IRTypeBean(key = IRType.DEVICE_REMOTE_DIY)
         )
         bind.ryView.adapter = RemoteTypeListAdapter(irTypeList) {

@@ -97,5 +97,10 @@
     <string name="ir_wave_too_short">读取到的遥控器数据长度过短，请重试。</string>
     <string name="air_auto_match_introduction">请将遥控器对准Hub3 LED发光侧，按下电源ON按键。</string>
     <string name="air_auto_match_code_fail">寻找该型号数据失败，请再次重试。</string>
+    <string name="shake_head">摇头</string>
+    <string name="high">高</string>
+    <string name="low">低</string>
+    <string name="middle">中</string>
+    <string name="fan_speed">风速</string>
 
 </resources>

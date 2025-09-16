@@ -17,7 +17,9 @@ import co.candyhouse.sesame.server.IoTSubscriptionManager
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kotlinx.coroutines.Delay
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.UUID
@@ -32,6 +34,7 @@ class IrAirMatchCodeViewModel(val context: Context) :
     val connectStatusLiveData = MutableLiveData<Boolean>()
     val matchingLiveData = MutableLiveData<Boolean>()
     var isLearningMode = false
+    var hub3Mode = IROperation.MODE_CONTROL
     fun setHub3DeviceId(device: String) {
         this.hub3DeviceId = device
     }
@@ -60,17 +63,22 @@ class IrAirMatchCodeViewModel(val context: Context) :
         enterLearnMode()
     }
 
-    private fun startSubscribeIRMode() {
+    fun startSubscribeIRMode() {
         subscribeTopic(getGetModeTopic()) { it ->
             it.onSuccess { data->
-                if (!isLearningMode) {
-                    return@onSuccess
-                }
+
                 val jsonString = String(data.data)
                 val mode = extractValueWithJson(jsonString)
                 mode?.let {
-                    if (mode != IROperation.MODE_REGISTER) {
-                        setModel(IROperation.MODE_REGISTER)
+                    hub3Mode = mode
+                    if (hub3Mode != IROperation.MODE_REGISTER) {
+                        viewModelScope.launch(Dispatchers.IO) {
+                            delay(500) // 延迟500毫秒，防止干扰信息导致过快切换模式
+                            if (isLearningMode && hub3Mode != IROperation.MODE_REGISTER) {
+                                setModel(IROperation.MODE_REGISTER)
+                            }
+                        }
+
                     }
                 } ?: run {
                     L.e(tag, "getIRMode failed: Invalid JSON format or missing 'ir_mode' key")
@@ -109,31 +117,23 @@ class IrAirMatchCodeViewModel(val context: Context) :
             subscribeTopic(getLeaningDataTopic()) {
                 it.onSuccess {
                     viewModelScope.launch(Dispatchers.Main) { matchingLiveData.value = true }
-                    val callResult = CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), originRemoteLiveData.value!!.model!!) {
+                    CHIRAPIManager.matchIrCode(it.data, getCurrentIrDeviceType(), originRemoteLiveData.value!!.model!!) {
                         it.onSuccess { matchCodeResponse ->
                             startAutoMatch()
                             val irMatchCodeRequest = matchCodeResponse.data
                             val jsonString = Gson().toJson(irMatchCodeRequest)
                             val irMatchList = parseJsonToIrRemoteWithMatchList(jsonString, getCurrentIrDeviceType())
-                            L.e(tag, "Success: matchIrCode , list.size=${irMatchList.size}")
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = irMatchList
                                 matchingLiveData.value = false
                             }
                         }
                         it.onFailure { error ->
-                            L.e(tag, "Error: matchIrCode : ${error.message}")
                             startAutoMatch()
                             viewModelScope.launch(Dispatchers.Main) {
                                 irMatchRemoteListLiveData.value = emptyList()
                                 matchingLiveData.value = false
                             }
-                        }
-                    }
-                    if (!callResult) {
-                        startAutoMatch()
-                        viewModelScope.launch(Dispatchers.Main) {
-                            Toast.makeText(context, R.string.ir_wave_too_short, Toast.LENGTH_SHORT).show()
                         }
                     }
                 }

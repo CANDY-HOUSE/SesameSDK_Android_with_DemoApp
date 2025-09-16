@@ -116,7 +116,12 @@ object UIResourceExtension {
         "light_brightness_up" to R.string.light_brightness_up,
         "light_brightness_down" to R.string.light_brightness_down,
         "light_color_temp_up" to R.string.light_color_temp_up,
-        "light_color_temp_down" to R.string.light_color_temp_down
+        "light_color_temp_down" to R.string.light_color_temp_down,
+        "shake_head" to R.string.shake_head,
+        "low" to R.string.low,
+        "middle" to R.string.middle,
+        "high" to R.string.high,
+        "fan_speed" to R.string.fan_speed,
     )
 
     fun getString(context: Context, key: String): String {

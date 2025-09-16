@@ -6,9 +6,9 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.UIControlConfig
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerCallback
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.RemoteHandlerAdapter
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.ConfigUpdateCallback
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIAdapter
 import co.candyhouse.server.CHResult
 import co.candyhouse.sesame.utils.L
 
@@ -16,8 +16,8 @@ import co.candyhouse.sesame.utils.L
  * 红外远程控制器，使用请先初始化 initialize
  */
 class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
-    private lateinit var uiConfigAdapter: UIConfigAdapter
-    private lateinit var handlerConfigAdapter: HandlerConfigAdapter
+    private lateinit var uiAdapter: RemoteUIAdapter
+    private lateinit var handlerAdapter: RemoteHandlerAdapter
     private var haveInitialized = false
 
     /**
@@ -28,10 +28,11 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
      */
     fun initialize(type: Int, uiItemCallback: ConfigUpdateCallback, handlerCallback: HandlerCallback) {
         val factory = RemoteAdapterFactoryManager.getFactory(type)
-        uiConfigAdapter = factory.createUIConfigAdapter(context)
-        handlerConfigAdapter = factory.createHandlerConfigAdapter(context, uiConfigAdapter)
-        uiConfigAdapter.setConfigUpdateCallback(uiItemCallback)
-        handlerConfigAdapter.setHandlerCallback(handlerCallback)
+        val uiType = RemoteAdapterFactoryManager.getUIType(type)
+        uiAdapter = factory.createUIAdapter(context,uiType)
+        handlerAdapter = factory.createHandlerAdapter(context, uiAdapter)
+        uiAdapter.setConfigUpdateCallback(uiItemCallback)
+        handlerAdapter.setHandlerCallback(handlerCallback)
         haveInitialized = true
         clearHandlerCache()
         clearConfigCache()
@@ -47,7 +48,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        return uiConfigAdapter.loadConfig()
+        return uiAdapter.loadConfig()
     }
 
     /**
@@ -59,7 +60,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        return uiConfigAdapter.loadUIParams()
+        return uiAdapter.loadUIParams()
     }
 
     /**
@@ -73,9 +74,9 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        val handleSuccess = uiConfigAdapter.handleItemClick(item, hub3DeviceId, remoteDevice)
+        val handleSuccess = uiAdapter.handleItemClick(item, hub3DeviceId, remoteDevice)
         if (handleSuccess) {
-            handlerConfigAdapter.handleItemClick(item, hub3DeviceId, remoteDevice)
+            handlerAdapter.handleItemClick(item, hub3DeviceId, remoteDevice)
         }
     }
 
@@ -84,7 +85,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             throw Exception("RemoteRepository not initialized")
         }
-        handlerConfigAdapter.addIrDeviceToMatter(irRemote, hub3DeviceId)
+        handlerAdapter.addIrDeviceToMatter(irRemote, hub3DeviceId)
     }
 
     /**
@@ -95,7 +96,7 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             return
         }
-        uiConfigAdapter.clearConfigCache()
+        uiAdapter.clearConfigCache()
     }
 
     /**
@@ -106,22 +107,22 @@ class RemoteRepository(val context: Context) : ViewModelProvider.Factory {
             L.e("RemoteRepository", "RemoteRepository not initialized")
             return
         }
-        handlerConfigAdapter.clearHandlerCache()
+        handlerAdapter.clearHandlerCache()
     }
 
     fun getCurrentState(hub3DeviceId: String, remoteDevice: IrRemote): String {
-        return handlerConfigAdapter.getCurrentState(hub3DeviceId, remoteDevice)
+        return handlerAdapter.getCurrentState(hub3DeviceId, remoteDevice)
     }
 
     fun getCurrentIRType(): Int {
-        return handlerConfigAdapter.getCurrentIRType()
+        return handlerAdapter.getCurrentIRType()
     }
 
     fun modifyRemoteIrDeviceInfo(device: String, remoteDevice: IrRemote, onResponse: CHResult<Any>) {
-        handlerConfigAdapter.modifyIRDeviceInfo(device, remoteDevice, onResponse)
+        handlerAdapter.modifyIRDeviceInfo(device, remoteDevice, onResponse)
     }
 
     fun setCurrentSate(state: String?) {
-        uiConfigAdapter.setCurrentSate(state)
+        uiAdapter.setCurrentSate(state)
     }
 }

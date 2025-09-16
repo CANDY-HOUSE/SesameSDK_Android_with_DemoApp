@@ -7,11 +7,11 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IROperation
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.ItemType
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.air.ui.AirControllerConfigAdapter
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.air.ui.AirUIAdapter
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerCallback
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.HandlerConfigAdapter
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.UIConfigAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.handleBase.RemoteHandlerAdapter
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIType
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.uiBase.RemoteUIAdapter
 import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.sesame.server.HttpRespondCode
@@ -23,8 +23,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.text.toHexString
 
-class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIConfigAdapter) : HandlerConfigAdapter {
-    private val tag = AirControllerHandlerAdapter::class.java.simpleName
+class AirHandlerAdapter(val context: Context, val uiAdapter: RemoteUIAdapter) : RemoteHandlerAdapter {
+    private val tag = AirHandlerAdapter::class.java.simpleName
+    private val uiType: RemoteUIType = (uiAdapter as AirUIAdapter).uiType
 
     override fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote) {
         GlobalScope.launch(Dispatchers.IO) {
@@ -34,7 +35,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
                 return@launch
             }
             L.d(tag, "handleItemClick buildCommand is:command=${command}, device:${hub3DeviceId}")
-            uiConfigAdapter.setCurrentSate(command)
+            uiAdapter.setCurrentSate(command)
             postCommand(hub3DeviceId, command)
             if (remoteDevice.uuid.isNotEmpty() && remoteDevice.haveSave) {
                 CHIRAPIManager.updateIRDeviceState(hub3DeviceId, remoteDevice.uuid, state = command) {
@@ -144,7 +145,7 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     private fun buildCommand(item: IrControlItem, remoteDevice: IrRemote): String {
         L.d("harry", "buildCommand item: $item , remoteDevice: $remoteDevice")
         try {
-            val configAdapter: AirControllerConfigAdapter = uiConfigAdapter as AirControllerConfigAdapter
+            val configAdapter: AirUIAdapter = uiAdapter as AirUIAdapter
             val key = configAdapter.parametersSwapper.getAirKey(item.type)
             val command = configAdapter.commandProcessor.setKey(key).setCode(remoteDevice.code).buildAirCommand()
 
@@ -165,10 +166,10 @@ class AirControllerHandlerAdapter(val context: Context, val uiConfigAdapter: UIC
     }
 
     override fun getCurrentState(hub3DeviceId: String, remoteDevice: IrRemote): String {
-        return (uiConfigAdapter as AirControllerConfigAdapter).getCurrentState()
+        return (uiAdapter as AirUIAdapter).getCurrentState()
     }
 
     override fun getCurrentIRType(): Int {
-        return IRType.DEVICE_REMOTE_AIR
+        return uiType.irType
     }
 }

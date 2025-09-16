@@ -109,6 +109,7 @@ class RemoteMatchCodeFG : BaseIRFG<FgRemoteMatchCodeBinding>() {
 
     private fun startAutoMatch() {
         showAutoMatchView(emptyList(), true)
+        viewModel.startSubscribeIRMode()
         viewModel.startAutoMatch()
     }
 

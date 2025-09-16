@@ -62,7 +62,7 @@ class Hub3IrAdapter(
                                         hub3IrAdapterProvider.performStudy(data)
                                     }
 
-                                    IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV -> {
+                                    IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV, IRType.DEVICE_REMOTE_FANS -> {
                                         // 空调
                                         hub3IrAdapterProvider.performAirControl(data)
                                     }

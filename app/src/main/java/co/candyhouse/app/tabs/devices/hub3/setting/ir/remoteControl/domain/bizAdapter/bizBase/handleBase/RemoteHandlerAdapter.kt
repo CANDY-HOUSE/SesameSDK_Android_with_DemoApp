@@ -4,7 +4,7 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrControlItem
 import co.candyhouse.server.CHResult
 
-interface HandlerConfigAdapter {
+interface RemoteHandlerAdapter {
     fun handleItemClick(item: IrControlItem, hub3DeviceId: String, remoteDevice: IrRemote)
     fun modifyIRDeviceInfo(hub3DeviceId: String, remoteDevice: IrRemote, onResponse: CHResult<Any>)
     fun clearHandlerCache()

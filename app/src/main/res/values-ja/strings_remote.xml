@@ -97,5 +97,10 @@
     <string name="ir_wave_too_short">読み取ったリモコンデータの長さが短すぎます。もう一度お試しくださいませ</string>
     <string name="air_auto_match_introduction">リモコンをHub3のLEDが光る側に向けて、リモコンの電源ONボタンを押してくださいませ。</string>
     <string name="air_auto_match_code_fail">このリモコン型番のデータ検索に失敗しました。もう一度お試しくださいませ</string>
+    <string name="shake_head">スイング</string>
+    <string name="high">強</string>
+    <string name="low">弱</string>
+    <string name="middle">中</string>
+    <string name="fan_speed">風量</string>
 
 </resources>

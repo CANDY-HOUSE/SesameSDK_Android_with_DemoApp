@@ -251,7 +251,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 safeNavigate(R.id.remoteLearnFg, bundle)
             }
 
-            IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV -> {
+            IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV, IRType.DEVICE_REMOTE_FANS -> {
                 //空调
                 mDeviceViewModel.ssmLockLiveData.value = hub3
                 safeNavigate(R.id.action_to_irgridefg2, Bundle().apply {

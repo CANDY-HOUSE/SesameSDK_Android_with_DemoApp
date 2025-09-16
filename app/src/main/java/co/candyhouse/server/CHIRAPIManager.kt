@@ -314,11 +314,13 @@ object CHIRAPIManager {
     }
 
 
-    fun matchIrCode(data: ByteArray, type:Int, brandName:String, onResponse: CHResult<Any>): Boolean {
+    @OptIn(ExperimentalStdlibApi::class)
+    fun matchIrCode(data: ByteArray, type:Int, brandName:String, onResponse: CHResult<Any>) {
 
         if (data.size < DATA_SIZE_MIN_NUM) {
             L.e("matchIrCode", "Invalid data length: ${data.size}")
-            return false
+            onResponse.invoke(Result.failure(Exception("Invalid data length: ${data.size}")))
+            return
         }
         makeApiCall(onResponse) {
             try {
@@ -335,7 +337,6 @@ object CHIRAPIManager {
                 onResponse.invoke(Result.failure(e))
             }
         }
-        return true
     }
 
     /**

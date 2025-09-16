@@ -37,7 +37,7 @@ class HXDCommandProcessor {
 
 
     @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
-    fun buildNoneAirCommand(): UByteArray {
+    fun buildNonAirCommand(): UByteArray {
         val buf: UByteArray = buildKeyData(commonPrefixCode, code,defaultTable)
         buf[9] = key.toByte().toUByte()
 
