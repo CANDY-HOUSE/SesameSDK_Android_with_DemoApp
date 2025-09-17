@@ -48,7 +48,7 @@ class Hub3MatterFG : BaseDeviceFG<FgMatterBinding>() {
         val isStatus = targetDevice.deviceStatus.value
         isStatus?.apply {
             if (this == CHDeviceLoginStatus.UnLogin) {
-                toastMSG("4 - Bluetooch is off")
+                toastMSG("4 - Bluetooth is off")
             }
         }
 
