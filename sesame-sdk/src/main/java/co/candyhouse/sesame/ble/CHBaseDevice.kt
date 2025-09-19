@@ -27,6 +27,7 @@ import co.candyhouse.sesame.open.device.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.CHMulticastDelegate
 import co.candyhouse.sesame.utils.L
 import java.util.UUID
@@ -54,6 +55,14 @@ internal interface CHDeviceUtil {
     var rssi: Int? = 0
     var mBluetoothGatt: BluetoothGatt? = null //[gatt] 控制藍芽連線的全局物件
     var isNeedAuthFromServer: Boolean? = false
+    var userKey: CHUserKey? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                delegate?.onMechStatus(this as CHDevices)
+                notifyMechStatusChanged()
+            }
+        }
     var mechStatus: CHSesameProtocolMechStatus? = null
         set(value) {
             if (field != value) {
@@ -179,6 +188,9 @@ internal fun <T> CHDevices.isBleAvailable(result: CHResult<T>): Boolean {
 
 internal fun CHBaseDevice.toCHDevices(): CHDevices {
     return object : CHDevices {
+        override var userKey: CHUserKey?
+            get() = this@toCHDevices.userKey
+            set(value) { this@toCHDevices.userKey = value }
         override var mechStatus: CHSesameProtocolMechStatus?
             get() = this@toCHDevices.mechStatus
             set(value) { this@toCHDevices.mechStatus = value }

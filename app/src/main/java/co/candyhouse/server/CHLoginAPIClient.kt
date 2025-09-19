@@ -1,7 +1,7 @@
 package co.candyhouse.server
 
 import co.candyhouse.app.BuildConfig
-import co.candyhouse.app.tabs.account.CHUserKey
+import co.candyhouse.sesame.server.dto.CHUserKey
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
 import com.amazonaws.mobileconnectors.apigateway.annotation.Service

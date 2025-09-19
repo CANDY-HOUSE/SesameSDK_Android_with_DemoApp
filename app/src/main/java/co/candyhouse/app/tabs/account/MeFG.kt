@@ -19,7 +19,6 @@ import androidx.lifecycle.lifecycleScope
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgMeBinding
-import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.tabs.HomeFragment
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
@@ -27,6 +26,7 @@ import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHSesameLock
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.utils.SharedPreferencesUtils
@@ -164,7 +164,6 @@ class MeFG : HomeFragment<FgMeBinding>() {
                 )
             )
         }
-        CHDeviceWrapperManager.clear()
     }
 
     private fun handleNameEdit() {
@@ -302,23 +301,3 @@ fun userKeyToCHKey(key: CHUserKey, historyTag: ByteArray? = null): CHDevice {
 fun getHistoryTag(): ByteArray {
     return SharedPreferencesUtils.nickname?.toByteArray() ?: MainActivity.activity!!.getString(R.string.unLoginHistoryTag).toByteArray()
 }
-
-data class CHUserKey(
-    var deviceUUID: String,
-    val deviceModel: String,
-    val keyIndex: String,
-    val secretKey: String,
-    val sesame2PublicKey: String,
-    var deviceName: String?,
-    var keyLevel: Int,
-    var rank: Int? = null,
-    val subUUID: String = "",
-    val stateInfo: StateInfo = StateInfo()
-)
-
-data class StateInfo(
-    val batteryPercentage: Int? = null,
-    val CHSesame2Status: String? = null,
-    val timestamp: Long? = null,
-    val wm2State: Boolean? = null
-)

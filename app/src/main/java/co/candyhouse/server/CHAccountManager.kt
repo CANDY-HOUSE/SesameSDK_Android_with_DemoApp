@@ -1,12 +1,13 @@
 package co.candyhouse.server
 
-import co.candyhouse.app.ext.TokenManager
-import co.candyhouse.app.tabs.account.CHUserKey
+import co.candyhouse.sesame.server.dto.CHUserKey
+import co.utils.JsonUtil
 import co.utils.SharedPreferencesUtils
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
@@ -29,19 +30,23 @@ object CHLoginAPIManager {
         jpAPIClient = factory.build(CHLoginAPIClient::class.java)
     }
 
-    private fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, requireSignIn: Boolean = true, block: T.() -> R) {
-        if (requireSignIn && !AWSMobileClient.getInstance().isSignedIn) {
-            onResponse.invoke(Result.failure(Throwable("isSignedIn???")))
-            return
+
+        private fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, requireSignIn: Boolean = true, block: T.() -> R) {
+
+            if (requireSignIn && !AWSMobileClient.getInstance().isSignedIn) {
+                onResponse.invoke(Result.failure(Throwable("isSignedIn???")))
+                return
+            }
+            httpScope.launch(EmptyCoroutineContext, CoroutineStart.DEFAULT) {
+                runCatching {
+                    block()
+                }.onFailure {
+
+                    onResponse.invoke(Result.failure(it))
+                }.onSuccess {}
+            }
         }
-        httpScope.launch(EmptyCoroutineContext, CoroutineStart.DEFAULT) {
-            runCatching {
-                block()
-            }.onFailure {
-                onResponse.invoke(Result.failure(it))
-            }.onSuccess {}
-        }
-    }
+
 
     fun upLoadKeys(keys: List<CHUserKey>, onResponse: CHResult<Array<CHUserKey>>) {
         makeApiCall(onResponse) {
@@ -148,22 +153,17 @@ object CHLoginAPIManager {
 
     fun getWebUrlByScene(scene: String, extInfo: Map<String, String>? = null, onResponse: CHResult<Any>,) {
         makeApiCall(onResponse, requireSignIn = false) {
-            TokenManager.getValidToken { result ->
-                result.fold(
-                    onSuccess = {
-                        val token = result.getOrNull()
+            val token = if (AWSMobileClient.getInstance().isSignedIn) {
+                AWSMobileClient.getInstance().tokens.idToken.tokenString
+            } else null
 
-                        val requestBody = ScenePayload(scene = scene, token = token, extInfo = extInfo)
-                        val response = jpAPIClient.getWebUrlByScene(requestBody)
+            val requestBody = ScenePayload(scene = scene, token = token, extInfo = extInfo)
+            val response = jpAPIClient.getWebUrlByScene(requestBody)
 
-                        val urlString = Gson().toJsonTree(response).asJsonObject.get("url").asString
-                        onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(data = urlString)))
-                    },
-                    onFailure = {
-                        onResponse.invoke(Result.failure(result.exceptionOrNull() ?: Exception("Token refresh failed")))
-                    }
-                )
-            }
+            val urlString = Gson().toJsonTree(response).asJsonObject.get("url").asString
+
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(data = urlString)))
         }
     }
+
 }
