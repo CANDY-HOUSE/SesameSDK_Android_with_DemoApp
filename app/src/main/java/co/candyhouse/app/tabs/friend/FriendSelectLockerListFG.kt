@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgFriendSelectLockerListBinding
+import co.candyhouse.app.tabs.account.CHUserKey
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
@@ -21,7 +22,6 @@ import co.candyhouse.server.CHUserKeyFriendID
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
-import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView

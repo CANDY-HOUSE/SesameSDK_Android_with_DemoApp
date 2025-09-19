@@ -13,8 +13,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.app.tabs.account.CHUserKey
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.account.userKeyToCHKey
@@ -29,6 +31,7 @@ import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.server.CHResultState
+import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.CHScanStatus
@@ -38,11 +41,9 @@ import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
-import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.receiver.widget.SesameReceiver
@@ -51,6 +52,7 @@ import co.utils.JsonUtil.parseList
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
+import co.utils.isAutoConnect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -158,7 +160,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             userKeys.addAll(result.data.map { it.deviceUUID.lowercase() })
 
             viewModelScope.launch {
-                val userKeyMap = result.data.associateBy { it.deviceUUID.lowercase() }
+                CHDeviceWrapperManager.updateUserKeys(result.data.toList())
 
                 result.data.forEach { userKey ->
                     val deviceId = userKey.deviceUUID.lowercase()
@@ -180,10 +182,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 CHDeviceManager.receiveCHDeviceKeys(userks) { response ->
                     response.onSuccess { deviceResponse ->
                         deviceResponse.data.forEach { device ->
-                            val deviceId = device.deviceId?.toString()?.lowercase()
-                            deviceId?.let { id ->
-                                device.userKey = userKeyMap[id]
-                            }
+                            CHDeviceWrapperManager.updateDevice(device)
                         }
                         updateDevices(deviceResponse.data)
                     }
@@ -278,30 +277,41 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             synchronized(this@CHDeviceViewModel) {
                 userKeys.clear()
                 myChDevices.value = ArrayList(filteredDevices)
+                val devicesToRefresh = mutableListOf<CHDevices>()
                 myChDevices.value.forEach { device ->
                     device.delegate = delegateManager
+                    // 锁、bike、bot自动连接蓝牙
                     backgroundAutoConnect(device)
 
                     // 红外设备
                     if (device is CHHub3) {
-                        L.d("sf", "fetchIRDevices...")
+                        L.d("updateDevices", "fetchIRDevices...")
                         fetchIRDevices(device)
                     }
 
-                    // 设备列表更新
+                    // 监听器（设备状态变化时会触发）
                     listerChDeviceStatus(device) {
+                        L.d("updateDevices", "刷新锁-ID=${device.deviceId}")
                         updateNeeRefresh(it)
                     }
 
-                    // 下拉刷新，更新界面
-                    if (CHDeviceManager.isRefresh.get()) {
-                        L.e("sf", "下拉刷新，设备ID=${device.deviceId}")
-                        updateNeeRefresh(device)
+                    val needsImmediateRefresh = when {
+                        CHDeviceManager.isRefresh.get() -> true
+                        device is CHWifiModule2 || device is CHSesameBiometricDevice -> true
+                        else -> false
+                    }
+
+                    if (needsImmediateRefresh) {
+                        devicesToRefresh.add(device)
                     }
                 }
-                // 下拉刷新增加判断，如果没有设备的处理
-                if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
-                    L.e("sf", "下拉刷新，没有发现任何设备")
+                if (devicesToRefresh.isNotEmpty()) {
+                    devicesToRefresh.map { device ->
+                        L.d("updateDevices", "立即刷新设备ID=${device.deviceId}")
+                        updateNeeRefresh(device)
+                    }
+                } else if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
+                    L.e("updateDevices", "下拉刷新，没有发现任何设备")
                     neeReflesh.postValue(BeanDevices(emptyList()))
                 }
             }
@@ -387,14 +397,11 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         }
     }
 
-    fun backgroundAutoConnect(device: CHDevices) {// 根據不同設備判斷要不要自動斷線連線
-        GlobalScope.launch(IO) { // 在 IO 调度器上启动新协程
-            if (device.deviceStatus == CHDeviceStatus.ReceivedAdV) {
-                if (device !is CHSesameConnector && device !is CHWifiModule2) {
-                    L.d("backgroundAutoConnect", Thread.currentThread().name)
-                    // 自动重连
-                    device.connect { }
-                }
+    fun backgroundAutoConnect(device: CHDevices) {
+        GlobalScope.launch(IO) {
+            if (device.deviceStatus == CHDeviceStatus.ReceivedAdV && device.isAutoConnect()) {
+                L.d("backgroundAutoConnect", "自动连接设备ID=${device.deviceId}")
+                device.connect { }
             }
         }
     }

@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgFriendDetailBinding
+import co.candyhouse.app.tabs.account.CHUserKey
 import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.level2Tag
 import co.candyhouse.server.CHDeviceIDFriendID
 import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
