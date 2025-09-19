@@ -351,7 +351,7 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_001481
         CHProductModel.SSMFace -> R.raw.sesameface1_30_19_001481
         CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_c77013
-        CHProductModel.SSMOpenSensor2 -> R.raw.opensensor2_30_24_331261
+        CHProductModel.SSMOpenSensor2 -> R.raw.opensensor2_30_24_7970f1
         else ->0
     }
 
