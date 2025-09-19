@@ -146,7 +146,7 @@ fun ssm5UIParser(device: CHDevices): Int {
             }
         }
     }
-    if (device.productModel == CHProductModel.SSMOpenSensor) {
+    if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.SSMOpenSensor2) {
         return R.drawable.icon_opensensor
     }
 
@@ -259,6 +259,7 @@ fun CHDevices.getRank(): Int {
 
 fun CHDevices.uiPriority(): Int { // 利用 * -1 排序。數字越大排越上方
     return -1 * when (productModel) {
+        CHProductModel.SSMOpenSensor2 -> 24
         CHProductModel.SSMFaceAI -> 23
         CHProductModel.SSMFaceProAI -> 22
         CHProductModel.SS6Pro -> 21
@@ -350,6 +351,7 @@ fun CHDevices.getFirZip(): Int {
         CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_001481
         CHProductModel.SSMFace -> R.raw.sesameface1_30_19_001481
         CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_c77013
+        CHProductModel.SSMOpenSensor2 -> R.raw.opensensor2_30_24_331261
         else ->0
     }
 
@@ -403,5 +405,6 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFaceProAI -> MainActivity.activity!!.getString(R.string.SSMFaceProAI)
         CHProductModel.SSMFaceAI -> MainActivity.activity!!.getString(R.string.SSMFaceAI)
         CHProductModel.SS6Pro -> MainActivity.activity!!.getString(R.string.Sesame6Pro)
+        CHProductModel.SSMOpenSensor2 -> MainActivity.activity!!.getString(R.string.SesameOpenSensor2)
     }
 }

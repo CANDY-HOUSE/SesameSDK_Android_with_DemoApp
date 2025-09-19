@@ -73,7 +73,7 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
                                                     it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }
                                                 }
                                             }
-                                            CHProductModel.SSMOpenSensor -> { }
+                                            CHProductModel.SSMOpenSensor, CHProductModel.SSMOpenSensor2 -> { }
                                             else -> {
                                                 (mDeviceModel.ssmLockLiveData.value!! as CHHub3).insertSesame(locker, locker.getNickname(), MatterProductModel.DoorLock) {
                                                     it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }

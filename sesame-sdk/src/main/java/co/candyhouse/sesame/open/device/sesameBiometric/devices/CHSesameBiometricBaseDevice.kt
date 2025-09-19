@@ -318,7 +318,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      */
     override fun goIOT() {
         when {
-            productModel == CHProductModel.SSMOpenSensor -> {
+            productModel == CHProductModel.SSMOpenSensor || productModel == CHProductModel.SSMOpenSensor2 -> {
                 subscribeOpenSensor()
             }
 

@@ -299,7 +299,7 @@ class DeviceListAdapter(
                 blImg.visibility = View.GONE
                 ssmBikeBotView.visibility = View.GONE
 
-                if (device.productModel == CHProductModel.SSMOpenSensor) {
+                if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.SSMOpenSensor2) {
                     val statusText = (device.mechStatus as? CHSesameOpenSensorMechStatus)?.data?.let { data ->
                         runCatching {
                             val sensorData = OpenSensorData.fromByteArray(data)

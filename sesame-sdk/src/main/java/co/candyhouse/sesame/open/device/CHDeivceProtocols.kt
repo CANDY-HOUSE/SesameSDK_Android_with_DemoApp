@@ -177,6 +177,12 @@ enum class CHProductModel {
         override fun deviceModel() = "sesame_face_ai" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 1 AI"
         override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_AI, DeviceProfiles.SESAME_FACE_AI)
+    },
+    SSMOpenSensor2 {
+        override fun productType() = 24
+        override fun deviceModel() = "open_sensor_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Open Sensor 2"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.OPEN_SENSOR_2, setOf())
     };
 
     abstract fun productType(): Int

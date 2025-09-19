@@ -39,7 +39,8 @@ enum class BiometricDeviceType {
     SESAME_FACE,
     SESAME_FACE_PRO,
     SESAME_FACE_AI,
-    SESAME_FACE_PRO_AI
+    SESAME_FACE_PRO_AI,
+    OPEN_SENSOR_2
 }
 
 internal class CHSesameBiometricDeviceImpl(

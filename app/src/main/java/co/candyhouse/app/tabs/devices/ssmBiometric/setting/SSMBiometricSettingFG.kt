@@ -405,7 +405,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         if (mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.SSMOpenSensor
             || mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.Remote
             || mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.RemoteNano
-
+            || mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.SSMOpenSensor2
         ) {
             bind.cardsZone.visibility = View.GONE
             bind.fpZone.visibility = View.GONE
