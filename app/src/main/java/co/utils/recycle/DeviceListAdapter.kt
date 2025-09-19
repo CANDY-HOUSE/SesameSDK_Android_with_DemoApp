@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.SesameDevicesListLayoutBinding
+import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.hub3.recycle.Hub3ItemView
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote

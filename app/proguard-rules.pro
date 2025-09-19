@@ -85,6 +85,14 @@
 # 数据模型类
 -keep class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.** { *; }
 -keepclassmembers class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.** { *; }
+-keep class co.candyhouse.app.tabs.account.CHUserKey { *; }
+-keep class co.candyhouse.app.tabs.account.StateInfo { *; }
+-keepclassmembers class co.candyhouse.app.tabs.account.CHUserKey {
+    <fields>;
+}
+-keepclassmembers class co.candyhouse.app.tabs.account.StateInfo {
+    <fields>;
+}
 
 
 # AWS相关

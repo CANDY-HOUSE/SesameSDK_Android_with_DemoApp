@@ -8,6 +8,15 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
+import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHSesame2
+import co.candyhouse.sesame.open.device.CHSesame5
+import co.candyhouse.sesame.open.device.CHSesameBike
+import co.candyhouse.sesame.open.device.CHSesameBike2
+import co.candyhouse.sesame.open.device.CHSesameBot
+import co.candyhouse.sesame.open.device.CHSesameBot2
+import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.utils.L
 
 private fun NavController.hasAction(actionId: Int): Boolean {
@@ -74,4 +83,14 @@ fun Fragment.restoreContainerTopPadding() {
 
 fun Fragment.applyBottomInsets() {
     applyInsetsPadding(requireView(), bottom = true)
+}
+
+fun CHDevices.isAutoConnect(): Boolean {
+    return when (this) {
+        is CHSesame2, is CHSesameBot, is CHSesameBike,
+        is CHSesame5, is CHSesameBike2, is CHSesameBot2 -> true
+
+        is CHWifiModule2, is CHSesameBiometricDevice -> false
+        else -> false
+    }
 }

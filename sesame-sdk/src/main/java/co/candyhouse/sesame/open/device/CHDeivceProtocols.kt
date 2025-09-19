@@ -1,4 +1,5 @@
 package co.candyhouse.sesame.open.device
+
 import android.bluetooth.BluetoothDevice
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.os2.CHError
@@ -23,7 +24,6 @@ import co.candyhouse.sesame.server.dto.CHGuestKey
 import co.candyhouse.sesame.server.dto.CHGuestKeyCut
 import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHRemoveGuestKeyRequest
-import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.utils.CHMulticastDelegate
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
@@ -200,7 +200,6 @@ enum class CHProductModel {
 //interface CHDeviceStatusAndKeysDelegate : CHDeviceStatusDelegate, CHWifiModule2Delegate {}
 interface CHDevices {
 
-    var userKey: CHUserKey?
     var mechStatus: CHSesameProtocolMechStatus?
     var deviceTimestamp: Long?
     var loginTimestamp: Long?
