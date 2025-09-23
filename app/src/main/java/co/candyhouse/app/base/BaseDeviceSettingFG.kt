@@ -25,7 +25,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.clearNFC
-import co.candyhouse.app.tabs.devices.ssm2.getFirZip
+import co.candyhouse.app.tabs.devices.ssm2.getFirmwareName
+import co.candyhouse.app.tabs.devices.ssm2.getFirmwarePath
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
@@ -144,8 +145,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private fun versionSet(targetDevice: CHDevices, str: String) {
         if (targetDevice.productModel != CHProductModel.Hub3) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
-                val zipname: String? =
-                    context?.resources?.getResourceEntryName(targetDevice.getFirZip())
+                val zipname: String? = targetDevice.getFirmwareName()
                 L.d(
                     "sf",
                     targetDevice.productModel.deviceModelName() + "------" + zipname
@@ -341,16 +341,17 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                                 L.d("hcia", "res:$res")
                                 res.onSuccess {
                                     L.d("hcia", "updateFirmware:" + it.data.address)
-                                    val starter = DfuServiceInitiator(it.data.address)
-                                    starter.setZip(targetDevice.getFirZip())
-                                    starter.setPacketsReceiptNotificationsEnabled(true)
-                                    starter.setPrepareDataObjectDelay(400)
-                                    starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(
-                                        true
-                                    )
-                                    starter.setDisableNotification(false)
-                                    starter.setForeground(false)
-                                    starter.start(requireActivity(), DfuService::class.java)
+                                    val firmwarePath = targetDevice.getFirmwarePath(requireContext())
+                                    if (firmwarePath != null) {
+                                        val starter = DfuServiceInitiator(it.data.address)
+                                        starter.setZip(firmwarePath)
+                                        starter.setPacketsReceiptNotificationsEnabled(true)
+                                        starter.setPrepareDataObjectDelay(400)
+                                        starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
+                                        starter.setDisableNotification(false)
+                                        starter.setForeground(false)
+                                        starter.start(requireActivity(), DfuService::class.java)
+                                    }
                                 }
                             }
                         }

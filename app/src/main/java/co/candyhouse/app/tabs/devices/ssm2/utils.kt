@@ -1,5 +1,6 @@
 package co.candyhouse.app.tabs.devices.ssm2
 
+import android.content.Context
 import android.graphics.Typeface
 import android.text.Layout
 import android.text.SpannableStringBuilder
@@ -20,6 +21,7 @@ import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -327,58 +329,59 @@ fun CHDevices.getDistance(): Int {
     return (10.0.pow(((0 - rssiValue - 62.0) / 20.0)) * 100).toInt()
 }
 
-fun CHDevices.getFirZip(): Int {
-       L.d("hcia", "productModel:$productModel")
+fun CHDevices.getFirmwareName(): String? {
+    L.d("firmware", "productModel:$productModel")
     return when (productModel) {
-        CHProductModel.SS2 -> R.raw.sesame_221_0_8c080c
-        CHProductModel.SS4 -> R.raw.sesame_421_4_50ce5b
-        CHProductModel.SS5 -> R.raw.sesame5_30_5_01be3d
-        CHProductModel.SS5PRO -> R.raw.sesame5pro_30_7_01be3d
-        CHProductModel.WM2 -> 0
-        CHProductModel.SesameBot1 -> R.raw.sesamebot1_21_2_369eb9
-        CHProductModel.BiKeLock -> R.raw.sesamebike1_21_3_d7162a
-        CHProductModel.BiKeLock2 -> R.raw.sesamebike2_30_6_990e7f
-        CHProductModel.SSMTouchPro -> R.raw.sesametouch1pro_30_9_4d0bf8
-        CHProductModel.SSMTouch -> R.raw.sesametouch1_30_10_4d0bf8
-        CHProductModel.SSMOpenSensor -> R.raw.opensensor1_30_8_7970f1
-        CHProductModel.BLEConnector -> R.raw.bleconnector_30_11_01be3d
-        CHProductModel.Remote -> R.raw.remote_30_14_03d244
-        CHProductModel.RemoteNano -> R.raw.remoten_30_15_03d244
-        CHProductModel.SesameBot2 -> R.raw.sesamebot2_30_17_990e7f
-        CHProductModel.SS5US -> R.raw.sesame5us_30_16_01be3d
-        CHProductModel.SSMFacePro -> R.raw.sesameface1pro_30_18_001481
-        CHProductModel.SSMFaceAI -> R.raw.sesameface1ai_30_23_001481
-        CHProductModel.SSMFaceProAI -> R.raw.sesameface1proai_30_22_001481
-        CHProductModel.SSMFace -> R.raw.sesameface1_30_19_001481
-        CHProductModel.SS6Pro -> R.raw.sesame6pro_30_21_c77013
-        CHProductModel.SSMOpenSensor2 -> R.raw.opensensor2_30_24_7970f1
-        else ->0
+        CHProductModel.SS2 -> "sesame_221_0_8c080c"
+        CHProductModel.SS4 -> "sesame_421_4_50ce5b"
+        CHProductModel.SS5 -> "sesame5_30_5_01be3d"
+        CHProductModel.SS5PRO -> "sesame5pro_30_7_01be3d"
+        CHProductModel.WM2 -> null
+        CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
+        CHProductModel.BiKeLock -> "sesamebike1_21_3_d7162a"
+        CHProductModel.BiKeLock2 -> "sesamebike2_30_6_990e7f"
+        CHProductModel.SSMTouchPro -> "sesametouch1pro_30_9_4d0bf8"
+        CHProductModel.SSMTouch -> "sesametouch1_30_10_4d0bf8"
+        CHProductModel.SSMOpenSensor -> "opensensor1_30_8_7970f1"
+        CHProductModel.BLEConnector -> "bleconnector_30_11_01be3d"
+        CHProductModel.Remote -> "remote_30_14_03d244"
+        CHProductModel.RemoteNano -> "remoten_30_15_03d244"
+        CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
+        CHProductModel.SS5US -> "sesame5us_30_16_01be3d"
+        CHProductModel.SSMFacePro -> "sesameface1pro_30_18_001481"
+        CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_001481"
+        CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_001481"
+        CHProductModel.SSMFace -> "sesameface1_30_19_001481"
+        CHProductModel.SS6Pro -> "sesame6pro_30_21_c77013"
+        CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_7970f1"
+        else -> null
+    }
+}
+
+fun CHDevices.getFirmwarePath(context: Context): String? {
+    val fileName = getFirmwareName() ?: return null
+    val cacheDir = File(context.cacheDir, "firmware")
+    if (!cacheDir.exists()) {
+        cacheDir.mkdirs()
     }
 
-//    fun findDFU(zipStart: String): Int {
-////        L.d("hcia", "zipStart:" + zipStart)
-//        val fields: Array<Field> = R.raw::class.java.fields
-//        fields.forEach { field ->
-////            L.d("hcia", "field.name:" + field.name)
-//            if (field.name.startsWith(zipStart)) {
-//                return field.getInt(field)
-//            }
-//        }
-//        return -1
-//    }
-//
-//    return when (productModel) {
-//        CHProductModel.SS2 -> findDFU("sesame_221")
-//        CHProductModel.SS4 -> findDFU("sesame_421")
-//        CHProductModel.SS5 -> findDFU("sesame5_")
-//        CHProductModel.SS5PRO -> findDFU("sesame5pro_")
-//        CHProductModel.SesameBot1 -> findDFU("sesamebot1_")
-//        CHProductModel.BiKeLock -> findDFU("sesamebike1_")
-//        CHProductModel.BiKeLock2 -> findDFU("sesamebike2_")
-//        CHProductModel.SSMOpenSensor -> findDFU("opensensor1_")
-//        CHProductModel.SSMTouchPro -> findDFU("sesametouch1pro_")
-//        CHProductModel.WM2 -> return -1 //wm2 聯網更新。不需要 zip
-//    }
+    val cacheFile = File(cacheDir, "$fileName.zip")
+
+    // 如果缓存文件不存在，从assets复制
+    if (!cacheFile.exists()) {
+        try {
+            context.assets.open("firmware/$fileName.zip").use { input ->
+                cacheFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        } catch (e: Exception) {
+            L.e("firmware", "Failed to copy firmware: $fileName", e)
+            return null
+        }
+    }
+
+    return cacheFile.absolutePath
 }
 
 fun CHProductModel.modelName(): String {
