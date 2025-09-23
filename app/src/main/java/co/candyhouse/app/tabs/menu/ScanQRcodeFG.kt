@@ -234,7 +234,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                 this == CHProductModel.SSMTouch || this == CHProductModel.SS5PRO || this == CHProductModel.BLEConnector ||
                 this == CHProductModel.Remote || this == CHProductModel.SS5US || this == CHProductModel.SesameBot2 ||
                 this == CHProductModel.SSMFacePro || this == CHProductModel.SSMFaceProAI || this == CHProductModel.SSMFaceAI || this == CHProductModel.SS6Pro ||
-                this == CHProductModel.Hub3 || this == CHProductModel.SSMFace
+                this == CHProductModel.Hub3 || this == CHProductModel.SSMFace || this == CHProductModel.SSMOpenSensor2
     }
 
     override fun onDestroy() {
