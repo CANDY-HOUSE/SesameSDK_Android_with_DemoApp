@@ -34,7 +34,6 @@
     <string name="last_name">姓</string>
     <string name="first_name">名</string>
 
-    <string name="delete_friend">删除此联系人</string>
     <string name="set_lock_position">设置上锁角度</string>
     <string name="set_unlock_position">设置解锁角度</string>
     <string name="second">后</string>
@@ -125,9 +124,7 @@
     <string name="wm2_pwk">WiFi 密码</string>
     <string name="wm2_pwk_hint">请输入 WiFi 密码</string>
     <string name="wm2_ssid">WiFi SSID</string>
-    <string name="shareSesameToFriends">点击以共享设备</string>
 
-    <string name="revoke">撤销</string>
     <string name="login">登入/注册</string>
     <string name="loginNeed">请登入。</string>
     <string name="Notification">通知</string>
@@ -141,7 +138,6 @@
     <string name="TrashTheHub3Module2Key">删除Hub3</string>
     <string name="addSesameTo">添加芝麻设备…</string>
     <string name="wm2NetworkConnectionStatus">网络状态</string>
-    <string name="modifyGuestKeyTag">命名访客钥匙名称</string>
 
     <string name="key_level">角色与权限</string>
     <string name="click_script">剧本</string>
@@ -160,7 +156,6 @@
     <string name="wm2_hint">添加距离此WiFi模块 5米内要连接的芝麻设备：</string>
     <string name="hub3_hint">添加距离此Hub3 5米内要连接的芝麻设备：</string>
     <string name="hub3_hint_ir">添加距离此Hub3 5米内要连接的红外设备：</string>
-    <string name="friend_keys_hint">以下设备钥匙被共享给此联系人:</string>
     <string name="drop_hint">删除 %1$s 不会重置 %1$s。\n若要重置 %1$s，请用针戳复位键直到LED灯熄灭。</string>
     <string name="drop_hint_press">删除 %1$s 不会重置 %1$s。\n若要重置 %1$s，请按住复位键直到LED灯熄灭。</string>
     <string name="hub3_addSesameTo">添加红外线数据...</string>
@@ -245,7 +240,6 @@
 
     <string name="judge_the_sesame">水平校正</string>
     <string name="device_model">机种</string>
-    <string name="no_more" />
 <!--    <string name="load_fail">加载数据失败</string>-->
     <string name="battary">电池电量</string>
     <string name="open_sensor_status">开关状态</string>

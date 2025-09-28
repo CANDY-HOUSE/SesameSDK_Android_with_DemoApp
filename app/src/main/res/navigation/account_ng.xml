@@ -12,9 +12,6 @@
         android:label="MeFG"
         tools:layout="@layout/fg_me">
         <action
-            android:id="@+id/action_deviceListPG_to_FriendDetailFG"
-            app:destination="@id/FriendDetailFG" />
-        <action
             android:id="@+id/action_register_to_myQrcodeFG"
             app:destination="@id/myQrcodeFG" />
         <action
@@ -82,24 +79,11 @@
         android:name="co.candyhouse.app.tabs.account.LoginVerifiCodeFG"
         android:label="LoginVerifiCodeFG"
         tools:layout="@layout/fg_verify_mail" />
-    <fragment
-        android:id="@+id/FriendDetailFG"
-        android:name="co.candyhouse.app.tabs.friend.FriendDetailFG"
-        android:label="FriendDetailFG"
-        tools:layout="@layout/fg_friend_detail">
-        <action
-            android:id="@+id/action_FriendDetailFG_to_friendSelectLockerListFG"
-            app:destination="@id/friendSelectLockerListFG" />
-    </fragment>
-    <fragment
-        android:id="@+id/friendSelectLockerListFG"
-        android:name="co.candyhouse.app.tabs.friend.FriendSelectLockerListFG"
-        android:label="FriendSelectLockerListFG" />
 
     <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
-        android:label="WebView" />
+        android:label="webViewFragment" />
 
 </navigation>

@@ -29,7 +29,6 @@
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
 
-    <string name="delete_friend">Delete the Contact</string>
     <string name="set_lock_position">Set Lock Position</string>
     <string name="set_unlock_position">Set Unlock Position</string>
     <string name="second">later</string>
@@ -116,9 +115,6 @@
     <string name="wm2_pwk_hint">Please enter the WiFi password</string>
     <string name="wm2_ssid">WiFi SSID</string>
 
-    <string name="shareSesameToFriends">Tap to share devices</string>
-
-    <string name="revoke">Revoke</string>
     <string name="login">Log In/Sign up</string>
     <string name="loginNeed">Please login.</string>
     <string name="Notification">Notifications</string>
@@ -135,7 +131,6 @@
     <string name="cameraError">Camera Error</string>
     <string name="addSesameTo">Add Sesame to…</string>
     <string name="wm2NetworkConnectionStatus">Internet Status</string>
-    <string name="modifyGuestKeyTag">Rename the Guest Key</string>
 
     <string name="key_level">Role &amp; Permission</string>
     <string name="click_script">Script</string>
@@ -154,7 +149,6 @@
 
     <string name="wm2_hint">Add Sesame to be connected within 5 meters of this WiFi Module:</string>
     <string name="hub3_hint">Add Sesame to be connected within 5 meters of this Hub3 :</string>
-    <string name="friend_keys_hint">The following device keys are shared with this contact:</string>
     <string name="drop_hint">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button with a pin until the LED light turns off.</string>
     <string name="drop_hint_press">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button the LED light turns off.</string>
 
@@ -227,7 +221,6 @@
 
     <string name="judge_the_sesame">Horizontal calibration</string>
     <string name="device_model">Model</string>
-    <string name="no_more" />
 <!--    <string name="load_fail">Failed to load data</string>-->
     <string name="battary">Battery level</string>
     <string name="open_sensor_status">Status</string>

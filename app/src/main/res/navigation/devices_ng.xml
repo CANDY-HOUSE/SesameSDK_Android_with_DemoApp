@@ -23,9 +23,6 @@
             android:id="@+id/to_scan"
             app:destination="@id/scanFG" />
         <action
-            android:id="@+id/action_deviceListPG_to_FriendDetailFG"
-            app:destination="@id/FriendDetailFG" />
-        <action
             android:id="@+id/action_to_SSM2SetAngleFG"
             app:destination="@id/SSM2SetAngleFG" />
         <action
@@ -86,14 +83,14 @@
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
         <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+        <action
             android:id="@+id/to_MatterQrCodeFG"
             app:destination="@id/MatterQrCodeFG" />
         <action
             android:id="@+id/to_HUB3ScanSSIDListFG"
             app:destination="@id/HUB3ScanSSIDListFG" />
-        <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
         <action
             android:id="@+id/action_to_irfg"
             app:destination="@id/irIrFg" />
@@ -113,11 +110,11 @@
         android:label="SSM5SettingFG"
         tools:layout="@layout/fg_setting_main">
         <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
-        <action
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
         <action
             android:id="@+id/action_SSM2SettingFG_to_SSM2SetAngleFG"
             app:destination="@id/SSM2SetAngleFG"
@@ -147,8 +144,8 @@
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
         <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
         <action
             android:id="@+id/to_SesameFaceProFaces"
             app:destination="@id/SesameFaceProFaces" />
@@ -182,11 +179,11 @@
             app:destination="@id/SSM2SetAngleFG"
             app:launchSingleTop="true" />
         <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
-        <action
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
         <action
             android:id="@+id/action_SSM2SettingFG_to_guestKeyListFG"
             app:destination="@id/guestKeyListFG" />
@@ -198,14 +195,6 @@
         android:id="@+id/SSM2SetAngleFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
         android:label="SSM2SetAngleFG" />
-    <fragment
-        android:id="@+id/addMemberFG"
-        android:name="co.candyhouse.app.tabs.devices.ssm2.member.AddMemberFG"
-        android:label="AddMemberFG">
-        <action
-            android:id="@+id/to_scan"
-            app:destination="@id/scanFG" />
-    </fragment>
     <fragment
         android:id="@+id/myKEYFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.KeyQrCodeFG"
@@ -227,6 +216,9 @@
         <action
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
     </fragment>
     <fragment
         android:id="@+id/SesameBotSettingFG"
@@ -237,8 +229,8 @@
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
         <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
         <action
             android:id="@+id/action_SSM2SettingFG_to_guestKeyListFG"
             app:destination="@id/guestKeyListFG" />
@@ -294,11 +286,11 @@
         android:name="co.candyhouse.app.tabs.devices.ssmbike.setting.SesameBikeSettingFG"
         android:label="SesameBikeSettingFG">
         <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
-        <action
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
         <action
             android:id="@+id/action_sesameBikeSettingFG_to_guestKeyListFG"
             app:destination="@id/guestKeyListFG" />
@@ -308,11 +300,11 @@
         android:name="co.candyhouse.app.tabs.devices.ssmbot2.setting.SesameBot2SettingFG"
         android:label="SesameBot2SettingFG">
         <action
-            android:id="@+id/action_SettingFG_to_addMemberFG"
-            app:destination="@id/addMemberFG" />
-        <action
             android:id="@+id/action_SesameSetting_to_myKEYFG"
             app:destination="@id/myKEYFG" />
+        <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
         <action
             android:id="@+id/action_sesameBot2SettingFG_to_guestKeyListFG"
             app:destination="@id/guestKeyListFG" />
@@ -347,25 +339,12 @@
         android:id="@+id/Hub3MatterFG"
         android:name="co.candyhouse.app.tabs.devices.hub3.setting.Hub3MatterFG"
         android:label="Hub3MatterFG" />
-    <fragment
-        android:id="@+id/FriendDetailFG"
-        android:name="co.candyhouse.app.tabs.friend.FriendDetailFG"
-        android:label="FriendDetailFG"
-        tools:layout="@layout/fg_friend_detail">
-        <action
-            android:id="@+id/action_FriendDetailFG_to_friendSelectLockerListFG"
-            app:destination="@id/friendSelectLockerListFG" />
-    </fragment>
-    <fragment
-        android:id="@+id/friendSelectLockerListFG"
-        android:name="co.candyhouse.app.tabs.friend.FriendSelectLockerListFG"
-        android:label="FriendSelectLockerListFG" />
 
     <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
-        android:label="WebView">
+        android:label="webViewFragment">
         <action
             android:id="@+id/action_mainRoomFG_to_SSM2SettingFG"
             app:destination="@id/SSM2SettingFG" />

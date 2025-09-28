@@ -21,7 +21,6 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgMeBinding
 import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.tabs.HomeFragment
-import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.db.model.CHDevice
@@ -139,30 +138,24 @@ class MeFG : HomeFragment<FgMeBinding>() {
         AWSMobileClient.getInstance().signOut()
         bind.scrollView.scrollTo(0, 0)
 
-        CHDeviceManager.getCandyDevices {
-            it.onSuccess {
-                it.data.forEach {
-                    it.dropKey {
-                        deviceViewModel.updateDevices()
-                    }
-                    when (it) {
+        CHDeviceManager.getCandyDevices { result ->
+            result.onSuccess { devices ->
+                devices.data.forEach { device ->
+                    when (device) {
                         is CHSesameLock -> {
-                            NotificationManagerCompat.from(MainActivity.activity!!.applicationContext)
-                                .cancel(it.deviceId.hashCode())
+                            NotificationManagerCompat.from(CHDeviceManager.app).cancel(device.deviceId.hashCode())
                         }
                     }
                 }
+                CHDeviceManager.dropAllKeys(devices.data) {
+                    deviceViewModel.updateDevices()
+                }
             }
         }
-        NotificationManagerCompat.from(MainActivity.activity!!.applicationContext)
-            .cancel("all".hashCode())
+
+        NotificationManagerCompat.from(CHDeviceManager.app).cancel("all".hashCode())
         if (SesameForegroundService.isLive) {
-            MainActivity.activity!!.stopService(
-                Intent(
-                    MainActivity.activity!!,
-                    SesameForegroundService::class.java
-                )
-            )
+            CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, SesameForegroundService::class.java))
         }
         CHDeviceWrapperManager.clear()
     }
@@ -300,7 +293,7 @@ fun userKeyToCHKey(key: CHUserKey, historyTag: ByteArray? = null): CHDevice {
 }
 
 fun getHistoryTag(): ByteArray {
-    return SharedPreferencesUtils.nickname?.toByteArray() ?: MainActivity.activity!!.getString(R.string.unLoginHistoryTag).toByteArray()
+    return SharedPreferencesUtils.nickname?.toByteArray() ?: CHDeviceManager.app.getString(R.string.unLoginHistoryTag).toByteArray()
 }
 
 data class CHUserKey(

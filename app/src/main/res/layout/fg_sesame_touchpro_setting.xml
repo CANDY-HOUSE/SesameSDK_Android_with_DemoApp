@@ -60,8 +60,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/friend_recy"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/friend_web_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"

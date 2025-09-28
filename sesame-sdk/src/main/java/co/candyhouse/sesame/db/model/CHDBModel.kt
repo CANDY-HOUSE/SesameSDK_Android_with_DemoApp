@@ -3,17 +3,16 @@ package co.candyhouse.sesame.db.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import co.candyhouse.sesame.ble.UUID4HistoryTagTypeEnum
-import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.toHexString
 
 @Entity
+@Suppress("ArrayInDataClass")
 data class CHDevice(
-        @PrimaryKey var deviceUUID: String, // 16
-        val deviceModel: String, // 1
-        var historyTag: ByteArray? = null, // 默认值设为空
-        val keyIndex: String, // 2
-        val secretKey: String, // 16
-        val sesame2PublicKey: String // 64
+    @PrimaryKey var deviceUUID: String, // 16
+    val deviceModel: String, // 1
+    var historyTag: ByteArray? = null, // 默认值设为空
+    val keyIndex: String, // 2
+    val secretKey: String, // 16
+    val sesame2PublicKey: String // 64
 )
 
 internal fun CHDevice.createHistag(histag_: ByteArray? = null): ByteArray {

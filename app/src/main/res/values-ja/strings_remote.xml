@@ -94,7 +94,6 @@
     <string name="ir_ble_invalid">Hub3の接続に異常があります。Hub3の詳細画面に戻って、再接続してください。</string>
     <string name="ir_auto_searching_remote">最も可能性の高いリモコンを検索中...</string>
     <string name="ir_modify_key_name">ボタン名を変更</string>
-    <string name="ir_wave_too_short">読み取ったリモコンデータの長さが短すぎます。もう一度お試しくださいませ</string>
     <string name="air_auto_match_introduction">リモコンをHub3のLEDが光る側に向けて、リモコンの電源ONボタンを押してくださいませ。</string>
     <string name="air_auto_match_code_fail">このリモコン型番のデータ検索に失敗しました。もう一度お試しくださいませ</string>
     <string name="shake_head">スイング</string>

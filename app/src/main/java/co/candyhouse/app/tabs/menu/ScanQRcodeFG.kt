@@ -19,7 +19,6 @@ import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
-import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
@@ -50,7 +49,6 @@ import java.io.FileNotFoundException
 class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate,
     EasyPermissions.PermissionCallbacks {
 
-    private val mFriendModel: CHUserViewModel by activityViewModels()
     private val mDeviceModel: CHDeviceViewModel by activityViewModels()
     override fun getViewBinder() = ActivitySimpleScannerBinding.inflate(layoutInflater)
 
@@ -180,8 +178,6 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         friendID?.let {
             CHLoginAPIManager.addFriend(it) {
                 it.onSuccess {
-                    mFriendModel.myFriends.value.clear()
-                    mFriendModel.syncFriendsFromServer()
                     view?.post {
                         findNavController().navigateUp()
                         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
@@ -198,9 +194,6 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
     private fun handleFriendFailure() {
         if (!AWSMobileClient.getInstance().isSignedIn) {
             toastMSG(getString(R.string.loginNeed))
-        } else {
-            mFriendModel.myFriends.value.clear()
-            mFriendModel.syncFriendsFromServer()
         }
         activity?.runOnUiThread {
             findNavController().navigateUp()
@@ -261,37 +254,27 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         val uuidHex = keyData.sliceArray(23..38).toHexString()
         val uuidStr = uuidHex.noHashtoUUID().toString().lowercase()
 
-        val receiveDevoiceKey =
-            CHDevice(uuidStr, modelStr, getHistoryTag(), keyIndexHex, secretHex, pubHex)
-        CHDeviceManager.receiveCHDeviceKeys(receiveDevoiceKey) {
-            it.onSuccess {
-                it.data.forEach { device ->
-                    device.setLevel(level!!.toInt())
-                    device.setNickname(customName!!)
-                    if (device.getLevel() == -1) {
-                        return@forEach
-                    }
-                    CHLoginAPIManager.putKey(
-                        cheyKeyToUserKey(
-                            device.getKey(),
-                            device.getLevel(),
-                            device.getNickname()
-                        )
-                    ) {}
-                    mDeviceModel.updateDevices()
-                    view?.post {
-                        if (isAdded && !isDetached) {
-                            findNavController().navigateUp()
-                            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-                                ?.setPage(0)
-                        }
+        addDeviceWithKey(
+            uuidStr = uuidStr,
+            modelStr = modelStr,
+            keyIndexHex = keyIndexHex,
+            secretHex = secretHex,
+            pubHex = pubHex,
+            level = level,
+            customName = customName,
+            onSuccess = {
+                view?.post {
+                    if (isAdded && !isDetached) {
+                        findNavController().navigateUp()
+                        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
+                            ?.setPage(0)
                     }
                 }
+            },
+            onFailure = { errorMsg ->
+                qrCodeError(errorMsg)
             }
-            it.onFailure {
-                qrCodeError(getString(R.string.addFail))
-            }
-        }
+        )
     }
 
     private fun handleInvalidModel(keyData: ByteArray, level: String?, customName: String?) {
@@ -304,33 +287,71 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         val uuidHex = keyData.sliceArray(83..98).toHexString()
         val uuidStr = uuidHex.noHashtoUUID().toString().lowercase()
 
-        val receiveDevoiceKey =
-            CHDevice(uuidStr, modelStr, getHistoryTag(), keyIndexHex, secretHex, pubHex)
-        CHDeviceManager.receiveCHDeviceKeys(receiveDevoiceKey) {
-            it.onSuccess {
-                it.data.forEach { device ->
-                    device.setLevel(level?.toInt()!!)
-                    device.setNickname(customName!!)
-                    if (device.getLevel() == -1) {
-                        return@forEach
-                    }
-                    CHLoginAPIManager.putKey(
-                        cheyKeyToUserKey(
-                            device.getKey(),
-                            device.getLevel(),
-                            device.getNickname()
-                        )
-                    ) {}
-                    mDeviceModel.updateDevices()
-                    view?.post {
+        addDeviceWithKey(
+            uuidStr = uuidStr,
+            modelStr = modelStr,
+            keyIndexHex = keyIndexHex,
+            secretHex = secretHex,
+            pubHex = pubHex,
+            level = level,
+            customName = customName,
+            onSuccess = {
+                view?.post {
+                    if (isAdded && !isDetached) {
                         findNavController().navigateUp()
                         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
                             ?.setPage(0)
                     }
                 }
+            },
+            onFailure = { errorMsg ->
+                qrCodeError(errorMsg)
             }
-            it.onFailure {
-                qrCodeError(getString(R.string.addFail))
+        )
+    }
+
+    private fun addDeviceWithKey(
+        uuidStr: String,
+        modelStr: String,
+        keyIndexHex: String,
+        secretHex: String,
+        pubHex: String,
+        level: String?,
+        customName: String?,
+        onSuccess: () -> Unit = {},
+        onFailure: (String) -> Unit = {}
+    ) {
+        val receiveDevoiceKey = CHDevice(
+            uuidStr,
+            modelStr,
+            getHistoryTag(),
+            keyIndexHex,
+            secretHex,
+            pubHex
+        )
+
+        CHDeviceManager.receiveCHDeviceKeys(receiveDevoiceKey) { result ->
+            result.onSuccess { data ->
+                data.data.forEach { device ->
+                    device.setLevel(level!!.toInt())
+                    device.setNickname(customName!!)
+                    if (device.getLevel() != -1) {
+                        // 上传到云端
+                        CHLoginAPIManager.putKey(
+                            cheyKeyToUserKey(
+                                device.getKey(),
+                                device.getLevel(),
+                                device.getNickname()
+                            )
+                        ) {}
+                    }
+                }
+
+                mDeviceModel.updateDevices()
+                onSuccess()
+            }
+            result.onFailure {
+                onFailure(getString(R.string.addFail))
             }
         }
     }

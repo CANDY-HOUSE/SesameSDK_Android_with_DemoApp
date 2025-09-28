@@ -28,7 +28,7 @@ import cn.bingoogolapple.qrcode.zxing.QRCodeEncoder
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgMyqrBinding
-import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +63,7 @@ class MyQrCodeFG : BaseNFG<FgMyqrBinding>() {
                 userURI.appendQueryParameter("t", "friend")
                 userURI.appendQueryParameter("friend", subUUID)
                 val uri = userURI.build()
-                val image = QRCodeEncoder.syncEncodeQRCode(uri.toString(), BGQRCodeUtil.dp2px(MainActivity.activity, 150f))
+                val image = QRCodeEncoder.syncEncodeQRCode(uri.toString(), BGQRCodeUtil.dp2px(CHDeviceManager.app, 150f))
 
                 withContext(Dispatchers.Main) {
                     bind.customName.text = SharedPreferencesUtils.nickname

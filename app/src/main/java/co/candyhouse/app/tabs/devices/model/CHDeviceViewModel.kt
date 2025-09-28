@@ -32,10 +32,7 @@ import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.server.CHResultState
 import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
-import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.CHScanStatus
-import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
@@ -56,7 +53,7 @@ import co.utils.isAutoConnect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,9 +77,9 @@ data class LockDeviceStatus(var id: String, var model: Byte, var status: Byte)
 class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDelegate,
     CHHub3Delegate {
 
+    private var syncJob: Job? = null
     var targetShareLevel: Int = 0
     var guestKeyId: String? = null
-    private var userKeys: ArrayList<String> = ArrayList()
     val myChDevices = MutableStateFlow(ArrayList<CHDevices>())
     var neeReflesh = MutableLiveData<BeanDevices>()
     val ssmLockLiveData = MutableLiveData<CHDevices>()
@@ -148,17 +145,23 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     private fun syncDeviceFromServer() {
-        CHLoginAPIManager.getDevicesList {
-            receiveKeysFromServer(it)
-            SharedPreferencesUtils.isNeedFreshDevice = false
+        syncJob?.cancel()
+
+        syncJob = viewModelScope.launch {
+            CHLoginAPIManager.getDevicesList {
+                L.e("hcia", "💋 receiveKeysFromServer(it)")
+                receiveKeysFromServer(it)
+                SharedPreferencesUtils.isNeedFreshDevice = false
+            }
         }
     }
 
     private fun receiveKeysFromServer(it: Result<CHResultState<Array<CHUserKey>>>) {
         it.onSuccess { result ->
-            userKeys.clear()
-            userKeys.addAll(result.data.map { it.deviceUUID.lowercase() })
-
+            if (result.data.isEmpty()) {
+                updateDevices()
+                return@onSuccess
+            }
             viewModelScope.launch {
                 CHDeviceWrapperManager.updateUserKeys(result.data.toList())
 
@@ -200,7 +203,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun refleshDevices() {
         val status = AWSStatus.getAWSLoginStatus()
-        L.d("sf", "👘 refleshDevices islogin:$status")
+        L.d("hcia", "👘 refleshDevices islogin:$status")
         if (status) {
             syncDeviceFromServer()
         } else {
@@ -263,20 +266,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         { it.getNickname() })
                 )
             }
-            val filteredDevices = if (userKeys.isNotEmpty()) {
-                updatedDevices.filter { device ->
-                    userKeys.contains(device.deviceId.toString().lowercase()).also { isInUserKeys ->
-                        if (!isInUserKeys) {
-                            device.dropKey { }
-                        }
-                    }
-                }
-            } else {
-                updatedDevices
-            }
             synchronized(this@CHDeviceViewModel) {
-                userKeys.clear()
-                myChDevices.value = ArrayList(filteredDevices)
+                myChDevices.value = ArrayList(updatedDevices)
                 val devicesToRefresh = mutableListOf<CHDevices>()
                 myChDevices.value.forEach { device ->
                     device.delegate = delegateManager
@@ -285,13 +276,13 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
                     // 红外设备
                     if (device is CHHub3) {
-                        L.d("updateDevices", "fetchIRDevices...")
+                        L.d("hcia", "fetchIRDevices...")
                         fetchIRDevices(device)
                     }
 
                     // 监听器（设备状态变化时会触发）
                     listerChDeviceStatus(device) {
-                        L.d("updateDevices", "刷新锁-ID=${device.deviceId}")
+                        L.d("hcia", "刷新锁-ID=${device.deviceId}")
                         updateNeeRefresh(it)
                     }
 
@@ -307,11 +298,11 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 }
                 if (devicesToRefresh.isNotEmpty()) {
                     devicesToRefresh.map { device ->
-                        L.d("updateDevices", "立即刷新设备ID=${device.deviceId}")
+                        L.d("hcia", "立即刷新设备ID=${device.deviceId}")
                         updateNeeRefresh(device)
                     }
                 } else if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
-                    L.e("updateDevices", "下拉刷新，没有发现任何设备")
+                    L.e("hcia", "下拉刷新，没有发现任何设备")
                     neeReflesh.postValue(BeanDevices(emptyList()))
                 }
             }
@@ -398,7 +389,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     fun backgroundAutoConnect(device: CHDevices) {
-        GlobalScope.launch(IO) {
+        viewModelScope.launch(IO) {
             if (device.deviceStatus == CHDeviceStatus.ReceivedAdV && device.isAutoConnect()) {
                 L.d("backgroundAutoConnect", "自动连接设备ID=${device.deviceId}")
                 device.connect { }
@@ -407,23 +398,14 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     fun handleAppGoToForeground() {
-        GlobalScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.Main) {
             neeReflesh.postValue(BeanDevices(emptyList()))
-        }
-    }
-
-    fun handleAppGoToBackground() {
-        CHBleManager.mScanning = CHScanStatus.BleClose
-        myChDevices.value.forEach {
-            if (it.deviceStatus.value == CHDeviceLoginStatus.Login) {
-                it.disconnect { }
-            }
         }
     }
 
     @SuppressLint("ServiceCast", "ImplicitSamInstance")
     fun updateWidgets(id: String? = null) {
-        GlobalScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.Main) {
             synchronized(CHDeviceManager.listDevices) {
                 CHDeviceManager.listDevices.clear()
                 CHDeviceManager.listDevices.addAll(myChDevices.value)
@@ -596,4 +578,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        syncJob?.cancel()
+    }
 }

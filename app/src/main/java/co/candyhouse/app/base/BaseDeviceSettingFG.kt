@@ -3,7 +3,6 @@ package co.candyhouse.app.base
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Intent
-import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -12,11 +11,12 @@ import android.widget.RelativeLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
@@ -38,9 +38,8 @@ import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.setNFC
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
-import co.candyhouse.server.CHDeviceIDFriendID
+import co.candyhouse.app.tabs.menu.EmbeddedWebView
 import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.server.CHUser
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
 import co.candyhouse.sesame.open.CHScanStatus
@@ -49,7 +48,6 @@ import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.server.dto.CHGuestKeyCut
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -58,21 +56,18 @@ import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
-import co.utils.convertStringToColor
-import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
 import com.amazonaws.mobile.client.AWSMobileClient
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.dfu.DfuServiceInitiator
-import java.util.UUID
 
 abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSetting,
     BleStatusUpdate, DeviceStatusChange {
 
     private var isToNotification = false
     private var isViewDestroyed = false
-    var mKeyUser = ArrayList<Any>()
+
+    private val refreshCounter = mutableIntStateOf(0)
 
     override fun onDestroy() {
         super.onDestroy()
@@ -134,11 +129,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 }
             }
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mKeyUser.add("add")
     }
 
     @SuppressLint("SetTextI18n")
@@ -394,304 +384,64 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             }
         }
 
-        view?.findViewById<RecyclerView>(R.id.friend_recy)?.apply {
-            layoutManager = GridLayoutManager(context, 7)
-            adapter = object : GenericAdapter<Any>(mKeyUser) {
-                override fun getLayoutId(position: Int, obj: Any): Int {
-                    return when (obj) {
-                        is String -> R.layout.device_member_add
-                        is ItemHead<*> -> R.layout.device_member_guest
-                        is ItemMember<*> -> R.layout.device_guest_member_cell
-                        is CHUser -> R.layout.device_member_cell
-                        else -> R.layout.device_member_cell
-                    }
-                }
+        view?.findViewById<TextView>(R.id.drop_hint_txt)?.text =
+            getString(R.string.drop_hint, targetDevice.productModel.modelName())
 
-                override fun getViewHolder(view: View, viewType: Int): RecyclerView.ViewHolder {
-                    when (viewType) {
-                        R.layout.device_member_guest -> return object :
-                            RecyclerView.ViewHolder(view), Binder<ItemHead<CHGuestKeyCut>> {
+        if (AWSMobileClient.getInstance().isSignedIn) {
+            view?.findViewById<ComposeView>(R.id.friend_web_view)?.apply {
+                disposeComposition()
 
-                            @SuppressLint("NotifyDataSetChanged")
-                            override fun bind(data: ItemHead<CHGuestKeyCut>, pos: Int) {
-                                val title: TextView = view.findViewById(R.id.title)
-                                val subtitle: TextView = view.findViewById(R.id.subtitle)
-                                val cell_back: View = view.findViewById(R.id.cell_back)
-                                title.text = data.data.keyName
-                                subtitle.text = level2Tag(2)
-                                val gtag = data.data.guestKeyId.replace(
-                                    "00000000",
-                                    ""
-                                )
-                                cell_back.setBackgroundColor(
-                                    convertStringToColor(
-                                        data.data.guestKeyId.replace("00000000", "")
-                                    ).toColorInt()
-                                )
-                                val mRadius = 25f
-                                val drawable = GradientDrawable()
-                                drawable.shape = GradientDrawable.RECTANGLE
-                                if (data.total == 0) {
-                                    drawable.cornerRadii = floatArrayOf(
-                                        mRadius,
-                                        mRadius,
-                                        mRadius,
-                                        mRadius,
-                                        mRadius,
-                                        mRadius,
-                                        mRadius,
-                                        mRadius
-                                    )
-                                } else {
-                                    drawable.cornerRadii = floatArrayOf(
-                                        mRadius,
-                                        mRadius,
-                                        0f,
-                                        0f,
-                                        0f,
-                                        0f,
-                                        mRadius,
-                                        mRadius
-                                    )
-                                }
-                                drawable.setColor(convertStringToColor(gtag).toColorInt())
-                                cell_back.background = drawable
-                                view.setOnClickListener {
-                                    AlertView(data.data.keyName, "", AlertStyle.IOS).apply {
-                                        addAction(
-                                            AlertAction(
-                                                getString(R.string.modifyGuestKeyTag),
-                                                AlertActionStyle.DEFAULT
-                                            ) {
-                                                context?.inputTextAlert(
-                                                    "",
-                                                    getString(R.string.modifyGuestKeyTag),
-                                                    data.data.keyName
-                                                ) {
-                                                    confirmButtonWithText("OK") { alert, name ->
-                                                        targetDevice.updateGuestKey(
-                                                            data.data.guestKeyId,
-                                                            name
-                                                        ) {
-                                                            it.onSuccess {
-                                                                getView()?.findViewById<android.view.View>(
-                                                                    co.candyhouse.app.R.id.friend_recy
-                                                                )
-                                                                    ?.post {
-                                                                        data.data.keyName = name
-                                                                        adapter?.notifyDataSetChanged()
-                                                                        dismiss()
-                                                                    }
-                                                            }
-                                                        }
-                                                    }
-                                                    cancelButton(getString(R.string.cancel))
-                                                }?.show()
-                                            })
-
-                                        addAction(
-                                            AlertAction(
-                                                getString(R.string.share_key),
-                                                AlertActionStyle.DEFAULT
-                                            ) {
-                                                mDeviceModel.targetShareLevel = 2
-                                                mDeviceModel.guestKeyId = data.data.guestKeyId
-                                                safeNavigate(R.id.action_SesameSetting_to_myKEYFG)
-                                            })
-
-                                        addAction(
-                                            AlertAction(
-                                                getString(R.string.revoke),
-                                                AlertActionStyle.NEGATIVE
-                                            ) {
-                                                targetDevice.removeGuestKey(data.data.guestKeyId) {
-                                                    it.onSuccess {
-                                                        view.post {
-                                                            mKeyUser.remove(data)
-                                                            getView()?.findViewById<androidx.recyclerview.widget.RecyclerView>(
-                                                                co.candyhouse.app.R.id.friend_recy
-                                                            )?.adapter?.notifyDataSetChanged()
-                                                            refreshTop()
-                                                        }
-                                                    }
-                                                }
-                                            })
-
-                                        show(activity as AppCompatActivity)
-                                    }
-                                }
-                            }
-                        }
-
-                        R.layout.device_guest_member_cell -> return object :
-                            RecyclerView.ViewHolder(view), Binder<ItemMember<CHUser>> {
-                            var title: TextView = view.findViewById(R.id.title)
-                            val cell_back: View = view.findViewById(R.id.cell_back)
-
-                            @SuppressLint("NotifyDataSetChanged")
-                            override fun bind(data: ItemMember<CHUser>, pos: Int) {
-                                val friend = data.data
-                                title.text = friend.nickname ?: friend.email
-                                friend.gtag?.let {
-                                    val mRadius = 25f
-                                    val drawable = GradientDrawable()
-                                    drawable.shape = GradientDrawable.RECTANGLE
-                                    if ((data.index + 1) == data.total) {
-                                        drawable.cornerRadii = floatArrayOf(
-                                            0f,
-                                            0f,
-                                            mRadius,
-                                            mRadius,
-                                            mRadius,
-                                            mRadius,
-                                            0f,
-                                            0f
-                                        )
-                                    }
-                                    drawable.setColor(convertStringToColor(it).toColorInt())
-                                    cell_back.background = drawable
-                                }
-
-                                view.setOnClickListener {
-                                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                                        val checkKeylevel =
-                                            (targetDevice.getLevel() <= friend.keyLevel!!)
-                                        AWSMobileClient.getInstance().userAttributes["sub"]?.let {
-                                            if (friend.sub != it && checkKeylevel) {
-                                                AlertView(
-                                                    friend.email,
-                                                    friend.nickname ?: friend.email,
-                                                    AlertStyle.IOS
-                                                ).apply {
-                                                    addAction(
-                                                        AlertAction(
-                                                            getString(R.string.revoke),
-                                                            AlertActionStyle.NEGATIVE
-                                                        ) {
-                                                            getView()?.findViewById<SwipeRefreshLayout>(
-                                                                R.id.swiperefresh
-                                                            )?.isRefreshing = true
-                                                            CHLoginAPIManager.removeFriendDevice(
-                                                                CHDeviceIDFriendID(
-                                                                    targetDevice.deviceId.toString(),
-                                                                    friend.sub
-                                                                )
-                                                            ) {
-                                                                it.onSuccess {
-                                                                    getView()?.findViewById<View>(R.id.friend_recy)
-                                                                        ?.post {
-                                                                            mKeyUser.remove(
-                                                                                data
-                                                                            )
-                                                                            getView()?.findViewById<RecyclerView>(
-                                                                                R.id.friend_recy
-                                                                            )?.adapter?.notifyDataSetChanged()
-                                                                            getView()?.findViewById<SwipeRefreshLayout>(
-                                                                                R.id.swiperefresh
-                                                                            )?.isRefreshing = false
-                                                                        }
-                                                                }
-                                                            }
-                                                        })
-                                                    show(activity as AppCompatActivity)
-                                                }
-                                            }
+                setContent {
+                    EmbeddedWebView(
+                        scene = "device-user",
+                        deviceId = targetDevice.deviceId.toString().uppercase(),
+                        height = 80.dp,
+                        refreshTrigger = refreshCounter.intValue,
+                        onSchemeIntercept = { uri, params ->
+                            when (uri.path) {
+                                "/webview/open" -> {
+                                    params["url"]?.let { targetUrl ->
+                                        params["notifyName"]?.let { notifyName ->
+                                            L.d("EmbeddedWebView", "EmbeddedWebView-notifyName=$notifyName")
                                         }
+                                        L.d("EmbeddedWebView", "EmbeddedWebView-targetUrl=$targetUrl")
+                                        safeNavigate(R.id.action_DeviceMember_to_webViewFragment, Bundle().apply {
+                                            putString("scene", "device-user")
+                                            putString("url", targetUrl)
+                                        })
                                     }
                                 }
                             }
                         }
-
-                        R.layout.device_member_cell -> return object :
-                            RecyclerView.ViewHolder(view), Binder<CHUser> {
-                            @SuppressLint("NotifyDataSetChanged")
-                            override fun bind(data: CHUser, pos: Int) {
-                                val title: TextView = view.findViewById(R.id.title)
-                                val subtitle: TextView = view.findViewById(R.id.subtitle)
-                                title.text = data.nickname ?: data.email
-                                subtitle.text = level2Tag(data.keyLevel)
-
-                                view.setOnClickListener {
-                                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                                        val checkKeylevel =
-                                            (targetDevice.getLevel() <= data.keyLevel!!)
-                                        AWSMobileClient.getInstance().userAttributes["sub"]?.let {
-                                            if (data.sub != it && checkKeylevel) {
-                                                AlertView(
-                                                    getString(R.string.revoke) + " " + data.email,
-                                                    "",
-                                                    AlertStyle.IOS
-                                                ).apply {
-                                                    addAction(
-                                                        AlertAction(
-                                                            getString(R.string.revoke),
-                                                            AlertActionStyle.NEGATIVE
-                                                        ) {
-                                                            getView()?.post {
-                                                                getView()?.findViewById<SwipeRefreshLayout>(
-                                                                    R.id.swiperefresh
-                                                                )?.isRefreshing = true
-                                                                CHLoginAPIManager.removeFriendDevice(
-                                                                    CHDeviceIDFriendID(
-                                                                        targetDevice.deviceId.toString(),
-                                                                        data.sub
-                                                                    )
-                                                                ) {
-                                                                    it.onSuccess {
-                                                                        getView()?.findViewById<View>(
-                                                                            R.id.friend_recy
-                                                                        )?.post {
-                                                                            mKeyUser.remove(data)
-                                                                            getView()?.findViewById<RecyclerView>(
-                                                                                R.id.friend_recy
-                                                                            )?.adapter?.notifyDataSetChanged()
-                                                                            getView()?.findViewById<SwipeRefreshLayout>(
-                                                                                R.id.swiperefresh
-                                                                            )?.isRefreshing = false
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        })
-                                                    show(activity as AppCompatActivity)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        else -> return object : RecyclerView.ViewHolder(view), Binder<String> {
-                            override fun bind(data: String, pos: Int) {
-                                view.setOnClickListener { safeNavigate(R.id.action_SettingFG_to_addMemberFG) }
-                            }
-                        }
-                    }
+                    )
                 }
             }
         }
-
-        view?.findViewById<RecyclerView>(R.id.friend_recy)?.adapter?.notifyDataSetChanged()
-
-        view?.findViewById<TextView>(R.id.drop_hint_txt)?.text =
-            getString(R.string.drop_hint, targetDevice.productModel.modelName())
 
         updateFreshTop(targetDevice)
     }
 
     private fun updateFreshTop(targetDevice: CHDevices) {
-        if (!AWSMobileClient.getInstance().isSignedIn) {
-            view?.findViewById<RecyclerView>(R.id.friend_recy)?.visibility = View.GONE
-        } else if (targetDevice.getLevel() == 0 || targetDevice.getLevel() == 1) {
+        if (targetDevice.getLevel() == 0 || targetDevice.getLevel() == 1) {
             view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setOnRefreshListener {
                 refreshTop()
             }
-
-            refreshTop()
         } else {
-            view?.findViewById<RecyclerView>(R.id.friend_recy)?.visibility = View.GONE
+            view?.findViewById<RecyclerView>(R.id.friend_web_view)?.visibility = View.GONE
         }
+    }
+
+    private fun refreshTop() {
+        view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.post {
+            view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.isRefreshing = true
+        }
+
+        // 触发WebView刷新
+        refreshCounter.intValue++
+
+        view?.postDelayed({
+            view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.isRefreshing = false
+        }, 1500)
     }
 
     private fun updataTargetDevice(isChecked: Boolean, targetDevice: CHDevices?) {
@@ -708,92 +458,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun refreshTop() {
-        view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.post {
-            view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.isRefreshing = true
-        }
-
-        mDeviceModel.ssmLockLiveData.value?.apply {
-            this.getTimeSignature()?.apply {
-                CHLoginAPIManager.getDeviceMember(
-                    mDeviceModel.ssmLockLiveData.value!!.deviceId.toString(),
-                    this
-                ) {
-                    it.onSuccess { mebData ->
-                        mKeyUser.clear()
-                        mKeyUser.add("add")
-
-                        val mySub = AWSMobileClient.getInstance().userAttributes["sub"]
-                        mKeyUser.addAll(sortedMembers(mySub, mebData.data))
-
-                        view?.post { view?.findViewById<RecyclerView>(R.id.friend_recy)?.adapter?.notifyDataSetChanged() }
-
-                        mDeviceModel.ssmLockLiveData.value!!.getGuestKeys {/// 拿取訪客鑰匙
-                            it.onSuccess {
-                                it.data.forEach { guestKey ->
-                                    sortedGuests(guestKey, mebData.data)
-                                }
-                                view?.post { view?.findViewById<RecyclerView>(R.id.friend_recy)?.adapter?.notifyDataSetChanged() }
-                            }
-                        }
-                    }
-                    it.onFailure {
-                        L.d("hcia", "it: 拿取成員失敗 <--")
-                        view?.post {
-                            view?.findViewById<RecyclerView>(R.id.friend_recy)?.visibility =
-                                View.GONE
-                        }
-                    }
-                    view?.post {
-                        view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.isRefreshing =
-                            false
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 群主、管理员排序
-     */
-    private fun sortedMembers(topSubId: String?, members: Array<CHUser>): List<Any> {
-        val mySelf = mutableListOf<CHUser>()
-        val friends = mutableListOf<CHUser>()
-        if (topSubId != null) {
-            val subId = UUID.fromString(topSubId)
-            mySelf.addAll(members.filter { UUID.fromString(it.sub) == subId })
-            friends.addAll(members.filter { UUID.fromString(it.sub) != subId })
-        } else {
-            friends.addAll(members)
-        }
-
-        friends.sortBy { UUID.fromString(it.sub).toString() }
-
-        return mySelf +
-                friends.filter { it.keyLevel == 0 }
-                    .sortedBy { it.sub } +
-                friends.filter { it.keyLevel == 1 }
-                    .sortedBy { it.sub }
-    }
-
-    /**
-     * 访客排序
-     */
-    private fun sortedGuests(guestKey: CHGuestKeyCut, members: Array<CHUser>) {
-        val keyHead = ItemHead(guestKey)
-        mKeyUser.add(keyHead)
-        val sss = members.filter {
-            it.keyLevel == 2 && guestKey.guestKeyId.contains(it.gtag!!)
-        }
-        sss.forEach { user ->
-            val guestMember = ItemMember(user)
-            guestMember.index = keyHead.total++
-            guestMember.total = sss.count()
-            mKeyUser.add(guestMember)
-        }
-    }
-
     override fun onNfcId(id: String) {
         requireActivity().runOnUiThread {
             mDeviceModel.ssmLockLiveData.value?.apply {
@@ -804,7 +468,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                         this.text = id
                     }
                 }
-
             }
         }
     }
@@ -906,17 +569,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
         }
     }
-}
-
-class ItemHead<T>(ss: T) {
-    val data: T = ss
-    var total: Int = 0
-}
-
-class ItemMember<T>(ss: T) {
-    val data: T = ss
-    var index: Int = 0
-    var total: Int = 0
 }
 
 interface NfcSetting {

@@ -37,7 +37,6 @@
     <string name="last_name">姓</string>
     <string name="first_name">名</string>
 
-    <string name="delete_friend">刪除聯絡人</string>
     <string name="set_lock_position">設置上鎖角度</string>
     <string name="set_unlock_position">設置解鎖角度</string>
     <string name="second">後</string>
@@ -127,8 +126,6 @@
     <string name="wm2_pwk">WiFi 密碼</string>
     <string name="wm2_pwk_hint">請輸入 WiFi 密碼</string>
     <string name="wm2_ssid">WiFi SSID</string>
-    <string name="shareSesameToFriends">點擊以共享設備</string>
-    <string name="revoke">撤銷</string>
     <string name="login">登入/註冊</string>
     <string name="loginNeed">請登入。</string>
     <string name="Notification">通知</string>
@@ -142,7 +139,6 @@
 
     <string name="addSesameTo">添加芝麻設備…</string>
     <string name="wm2NetworkConnectionStatus">網路狀態</string>
-    <string name="modifyGuestKeyTag">變更訪客鑰匙名稱</string>
 
     <string name="key_level">角色與權限</string>
     <string name="click_script">劇本</string>
@@ -162,7 +158,6 @@
 
     <string name="wm2_hint">添加距離此WiFi模組 5公尺內要連接的芝麻設備：</string>
     <string name="hub3_hint">添加距離此Hub3 5公尺內要連接的芝麻設備：</string>
-    <string name="friend_keys_hint">以下設備鑰匙被共享給此聯絡人：</string>
     <string name="drop_hint">刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請用針戳復位鍵LED燈熄滅</string>
     <string name="drop_hint_press">刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請按住復位鍵LED燈熄滅</string>
 
@@ -245,7 +240,6 @@
 
     <string name="judge_the_sesame">水平校正</string>
     <string name="device_model">機種</string>
-    <string name="no_more" />
 <!--    <string name="load_fail">加載數據失敗</string>-->
     <string name="facepalm">管理掌靜脈</string>
     <string name="battary">電池電量</string>

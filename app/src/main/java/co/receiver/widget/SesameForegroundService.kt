@@ -18,10 +18,9 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import co.candyhouse.app.ext.aws.AWSStatus
-import co.candyhouse.app.CandyHouseApp
 import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG

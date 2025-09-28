@@ -31,7 +31,6 @@
     <string name="cancel">キャンセル</string>
     <string name="last_name">姓</string>
     <string name="first_name">名</string>
-    <string name="delete_friend">連絡先を削除</string>
     <string name="set_lock_position">施錠の位置を固定する</string>
     <string name="set_unlock_position">解錠の位置を固定する</string>
     <string name="second">後</string>
@@ -115,8 +114,6 @@
     <string name="wm2_pwk">WiFi パスワード</string>
     <string name="wm2_pwk_hint">WiFi環境のパスワードをご入力ください</string>
     <string name="wm2_ssid">WiFi SSID</string>
-    <string name="shareSesameToFriends">デバイスをシェアする</string>
-    <string name="revoke">鍵を取り消す</string>
     <string name="login">ログイン/登録</string>
     <string name="loginNeed">ログインをお願い。</string>
     <string name="Notification">通知</string>
@@ -127,7 +124,6 @@
     <string name="ResetHub3">このHub3を初期化、そして鍵を捨てる</string>
     <string name="TrashTheWifiModule2Key">このWiFiモジュールを削除する</string>
     <string name="TrashTheHub3Module2Key">このHub3を削除する</string>
-    <string name="modifyGuestKeyTag">ゲストキー名の変更</string>
 
 
     <string name="addSesameTo">セサミを追加…</string>
@@ -150,7 +146,6 @@
 
     <string name="wm2_hint">このWiFiモジュールと5メートル以内に接続するセサミを追加してください：</string>
     <string name="hub3_hint">このHub3と5メートル以内に接続するセサミを追加してください：</string>
-    <string name="friend_keys_hint">この連絡先にシェアされているデバイスの鍵：</string>
     <string name="drop_hint">%1$sを削除しても%1$sは初期化またリセットされません。%1$sを初期化またリセットするには、細い棒でリセットボタンをLED点灯が消えるまで長押ししてください。</string>
     <string name="drop_hint_press">%1$sを削除しても%1sを削除してもsは初期化またリセットされません。%1$sを初期化またリセットするには、リセットボタンをLED点灯が消えるまで長押ししてください</string>
 
@@ -223,7 +218,6 @@
 
     <string name="judge_the_sesame">水平の調整</string>
     <string name="device_model">機種</string>
-    <string name="no_more" />
     <!--    <string name="load_fail">データ読込失敗</string>-->
     <string name="battary">電池残量</string>
     <string name="open_sensor_status">スイッチの状態</string>

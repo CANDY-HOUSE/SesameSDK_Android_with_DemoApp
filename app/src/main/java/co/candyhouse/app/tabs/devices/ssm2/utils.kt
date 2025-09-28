@@ -12,7 +12,7 @@ import android.text.style.StyleSpan
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
@@ -386,28 +386,28 @@ fun CHDevices.getFirmwarePath(context: Context): String? {
 
 fun CHProductModel.modelName(): String {
     return when (this) {
-        CHProductModel.WM2 -> MainActivity.activity!!.getString(R.string.WM2)
-        CHProductModel.SS2 -> MainActivity.activity!!.getString(R.string.Sesame)
-        CHProductModel.SS4 -> MainActivity.activity!!.getString(R.string.Sesame)
-        CHProductModel.SS5 -> MainActivity.activity!!.getString(R.string.Sesame5)
-        CHProductModel.SS5PRO -> MainActivity.activity!!.getString(R.string.Sesame5pro)
-        CHProductModel.SesameBot1 -> MainActivity.activity!!.getString(R.string.SesameBot)
-        CHProductModel.BiKeLock -> MainActivity.activity!!.getString(R.string.SesameBike)
-        CHProductModel.BiKeLock2 -> MainActivity.activity!!.getString(R.string.SesameBike2)
-        CHProductModel.SSMOpenSensor -> MainActivity.activity!!.getString(R.string.SesameOpenSensor)
-        CHProductModel.SSMTouchPro -> MainActivity.activity!!.getString(R.string.SSMTouchPro)
-        CHProductModel.SSMTouch -> MainActivity.activity!!.getString(R.string.SSMTouch)
-        CHProductModel.BLEConnector -> MainActivity.activity!!.getString(R.string.BLEConnector)
-        CHProductModel.Hub3 -> MainActivity.activity!!.getString(R.string.Hub3)
-        CHProductModel.Remote -> MainActivity.activity!!.getString(R.string.CHRemote)
-        CHProductModel.RemoteNano -> MainActivity.activity!!.getString(R.string.CHRemoteNano)
-        CHProductModel.SS5US -> MainActivity.activity!!.getString(R.string.Sesame5us)
-        CHProductModel.SesameBot2 -> MainActivity.activity!!.getString(R.string.SesameBot2)
-        CHProductModel.SSMFace -> MainActivity.activity!!.getString(R.string.SSMFace)
-        CHProductModel.SSMFacePro -> MainActivity.activity!!.getString(R.string.SSMFacePro)
-        CHProductModel.SSMFaceProAI -> MainActivity.activity!!.getString(R.string.SSMFaceProAI)
-        CHProductModel.SSMFaceAI -> MainActivity.activity!!.getString(R.string.SSMFaceAI)
-        CHProductModel.SS6Pro -> MainActivity.activity!!.getString(R.string.Sesame6Pro)
-        CHProductModel.SSMOpenSensor2 -> MainActivity.activity!!.getString(R.string.SesameOpenSensor2)
+        CHProductModel.WM2 -> CHDeviceManager.app.getString(R.string.WM2)
+        CHProductModel.SS2 -> CHDeviceManager.app.getString(R.string.Sesame)
+        CHProductModel.SS4 -> CHDeviceManager.app.getString(R.string.Sesame)
+        CHProductModel.SS5 -> CHDeviceManager.app.getString(R.string.Sesame5)
+        CHProductModel.SS5PRO -> CHDeviceManager.app.getString(R.string.Sesame5pro)
+        CHProductModel.SesameBot1 -> CHDeviceManager.app.getString(R.string.SesameBot)
+        CHProductModel.BiKeLock -> CHDeviceManager.app.getString(R.string.SesameBike)
+        CHProductModel.BiKeLock2 -> CHDeviceManager.app.getString(R.string.SesameBike2)
+        CHProductModel.SSMOpenSensor -> CHDeviceManager.app.getString(R.string.SesameOpenSensor)
+        CHProductModel.SSMTouchPro -> CHDeviceManager.app.getString(R.string.SSMTouchPro)
+        CHProductModel.SSMTouch -> CHDeviceManager.app.getString(R.string.SSMTouch)
+        CHProductModel.BLEConnector -> CHDeviceManager.app.getString(R.string.BLEConnector)
+        CHProductModel.Hub3 -> CHDeviceManager.app.getString(R.string.Hub3)
+        CHProductModel.Remote -> CHDeviceManager.app.getString(R.string.CHRemote)
+        CHProductModel.RemoteNano -> CHDeviceManager.app.getString(R.string.CHRemoteNano)
+        CHProductModel.SS5US -> CHDeviceManager.app.getString(R.string.Sesame5us)
+        CHProductModel.SesameBot2 -> CHDeviceManager.app.getString(R.string.SesameBot2)
+        CHProductModel.SSMFace -> CHDeviceManager.app.getString(R.string.SSMFace)
+        CHProductModel.SSMFacePro -> CHDeviceManager.app.getString(R.string.SSMFacePro)
+        CHProductModel.SSMFaceProAI -> CHDeviceManager.app.getString(R.string.SSMFaceProAI)
+        CHProductModel.SSMFaceAI -> CHDeviceManager.app.getString(R.string.SSMFaceAI)
+        CHProductModel.SS6Pro -> CHDeviceManager.app.getString(R.string.Sesame6Pro)
+        CHProductModel.SSMOpenSensor2 -> CHDeviceManager.app.getString(R.string.SesameOpenSensor2)
     }
 }

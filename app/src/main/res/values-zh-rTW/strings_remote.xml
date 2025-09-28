@@ -94,7 +94,6 @@
     <string name="ir_ble_invalid">Hub3連接異常，請返回Hub3詳情界面，重新連接。</string>
     <string name="ir_auto_searching_remote">正在尋找最可能的遙控器...</string>
     <string name="ir_modify_key_name">修改按鍵名稱</string>
-    <string name="ir_wave_too_short">讀取到的遙控器數據長度過短，請重試。</string>
     <string name="air_auto_match_introduction">請將遙控器對準Hub3 LED發光側，按下電源ON按鍵。</string>
     <string name="air_auto_match_code_fail">找該遙控器型號數據失敗，請再次重試。</string>
     <string name="shake_head">擺頭</string>

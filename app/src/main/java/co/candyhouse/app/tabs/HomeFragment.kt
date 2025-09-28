@@ -5,21 +5,19 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
+import co.candyhouse.app.base.setPage
 import co.candyhouse.app.base.view.IBaseView
 import co.candyhouse.app.ext.aws.AWSConfig
-import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.app.tabs.menu.BarMenuItem
 import co.candyhouse.app.tabs.menu.CustomAdapter
 import co.candyhouse.app.tabs.menu.ItemUtils
 import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.server.CHUser
 import co.candyhouse.sesame.utils.L
 import co.utils.alerts.ext.inputNameAlert
 import co.utils.alertview.fragments.toastMSG
@@ -31,6 +29,7 @@ import com.amazonaws.regions.Region
 import com.amazonaws.services.cognitoidentityprovider.AmazonCognitoIdentityProviderClient
 import com.amazonaws.services.cognitoidentityprovider.model.ListUsersRequest
 import com.amazonaws.services.cognitoidentityprovider.model.ListUsersResult
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.skydoves.balloon.ArrowOrientation
 import com.skydoves.balloon.Balloon
 import com.skydoves.balloon.BalloonAnimation
@@ -44,7 +43,6 @@ import org.json.JSONObject
 abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
 
     lateinit var customListBalloon: Balloon
-    private val mFrdModel: CHUserViewModel by activityViewModels()
     private val customAdapter by lazy {
         CustomAdapter(object : CustomAdapter.CustomViewHolder.Delegate {
             override fun onCustomItemClick(customItem: BarMenuItem) {
@@ -109,31 +107,17 @@ abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
                 }
                 val result: ListUsersResult = cognitoIdentityProvider.listUsers(request)
                 val user = result.users?.firstOrNull()
-                var nickName = ""
                 var subId: String? = null
 
                 user?.attributes?.forEach {
-                    if (it.name == "nickname") {
-                        nickName = it.value
-                    }
-
                     if (it.name == "sub") {
                         subId = it.value
 
                         CHLoginAPIManager.addFriend(subId!!) {
                             it.onSuccess {
                                 L.d("adduser", "addFriend success: ")
-                                if (nickName.isEmpty()) {
-                                    nickName = email
-                                }
-
-                                view?.apply {
-                                    this.post {
-                                        val user = CHUser(subId!!, email, nickName, 0, null)
-                                        mFrdModel.userViewModel.value = user
-                                        mFrdModel.addFriend(user)
-                                        findNavController().navigate(R.id.action_deviceListPG_to_FriendDetailFG)
-                                    }
+                                view?.post {
+                                    requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)?.setPage(1)
                                 }
                             }
                             it.onFailure {

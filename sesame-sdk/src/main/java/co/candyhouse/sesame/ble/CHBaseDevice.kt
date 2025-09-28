@@ -100,24 +100,26 @@ internal interface CHDeviceUtil {
         }
 
     fun dropKey(result: CHResult<CHEmpty>) {
-        CHDB.CHSS2Model.getDevice(deviceId.toString()) { ss2Keydata ->
-            if (ss2Keydata.getOrNull() != null){
-                CHDB.CHSS2Model.delete(ss2Keydata.getOrNull()!!) {
-                    delegate = null
-                    deviceStatus = CHDeviceStatus.NoBleSignal
-                    (this as CHDevices).disconnect {}
-                    this.sesame2KeyData = null
+        CHDB.CHSS2Model.deleteByDeviceId(deviceId.toString()) { deleteResult ->
+            when {
+                deleteResult.isSuccess -> {
+                    val deletedCount = deleteResult.getOrNull() ?: 0
+                    if (deletedCount > 0) {
+                        delegate = null
+                        deviceStatus = CHDeviceStatus.NoBleSignal
+                        (this as CHDevices).disconnect {}
+                        this.sesame2KeyData = null
+                    }
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                 }
-            }else{
-                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 
-                L.d("hcia", "ss2Keydata:" + ss2Keydata)
-                //todo
+                deleteResult.isFailure -> {
+                    result.invoke(Result.failure(deleteResult.exceptionOrNull()!!))
+                }
             }
-
         }
     }
+
     fun disconnect(result: CHResult<CHEmpty>) {
       L.d("hcia", "[say] 主動要求斷開藍芽連接 :" + " bluetoothAdapter.isEnabled: " + bluetoothAdapter.isEnabled + " mBluetoothGatt:" + mBluetoothGatt)
         // 在调用安卓的disconnect()断线之前，需要把原来enable的notify disable掉。否则会影响ESP32-C3 BLE 断线事件的触发。

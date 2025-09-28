@@ -50,18 +50,6 @@ object CHLoginAPIManager {
         }
     }
 
-    fun putKeyInfor(key: CHDeviceInfor, onResponse: CHResult<Any>) {
-        if (key.latitude == "null" || key.longitude == "null") {
-//            L.d("hcia", "空不傳:" + key)
-            return
-        }
-        makeApiCall(onResponse) {
-//            L.d("hcia", "key:" + key)
-            val res = jpAPIClient.putKeyInfor(key)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
     fun putKey(key: CHUserKey, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val res = jpAPIClient.putKey(key)
@@ -86,52 +74,7 @@ object CHLoginAPIManager {
 
     fun addFriend(friendID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-
-
             val res = jpAPIClient.addFriend(friendID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    fun removeFriend(friendID: String, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.removeFriend(friendID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    fun getFriends(tag:String? = null,onResponse: CHResult<Array<CHUser>>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.getFriends(10,tag)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    fun getDeviceMember(deviceID: String, timeSign: String, onResponse: CHResult<Array<CHUser>>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.getFriendsWithDevice(deviceID, timeSign)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    fun devicesWithFriend(friendID: String, onResponse: CHResult<Array<CHUserKey>>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.deviceWithFriend(friendID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-
-    fun giveFriendDevice(key: Any, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.addFriendDevice(key)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    fun removeFriendDevice(key: Any, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.removeFriendDevice(key)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }

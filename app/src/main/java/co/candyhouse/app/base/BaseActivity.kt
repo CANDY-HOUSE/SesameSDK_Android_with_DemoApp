@@ -17,16 +17,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
-import co.candyhouse.app.ext.aws.AWSConfig
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
-import co.candyhouse.app.tabs.devices.model.CHUserViewModel
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.utils.L
@@ -34,19 +33,16 @@ import co.receiver.widget.SesameForegroundService
 import co.utils.SharedPreferencesUtils
 import co.utils.applyInsetsPadding
 import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.UserState
-import com.amazonaws.mobile.client.UserStateDetails
-import com.amazonaws.mobile.config.AWSConfiguration
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
 
 open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     val loginViewModel by lazy { ViewModelProvider(this)[CHLoginViewModel::class.java] }
     val deviceViewModel by lazy { ViewModelProvider(this)[CHDeviceViewModel::class.java] }
-    val userViewModel by lazy { ViewModelProvider(this)[CHUserViewModel::class.java] }
 
     private val restartValue = 100
     private val outStateSaveKey = "outStateSaveKey"
@@ -152,35 +148,19 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
         }
     }
 
-    protected fun setAWSMobileClient() {
-        AWSMobileClient.getInstance().initialize(
-            this,
-            AWSConfiguration(JSONObject(AWSConfig.jpDevTeam)),
-            object : Callback<UserStateDetails?> {
-                override fun onError(e: Exception) {
-                    L.d(
-                        "KinesisVideoStream",
-                        "💋 初始化 AWSMobileClient onError: Initialization error of the mobile client$e"
-                    )
-                }
-
-                override fun onResult(result: UserStateDetails?) {
-                    L.d("KinesisVideoStream", "result:" + result!!.userState)
-                    CHLoginAPIManager.setupAPi(AWSMobileClient.getInstance())
-                    loginViewModel.gUserState.value = result.userState
-                    AWSStatus.setAWSLoginStatus(
-                        (AWSMobileClient.getInstance()
-                            .currentUserState().userState == UserState.SIGNED_IN)
-                    )
-                    L.d("hcia", "onResult islogin:" + AWSStatus.getAWSLoginStatus())
-                    deviceViewModel.refleshDevices()
-                }
-            })
-
+    protected fun setAWSUserStateListener() {
         AWSMobileClient.getInstance().addUserStateListener { details ->
             L.d("hcia", "💋----> 登入狀態:" + details?.userState?.name)
             when (details?.userState) {
                 UserState.SIGNED_IN -> {
+                    AWSStatus.setAWSLoginStatus(true)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        try {
+                            val attributes = AWSMobileClient.getInstance().getUserAttributes()
+                            AWSStatus.setSubUUID(attributes["sub"])
+                        } catch (_: Exception) {
+                        }
+                    }
                     CHLoginAPIManager.uploadUserDeviceToken {}
                     if (loginViewModel.isJustLogin) {
                         L.d("hcia", "💋 第一次登入上傳所有鑰匙" + loginViewModel.isJustLogin)
@@ -190,17 +170,17 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                     if (SharedPreferencesUtils.isNeedFreshDevice) {
                         deviceViewModel.refleshDevices()
                     }
-                    userViewModel.syncFriendsFromServer()
                 }
-
                 UserState.SIGNED_OUT -> {
                     L.d("hcia", "SIGNED_OUT:")
+                    AWSStatus.setAWSLoginStatus(false)
+                    AWSStatus.setSubUUID(null)
                     SharedPreferencesUtils.nickname = null
                     SharedPreferencesUtils.userId = null
-                    userViewModel.clearFriend()
                 }
-
-                else -> {}
+                else -> {
+                    AWSStatus.setAWSLoginStatus(false)
+                }
             }
             loginViewModel.gUserState.value = details.userState
         }

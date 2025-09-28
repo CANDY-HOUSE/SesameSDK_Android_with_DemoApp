@@ -20,7 +20,9 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
 import co.candyhouse.app.base.NfcSetting
 import co.candyhouse.app.ext.NfcHandler
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
+import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -37,6 +39,7 @@ import co.utils.AnalyticsUtil
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.toHexString
+import com.amazonaws.mobile.client.AWSMobileClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
@@ -57,10 +60,25 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         super.onCreate(savedInstanceState)
         activity = this
         onNewIntent(intent)
-        deviceViewModel.updateDevices()
-        deviceViewModel.updateWidgets()
 
-        setAWSMobileClient()
+        // 先显示本地数据
+        deviceViewModel.updateDevices()
+
+        if (AWSStatus.isInitialized()) {
+            setupAWSFeatures()
+        } else {
+            AWSStatus.initAWSMobileClient(this) { isLoggedIn ->
+                setupAWSFeatures()
+            }
+        }
+        setAWSUserStateListener()
+    }
+
+    private fun setupAWSFeatures() {
+        CHLoginAPIManager.setupAPi(AWSMobileClient.getInstance())
+        val userState = AWSStatus.getCachedUserState()
+        loginViewModel.gUserState.value = userState
+        deviceViewModel.refleshDevices()
     }
 
     override fun onStart() {
@@ -92,6 +110,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             e.printStackTrace()
         }
         super.onDestroy()
+        activity = null
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -342,11 +361,11 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     }
 
     override fun onSharedPreferenceChanged(p0: SharedPreferences?, key: String?) {
-        if (key == "isNeedFreshFriend") {
+        /*if (key == "isNeedFreshFriend") {
             if (SharedPreferencesUtils.isNeedFreshFriend) {
                 userViewModel.syncFriendsFromServer()
             }
-        }
+        }*/
         if (key == "isNeedFreshDevice") {
             if (SharedPreferencesUtils.isNeedFreshDevice) {
                 deviceViewModel.refleshDevices()

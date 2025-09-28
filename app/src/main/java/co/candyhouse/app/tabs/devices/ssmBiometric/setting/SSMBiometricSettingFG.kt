@@ -311,7 +311,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             }
         }
         if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.RemoteNano) {
-            bind.friendRecy.visibility = View.GONE
+            bind.friendWebView.visibility = View.GONE
         }
         if (device.productModel == CHProductModel.RemoteNano) {
             bind.triggertimeZone.apply {
