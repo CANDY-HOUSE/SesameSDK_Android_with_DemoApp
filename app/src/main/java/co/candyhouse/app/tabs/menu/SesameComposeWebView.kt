@@ -60,6 +60,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgComposeWebviewBinding
+import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.server.CHLoginAPIManager.getWebUrlByScene
 import co.candyhouse.server.CHResultState
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -196,6 +197,17 @@ class SesameComposeWebView : Fragment() {
                                     L.e("SesameComposeWebView", "notifyName=$notifyName")
                                 }
                                 L.e("SesameComposeWebView", "targetUrl=$targetUrl")
+                            }
+                        }
+
+                        "/webview/notify" -> {
+                            params["notifyName"]?.let { notifyName ->
+                                // 注册通知监听
+                                L.e("SesameComposeWebView", "notifyName=$notifyName")
+                                if (notifyName == "FriendChanged") {
+                                    ContactsWebViewManager.setPendingRefresh()
+                                    findNavController().popBackStack()
+                                }
                             }
                         }
                     }

@@ -23,6 +23,7 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
+import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.BaseFG
 import co.candyhouse.sesame.db.model.CHDevice
@@ -179,6 +180,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
             CHLoginAPIManager.addFriend(it) {
                 it.onSuccess {
                     view?.post {
+                        ContactsWebViewManager.setPendingRefresh()
                         findNavController().navigateUp()
                         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
                             ?.setPage(1)

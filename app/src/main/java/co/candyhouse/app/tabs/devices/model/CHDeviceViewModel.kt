@@ -149,7 +149,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
         syncJob = viewModelScope.launch {
             CHLoginAPIManager.getDevicesList {
-                L.e("hcia", "💋 receiveKeysFromServer(it)")
                 receiveKeysFromServer(it)
                 SharedPreferencesUtils.isNeedFreshDevice = false
             }

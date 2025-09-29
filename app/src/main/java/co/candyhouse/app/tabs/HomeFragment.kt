@@ -14,6 +14,7 @@ import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.base.view.IBaseView
 import co.candyhouse.app.ext.aws.AWSConfig
+import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.app.tabs.menu.BarMenuItem
 import co.candyhouse.app.tabs.menu.CustomAdapter
 import co.candyhouse.app.tabs.menu.ItemUtils
@@ -117,6 +118,9 @@ abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
                             it.onSuccess {
                                 L.d("adduser", "addFriend success: ")
                                 view?.post {
+                                    ContactsWebViewManager.setPendingRefresh()
+                                    ContactsWebViewManager.setPendingDetailNavigation(email, subId)
+                                    findNavController().navigateUp()
                                     requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)?.setPage(1)
                                 }
                             }

@@ -22,6 +22,7 @@ import co.candyhouse.app.base.NfcSetting
 import co.candyhouse.app.ext.NfcHandler
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
+import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -111,6 +112,9 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         }
         super.onDestroy()
         activity = null
+        if (isFinishing) {
+            ContactsWebViewManager.clear()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {

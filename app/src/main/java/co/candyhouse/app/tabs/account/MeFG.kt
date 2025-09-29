@@ -23,6 +23,7 @@ import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.tabs.HomeFragment
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
+import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHSesameLock
@@ -158,6 +159,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
             CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, SesameForegroundService::class.java))
         }
         CHDeviceWrapperManager.clear()
+        ContactsWebViewManager.clear()
     }
 
     private fun handleNameEdit() {
