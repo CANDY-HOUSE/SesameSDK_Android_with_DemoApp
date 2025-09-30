@@ -167,9 +167,6 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                         loginViewModel.isJustLogin = false
                         deviceViewModel.saveKeysToServer()
                     }
-                    if (SharedPreferencesUtils.isNeedFreshDevice) {
-                        deviceViewModel.refleshDevices()
-                    }
                 }
                 UserState.SIGNED_OUT -> {
                     L.d("hcia", "SIGNED_OUT:")

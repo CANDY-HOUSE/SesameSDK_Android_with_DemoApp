@@ -19,6 +19,7 @@ import androidx.preference.PreferenceManager
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
 import co.candyhouse.app.base.NfcSetting
+import co.candyhouse.app.base.setPage
 import co.candyhouse.app.ext.NfcHandler
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
@@ -41,6 +42,7 @@ import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.toHexString
 import com.amazonaws.mobile.client.AWSMobileClient
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
@@ -62,6 +64,8 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         activity = this
         onNewIntent(intent)
 
+        initNeedSharedParams()
+
         // 先显示本地数据
         deviceViewModel.updateDevices()
 
@@ -80,6 +84,11 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         val userState = AWSStatus.getCachedUserState()
         loginViewModel.gUserState.value = userState
         deviceViewModel.refleshDevices()
+    }
+
+    private fun initNeedSharedParams() {
+        SharedPreferencesUtils.isNeedFreshFriend = false
+        SharedPreferencesUtils.isNeedFreshDevice = false
     }
 
     override fun onStart() {
@@ -365,14 +374,18 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     }
 
     override fun onSharedPreferenceChanged(p0: SharedPreferences?, key: String?) {
-        /*if (key == "isNeedFreshFriend") {
+        if (key == "isNeedFreshFriend") {
             if (SharedPreferencesUtils.isNeedFreshFriend) {
-                userViewModel.syncFriendsFromServer()
+                ContactsWebViewManager.setPendingRefresh()
+                navController.navigateUp()
+                findViewById<BottomNavigationView>(R.id.bottom_nav)?.setPage(1)
+                SharedPreferencesUtils.isNeedFreshFriend = false
             }
-        }*/
+        }
         if (key == "isNeedFreshDevice") {
             if (SharedPreferencesUtils.isNeedFreshDevice) {
                 deviceViewModel.refleshDevices()
+                SharedPreferencesUtils.isNeedFreshDevice = false
             }
         }
     }
