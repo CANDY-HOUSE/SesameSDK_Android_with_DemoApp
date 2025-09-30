@@ -160,7 +160,11 @@
         android:id="@+id/SesameOpenSensorSettingFG"
         android:name="co.candyhouse.app.tabs.devices.ssmopensensor.setting.SesameOpenSensorNoBLESettingFG"
         android:label="SesameButtonSettingFG"
-        tools:layout="@layout/fg_sesame_opensensor_noble_setting" />
+        tools:layout="@layout/fg_sesame_opensensor_noble_setting">
+        <action
+            android:id="@+id/action_DeviceMember_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+    </fragment>
     <fragment
         android:id="@+id/register_list"
         android:name="co.candyhouse.app.tabs.devices.ScanNewDeviceFG"
