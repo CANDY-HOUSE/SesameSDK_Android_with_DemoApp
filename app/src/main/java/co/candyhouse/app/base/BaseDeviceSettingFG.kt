@@ -427,7 +427,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 refreshTop()
             }
         } else {
-            view?.findViewById<RecyclerView>(R.id.friend_web_view)?.visibility = View.GONE
+            view?.findViewById<ComposeView>(R.id.friend_web_view)?.visibility = View.GONE
         }
     }
 
