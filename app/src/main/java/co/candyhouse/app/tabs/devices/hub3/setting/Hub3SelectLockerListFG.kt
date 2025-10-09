@@ -32,7 +32,8 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
         CHProductModel.SSMFacePro,
         CHProductModel.SSMFaceProAI,
         CHProductModel.SSMFaceAI,
-        CHProductModel.BLEConnector
+        CHProductModel.BLEConnector,
+        CHProductModel.SS6Pro
     )
 
 
