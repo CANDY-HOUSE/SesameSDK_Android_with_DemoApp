@@ -6,10 +6,9 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.MainActivity.Companion.activity
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Hub3IrAdapterProvider
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
@@ -42,48 +41,53 @@ class Hub3IrAdapter(
                 title.text = data.alias
 
                 itemView.setOnClickListener {
-                    AlertView(
-                        title.text.toString(),
-                        "",
-                        AlertStyle.IOS
-                    ).apply {
-                        addAction(
-                            AlertAction(
-                                context.getString(R.string.hub3_details),
-                                AlertActionStyle.POSITIVE
-                            ) {
-                                L.d(
-                                    "sf",
-                                    "详情……" + data.alias + " " + data.type + " " + data.uuid
-                                )
-                                when (data.type) {
-                                    IRType.DEVICE_REMOTE_CUSTOM -> {
-                                        // 学习
-                                        hub3IrAdapterProvider.performStudy(data)
-                                    }
+                    val activity = context as? AppCompatActivity
+                    if (activity != null) {
+                        AlertView(
+                            title.text.toString(),
+                            "",
+                            AlertStyle.IOS
+                        ).apply {
+                            addAction(
+                                AlertAction(
+                                    context.getString(R.string.hub3_details),
+                                    AlertActionStyle.POSITIVE
+                                ) {
+                                    L.d(
+                                        "sf",
+                                        "详情……" + data.alias + " " + data.type + " " + data.uuid
+                                    )
+                                    when (data.type) {
+                                        IRType.DEVICE_REMOTE_CUSTOM -> {
+                                            // 学习
+                                            hub3IrAdapterProvider.performStudy(data)
+                                        }
 
-                                    IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV, IRType.DEVICE_REMOTE_FANS -> {
-                                        // 空调
-                                        hub3IrAdapterProvider.performAirControl(data)
-                                    }
+                                        IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV, IRType.DEVICE_REMOTE_FANS -> {
+                                            // 空调
+                                            hub3IrAdapterProvider.performAirControl(data)
+                                        }
 
-                                    else -> {
-                                        L.d("sf", "暂不支持未知类型跳转...")
+                                        else -> {
+                                            L.d("sf", "暂不支持未知类型跳转...")
+                                        }
                                     }
-                                }
-                            })
-                        addAction(
-                            AlertAction(
-                                context.getString(R.string.ssm_delete),
-                                AlertActionStyle.NEGATIVE
-                            ) {
-                                L.d(
-                                    "sf",
-                                    "删除……" + data.alias + " " + data.type + " " + data.uuid
-                                )
-                                hub3IrAdapterProvider.deleteIRDevice(data)
-                            })
-                        show(activity as AppCompatActivity)
+                                })
+                            addAction(
+                                AlertAction(
+                                    context.getString(R.string.ssm_delete),
+                                    AlertActionStyle.NEGATIVE
+                                ) {
+                                    L.d(
+                                        "sf",
+                                        "删除……" + data.alias + " " + data.type + " " + data.uuid
+                                    )
+                                    hub3IrAdapterProvider.deleteIRDevice(data)
+                                })
+                            show(activity)
+                        }
+                    } else {
+                        L.e("Hub3IrAdapter", "Activity is null or not AppCompatActivity")
                     }
                 }
             }

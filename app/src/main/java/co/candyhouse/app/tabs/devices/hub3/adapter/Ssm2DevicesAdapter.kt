@@ -7,7 +7,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.MainActivity.Companion.activity
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Ssm2DevicesAdapterProvider
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.sesame.utils.L
@@ -42,15 +41,20 @@ class Ssm2DevicesAdapter(
                 }
 
                 itemView.setOnClickListener {
-                    AlertView(title.text.toString(), "", AlertStyle.IOS).apply {
-                        addAction(
-                            AlertAction(
-                                context.getString(R.string.ssm_delete),
-                                AlertActionStyle.NEGATIVE
-                            ) {
-                                deviceNameProvider.removeSesame(data.id)
-                            })
-                        show(activity as AppCompatActivity)
+                    val activity = context as? AppCompatActivity
+                    if (activity != null) {
+                        AlertView(title.text.toString(), "", AlertStyle.IOS).apply {
+                            addAction(
+                                AlertAction(
+                                    context.getString(R.string.ssm_delete),
+                                    AlertActionStyle.NEGATIVE
+                                ) {
+                                    deviceNameProvider.removeSesame(data.id)
+                                })
+                            show(activity)
+                        }
+                    } else {
+                        L.e("Ssm2DevicesAdapter", "Activity is null or not AppCompatActivity")
                     }
                 }
             }
