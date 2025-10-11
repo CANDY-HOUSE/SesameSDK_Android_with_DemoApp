@@ -120,7 +120,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
                 putString("pushToken", SharedPreferencesUtils.deviceToken)
             })
         }
-        bind.sysNotifyMsg.setOnClickListener {
+        bind.checkSysNotifyMsg.setOnClickListener {
             openSettingNotify()
         }
     }
