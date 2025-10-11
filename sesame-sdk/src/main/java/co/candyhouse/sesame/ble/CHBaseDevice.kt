@@ -257,6 +257,8 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
             // 实现 updateFirmware 方法
         }
 
+        override fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>) {
+        }
         // 其他方法的实现...
     }
 }

@@ -46,6 +46,8 @@ import kotlin.math.abs
 
 @SuppressLint("MissingPermission")
 internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
+    override var hub3Mac: String? = null
+
     private lateinit var HistoryTagWithUUID: ByteArray
 
     /** 其他功能: history  */
@@ -87,6 +89,8 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                 resource.data.state.reported.wm2s?.let { wm2s ->
                     L.d("hcia", "[ss5]wm2s:" + wm2s)
                     isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
+                    hub3Mac = wm2s.keys.firstOrNull()
+                    L.d("harry", "Hub3 MAC: $hub3Mac")
                 }
 
                 if (isConnectedByWM2) {
@@ -332,6 +336,19 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         if (receivePayload.cmdItCode == SesameItemCode.OPS_CONTROL.value) {
             opsSetting = CHSesame5OpsSettings(receivePayload.payload)
             L.d("switch", "[ss5][opsSecond]:" + opsSetting!!.opsLockSecond)
+        }
+    }
+
+    override fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>) {
+        L.d("hcia", "[ss5]updateFirmwareViaHub3")
+        if (isInternetAvailable() && isConnectedByWM2) {
+            try {
+                CHAccountManager.postDFU(deviceId.toString(), hub3Mac, this) {}
+                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } catch (e: Exception) {
+                L.e("hcia", "[ss5]updateFirmwareViaHub3 failed: ${e.message}")
+                onResponse.invoke(Result.failure(e))
+            }
         }
     }
 

@@ -16,6 +16,7 @@ import co.candyhouse.sesame.server.dto.CHSS2Infor
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
+import co.candyhouse.sesame.server.dto.CHSS5WebDFUReq
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame2.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
@@ -182,4 +183,10 @@ internal interface CHPrivateAPIClient {
 
     @Operation(path = "/device/v2/sesame5/{device_id}/battery", method = "POST")
     fun postBatteryData(@Parameter(name = "device_id", location = "path") deviceID: String, body: String): Any
+
+    @Operation(path = "/device/v2/sesame5/{device_id}/firmware/DFU", method = "POST")
+    fun postDFU(
+        @Parameter(name = "device_id", location = "path") deviceId: String,
+        body: CHSS5WebDFUReq,
+    ): Any
 }

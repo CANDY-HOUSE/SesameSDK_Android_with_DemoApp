@@ -233,6 +233,7 @@ interface CHDevices {
     fun register(result: CHResult<CHEmpty>)
     fun reset(result: CHResult<CHEmpty>)
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
+    fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>)
 
     fun createGuestKey(keyName: String, result: CHResult<CHDevice>) {
         CHAccountManager.generateGuestKey(CHGuestKey(getKey().deviceUUID, getKey().deviceModel, getKey().keyIndex, getKey().secretKey, getKey().sesame2PublicKey, keyName)) {

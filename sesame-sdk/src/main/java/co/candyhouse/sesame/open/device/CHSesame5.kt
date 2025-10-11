@@ -8,6 +8,7 @@ import co.candyhouse.sesame.utils.bytesToUShort
 interface CHSesame5 : CHSesameLock {
     var mechSetting: CHSesame5MechSettings?
     var opsSetting: CHSesame5OpsSettings?
+    var hub3Mac: String?
     fun lock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
     fun unlock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
     fun toggle(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
