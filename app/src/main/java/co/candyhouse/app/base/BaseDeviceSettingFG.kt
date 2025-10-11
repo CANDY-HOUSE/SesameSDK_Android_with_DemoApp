@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
@@ -380,7 +379,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             view?.findViewById<View>(R.id.share_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.chenge_angle_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.auto_lock_zone)?.visibility = View.GONE
-            view?.findViewById<View>(R.id.noti_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.opsensor_zone)?.visibility = View.GONE
         }
         targetDevice.getNFC()
@@ -569,26 +567,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 }
             }
             isSelected = isEnabled && !isNotifyEnable()
-        }
-    }
-
-    fun checkTvSysNotifyMsg(isCheck: Boolean = false, isOnResume: Boolean = false) {
-        view?.findViewById<View>(R.id.noti_zone)?.apply {
-            setOnClickListener(null)
-            setOnClickListener {
-                openSettingNotify()
-            }
-        }
-        view?.findViewById<TextView>(R.id.tvSysNotifyMsg)?.apply {
-            text =
-                if (isNotifyEnable()) getString(R.string.android_notifica_permis_on) else getString(
-                    R.string.android_notifica_permis_off
-                )
-            if (!isOnResume) {
-                isEnabled = isCheck
-            }
-            isSelected = isEnabled && !isNotifyEnable()
-
         }
     }
 }

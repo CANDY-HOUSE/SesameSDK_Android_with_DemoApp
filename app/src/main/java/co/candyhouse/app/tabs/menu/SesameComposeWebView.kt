@@ -46,6 +46,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +67,7 @@ import co.candyhouse.server.CHResultState
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
+import co.utils.WebViewJSBridge
 import co.utils.clearContainerTopPadding
 import co.utils.restoreContainerTopPadding
 import co.utils.safeNavigate
@@ -116,6 +118,7 @@ internal fun rememberWebUrl(
     initialUrl: String,
     scene: String,
     deviceId: String,
+    pushToken: String = "",
     onError: (String) -> Unit = {}
 ): State<String> {
     val webUrl = remember { mutableStateOf(initialUrl) }
@@ -123,8 +126,14 @@ internal fun rememberWebUrl(
     LaunchedEffect(scene) {
         if (scene.isNotEmpty() && initialUrl.isEmpty()) {
             val extInfo = buildMap {
-                if (deviceId.isNotEmpty()) {
-                    put("deviceUUID", deviceId)
+                when {
+                    pushToken.isNotEmpty() -> {
+                        put("pushToken", pushToken)
+                    }
+
+                    deviceId.isNotEmpty() -> {
+                        put("deviceUUID", deviceId)
+                    }
                 }
             }
 
@@ -177,6 +186,7 @@ class SesameComposeWebView : Fragment() {
                 deviceId = arguments?.getString("deviceId") ?: "",
                 where = arguments?.getString("where") ?: "",
                 title = arguments?.getString("title") ?: "",
+                pushToken = arguments?.getString("pushToken") ?: "",
                 onBackClick = {
                     if (!findNavController().popBackStack()) {
                         findNavController().navigate(R.id.deviceListPG)
@@ -236,15 +246,20 @@ fun WebViewContent(
     deviceId: String = "",
     where: String = "",
     title: String = "",
+    pushToken: String = "",
     onBackClick: () -> Unit,
     onMoreClick: (String) -> Unit,
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null
 ) {
     val tag = "SesameComposeWebView"
+    val scope = rememberCoroutineScope()
+
+    // 判断是否需要启用JS桥接
+    val enableJSBridge = scene == "device-notify"
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val webUrl by rememberWebUrl(url, scene, deviceId) { errorMsg ->
+    val webUrl by rememberWebUrl(url, scene, deviceId, pushToken) { errorMsg ->
         error = errorMsg
         loading = false
     }
@@ -253,13 +268,19 @@ fun WebViewContent(
 
     val schemeHandlers = remember { createSchemeHandlers(onSchemeIntercept) }
 
+    var jsBridge by remember { mutableStateOf<WebViewJSBridge?>(null) }
+
     LaunchedEffect(Unit) {
-        L.d(tag, "where=$where scene=$scene deviceId=$deviceId title=$title")
+        L.d(tag, "where=$where scene=$scene deviceId=$deviceId title=$title enableJSBridge=$enableJSBridge pushToken=$pushToken")
         if (webUrl.isNotEmpty()) L.d(tag, "url=$webUrl")
     }
 
     DisposableEffect(Unit) {
         onDispose {
+            if (enableJSBridge) {
+                webViewRef?.removeJavascriptInterface("AndroidHandler")
+                jsBridge = null
+            }
             cleanupWebView(webViewRef)
             webViewRef = null
         }
@@ -322,6 +343,12 @@ fun WebViewContent(
 
                     if (!isWebViewInitialized) {
                         wv.setupCommonSettings(supportZoom = true)
+
+                        if (enableJSBridge) {
+                            L.d(tag, "Adding JS Bridge for scene='$scene'")
+                            jsBridge = WebViewJSBridge(wv, scope)
+                            wv.addJavascriptInterface(jsBridge!!, "AndroidHandler")
+                        }
 
                         wv.webViewClient = object : WebViewClient() {
 

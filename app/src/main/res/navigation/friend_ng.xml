@@ -47,8 +47,6 @@
         android:id="@+id/SSM2SetAngleFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
         android:label="SSM2SetAngleFG" />
-
-    <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"

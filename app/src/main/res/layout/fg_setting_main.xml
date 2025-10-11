@@ -323,61 +323,6 @@
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/noti_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:background="@color/white">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_centerVertical="true"
-                        android:orientation="vertical"
-                        android:layout_height="wrap_content">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="17dp"
-                            android:background="@color/white"
-                            android:gravity="center_vertical"
-                            android:text="@string/Notification"
-                            android:textColor="@color/black"
-                            android:textSize="17dp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="17dp"
-
-                            android:id="@+id/tvSysNotifyMsg"
-                            android:gravity="center_vertical"
-                            android:text="@string/android_notifica_permis_on"
-                            android:textColor="@color/tv_color_red_gray"
-                            android:textSize="11dp" />
-                    </LinearLayout>
-
-
-
-
-                    <Switch
-                        android:id="@+id/noti_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:paddingVertical="14dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="12dp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="17dp"
-                        android:background="@color/gray0" />
-                </RelativeLayout>
-
-                <RelativeLayout
                     android:id="@+id/opsensor_zone"
                     android:layout_width="match_parent"
                     android:layout_height="53dp"

@@ -343,8 +343,6 @@
         android:id="@+id/Hub3MatterFG"
         android:name="co.candyhouse.app.tabs.devices.hub3.setting.Hub3MatterFG"
         android:label="Hub3MatterFG" />
-
-    <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"

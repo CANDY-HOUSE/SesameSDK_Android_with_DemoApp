@@ -7,13 +7,11 @@ import android.os.Build
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.server.CHPrivateAPIClient
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
-import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.CHGuestKey
 import co.candyhouse.sesame.server.dto.CHGuestKeyCut
@@ -74,28 +72,6 @@ object CHAccountManager {
 //                L.d("hcia", "APIFail!:" + it)
                 onResponse.invoke(Result.failure(it))
             }
-        }
-    }
-
-    internal fun isNotificationEnable(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val tmpNo = jpAPIclient.fcmTokenGet((device as CHDevices).deviceId.toString().uppercase(), fcmToken)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(tmpNo)))
-        }
-    }
-
-    internal fun enableNotification(device: CHSesameLock, fcmToken: String, subUUID:String, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val tmpEnable = jpAPIclient.fcmTokenSignPost(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken, subUUID))
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(tmpEnable)))
-        }
-    }
-
-    internal fun cancelNotification(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val tmpEnable = jpAPIclient.fcmTokenSignDelete(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken))
-//            L.d("hcia", "tmpEnable:" + tmpEnable)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(tmpEnable)))
         }
     }
 

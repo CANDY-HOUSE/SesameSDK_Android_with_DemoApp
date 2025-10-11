@@ -3,7 +3,6 @@ package co.candyhouse.app.tabs.devices.ssm5.setting
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
@@ -21,8 +20,6 @@ import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame5
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
-import co.utils.UserUtils
 import co.utils.safeNavigate
 
 class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
@@ -103,9 +100,6 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             bind.chengeAngleZone.setOnClickListener {
                 safeNavigate(R.id.action_SSM2SettingFG_to_SSM2SetAngleFG)
             }
-
-            // 开关锁通知
-            setupNotificationSwitch()
         }
         bind.autolockStatus.setOnClickListener {
             L.d("ischecaksa","isChecked:"+bind.autolockSwitch.isChecked)
@@ -116,49 +110,8 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
 
     } //end view created
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupNotificationSwitch() {
-        val device = mDeviceModel.ssmLockLiveData.value as? CHSesame5 ?: return
-
-        SharedPreferencesUtils.deviceToken?.let { fcmToken ->
-            device.isEnableNotification(fcmToken) { result ->
-                result.onSuccess { response ->
-                    bind.notiSwitch.post {
-                        bind.notiSwitch.apply {
-                            isActivated = false
-                            isChecked = response.data
-                            setOnClickListener {} // 防止默认点击
-                        }
-                        checkTvSysNotifyMsg(response.data)
-
-                        bind.notiSwitch.setOnTouchListener { _, event ->
-                            if (event.action == MotionEvent.ACTION_UP) {
-                                handleSwitchToggle(device, fcmToken, !bind.notiSwitch.isChecked)
-                            }
-                            true
-                        }
-                    }
-                }
-            }
-        } ?: L.d("sf", "FCM token unavailable. Reconnect and restart app")
-    }
-
-    private fun handleSwitchToggle(device: CHSesame5, token: String, enable: Boolean) {
-        val operation = if (enable) device::enableNotification else device::disableNotification
-        val subUUID = UserUtils.getUserId()?:""
-        operation(token,subUUID) { result ->
-            result.onSuccess {
-                bind.notiSwitch.post {
-                    bind.notiSwitch.isChecked = enable
-                    checkTvSysNotifyMsg(enable)
-                }
-            }
-        }
-    }
-
     override fun onResume() {
         super.onResume()
-        checkTvSysNotifyMsg(isOnResume = true)
     }
 
     override fun onUIDeviceStatus(status: CHDeviceStatus) {

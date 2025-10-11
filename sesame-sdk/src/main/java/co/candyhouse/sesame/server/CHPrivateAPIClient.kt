@@ -3,7 +3,6 @@ package co.candyhouse.sesame.server
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
-import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.CHGuestKey
 import co.candyhouse.sesame.server.dto.CHGuestKeyCut
@@ -79,18 +78,6 @@ internal interface CHPrivateAPIClient {
 
     @Operation(path = "/device/v1/sesame2/sign", method = "POST")
     fun guestKeysSignPost(body: CHRemoveSignKeyRequest): String
-
-    @Operation(path = "/device/v1/token", method = "GET")
-    fun fcmTokenGet(
-        @Parameter(name = "deviceId", location = "query") deviceId: String,
-        @Parameter(name = "deviceToken", location = "query") fcmToken: String,
-    ): Any
-
-    @Operation(path = "/device/v1/token", method = "POST")
-    fun fcmTokenSignPost(body: CHFcmTokenUpload): Any
-
-    @Operation(path = "/device/v1/token", method = "DELETE")
-    fun fcmTokenSignDelete(body: CHFcmTokenUpload): Any
 
     @Operation(path = "/device/v1/version", method = "GET")
     fun getVersion(): Any

@@ -2,11 +2,17 @@ package co.candyhouse.app.tabs.devices.hub3.setting
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -399,8 +405,34 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         bind.ledSeekbar.setProgress(progressValue)
         bind.ledSeekbar.setIndicatorTextFormat(getString(R.string.brightness) + " \${PROGRESS}%")
 
+        val vibrator = context?.let { ctx ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+        }
+
+        var lastProgress = -1
+
         bind.ledSeekbar.onSeekChangeListener = object : OnSeekChangeListener {
-            override fun onSeeking(seekParams: SeekParams) {}
+            override fun onSeeking(seekParams: SeekParams) {
+                vibrator?.let {
+                    val currentProgress = seekParams.progress
+                    if (currentProgress != lastProgress) {
+                        lastProgress = currentProgress
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            it.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            it.vibrate(3)
+                        }
+                    }
+                }
+            }
 
             override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
 

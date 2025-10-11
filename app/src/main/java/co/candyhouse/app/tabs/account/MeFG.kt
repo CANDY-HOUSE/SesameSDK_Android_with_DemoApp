@@ -1,9 +1,12 @@
 package co.candyhouse.app.tabs.account
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.os.Bundle
+import android.provider.Settings
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -13,6 +16,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -57,6 +61,13 @@ class MeFG : HomeFragment<FgMeBinding>() {
         activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.gray0)
     }
 
+    override fun onResume() {
+        super.onResume()
+        bind.sysNotifyMsg.apply {
+            text = if (isNotifyEnable()) getString(R.string.android_notifica_permis_on) else getString(R.string.android_notifica_permis_off)
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     override fun setupUI() {
         activity?.window?.statusBarColor = Color.WHITE
@@ -84,7 +95,6 @@ class MeFG : HomeFragment<FgMeBinding>() {
             this.text = spannable
             movementMethod = LinkMovementMethod.getInstance()
         }
-        bind.tvIr.visibility = View.GONE
     }
 
     override fun setupListeners() {
@@ -102,6 +112,16 @@ class MeFG : HomeFragment<FgMeBinding>() {
         bind.nameZone.setOnClickListener {
             // 名称编辑逻辑
             handleNameEdit()
+        }
+        bind.deviceNotification.setOnClickListener {
+            // 通知
+            safeNavigate(R.id.action_notify_to_webViewFragment, Bundle().apply {
+                putString("scene", "device-notify")
+                putString("pushToken", SharedPreferencesUtils.deviceToken)
+            })
+        }
+        bind.checkSysNotifyMsg.setOnClickListener {
+            openSettingNotify()
         }
     }
 
@@ -266,6 +286,28 @@ class MeFG : HomeFragment<FgMeBinding>() {
         }
     }
 
+    private fun openSettingNotify() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            activity?.apply {
+                val intent = Intent()
+                intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun isNotifyEnable(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val notificationManager = getSystemService(
+                requireContext(),
+                NotificationManager::class.java
+            ) as NotificationManager
+            return notificationManager.areNotificationsEnabled()
+        } else {
+            return true
+        }
+    }
 }
 
 fun cheyKeyToUserKey(key: CHDevice, level: Int, nickName: String, rank: Int? = null): CHUserKey {

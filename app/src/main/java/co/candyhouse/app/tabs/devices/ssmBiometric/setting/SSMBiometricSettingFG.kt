@@ -1,8 +1,13 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -177,8 +182,34 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         bind.radarSeekbar.setProgress(distance.toFloat())
         bind.radarSeekbar.setIndicatorTextFormat(getString(R.string.distance) + " \${PROGRESS}cm")
 
+        val vibrator = context?.let { ctx ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+        }
+
+        var lastProgress = -1
+
         bind.radarSeekbar.onSeekChangeListener = object : OnSeekChangeListener {
-            override fun onSeeking(seekParams: SeekParams) {}
+            override fun onSeeking(seekParams: SeekParams) {
+                vibrator?.let {
+                    val currentProgress = seekParams.progress
+                    if (currentProgress != lastProgress) {
+                        lastProgress = currentProgress
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            it.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            it.vibrate(3)
+                        }
+                    }
+                }
+            }
 
             override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
 

@@ -30,7 +30,6 @@ import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt24ByteArray
-import com.amazonaws.mobileconnectors.apigateway.ApiClientException
 import java.util.UUID
 
 enum class MatterProductModel(val value: UByte) {
@@ -323,50 +322,7 @@ interface CHSesameConnector : CHDevices {
     fun setRadarSensitivity(payload: ByteArray, result: CHResult<CHEmpty>){}
 }
 
-interface CHSesameLock : CHDevices {
-
-    fun isEnableNotification(fcmToken: String, result: CHResult<Boolean>) {
-        CHAccountManager.isNotificationEnable(this, fcmToken) {
-            it.onSuccess {
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(true)))
-            }
-            it.onFailure {
-                if (it is ApiClientException) {
-                    if (it.statusCode == 404) {
-                        result.invoke(Result.success(CHResultState.CHResultStateNetworks(false)))
-                        return@onFailure
-                    }
-                }
-                result.invoke(Result.failure(it))
-            }
-        }
-    }
-
-    fun enableNotification(fcmToken: String, subUUID:String, result: CHResult<Any>) {
-        L.d("hcia", "String:" + String)
-        CHAccountManager.enableNotification(this, fcmToken, subUUID) {
-            it.onSuccess {
-                L.d("hcia", "it:" + it)
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
-            }
-            it.onFailure {
-                L.d("hcia", "it:" + it)
-            }
-        }
-    }
-
-    fun disableNotification(fcmToken: String, subUUID: String = "", result: CHResult<Any>) {
-        CHAccountManager.cancelNotification(this, fcmToken) {
-            it.onSuccess {
-                L.d("hcia", "it:" + it)
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
-            }
-            it.onFailure {
-                L.d("hcia", "it:" + it)
-            }
-        }
-    }
-}
+interface CHSesameLock : CHDevices{}
 
 interface CHSesameProtocolMechStatus {
 

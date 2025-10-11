@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -31,7 +32,6 @@
         android:id="@+id/name_zone"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_below="@+id/menu"
         android:background="@color/white"
         android:orientation="vertical">
 
@@ -80,16 +80,12 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/tvIr"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:gravity="center"
-        android:text="IR"
-        android:textColor="@color/blue"
-        android:textSize="32px" />
+        android:layout_height="1dp"
+        android:background="@color/gray0" />
 
-    <ScrollView xmlns:tools="http://schemas.android.com/tools"
+    <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -99,6 +95,55 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="20dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="53dp"
+                android:background="@color/white">
+
+                <LinearLayout
+                    android:id="@+id/check_sysNotifyMsg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/white"
+                        android:gravity="center_vertical"
+                        android:text="@string/Notification"
+                        android:textColor="@color/black"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/sysNotifyMsg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="17dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/android_notifica_permis_on"
+                        android:textColor="@color/tv_color_red_gray"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/device_notification"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="right"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="20dp"
+                        android:src="@drawable/ic_arrow_gray" />
+                </LinearLayout>
+            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -144,8 +189,6 @@
                 android:id="@+id/delAccount"
                 android:layout_width="match_parent"
                 android:layout_height="53dp"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
                 android:layout_marginTop="550dp"
                 android:background="@color/status_bg"
                 android:gravity="center"

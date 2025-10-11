@@ -35,6 +35,9 @@
         <action
             android:id="@+id/action_to_SSM2SetAngleFG"
             app:destination="@id/SSM2SetAngleFG" />
+        <action
+            android:id="@+id/action_notify_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
     </fragment>
 
     <!--其他fragment-->
@@ -79,8 +82,6 @@
         android:name="co.candyhouse.app.tabs.account.LoginVerifiCodeFG"
         android:label="LoginVerifiCodeFG"
         tools:layout="@layout/fg_verify_mail" />
-
-    <!-- 添加 WebViewFragment -->
     <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
