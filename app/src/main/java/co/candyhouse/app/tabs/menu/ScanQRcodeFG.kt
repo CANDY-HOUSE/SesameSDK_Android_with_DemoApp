@@ -227,7 +227,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
     private fun CHProductModel?.isValidModel(): Boolean {
         return this == CHProductModel.SS5 || this == CHProductModel.BiKeLock2 || this == CHProductModel.SSMTouchPro ||
                 this == CHProductModel.SSMTouch || this == CHProductModel.SS5PRO || this == CHProductModel.BLEConnector ||
-                this == CHProductModel.Remote || this == CHProductModel.SS5US || this == CHProductModel.SesameBot2 ||
+                this == CHProductModel.Remote || this == CHProductModel.RemoteNano || this == CHProductModel.SS5US || this == CHProductModel.SesameBot2 ||
                 this == CHProductModel.SSMFacePro || this == CHProductModel.SSMFaceProAI || this == CHProductModel.SSMFaceAI || this == CHProductModel.SS6Pro ||
                 this == CHProductModel.Hub3 || this == CHProductModel.SSMFace || this == CHProductModel.SSMOpenSensor2 || this == CHProductModel.SSMOpenSensor
     }
