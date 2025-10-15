@@ -594,10 +594,6 @@ internal enum class CHError(val value: NSError) {
             }
         }
     }
-
-    override fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>) {
-        TODO("Not yet implemented")
-    }
 }
 
 internal class SSM2LoginResponsePayload(loginPayload: ByteArray) {

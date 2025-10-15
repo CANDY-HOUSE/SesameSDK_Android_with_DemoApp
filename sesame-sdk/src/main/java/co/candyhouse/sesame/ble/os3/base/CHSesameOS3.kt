@@ -436,11 +436,6 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
         }
     }
 
-    open fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>) {
-        L.d("harry", "CHSesameOS3 透过 Hub3 升级固件")
-
-    }
-
     fun parceADV(value: CHadv?) {
         value?.let {
             rssi = it.rssi

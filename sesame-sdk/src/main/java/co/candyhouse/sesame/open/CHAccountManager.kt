@@ -23,7 +23,6 @@ import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2Infor
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
-import co.candyhouse.sesame.server.dto.CHSS5WebDFUReq
 import co.candyhouse.sesame.server.dto.CHSSMHisUploadRequest
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.L
@@ -283,17 +282,6 @@ object CHAccountManager {
             val postBatteryDataRes = jpAPIclient.postBatteryData(deviceID, payloadString)
             L.d("harry", "[postBatteryData]: $postBatteryDataRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postBatteryDataRes)))
-        }
-    }
-
-    internal fun postDFU(deviceID: String, hub3Mac: String?, ss5: CHDevices, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val msg = System.currentTimeMillis().toUInt24ByteArray()
-            val keyCheck = AesCmac((ss5 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(msg)!!.sliceArray(0..3)
-
-            val postDFURes = jpAPIclient.postDFU(deviceID, CHSS5WebDFUReq(hub3Mac ?: "", keyCheck.toHexString()))
-            L.d("harry", "[postDFU]: $postDFURes")
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postDFURes)))
         }
     }
 }

@@ -304,12 +304,8 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             if (targetDevice.productModel != CHProductModel.Hub3
                 && mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.UnLogin
             ) {
-                if (co.candyhouse.sesame2.BuildConfig.DEBUG) {
-                    // Debug模式下允许 通过 Hub3 升级
-                } else {
                     toastMSG(getString(R.string.toastBleNotReadyForDFU))
                     return@setOnClickListener
-                }
             }
             AlertView(getString(R.string.ssm_update), "", AlertStyle.IOS).apply {
                 addAction(
@@ -349,23 +345,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                             }
                         }
                     })
-
-                // 添加新功能： Debug模式下， SSM5/SSM5 Pro 已连接WiFi， 允许用户选择通过Hub3升级固件
-                // TODO: 1、检查有哪些机型支持通过Hub3升级固件， 2、避免 WM2 连接的设备也出现该选项
-                if (co.candyhouse.sesame2.BuildConfig.DEBUG) {
-                    if (targetDevice.productModel == CHProductModel.SS5PRO || targetDevice.productModel == CHProductModel.SS5) {
-                        val isWifiConnect = targetDevice.deviceShadowStatus?.let { it.value == CHDeviceLoginStatus.Login } ?: false
-                        if (isWifiConnect) {
-                            addAction(
-                                AlertAction("DFU via Hub3", AlertActionStyle.NEGATIVE) {
-                                    L.d("harry", "DFU via Hub3")
-                                    targetDevice.updateFirmwareViaHub3 { res ->
-
-                                    }
-                                })
-                        }
-                    }
-                }
 
                 show(activity as AppCompatActivity)
             }

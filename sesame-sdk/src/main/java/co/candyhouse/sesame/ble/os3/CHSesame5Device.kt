@@ -338,18 +338,4 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             L.d("switch", "[ss5][opsSecond]:" + opsSetting!!.opsLockSecond)
         }
     }
-
-    override fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>) {
-        L.d("hcia", "[ss5]updateFirmwareViaHub3")
-        if (isInternetAvailable() && isConnectedByWM2) {
-            try {
-                CHAccountManager.postDFU(deviceId.toString(), hub3Mac, this) {}
-                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-            } catch (e: Exception) {
-                L.e("hcia", "[ss5]updateFirmwareViaHub3 failed: ${e.message}")
-                onResponse.invoke(Result.failure(e))
-            }
-        }
-    }
-
 }

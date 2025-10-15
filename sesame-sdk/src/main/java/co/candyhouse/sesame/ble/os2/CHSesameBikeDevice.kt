@@ -419,10 +419,6 @@ import java.util.*
         }
     }
 
-    override fun updateFirmwareViaHub3(onResponse: CHResult<CHEmpty>) {
-        TODO("Not yet implemented")
-    }
-
     private fun sendPlainCommand(payload: SSM2Payload, onResponse: SesameOS2ResponseCallback) {
         CoroutineScope(IO).launch {
             semaphore.send(onResponse)
