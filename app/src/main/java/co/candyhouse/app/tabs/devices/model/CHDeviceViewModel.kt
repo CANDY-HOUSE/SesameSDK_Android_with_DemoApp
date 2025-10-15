@@ -265,7 +265,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 )
             }
             synchronized(this@CHDeviceViewModel) {
-                myChDevices.value = ArrayList(updatedDevices)
+                myChDevices.value = updatedDevices
                 val devicesToRefresh = mutableListOf<CHDevices>()
                 myChDevices.value.forEach { device ->
                     device.delegate = delegateManager

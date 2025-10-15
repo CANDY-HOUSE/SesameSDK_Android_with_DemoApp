@@ -65,7 +65,7 @@ class WebViewJSBridge(
                                     put("deviceUUID", device.deviceId.toString().uppercase())
                                     put("deviceName", device.getNickname())
                                     put("deviceModel", device.productModel.deviceModel())
-                                    put("keyLevel", device.getLevel())
+                                    put("keyLevel", device.getLevel().toString())
                                 }
                                 deviceArray.put(deviceJson)
                             }

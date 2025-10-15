@@ -2,6 +2,7 @@ package co.utils.recycle
 
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.SesameDevicesListLayoutBinding
@@ -230,19 +231,24 @@ class DeviceListAdapter(
             setBatteryStatus(batteryLevel, false)
         }
 
-        private fun setBatteryStatus(level: Int, isHub3: Boolean) {
+        private fun setBatteryStatus(batteryLevel: Int, isHub3: Boolean) {
             binding.apply {
-                val visibility = if (level == -1) View.GONE else View.VISIBLE
-                batteryContain.visibility = visibility
-                batteryPercent.visibility = visibility
+                val isVisible = batteryLevel > 0
+                batteryContain.isVisible = isVisible
+                batteryPercent.isVisible = isVisible
 
-                batteryPercent.text = "$level%"
-                btnPecent.apply {
-                    progressDrawable = ContextCompat.getDrawable(
-                        itemView.context,
-                        if (!isHub3 && level < 15) R.drawable.progress_red else R.drawable.progress_blue
-                    )
-                    progress = level
+                if (isVisible) {
+                    batteryPercent.text = "$batteryLevel%"
+                    btnPecent.apply {
+                        progressDrawable = ContextCompat.getDrawable(
+                            itemView.context,
+                            when {
+                                isHub3 || batteryLevel >= 15 -> R.drawable.progress_blue
+                                else -> R.drawable.progress_red
+                            }
+                        )
+                        progress = batteryLevel
+                    }
                 }
             }
         }
