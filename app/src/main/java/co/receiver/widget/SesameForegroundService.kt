@@ -29,7 +29,6 @@ import co.candyhouse.app.tabs.devices.ssm2.getNOHandLeft
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandRadius
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandRight
 import co.candyhouse.app.tabs.devices.ssm2.setIsNOHandG
-import co.candyhouse.app.tabs.devices.ssm2.uiPriority
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
@@ -181,7 +180,7 @@ class SesameForegroundService : Service() {
                     devicesCopy = CHDeviceManager.listDevices.toList()
                 }
                 val sortedDevices = devicesCopy
-                    .sortedWith(compareBy({ it.uiPriority() }, { it.deviceId }))
+                    .sortedWith(compareBy { it.deviceId })
                     .reversed()
 
                 sortedDevices.forEach { device ->
@@ -280,7 +279,7 @@ class SesameForegroundService : Service() {
 
         val sortedDevices = synchronized(CHDeviceManager.listDevices) {
             CHDeviceManager.listDevices
-                .sortedWith(compareBy({ it.uiPriority() }, { it.deviceId }))
+                .sortedWith(compareBy { it.deviceId })
                 .reversed()
         }
         L.d("updateWidgets", "更新设备列表" + "--大小:" + sortedDevices.size + "---id:" + id)

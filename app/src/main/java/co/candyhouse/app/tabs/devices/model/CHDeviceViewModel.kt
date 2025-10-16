@@ -26,7 +26,6 @@ import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.app.tabs.devices.ssm2.uiPriority
 import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHResult
@@ -259,9 +258,9 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             val updatedDevices = ArrayList(list).apply {
                 sortWith(
                     compareBy(
-                        { -1 * it.getRank() },
-                        { it.uiPriority() },
-                        { it.getNickname() })
+                        { -it.getRank() },
+                        { it.getNickname() }
+                    )
                 )
             }
             synchronized(this@CHDeviceViewModel) {

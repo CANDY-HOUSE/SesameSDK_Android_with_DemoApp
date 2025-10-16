@@ -50,15 +50,20 @@ class DeviceListAdapter(
 
     override fun onItemMoveFinished() {
         super.onItemMoveFinished()
+
+        if (isUploading) return
+        isUploading = true
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 mDeviceViewModel.myChDevices.value.forEachIndexed { index, chDevices ->
-                    chDevices.setRank(index)
+                    chDevices.setRank(-index)
                 }
                 CHLoginAPIManager.upLoadKeys(mDeviceViewModel.myChDevices.value.map {
                     cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname(), it.getRank())
-                }) {}
+                }) { isUploading = false }
             } catch (e: Exception) {
+                isUploading = false
                 e.printStackTrace()
             }
         }
@@ -73,6 +78,8 @@ class DeviceListAdapter(
     }
 
     companion object {
+        @Volatile
+        private var isUploading = false
         private val expandStates = mutableMapOf<String, Boolean>()
 
         fun getExpandState(deviceId: String): Boolean = expandStates[deviceId] ?: false

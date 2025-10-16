@@ -250,43 +250,12 @@ fun CHDevices.getNFC(): String? {
 }
 
 fun CHDevices.setRank(level: Int) {
-    SharedPreferencesUtils.preferences.edit().putInt("ra" + this.deviceId.toString(), -level).apply()
+    SharedPreferencesUtils.preferences.edit().putInt("ra" + this.deviceId.toString(), level).apply()
 }
 
 fun CHDevices.getRank(): Int {
-//    L.d("hcia", "rank "+getNickname()+":" + SharedPreferencesUtils.preferences.getInt("ra" + this.deviceId.toString(), 0))
     return SharedPreferencesUtils.preferences.getInt("ra" + this.deviceId.toString(), 0)
 }
-
-
-fun CHDevices.uiPriority(): Int { // 利用 * -1 排序。數字越大排越上方
-    return -1 * when (productModel) {
-        CHProductModel.SSMOpenSensor2 -> 24
-        CHProductModel.SSMFaceAI -> 23
-        CHProductModel.SSMFaceProAI -> 22
-        CHProductModel.SS6Pro -> 21
-        CHProductModel.SSMFacePro -> 19
-        CHProductModel.SSMFace -> 18
-        CHProductModel.SesameBot2 -> 17
-        CHProductModel.SS5US -> 16
-        CHProductModel.RemoteNano -> 15
-        CHProductModel.Remote -> 14
-        CHProductModel.Hub3 -> 13
-        CHProductModel.BLEConnector -> 11
-        CHProductModel.BiKeLock2 -> 10
-        CHProductModel.SSMTouch -> 9
-        CHProductModel.SSMTouchPro -> 8
-        CHProductModel.SS5PRO -> 7
-        CHProductModel.SS5 -> 6
-        CHProductModel.SS4 -> 5
-        CHProductModel.SS2 -> 4
-        CHProductModel.SesameBot1 -> 3
-        CHProductModel.BiKeLock -> 2
-        CHProductModel.WM2 -> 1
-        CHProductModel.SSMOpenSensor -> 0
-    }
-}
-
 
 fun Fragment.level2Tag(level: Int?): String {
     if (level == 0) {
