@@ -1,5 +1,6 @@
 package co.candyhouse.app.tabs.devices.ssm2.setting
 
+import co.candyhouse.sesame.utils.L
 import no.nordicsemi.android.dfu.DfuServiceInitiator
 
 /**
@@ -39,7 +40,11 @@ object DfuStarterProvider {
      * 如果需要明确丢弃当前缓存（例如一次 DFU 完成后确保下次重新创建），可以调用此方法。
      */
     @Synchronized
-    fun clear() {
+    fun clear(address: String) {
+        L.d("dfu","DfuStarterProvider.clear for address: $address")
+        if (cachedAddress != address) {
+            return
+        }
         cachedInitiator = null
         cachedAddress = null
     }

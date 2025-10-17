@@ -75,6 +75,7 @@ class DfuProgressHandler(
     }
 
     override fun onDfuCompleted(deviceAddress: String) {
+        co.candyhouse.app.tabs.devices.ssm2.setting.DfuStarterProvider.clear(deviceAddress)
         handleSetText(deviceAddress, R.string.onDfuCompleted)
         snackbar?.dismiss()
     }
