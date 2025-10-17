@@ -325,20 +325,18 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                                 }
                             }
                         } else {
-                            L.d("sf", "非hub3模块升级固件……")
+                            L.d("dfu", "非hub3模块升级固件……")
                             targetDevice.updateFirmware { res ->
-                                L.d("hcia", "res:$res")
+                                L.d("dfu", "res:$res")
                                 res.onSuccess {
-                                    L.d("hcia", "updateFirmware:" + it.data.address)
+                                    L.d("dfu", "updateFirmware:" + it.data.address)
                                     val firmwarePath = targetDevice.getFirmwarePath(requireContext())
+                                    L.d("dfu", "firmwarePath: $firmwarePath")
                                     if (firmwarePath != null) {
-                                        val starter = DfuServiceInitiator(it.data.address)
+                                        // 使用单例提供者获取 starter，避免重复配置；仅需设置固件包。
+                                        val starter = co.candyhouse.app.tabs.devices.ssm2.setting.DfuStarterProvider.get(it.data.address)
+                                        L.d("dfu", "starter(singleton): $starter")
                                         starter.setZip(firmwarePath)
-                                        starter.setPacketsReceiptNotificationsEnabled(true)
-                                        starter.setPrepareDataObjectDelay(400)
-                                        starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
-                                        starter.setDisableNotification(false)
-                                        starter.setForeground(false)
                                         starter.start(requireActivity(), DfuService::class.java)
                                     }
                                 }

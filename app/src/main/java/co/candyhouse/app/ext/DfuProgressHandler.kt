@@ -15,27 +15,33 @@ import no.nordicsemi.android.dfu.DfuProgressListener
  */
 class DfuProgressHandler(
     private val dfuText: TextView?,
-    private val snackbar: Snackbar?
+    private val snackbar: Snackbar?,
+    private val targetDeviceAddress: String?
 ) : DfuProgressListener {
 
+    private fun isTargetDevice(deviceAddress: String?): Boolean {
+        L.d("DfuProgressHandler", "deviceAddress: $deviceAddress, targetDeviceAddress: $targetDeviceAddress")
+        return targetDeviceAddress == deviceAddress
+    }
+
     override fun onDeviceConnecting(deviceAddress: String) {
-        handleSetText(R.string.onDeviceConnecting)
+        handleSetText(deviceAddress, R.string.onDeviceConnecting)
     }
 
     override fun onDeviceConnected(deviceAddress: String) {
-        handleSetText(R.string.onDeviceConnected)
+        handleSetText(deviceAddress, R.string.onDeviceConnected)
     }
 
     override fun onDfuProcessStarting(deviceAddress: String) {
-        handleSetText(R.string.onDfuProcessStarting)
+        handleSetText(deviceAddress, R.string.onDfuProcessStarting)
     }
 
     override fun onDfuProcessStarted(deviceAddress: String) {
-        handleSetText(R.string.onDfuProcessStarted)
+        handleSetText(deviceAddress, R.string.onDfuProcessStarted)
     }
 
     override fun onEnablingDfuMode(deviceAddress: String) {
-        handleSetText(R.string.onEnablingDfuMode)
+        handleSetText(deviceAddress, R.string.onEnablingDfuMode)
     }
 
     @SuppressLint("SetTextI18n")
@@ -47,34 +53,42 @@ class DfuProgressHandler(
         currentPart: Int,
         partsTotal: Int
     ) {
+        if (!isTargetDevice(deviceAddress)) {
+            handleSetText(deviceAddress, R.string.onDeviceConnecting)
+            return
+        }
         dfuText?.post {
             dfuText.text = "$percent%"
         } ?: snackbar?.setText("$percent%")
     }
 
     override fun onFirmwareValidating(deviceAddress: String) {
-        handleSetText(R.string.onFirmwareValidating)
+        handleSetText(deviceAddress, R.string.onFirmwareValidating)
     }
 
     override fun onDeviceDisconnecting(deviceAddress: String?) {
-        handleSetText(R.string.onDeviceDisconnecting)
+        handleSetText(deviceAddress, R.string.onDeviceDisconnecting)
     }
 
     override fun onDeviceDisconnected(deviceAddress: String) {
-        handleSetText(R.string.onDeviceDisconnected)
+        handleSetText(deviceAddress, R.string.onDeviceDisconnected)
     }
 
     override fun onDfuCompleted(deviceAddress: String) {
-        handleSetText(R.string.onDfuCompleted)
+        handleSetText(deviceAddress, R.string.onDfuCompleted)
         snackbar?.dismiss()
     }
 
     override fun onDfuAborted(deviceAddress: String) {
-        handleSetText(R.string.onDfuAborted)
+        handleSetText(deviceAddress, R.string.onDfuAborted)
     }
 
     @SuppressLint("SetTextI18n")
     override fun onError(deviceAddress: String, error: Int, errorType: Int, message: String?) {
+        if (!isTargetDevice(deviceAddress)) {
+            handleSetText(deviceAddress, R.string.onDeviceConnecting)
+            return
+        }
         dfuText?.post {
             dfuText.text =
                 CHDeviceManager.app.getString(R.string.dfu_status_error_msg) + ":" + message
@@ -87,7 +101,13 @@ class DfuProgressHandler(
     }
 
     // 统一处理文本显示
-    private fun handleSetText(resId: Int) {
+    private fun handleSetText(deviceAddress: String?, resId: Int) {
+        if (!isTargetDevice(deviceAddress)) {
+            dfuText?.post {
+                dfuText.text = CHDeviceManager.app.getString(R.string.onDeviceConnecting)
+            } ?: snackbar?.setText(R.string.onDeviceConnecting)
+            return
+        }
         dfuText?.post {
             dfuText.text = CHDeviceManager.app.getString(resId)
         } ?: snackbar?.setText(resId)

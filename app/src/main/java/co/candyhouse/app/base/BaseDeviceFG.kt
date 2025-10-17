@@ -21,7 +21,13 @@ abstract class BaseDeviceFG<T : ViewBinding> : BaseNFG<T>() {
 
     // 使用委托类单独监听事件
     private val dfuProgressListener by lazy {
-        DfuProgressHandler(dfuText, snackbar)
+        var deviceAddress = ""
+        mDeviceModel.ssmLockLiveData.value?.updateFirmware{ res ->
+            res.onSuccess {
+            deviceAddress = it.data.address
+            }
+        }
+        DfuProgressHandler(dfuText, snackbar, deviceAddress)
     }
 
     var isUpload = false
