@@ -54,7 +54,7 @@ class DfuProgressHandler(
         partsTotal: Int
     ) {
         if (!isTargetDevice(deviceAddress)) {
-            handleSetText(deviceAddress, R.string.onDeviceConnecting)
+            // handleSetText(deviceAddress, R.string.onDeviceConnecting)
             return
         }
         dfuText?.post {
@@ -86,7 +86,7 @@ class DfuProgressHandler(
     @SuppressLint("SetTextI18n")
     override fun onError(deviceAddress: String, error: Int, errorType: Int, message: String?) {
         if (!isTargetDevice(deviceAddress)) {
-            handleSetText(deviceAddress, R.string.onDeviceConnecting)
+            // handleSetText(deviceAddress, R.string.onDeviceConnecting)
             return
         }
         dfuText?.post {
@@ -103,9 +103,9 @@ class DfuProgressHandler(
     // 统一处理文本显示
     private fun handleSetText(deviceAddress: String?, resId: Int) {
         if (!isTargetDevice(deviceAddress)) {
-            dfuText?.post {
-                dfuText.text = CHDeviceManager.app.getString(R.string.onDeviceConnecting)
-            } ?: snackbar?.setText(R.string.onDeviceConnecting)
+            // dfuText?.post {
+            //     dfuText.text = CHDeviceManager.app.getString(R.string.onDeviceConnecting)
+            // } ?: snackbar?.setText(R.string.onDeviceConnecting)
             return
         }
         dfuText?.post {

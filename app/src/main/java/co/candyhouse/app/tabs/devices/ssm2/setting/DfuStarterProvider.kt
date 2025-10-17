@@ -10,6 +10,7 @@ import no.nordicsemi.android.dfu.DfuServiceInitiator
 object DfuStarterProvider {
     @Volatile
     private var cachedAddress: String? = null
+
     @Volatile
     private var cachedInitiator: DfuServiceInitiator? = null
 
@@ -17,18 +18,19 @@ object DfuStarterProvider {
      * 获取指定 address 的 DfuServiceInitiator。如果 address 与缓存不同则重新创建并配置。
      */
     @Synchronized
-    fun get(address: String): DfuServiceInitiator {
-        if (cachedInitiator == null || cachedAddress != address) {
-            cachedAddress = address
-            cachedInitiator = DfuServiceInitiator(address).apply {
-                // 通用配置集中放这里，业务层只需 setZip 与 start。
-                setPacketsReceiptNotificationsEnabled(true)
-                setPrepareDataObjectDelay(400)
-                // 使用不安全的实验性无按钮安全 DFU（原代码如此）。
-                setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
-                setDisableNotification(false)
-                setForeground(false)
-            }
+    fun get(address: String): DfuServiceInitiator? {
+        if (cachedInitiator != null) {
+            return null
+        }
+        cachedAddress = address
+        cachedInitiator = DfuServiceInitiator(address).apply {
+            // 通用配置集中放这里，业务层只需 setZip 与 start。
+            setPacketsReceiptNotificationsEnabled(true)
+            setPrepareDataObjectDelay(400)
+            // 使用不安全的实验性无按钮安全 DFU（原代码如此）。
+            setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
+            setDisableNotification(false)
+            setForeground(false)
         }
         return cachedInitiator!!
     }

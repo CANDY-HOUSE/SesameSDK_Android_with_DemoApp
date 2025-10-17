@@ -58,7 +58,6 @@ import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
 import com.amazonaws.mobile.client.AWSMobileClient
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.dfu.DfuServiceInitiator
 
 abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSetting,
     BleStatusUpdate, DeviceStatusChange {
@@ -300,12 +299,12 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             }
         }
         view?.findViewById<View>(R.id.dfu_zone)?.setOnClickListener {
-            //对齐iOS统一弹出升级对话框风格
+            // 对齐iOS统一弹出升级对话框风格
             if (targetDevice.productModel != CHProductModel.Hub3
                 && mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.UnLogin
             ) {
-                    toastMSG(getString(R.string.toastBleNotReadyForDFU))
-                    return@setOnClickListener
+                toastMSG(getString(R.string.toastBleNotReadyForDFU))
+                return@setOnClickListener
             }
             AlertView(getString(R.string.ssm_update), "", AlertStyle.IOS).apply {
                 addAction(
@@ -335,6 +334,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                                     if (firmwarePath != null) {
                                         // 使用单例提供者获取 starter，避免重复配置；仅需设置固件包。
                                         val starter = co.candyhouse.app.tabs.devices.ssm2.setting.DfuStarterProvider.get(it.data.address)
+                                        if (starter == null) {
+                                            L.d("dfu", " DUF 忙碌中， 稍后再试。")
+                                            toastMSG("DFU busy, try again later.")
+                                            return@onSuccess
+                                        }
                                         L.d("dfu", "starter(singleton): $starter")
                                         starter.setZip(firmwarePath)
                                         starter.start(requireActivity(), DfuService::class.java)
