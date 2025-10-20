@@ -9,6 +9,7 @@ import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.server.CHPrivateAPIClient
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
@@ -279,7 +280,7 @@ object CHAccountManager {
 
     internal fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val postBatteryDataRes = jpAPIclient.postBatteryData(deviceID, payloadString)
+            val postBatteryDataRes = jpAPIclient.postBatteryData(deviceID, CHBatteryDataReq(payloadString))
             L.d("harry", "[postBatteryData]: $postBatteryDataRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postBatteryDataRes)))
         }

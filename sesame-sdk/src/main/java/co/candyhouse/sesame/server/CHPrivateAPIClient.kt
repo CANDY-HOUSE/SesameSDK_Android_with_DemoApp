@@ -1,6 +1,7 @@
 package co.candyhouse.sesame.server
 
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
@@ -168,5 +169,10 @@ internal interface CHPrivateAPIClient {
     fun subscribeToTopic(body: SubscriptionRequest): Any
 
     @Operation(path = "/device/v2/sesame5/{device_id}/battery", method = "POST")
-    fun postBatteryData(@Parameter(name = "device_id", location = "path") deviceID: String, body: String): Any
+
+    fun postBatteryData(
+        @Parameter(name = "device_id", location = "path") deviceID: String,
+        body: CHBatteryDataReq
+    ): Any
+
 }
