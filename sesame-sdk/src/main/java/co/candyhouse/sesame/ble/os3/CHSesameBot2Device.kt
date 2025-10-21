@@ -215,6 +215,7 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                 mechStatus = CHSesameBike2MechStatus(receivePayload.payload)
             }
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+            reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 }

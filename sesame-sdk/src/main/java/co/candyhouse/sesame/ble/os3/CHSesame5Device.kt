@@ -326,7 +326,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
             mechStatus = CHSesame5MechStatus(receivePayload.payload)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-
+            reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
 //            L.d("readHistoryCommand", "mechStatus " + "${deviceStatus}")
 //            readHistoryCommand()
         }

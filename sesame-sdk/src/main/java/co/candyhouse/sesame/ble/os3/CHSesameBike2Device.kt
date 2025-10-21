@@ -173,6 +173,7 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
             }
             L.d("harry", "[bike2]mechStatus isInLockRange: ${mechStatus!!.isInLockRange}")
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+            reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 }

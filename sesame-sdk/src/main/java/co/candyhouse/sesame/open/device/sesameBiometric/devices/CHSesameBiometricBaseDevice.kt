@@ -207,6 +207,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
     private fun handleMechStatus(receivePayload: SSM3PublishPayload) {
         mechStatus = CHSesameTouchProMechStatus(receivePayload.payload)
+        reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         L.d("hcia", "getBatteryPrecentage: ${mechStatus?.getBatteryPrecentage()}  getBatteryVoltage: ${mechStatus?.getBatteryVoltage()}")
     }
 
