@@ -20,10 +20,7 @@ import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesame2MechStatus
-import co.candyhouse.sesame.open.device.CHSesame5MechStatus
 import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
-import co.candyhouse.sesame.open.device.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.open.device.CHSesameTouchProMechStatus
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.open.device.OpenSensorData
@@ -47,9 +44,7 @@ import co.candyhouse.sesame.utils.divideArray
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.noHashtoUUID
 import co.candyhouse.sesame.utils.toHexString
-import co.candyhouse.sesame.utils.toReverseBytes
 import co.candyhouse.sesame.utils.toUInt32ByteArray
-import com.google.gson.Gson
 
 internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometricBase, CHCapabilitySupport, CHDeviceUtil, CHRemoteNanoCapable by CHRemoteNanoCapableImpl() {
 
@@ -85,15 +80,9 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     }
 
     companion object {
-        private val IOT_BATTERY_DEVICE_MODELS = setOf(
-            CHProductModel.Remote,
-            CHProductModel.RemoteNano,
-            CHProductModel.SSMTouch,
-            CHProductModel.SSMTouchPro,
-            CHProductModel.SSMFace,
-            CHProductModel.SSMFaceAI,
-            CHProductModel.SSMFacePro,
-            CHProductModel.SSMFaceProAI
+        private val IOT_BATTERY_OPENSENSOR_MODELS = setOf(
+            CHProductModel.SSMOpenSensor,
+            CHProductModel.SSMOpenSensor2
         )
 
         private val IOT_DEVICE_MODELS = setOf(
@@ -104,9 +93,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
             CHProductModel.SSMFacePro,
             CHProductModel.SSMFaceProAI
         )
-
         private const val TOPIC_OPENSENSOR_PREFIX = "opensensor/"
-        private const val TOPIC_BATTERY_PREFIX = "battery/"
     }
 
     /**
@@ -133,9 +120,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[stp][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        if (isInternetAvailable()) {
-            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
-        }
+        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /**
@@ -319,63 +304,37 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      */
     override fun goIOT() {
         when {
-            productModel == CHProductModel.SSMOpenSensor || productModel == CHProductModel.SSMOpenSensor2 -> {
-                subscribeOpenSensor()
+            productModel in IOT_BATTERY_OPENSENSOR_MODELS -> {
+                subscribeOpensensorTopic()
             }
 
-            productModel in IOT_BATTERY_DEVICE_MODELS -> {
-                subscribeBatteryStatus()
-                if (productModel in IOT_DEVICE_MODELS) {
-                    subscribeDeviceShadow()
-                }
+            productModel in IOT_DEVICE_MODELS -> {
+                subscribeDeviceShadow()
             }
         }
     }
 
-    private fun subscribeOpenSensor() {
+    private fun subscribeOpensensorTopic() {
         val topic = "$TOPIC_OPENSENSOR_PREFIX${deviceId.toString().uppercase()}"
+        L.d(tag, "Subscribing to opensensor topic: $productModel || $topic")
 
         CHIotManager.subscribeTopic(topic) { result ->
             result
                 .onSuccess { data ->
-                    mechStatus = CHSesameOpenSensorMechStatus(OpenSensorData.fromByteArray(data.data))
-                    L.d(tag, "subscribeOpenSensor $productModel = ${mechStatus?.getBatteryPrecentage()}")
+                    processOpensensorData(data.data)
                 }
                 .onFailure { error ->
-                    L.e(tag, "Failed to subscribe open sensor topic: ${error.message}")
+                    L.e(tag, "Failed to subscribe opensensor topic: ${error.message}")
                 }
         }
     }
 
-    private fun subscribeBatteryStatus() {
-        val topic = "$TOPIC_BATTERY_PREFIX${deviceId.toString().uppercase()}"
-        L.d(tag, "Subscribing to battery topic: $productModel || $topic")
-
-        CHIotManager.subscribeTopic(topic) { result ->
-            result
-                .onSuccess { data ->
-                    processBatteryData(data.data)
-                }
-                .onFailure { error ->
-                    L.e(tag, "Failed to subscribe battery topic: ${error.message}")
-                }
-        }
-    }
-
-    private fun processBatteryData(data: ByteArray) {
+    private fun processOpensensorData(data: ByteArray) {
         try {
-            val jsonStr = String(data)
-            val jsonObject = Gson().fromJson(jsonStr, Map::class.java)
-            val lightLoadVoltage = jsonObject["lightLoadBatteryVoltage_mV"] as? Number
-
-            lightLoadVoltage?.let { voltage ->
-                mechStatus = CHSesameTouchProMechStatus(voltage.toInt().toUInt().toShort().toReverseBytes())
-                L.d(tag, "$productModel battery = ${mechStatus?.getBatteryPrecentage()}")
-            } ?: run {
-                L.e(tag, "lightLoadBatteryVoltage_mV not found in battery data")
-            }
+            mechStatus = CHSesameOpenSensorMechStatus(OpenSensorData.fromByteArray(data))
+            L.d(tag, "OpenSensor $productModel = ${mechStatus?.getBatteryPrecentage()}")
         } catch (e: Exception) {
-            L.e(tag, "Failed to parse battery data: ${e.message}")
+            L.e(tag, "Failed to parse unified data: ${e.message}")
         }
     }
 
@@ -383,20 +342,16 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         CHIotManager.subscribeSesame2Shadow(this) { result ->
             result
                 .onSuccess { resource ->
-                    L.d(tag, "[$productModel] resource.data.state.reported:" + resource.data.state.reported.wm2s + "||" + resource.data.state.reported.mechst)
+                    L.d(tag, "[$productModel] resource.data.state.reported:" + resource.data.state.reported.wm2s)
 
                     resource.data.state.reported.apply {
                         val isConnectedByWM2 = wm2s?.hasWM2Connection() ?: false
                         L.d(tag, "[isConnectedByWM2: $isConnectedByWM2]")
 
-                        if (isConnectedByWM2) {
-                            mechst?.let {
-                                mechStatus = it.toMechStatus() as CHSesameProtocolMechStatus?
-                                L.d(tag, "[subscribeDeviceShadow]mechStatus: ${mechStatus?.getBatteryPrecentage()}")
-                            }
-                            deviceShadowStatus = CHDeviceStatus.IotConnected
+                        deviceShadowStatus = if (isConnectedByWM2) {
+                            CHDeviceStatus.IotConnected
                         } else {
-                            deviceShadowStatus = null
+                            null
                         }
                     }
                 }
@@ -444,14 +399,4 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private fun Map<*, String>.hasWM2Connection(): Boolean =
         any { (_, value) -> value.hexStringToByteArray().firstOrNull()?.toInt() == 1 }
 
-    private fun String.toMechStatus(): Any? {
-        val bytes = hexStringToByteArray()
-        return when {
-            bytes.size >= 7 -> CHSesame5MechStatus(CHSesame2MechStatus(bytes).ss5Adapter())
-                .also { L.d(tag, "[subscribeDeviceShadow]mechStatus: CHSesame5MechStatus") }
-
-            else -> CHSesameTouchProMechStatus(bytes.sliceArray(0..2))
-                .also { L.d(tag, "[subscribeDeviceShadow]mechStatus: CHSesameTouchProMechStatus") }
-        }
-    }
 }

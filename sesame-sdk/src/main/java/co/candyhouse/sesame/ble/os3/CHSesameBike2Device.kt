@@ -147,12 +147,9 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
     }
 
-    // 如果这台设备当前没有被 Hub3 连上云端， 则通过 APP 报告给云端。
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        if (isInternetAvailable() && !isConnectedByWM2) {
-            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
-        }
+        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /** 指令接收 */

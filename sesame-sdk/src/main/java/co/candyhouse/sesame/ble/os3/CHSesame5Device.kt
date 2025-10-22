@@ -307,12 +307,9 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         }
     }
 
-    // 如果这台锁当前没有被 Hub3 连上云端， 则通过 APP 报告给云端。
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        if (isInternetAvailable() && !isConnectedByWM2) {
-            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
-        }
+        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /** 指令接收 */

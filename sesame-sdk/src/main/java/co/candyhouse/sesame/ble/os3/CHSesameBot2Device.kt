@@ -1,29 +1,42 @@
 package co.candyhouse.sesame.ble.os3
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
-import co.candyhouse.sesame.ble.*
+import co.candyhouse.sesame.ble.CHDeviceUtil
+import co.candyhouse.sesame.ble.CHadv
+import co.candyhouse.sesame.ble.DeviceSegmentType
+import co.candyhouse.sesame.ble.SSM3PublishPayload
+import co.candyhouse.sesame.ble.SesameItemCode
+import co.candyhouse.sesame.ble.SesameResultCode
+import co.candyhouse.sesame.ble.isBleAvailable
 import co.candyhouse.sesame.ble.os3.base.CHSesameOS3
 import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.db.model.createHistagV2
-import co.candyhouse.sesame.db.model.hisTagC
-import co.candyhouse.sesame.open.*
+import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHSesame2MechStatus
+import co.candyhouse.sesame.open.device.CHSesame5MechStatus
+import co.candyhouse.sesame.open.device.CHSesameBike2MechStatus
+import co.candyhouse.sesame.open.device.CHSesameBot2
+import co.candyhouse.sesame.open.device.CHSesameBot2MechStatus
+import co.candyhouse.sesame.open.device.CHSesamebot2Event
+import co.candyhouse.sesame.open.device.CHSesamebot2Status
+import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.open.isInternetAvailable
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.*
-import co.candyhouse.sesame.utils.*
+import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.EccKey
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
-import java.util.*
+import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.toHexString
+import co.candyhouse.sesame.utils.toUInt32ByteArray
 
 @SuppressLint("MissingPermission")
 internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
@@ -190,12 +203,9 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
     }
 
-    // 如果这台设备当前没有被 Hub3 连上云端， 则通过 APP 报告给云端。
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        if (isInternetAvailable() && !isConnectedByWM2) {
-            CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
-        }
+        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /** 指令接收 */

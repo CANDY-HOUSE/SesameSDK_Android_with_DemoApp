@@ -133,7 +133,7 @@ class DeviceListAdapter(
                 blImg.visibility = View.GONE
                 updateWifiStatus(device)
 
-                setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage ?: -1, true)
+                setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage ?: -1)
 
                 setupExpandableView(device, 35) {
                     val param = device.deviceId.toString().uppercase(Locale.getDefault())
@@ -235,10 +235,10 @@ class DeviceListAdapter(
 
         private fun updateBatteryStatus(device: CHDevices) {
             val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.userKey?.stateInfo?.batteryPercentage ?: -1
-            setBatteryStatus(batteryLevel, false)
+            setBatteryStatus(batteryLevel)
         }
 
-        private fun setBatteryStatus(batteryLevel: Int, isHub3: Boolean) {
+        private fun setBatteryStatus(batteryLevel: Int) {
             binding.apply {
                 val isVisible = batteryLevel > 0
                 batteryContain.isVisible = isVisible
@@ -250,7 +250,7 @@ class DeviceListAdapter(
                         progressDrawable = ContextCompat.getDrawable(
                             itemView.context,
                             when {
-                                isHub3 || batteryLevel >= 15 -> R.drawable.progress_blue
+                                batteryLevel >= 15 -> R.drawable.progress_blue
                                 else -> R.drawable.progress_red
                             }
                         )

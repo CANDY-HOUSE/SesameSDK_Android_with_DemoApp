@@ -30,14 +30,12 @@ import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.server.CHResultState
-import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
-import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.L
@@ -265,7 +263,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             }
             synchronized(this@CHDeviceViewModel) {
                 myChDevices.value = updatedDevices
-                val devicesToRefresh = mutableListOf<CHDevices>()
                 myChDevices.value.forEach { device ->
                     device.delegate = delegateManager
                     // 锁、bike、bot自动连接蓝牙
@@ -283,22 +280,10 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         updateNeeRefresh(it)
                     }
 
-                    val needsImmediateRefresh = when {
-                        CHDeviceManager.isRefresh.get() -> true
-                        device is CHWifiModule2 || device is CHSesameBiometricDevice -> true
-                        else -> false
-                    }
-
-                    if (needsImmediateRefresh) {
-                        devicesToRefresh.add(device)
-                    }
+                    // 拿到数据直接刷新
+                    updateNeeRefresh(device)
                 }
-                if (devicesToRefresh.isNotEmpty()) {
-                    devicesToRefresh.map { device ->
-                        L.d("hcia", "立即刷新设备ID=${device.deviceId}")
-                        updateNeeRefresh(device)
-                    }
-                } else if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
+                if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
                     L.e("hcia", "下拉刷新，没有发现任何设备")
                     neeReflesh.postValue(BeanDevices(emptyList()))
                 }

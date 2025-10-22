@@ -169,7 +169,6 @@ internal interface CHPrivateAPIClient {
     fun subscribeToTopic(body: SubscriptionRequest): Any
 
     @Operation(path = "/device/v2/sesame5/{device_id}/battery", method = "POST")
-
     fun postBatteryData(
         @Parameter(name = "device_id", location = "path") deviceID: String,
         body: CHBatteryDataReq
