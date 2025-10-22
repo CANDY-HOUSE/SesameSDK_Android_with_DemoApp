@@ -48,4 +48,7 @@ interface RemoteCacheDao {
 
     @Query("SELECT * FROM remote_cache WHERE irType = :irType AND timestamp > :expiryTime")
     suspend fun getValidCache(irType: Int, expiryTime: Long): RemoteCacheEntity?
+
+    @Query("SELECT * FROM remote_cache WHERE irType = :irType ORDER BY pageIndex")
+    suspend fun getCacheByIRTypePages(irType: Int): List<RemoteCacheEntity>
 }
