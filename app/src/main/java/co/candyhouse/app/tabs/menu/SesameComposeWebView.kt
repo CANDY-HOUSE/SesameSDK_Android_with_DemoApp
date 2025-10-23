@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -188,14 +189,15 @@ class SesameComposeWebView : Fragment() {
                 title = arguments?.getString("title") ?: "",
                 pushToken = arguments?.getString("pushToken") ?: "",
                 onBackClick = {
-                    if (!findNavController().popBackStack()) {
-                        findNavController().navigate(R.id.deviceListPG)
-                    }
+                    exit()
                 },
                 onMoreClick = { whereValue ->
                     when (whereValue) {
                         "device_history_old" -> safeNavigate(R.id.action_mainRoomFG_to_SSM2SettingFG)
                         "device_history_new" -> safeNavigate(R.id.action_mainRoomSS5FG_to_SSM5SettingFG)
+                        CHDeviceManager.SHOP_FLAG -> {
+                            exit()
+                        }
                     }
                 },
                 onSchemeIntercept = { uri, params ->
@@ -234,6 +236,12 @@ class SesameComposeWebView : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         restoreContainerTopPadding()
+    }
+
+    private fun exit() {
+        if (!findNavController().popBackStack()) {
+            findNavController().navigate(R.id.deviceListPG)
+        }
     }
 }
 
@@ -317,13 +325,25 @@ fun WebViewContent(
                     }
                 },
                 actions = {
-                    if (where != CHDeviceManager.NOTIFICATION_FLAG && scene == "history") {
+                    if (where != CHDeviceManager.NOTIFICATION_FLAG && (scene == "history" || scene == CHDeviceManager.SHOP_FLAG)) {
                         IconButton(onClick = { onMoreClick(where) }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_icons_filled_more),
-                                contentDescription = "More"
+                                painter = painterResource(
+                                    id = if (scene == CHDeviceManager.SHOP_FLAG) {
+                                        R.drawable.ic_icons_filled_close
+                                    } else {
+                                        R.drawable.ic_icons_filled_more
+                                    }
+                                ),
+                                contentDescription = if (scene == CHDeviceManager.SHOP_FLAG) {
+                                    "Quit"
+                                } else {
+                                    "More"
+                                }
                             )
                         }
+                    } else {
+                        Box(modifier = Modifier.width(48.dp))
                     }
                 }
             )
@@ -449,9 +469,14 @@ fun WebViewContent(
                 if (target.isNotEmpty() && wv.url != target) {
                     loading = true
                     wv.loadUrl(target)
-                    if (where == CHDeviceManager.NOTIFICATION_FLAG) {
-                        AnalyticsUtil.logScreenView("WebViewFG_notification")
+
+                    // firebase 数据埋点
+                    val screenName = when (where) {
+                        CHDeviceManager.NOTIFICATION_FLAG -> "WebViewFG_notification"
+                        CHDeviceManager.SHOP_FLAG -> "WebViewFG_shop"
+                        else -> null
                     }
+                    screenName?.let { AnalyticsUtil.logScreenView(screenName = it) }
                 }
             }
 

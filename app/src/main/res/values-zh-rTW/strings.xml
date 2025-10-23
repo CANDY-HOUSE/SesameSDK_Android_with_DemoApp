@@ -280,5 +280,6 @@
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
     <string name="network_retry">網路異常，請點擊重試</string>
+    <string name="shop">商城</string>
 
 </resources>

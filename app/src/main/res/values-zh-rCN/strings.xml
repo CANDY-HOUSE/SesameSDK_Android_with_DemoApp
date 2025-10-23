@@ -281,5 +281,6 @@
     <string name="hint_enter_card_id">请输入卡ID</string>
 
     <string name="network_retry">网络开小差了，请点击重试</string>
+    <string name="shop">商城</string>
 
 </resources>

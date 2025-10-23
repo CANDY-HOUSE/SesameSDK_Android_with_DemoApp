@@ -18,6 +18,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import co.candyhouse.app.BuildConfig
@@ -46,6 +47,8 @@ import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.UserState
 import com.amazonaws.mobile.client.results.UserCodeDeliveryDetails
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,6 +58,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
 
     private val loginViewModel: CHLoginViewModel by activityViewModels()
     private val deviceViewModel: CHDeviceViewModel by activityViewModels()
+    private var shopHomeUrl: String? = null
 
     override fun onPause() {
         super.onPause()
@@ -71,6 +75,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
     @SuppressLint("SetTextI18n")
     override fun setupUI() {
         activity?.window?.statusBarColor = Color.WHITE
+        applyRemoteConfig()
         bind.version.apply {
             val text =
                 BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")" + "-" + BuildConfig.GIT_HASH + "-" + BuildConfig.BUILD_TYPE + "-" + Build.MODEL + ":" + Build.VERSION.SDK_INT
@@ -115,7 +120,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
         }
         bind.deviceNotification.setOnClickListener {
             // 通知
-            safeNavigate(R.id.action_notify_to_webViewFragment, Bundle().apply {
+            safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
                 putString("scene", "device-notify")
                 putString("pushToken", SharedPreferencesUtils.deviceToken)
             })
@@ -123,6 +128,21 @@ class MeFG : HomeFragment<FgMeBinding>() {
         bind.checkSysNotifyMsg.setOnClickListener {
             openSettingNotify()
         }
+        bind.shop.setOnClickListener {
+            safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+                putString("scene", CHDeviceManager.SHOP_FLAG)
+                putString("title", getString(R.string.shop))
+                putString("url", shopHomeUrl)
+                putString("where", CHDeviceManager.SHOP_FLAG)
+            })
+        }
+    }
+
+    private fun applyRemoteConfig() {
+        val showShop = Firebase.remoteConfig.getBoolean("show_shop_item")
+        shopHomeUrl = Firebase.remoteConfig.getString("shop_home_url")
+        L.d("RemoteConfig", "showShop is $showShop ,shopHomeUrl is $shopHomeUrl")
+        bind.shop.isVisible = showShop
     }
 
     override fun <T : View> observeViewModelData(view: T) {

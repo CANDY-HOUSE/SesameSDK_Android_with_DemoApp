@@ -258,6 +258,7 @@
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
     <string name="network_retry">通信エラーが発生しました。タップして再試行してください</string>
+    <string name="shop">ショップ</string>
 
 </resources>
 

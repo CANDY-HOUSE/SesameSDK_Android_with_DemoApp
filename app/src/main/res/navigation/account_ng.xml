@@ -36,7 +36,7 @@
             android:id="@+id/action_to_SSM2SetAngleFG"
             app:destination="@id/SSM2SetAngleFG" />
         <action
-            android:id="@+id/action_notify_to_webViewFragment"
+            android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
     </fragment>
 

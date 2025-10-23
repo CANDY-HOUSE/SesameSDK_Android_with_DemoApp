@@ -265,5 +265,6 @@
     <string name="hint_enter_card_id">Please enter Card ID</string>
 
     <string name="network_retry">Network error, please tap to retry</string>
+    <string name="shop">Shop</string>
 
 </resources>
