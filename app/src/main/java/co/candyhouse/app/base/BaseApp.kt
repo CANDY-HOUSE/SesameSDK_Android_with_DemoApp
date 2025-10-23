@@ -72,7 +72,7 @@ open class BaseApp : Application() {
         remoteConfig.setDefaultsAsync(
             mapOf(
                 "show_shop_item" to true,
-                "shop_home_url" to "https://jp.candyhouse.co/collections/frontpage"
+                "shop_home_url" to "https://jp.candyhouse.co/"
             )
         )
 
