@@ -12,9 +12,6 @@
         android:label="MeFG"
         tools:layout="@layout/fg_me">
         <action
-            android:id="@+id/action_register_to_myQrcodeFG"
-            app:destination="@id/myQrcodeFG" />
-        <action
             android:id="@+id/to_scan"
             app:destination="@id/scanFG2" />
         <action
@@ -45,10 +42,6 @@
         android:id="@+id/SSM2SetAngleFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
         android:label="SSM2SetAngleFG" />
-    <fragment
-        android:id="@+id/myQrcodeFG"
-        android:name="co.candyhouse.app.tabs.account.MyQrCodeFG"
-        android:label="MyQrcodeFG" />
     <fragment
         android:id="@+id/scanFG2"
         android:name="co.candyhouse.app.tabs.menu.ScanQRcodeFG"

@@ -36,17 +36,13 @@ import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
-import co.utils.alerts.ext.inputNameAlert
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
 import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.UserState
-import com.amazonaws.mobile.client.results.UserCodeDeliveryDetails
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.Dispatchers
@@ -103,9 +99,6 @@ class MeFG : HomeFragment<FgMeBinding>() {
     }
 
     override fun setupListeners() {
-        bind.qrcodeZone.setOnClickListener {
-            safeNavigate(R.id.action_register_to_myQrcodeFG)
-        }
         bind.logoutZone.setOnClickListener {
             // 登出
             showLogoutConfirmation(0)
@@ -146,7 +139,6 @@ class MeFG : HomeFragment<FgMeBinding>() {
     }
 
     override fun <T : View> observeViewModelData(view: T) {
-        // 观察 ViewModel 中的数据变化
         viewLifecycleOwner.lifecycleScope.launch {
             loginViewModel.gUserState.collect { loginState ->
                 updateUIForLoginState(loginState)
@@ -204,56 +196,11 @@ class MeFG : HomeFragment<FgMeBinding>() {
 
     private fun handleNameEdit() {
         if (loginViewModel.gUserState.value == UserState.SIGNED_IN) {
-            showNameEditDialog()
+            safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+                putString("scene", "me")
+            })
         } else {
             safeNavigate(R.id.action_register_to_LoginMailFG)
-        }
-    }
-
-    private fun showNameEditDialog() {
-        context?.inputNameAlert(
-            getString(R.string.edit_name),
-            bind.userName.text.toString()
-        ) {
-            // 名称编辑对话框配置
-            confirmButtonWithText("OK") { alert, name ->
-                updateUserName(name)
-                dismiss()
-            }
-            cancelButton(getString(R.string.cancel))
-        }?.show()
-    }
-
-    private fun updateUserName(name: String) {
-        bind.userName.text = name
-        val awsAttributes = CognitoUserAttributes()
-        awsAttributes.addAttribute("nickname", name)
-
-        AWSMobileClient.getInstance().updateUserAttributes(
-            awsAttributes.attributes,
-            object : Callback<List<UserCodeDeliveryDetails>> {
-                override fun onResult(result: List<UserCodeDeliveryDetails>?) {
-                    SharedPreferencesUtils.nickname = name
-                    updateDeviceHistoryTags()
-                }
-
-                override fun onError(e: Exception?) {
-                    L.d("hcia", "e:$e")
-                }
-            })
-    }
-
-    private fun updateDeviceHistoryTags() {
-        CHDeviceManager.getCandyDevices {
-            it.onSuccess {
-                it.data.forEach { device ->
-                    when (device) {
-                        is CHSesameLock -> {
-                            device.setHistoryTag(getHistoryTag()) {}
-                        }
-                    }
-                }
-            }
         }
     }
 

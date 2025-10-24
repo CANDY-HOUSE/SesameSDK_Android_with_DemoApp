@@ -23,7 +23,6 @@
     <string name="clickaction">⊕をクリックし動作を追加してください。\n秒数を「永遠」に設定し実行された場合、他の台本へ切替えて実行しない限り、SesameBot2は止まりません。\nモーター正逆回転スピードに公差があり、押す時間が戻すより少し長くするようお願い。</string>
     <string name="logout">ログアウト</string>
     <string name="title_friends">連絡先</string>
-    <string name="qrhint">セサミアプリでQRコードをスキャンして連絡先へ追加してください</string>
     <string name="change_sesame_angle">角度の設定</string>
     <string name="ssm_update">SesameOS更新と再起動</string>
     <string name="autolock">タイマー式のオートロック</string>

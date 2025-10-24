@@ -3,7 +3,7 @@
     <string name="launching_why_need_location_permission">
         如果使用Android 6.0或更高版本，为了使蓝牙正常工作，需要允许访问位置信息。否则，应用程序将无法找到Sesame。</string>
     <string name="app_name">芝麻</string>
-    <string name="email">电子邮箱</string>
+    <string name="email">邮箱</string>
     <string name="dfu_status_error_msg">エラーが発生しました</string>
     <string name="second2">秒</string>
     <string name="pleaseemail">请输入对方的邮箱号</string>
@@ -20,7 +20,6 @@
     <string name="logout">登出</string>
     <!--?-->
     <string name="delete_account">删除账号</string>
-    <string name="qrhint">使用 芝麻app 扫描此二维码\n添加我为联系人</string>
     <!--    更新Ssm名稱用↓-->
     <string name="change_sesame_angle">设定角度</string>
     <string name="ssm_update">SesameOS更新＆重启</string>

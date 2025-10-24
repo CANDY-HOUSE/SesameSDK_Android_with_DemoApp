@@ -38,7 +38,6 @@
     <color name="unlock_blue">#28aeb1</color>
     <color name="light_blue">#68c6c8</color>
     <color name="no_grey">@color/gray1</color>
-    <color name="yellow_light">#fdea8e</color>
 
     <color name="text_blue">#28aeb1</color>
 

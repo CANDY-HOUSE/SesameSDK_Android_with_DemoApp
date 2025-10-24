@@ -15,7 +15,6 @@
     <string name="forever">forever</string>
     <string name="hub3_hint_ir">Add infrared devices within 5 meters of this Hub3:</string>
 
-    <string name="qrhint">Scan this QR code with Sesame app to add me on your contact</string>
     <string name="change_sesame_angle">Configure Angles</string>
     <string name="ssm_update">SesameOS Update＆Restart</string>
     <string name="autolock">Auto-lock timer</string>
