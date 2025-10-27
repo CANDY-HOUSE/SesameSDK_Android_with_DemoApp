@@ -45,17 +45,6 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# IntelliJ
-*.iml
-
-# Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
-
-# External native build folder generated in Android Studio 2.2 and later
-.externalNativeBuild
-
 # Version control
 vcs.xml
 
@@ -67,7 +56,6 @@ lint/tmp/
 # lint/reports/
 CognitoConstant.kt
 
-build/
 dist/
 node_modules/
 aws-exports.js
@@ -77,17 +65,12 @@ amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 out.map
-#Sesame.jks
 Style_guideline.pdf
 app/release
 app/debug
 
 # 忽略所有.idea目录下的文件
-.idea/*
+.idea/
 
-# 不忽略特定文件
-!.idea/codeStyles/
-.idea/codeStyles/*
-!.idea/codeStyles/codeStyleConfig.xml
-
-!.idea/kotlinCodeInsightSettings.xml
+# 忽略所有.kotlin目录下的文件
+.kotlin/
