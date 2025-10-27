@@ -167,6 +167,7 @@ object CHServiceManager {
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
             .setCustomContentView(notificationLayout).setOngoing(true).setNotificationSilent()
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }
 }
