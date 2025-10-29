@@ -10,7 +10,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import co.candyhouse.app.R
 import co.candyhouse.app.ext.CHDeviceWrapperManager
@@ -387,7 +389,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     @SuppressLint("ServiceCast", "ImplicitSamInstance")
     fun updateWidgets(id: String? = null) {
-        viewModelScope.launch(Dispatchers.Main) {
+        ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Main) {
             synchronized(CHDeviceManager.listDevices) {
                 CHDeviceManager.listDevices.clear()
                 CHDeviceManager.listDevices.addAll(myChDevices.value)

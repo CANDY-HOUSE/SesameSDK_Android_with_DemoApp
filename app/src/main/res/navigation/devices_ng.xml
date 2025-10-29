@@ -59,7 +59,7 @@
             android:id="@+id/action_to_irgridefg2"
             app:destination="@id/IrGridFg2" />
         <action
-            android:id="@+id/to_historyWebView"
+            android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
     </fragment>
 

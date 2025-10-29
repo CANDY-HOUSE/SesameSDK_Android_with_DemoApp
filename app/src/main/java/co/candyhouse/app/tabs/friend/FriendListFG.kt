@@ -69,6 +69,9 @@ class FriendListFG : HomeFragment<FgFriendListBinding>() {
         bind.webviewContainer.addView(webView)
 
         if (ContactsWebViewManager.shouldReload()) {
+            // 重置刷新，不需要再执行onResume里面的doRefresh
+            ContactsWebViewManager.checkAndConsumePendingRefresh()
+
             bind.loadingProgress.visibility = View.VISIBLE
             loadWebViewContent()
         } else {
@@ -139,7 +142,7 @@ class FriendListFG : HomeFragment<FgFriendListBinding>() {
                     }
                     L.d(tag, "Opening URL: $targetUrl")
                     safeNavigate(
-                        R.id.action_Friend_to_webViewFragment,
+                        R.id.action_to_webViewFragment,
                         Bundle().apply {
                             putString("scene", "contacts")
                             putString("url", targetUrl)
@@ -171,21 +174,9 @@ class FriendListFG : HomeFragment<FgFriendListBinding>() {
     override fun onResume() {
         super.onResume()
         val needsRefresh = ContactsWebViewManager.checkAndConsumePendingRefresh()
-        val pendingDetail = ContactsWebViewManager.checkAndConsumePendingDetail()
 
         if (needsRefresh) {
-            if (pendingDetail != null) {
-                loadWebViewContent()
-            } else {
-                doRefresh()
-            }
-        }
-
-        pendingDetail?.let { detailBundle ->
-            view?.postDelayed({
-                hideAllLoadingIndicators()
-                navigateToContactDetail(detailBundle)
-            }, 300)
+            doRefresh()
         }
     }
 
@@ -199,40 +190,6 @@ class FriendListFG : HomeFragment<FgFriendListBinding>() {
         bind.loadingProgress.visibility = View.GONE
         isRefreshing = false
         isManualRefresh = false
-    }
-
-
-    private fun navigateToContactDetail(bundle: Bundle) {
-        val scene = bundle.getString("scene", "")
-        val email = bundle.getString("email", "")
-        val subUUID = bundle.getString("subUUID", "")
-
-        val extInfo = mapOf(
-            "email" to email,
-            "subUUID" to subUUID
-        )
-
-        getWebUrlByScene(scene, extInfo) { result ->
-            result.fold(
-                onSuccess = { state ->
-                    val url = ((state as? CHResultState.CHResultStateNetworks)?.data ?: "") as String
-                    if (url.isNotEmpty() && isAdded) {
-                        activity?.runOnUiThread {
-                            safeNavigate(
-                                R.id.action_Friend_to_webViewFragment,
-                                Bundle().apply {
-                                    putString("scene", scene)
-                                    putString("url", url)
-                                }
-                            )
-                        }
-                    }
-                },
-                onFailure = { t ->
-                    L.e(tag, "Failed to get contact detail URL: ${t.message}")
-                }
-            )
-        }
     }
 
     private fun doRefresh() {

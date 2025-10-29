@@ -284,7 +284,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.action_deviceListPG_to_SSM2SettingFG)
                 } else {
-                    safeNavigate(R.id.to_historyWebView, Bundle().apply {
+                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
                         putString("scene", "history")
                         putString("title", device.getNickname())
                         putString("deviceId", device.deviceId.toString().uppercase())
@@ -299,7 +299,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)
                 } else {
-                    safeNavigate(R.id.to_historyWebView, Bundle().apply {
+                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
                         putString("scene", "history")
                         putString("title", device.getNickname())
                         putString("deviceId", device.deviceId.toString().uppercase())

@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.view.ViewGroup
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -26,7 +25,6 @@ object ContactsWebViewManager {
     private var isInitialized = false
     private var currentUrl: String? = null
     private var pendingRefresh = false
-    private var pendingDetailNavigation: Bundle? = null
 
     private var onPageStartedCallback: (() -> Unit)? = null
     private var onPageFinishedCallback: (() -> Unit)? = null
@@ -156,20 +154,6 @@ object ContactsWebViewManager {
         val needs = pendingRefresh
         pendingRefresh = false
         return needs
-    }
-
-    fun setPendingDetailNavigation(email: String, subId: String) {
-        pendingDetailNavigation = Bundle().apply {
-            putString("scene", "contact-info")
-            putString("email", email)
-            putString("subUUID", subId.lowercase())
-        }
-    }
-
-    fun checkAndConsumePendingDetail(): Bundle? {
-        val bundle = pendingDetailNavigation
-        pendingDetailNavigation = null
-        return bundle
     }
 
     fun clear() {

@@ -1,6 +1,7 @@
 package co.candyhouse.app.tabs.menu
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -8,18 +9,25 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -53,11 +61,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
@@ -68,10 +78,10 @@ import co.candyhouse.server.CHResultState
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
+import co.utils.ContainerPaddingManager
 import co.utils.WebViewJSBridge
-import co.utils.clearContainerTopPadding
-import co.utils.restoreContainerTopPadding
 import co.utils.safeNavigate
+import java.io.File
 
 /**
  * WebView通用设置
@@ -175,6 +185,8 @@ internal fun cleanupWebView(webView: WebView?) {
 
 class SesameComposeWebView : Fragment() {
 
+    private val logTag = "SesameComposeWebView"
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -195,30 +207,22 @@ class SesameComposeWebView : Fragment() {
                     when (whereValue) {
                         "device_history_old" -> safeNavigate(R.id.action_mainRoomFG_to_SSM2SettingFG)
                         "device_history_new" -> safeNavigate(R.id.action_mainRoomSS5FG_to_SSM5SettingFG)
-                        CHDeviceManager.SHOP_FLAG -> {
-                            exit()
-                        }
                     }
                 },
                 onSchemeIntercept = { uri, params ->
                     when (uri.path) {
-                        "/webview/open" -> {
-                            params["url"]?.let { targetUrl ->
-                                params["notifyName"]?.let { notifyName ->
-                                    // 注册通知监听
-                                    L.e("SesameComposeWebView", "notifyName=$notifyName")
-                                }
-                                L.e("SesameComposeWebView", "targetUrl=$targetUrl")
-                            }
-                        }
-
                         "/webview/notify" -> {
                             params["notifyName"]?.let { notifyName ->
-                                // 注册通知监听
-                                L.e("SesameComposeWebView", "notifyName=$notifyName")
-                                if (notifyName == "FriendChanged") {
-                                    ContactsWebViewManager.setPendingRefresh()
-                                    findNavController().popBackStack()
+                                L.e(logTag, "notifyName=$notifyName")
+                                when (notifyName) {
+                                    "FriendChanged" -> {
+                                        ContactsWebViewManager.setPendingRefresh()
+                                        findNavController().popBackStack()
+                                    }
+
+                                    "RefreshList" -> {
+                                        ContactsWebViewManager.setPendingRefresh()
+                                    }
                                 }
                             }
                         }
@@ -230,12 +234,12 @@ class SesameComposeWebView : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        clearContainerTopPadding()
+        ContainerPaddingManager.requestClearPadding(this)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        restoreContainerTopPadding()
+        ContainerPaddingManager.releaseClearPadding(this)
     }
 
     private fun exit() {
@@ -274,9 +278,61 @@ fun WebViewContent(
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
     var isWebViewInitialized by remember { mutableStateOf(false) }
 
-    val schemeHandlers = remember { createSchemeHandlers(onSchemeIntercept) }
+    var pendingUrl by remember { mutableStateOf<String?>(null) }
+    val schemeHandlers = remember {
+        mutableMapOf<String, (WebView?, Uri, Map<String, String>) -> Boolean>().apply {
+            this["ssm"] = { _, uri, params ->
+                when (uri.path) {
+                    "/webview/open" -> {
+                        params["url"]?.let { targetUrl ->
+                            params["notifyName"]?.let { notifyName ->
+                                L.e(tag, "notifyName=$notifyName")
+                                if (notifyName == "FriendChanged") {
+                                    L.e(tag, "targetUrl=$targetUrl")
+                                    pendingUrl = targetUrl
+                                }
+                            }
+                        }
+                    }
+
+                    else -> {
+                        onSchemeIntercept?.invoke(uri, params)
+                    }
+                }
+                true
+            }
+        }
+    }
 
     var jsBridge by remember { mutableStateOf<WebViewJSBridge?>(null) }
+
+    val context = LocalContext.current
+    var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
+    var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    val fileChooserLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val data = result.data
+        val results = when {
+            result.resultCode == Activity.RESULT_OK -> {
+                if (data?.data == null && cameraPhotoUri != null) {
+                    arrayOf(cameraPhotoUri!!)
+                } else {
+                    data?.data?.let { arrayOf(it) } ?: data?.clipData?.let { clipData ->
+                        (0 until clipData.itemCount).map {
+                            clipData.getItemAt(it).uri
+                        }.toTypedArray()
+                    }
+                }
+            }
+
+            else -> null
+        }
+        fileChooserCallback?.onReceiveValue(results)
+        fileChooserCallback = null
+        cameraPhotoUri = null
+    }
 
     LaunchedEffect(Unit) {
         L.d(tag, "where=$where scene=$scene deviceId=$deviceId title=$title enableJSBridge=$enableJSBridge pushToken=$pushToken")
@@ -291,6 +347,13 @@ fun WebViewContent(
             }
             cleanupWebView(webViewRef)
             webViewRef = null
+        }
+    }
+
+    LaunchedEffect(pendingUrl) {
+        pendingUrl?.let { newUrl ->
+            webViewRef?.loadUrl(newUrl)
+            pendingUrl = null
         }
     }
 
@@ -325,22 +388,9 @@ fun WebViewContent(
                     }
                 },
                 actions = {
-                    if (where != CHDeviceManager.NOTIFICATION_FLAG && (scene == "history" || scene == CHDeviceManager.SHOP_FLAG)) {
+                    if (scene == "history") {
                         IconButton(onClick = { onMoreClick(where) }) {
-                            Icon(
-                                painter = painterResource(
-                                    id = if (scene == CHDeviceManager.SHOP_FLAG) {
-                                        R.drawable.ic_icons_filled_close
-                                    } else {
-                                        R.drawable.ic_icons_filled_more
-                                    }
-                                ),
-                                contentDescription = if (scene == CHDeviceManager.SHOP_FLAG) {
-                                    "Quit"
-                                } else {
-                                    "More"
-                                }
-                            )
+                            Icon(painter = painterResource(id = R.drawable.ic_icons_filled_more), contentDescription = "More")
                         }
                     } else {
                         Box(modifier = Modifier.width(48.dp))
@@ -368,6 +418,62 @@ fun WebViewContent(
                             L.d(tag, "Adding JS Bridge for scene='$scene'")
                             jsBridge = WebViewJSBridge(wv, scope)
                             wv.addJavascriptInterface(jsBridge!!, "AndroidHandler")
+                        }
+
+                        wv.webChromeClient = object : WebChromeClient() {
+                            override fun onShowFileChooser(
+                                webView: WebView?,
+                                filePathCallback: ValueCallback<Array<Uri>>?,
+                                fileChooserParams: FileChooserParams?
+                            ): Boolean {
+                                fileChooserCallback?.onReceiveValue(null)
+                                fileChooserCallback = filePathCallback
+
+                                // 创建拍照Intent和临时文件
+                                val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                var photoFile: File? = null
+
+                                try {
+                                    photoFile = File.createTempFile(
+                                        "JPEG_${System.currentTimeMillis()}_",
+                                        ".jpg",
+                                        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                                    )
+                                    cameraPhotoUri = FileProvider.getUriForFile(
+                                        context,
+                                        context.packageName,
+                                        photoFile
+                                    )
+                                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoUri)
+                                } catch (e: Exception) {
+                                    L.e(tag, "Cannot create temp file: ${e.message}")
+                                }
+
+                                // 图片选择Intent
+                                val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                                    addCategory(Intent.CATEGORY_OPENABLE)
+                                    type = "image/*"
+                                }
+
+                                // 创建选择器，包含拍照和图片选择
+                                val chooserIntent = Intent.createChooser(contentSelectionIntent, "QRコード選択").apply {
+                                    if (photoFile != null) {
+                                        putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePictureIntent))
+                                    }
+                                }
+
+                                try {
+                                    fileChooserLauncher.launch(chooserIntent)
+                                } catch (e: Exception) {
+                                    L.e(tag, "Cannot open file chooser: ${e.message}")
+                                    fileChooserCallback?.onReceiveValue(null)
+                                    fileChooserCallback = null
+                                    cameraPhotoUri = null
+                                    return false
+                                }
+
+                                return true
+                            }
                         }
 
                         wv.webViewClient = object : WebViewClient() {
@@ -490,18 +596,28 @@ fun WebViewContent(
                 )
             }
 
-            if (error != null && !loading) {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = error ?: "Failed to load")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        error = null
-                        webViewRef?.reload()
-                    }) {
-                        Text("Retry")
+            error?.takeIf { !loading }?.let { errorMsg ->
+                when {
+                    errorMsg.contains("Please log in", ignoreCase = true) -> {
+                        LaunchedEffect(errorMsg) {
+                            Toast.makeText(context, "Please log in", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    else -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = errorMsg)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = {
+                                error = null
+                                webViewRef?.reload()
+                            }) {
+                                Text("Retry")
+                            }
+                        }
                     }
                 }
             }
