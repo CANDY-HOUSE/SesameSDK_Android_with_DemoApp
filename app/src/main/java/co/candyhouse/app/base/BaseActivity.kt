@@ -255,7 +255,12 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-        perms.forEach {
+        val filteredPerms = perms.filter { it != Manifest.permission.CAMERA }
+        if (filteredPerms.isEmpty()) {
+            return
+        }
+
+        filteredPerms.forEach {
             if (it != Manifest.permission.POST_NOTIFICATIONS) {
                 Toast.makeText(
                     applicationContext,

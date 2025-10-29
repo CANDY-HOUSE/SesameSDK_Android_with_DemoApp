@@ -1,8 +1,10 @@
 package co.candyhouse.app.tabs.menu
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -67,9 +69,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgComposeWebviewBinding
 import co.candyhouse.app.tabs.friend.ContactsWebViewManager
@@ -309,6 +313,7 @@ fun WebViewContent(
     val context = LocalContext.current
     var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCameraIntent by remember { mutableStateOf<Intent?>(null) }
 
     val fileChooserLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -332,6 +337,39 @@ fun WebViewContent(
         fileChooserCallback?.onReceiveValue(results)
         fileChooserCallback = null
         cameraPhotoUri = null
+    }
+
+    fun launchFileChooser(includeCameraIntent: Intent? = null) {
+        val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+        }
+
+        val chooserIntent = Intent.createChooser(contentSelectionIntent, "QRコード選択").apply {
+            includeCameraIntent?.let {
+                putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(it))
+            }
+        }
+
+        try {
+            fileChooserLauncher.launch(chooserIntent)
+        } catch (e: Exception) {
+            L.e(tag, "Cannot open file chooser: ${e.message}")
+            fileChooserCallback?.onReceiveValue(null)
+            fileChooserCallback = null
+            cameraPhotoUri = null
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted && pendingCameraIntent != null) {
+            launchFileChooser(pendingCameraIntent)
+        } else {
+            launchFileChooser()
+        }
+        pendingCameraIntent = null
     }
 
     LaunchedEffect(Unit) {
@@ -430,46 +468,39 @@ fun WebViewContent(
                                 fileChooserCallback = filePathCallback
 
                                 // 创建拍照Intent和临时文件
-                                val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                                var photoFile: File? = null
-
+                                var takePictureIntent: Intent? = null
                                 try {
-                                    photoFile = File.createTempFile(
+                                    val photoFile = File.createTempFile(
                                         "JPEG_${System.currentTimeMillis()}_",
                                         ".jpg",
                                         context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                                     )
                                     cameraPhotoUri = FileProvider.getUriForFile(
                                         context,
-                                        context.packageName,
+                                        BuildConfig.APPLICATION_ID,
                                         photoFile
                                     )
-                                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoUri)
+                                    takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                        putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoUri)
+                                    }
                                 } catch (e: Exception) {
                                     L.e(tag, "Cannot create temp file: ${e.message}")
                                 }
 
-                                // 图片选择Intent
-                                val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                                    addCategory(Intent.CATEGORY_OPENABLE)
-                                    type = "image/*"
-                                }
-
-                                // 创建选择器，包含拍照和图片选择
-                                val chooserIntent = Intent.createChooser(contentSelectionIntent, "QRコード選択").apply {
-                                    if (photoFile != null) {
-                                        putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePictureIntent))
+                                when {
+                                    takePictureIntent == null -> {
+                                        launchFileChooser()
                                     }
-                                }
 
-                                try {
-                                    fileChooserLauncher.launch(chooserIntent)
-                                } catch (e: Exception) {
-                                    L.e(tag, "Cannot open file chooser: ${e.message}")
-                                    fileChooserCallback?.onReceiveValue(null)
-                                    fileChooserCallback = null
-                                    cameraPhotoUri = null
-                                    return false
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                                            != PackageManager.PERMISSION_GRANTED -> {
+                                        pendingCameraIntent = takePictureIntent
+                                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+
+                                    else -> {
+                                        launchFileChooser(takePictureIntent)
+                                    }
                                 }
 
                                 return true
