@@ -197,7 +197,7 @@ class SesameComposeWebView : Fragment() {
         savedInstanceState: Bundle?
     ): View = ComposeView(requireContext()).apply {
         setContent {
-            WebViewContent(
+            SesameComposeWebViewContent(
                 url = arguments?.getString("url") ?: "",
                 scene = arguments?.getString("scene") ?: "",
                 deviceId = arguments?.getString("deviceId") ?: "",
@@ -256,7 +256,7 @@ class SesameComposeWebView : Fragment() {
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewContent(
+fun SesameComposeWebViewContent(
     url: String = "",
     scene: String = "",
     deviceId: String = "",
@@ -658,7 +658,7 @@ fun WebViewContent(
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun EmbeddedWebView(
+fun EmbeddedWebViewContent(
     url: String = "",
     scene: String = "",
     deviceId: String = "",

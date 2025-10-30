@@ -18,7 +18,7 @@ import co.candyhouse.sesame.server.dto.WM2Shadow
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.getClientRegion
 import co.candyhouse.sesame.utils.toHexString
-import co.candyhouse.sesame2.BuildConfig
+import co.candyhouse.sesame.BuildConfig
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager

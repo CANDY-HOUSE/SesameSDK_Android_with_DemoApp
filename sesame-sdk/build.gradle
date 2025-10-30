@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'co.candyhouse.sesame2'
+    namespace 'co.candyhouse.sesame'
 
     compileSdk = rootProject.ext.compileSdkVersion
 

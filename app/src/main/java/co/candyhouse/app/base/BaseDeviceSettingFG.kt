@@ -37,7 +37,7 @@ import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.setNFC
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
-import co.candyhouse.app.tabs.menu.EmbeddedWebView
+import co.candyhouse.app.tabs.menu.EmbeddedWebViewContent
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
@@ -391,7 +391,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 disposeComposition()
 
                 setContent {
-                    EmbeddedWebView(
+                    EmbeddedWebViewContent(
                         scene = "device-user",
                         deviceId = targetDevice.deviceId.toString().uppercase(),
                         height = 80.dp,

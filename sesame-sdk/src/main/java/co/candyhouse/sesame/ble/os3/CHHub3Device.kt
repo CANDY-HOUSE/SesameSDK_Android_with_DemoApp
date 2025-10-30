@@ -42,7 +42,7 @@ import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.noHashtoUUID
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
-import co.candyhouse.sesame2.BuildConfig
+import co.candyhouse.sesame.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.CoroutineScope

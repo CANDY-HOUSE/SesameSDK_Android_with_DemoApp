@@ -17,7 +17,7 @@ import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
-import co.candyhouse.sesame2.BuildConfig
+import co.candyhouse.sesame.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
 import com.amazonaws.mobileconnectors.apigateway.annotation.Service

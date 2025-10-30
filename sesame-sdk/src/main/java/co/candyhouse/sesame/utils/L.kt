@@ -2,7 +2,7 @@ package co.candyhouse.sesame.utils
 
 import android.os.Looper
 import android.util.Log
-import co.candyhouse.sesame2.BuildConfig
+import co.candyhouse.sesame.BuildConfig
 
 class L {
     companion object {

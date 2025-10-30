@@ -11,7 +11,7 @@ import co.candyhouse.server.dto.IrDeviceStateRequest
 import co.candyhouse.server.dto.IrLearnedDataAddRequest
 import co.candyhouse.server.dto.IrMatchCodeRequest
 import co.candyhouse.server.dto.IrRemoteInfoRespond
-import co.candyhouse.sesame2.BuildConfig
+import co.candyhouse.sesame.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
 import com.amazonaws.mobileconnectors.apigateway.annotation.Service
