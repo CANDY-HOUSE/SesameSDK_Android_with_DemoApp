@@ -31,7 +31,6 @@
     <string name="set_lock_position">Set Lock Position</string>
     <string name="set_unlock_position">Set Unlock Position</string>
     <string name="second">later</string>
-    <string name="edit_name">Edit Name</string>
     <string name="please_configure">Please configure the locked/unlocked positions.</string>
     <string name="please_complete">Please manually turn Sesame to fully locked/unlocked positions, and tap the buttons below to configure the locked/unlocked positions respectively.</string>
     <string name="add_contacts">Add Contacts</string>
@@ -55,8 +54,6 @@
 
     <string name="reset_the_sesame">Reset the Sesame and trash the key</string>
     <string name="trash_key">Delete the Sesame</string>
-    <string name="share_key">Share the key of the Sesame</string>
-    <string name="share_management_view">Share Management View</string>
 
     <string name="on">On</string>
     <string name="Off">Off</string>
@@ -131,7 +128,6 @@
     <string name="addSesameTo">Add Sesame to…</string>
     <string name="wm2NetworkConnectionStatus">Internet Status</string>
 
-    <string name="key_level">Role &amp; Permission</string>
     <string name="click_script">Script</string>
     <string name="Wm2WifiOK">WiFi Module is connected to network successfully</string>
     <string name="BotModeNormal">Click then return</string>
@@ -226,8 +222,6 @@
     <string name="open_sensor_last_update_time">Update Time</string>
     <string name="android_notifica_permis_on">Android notification permissions granted</string>
     <string name="android_notifica_permis_off">Android notification permissions NOT granted(Tap here)</string>
-
-    <string name="pleaseemail">Please enter the recipient\'s email address</string>
 
     <string name="matterMsg">Matter pairing mode activated. Please complete pairing within fifteen  minutes. If unsuccessful, please re-enter this page to reactivate Matter pairing mode.</string>
 

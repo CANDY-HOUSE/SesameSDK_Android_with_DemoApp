@@ -133,7 +133,7 @@ class DeviceListAdapter(
                 blImg.visibility = View.GONE
                 updateWifiStatus(device)
 
-                setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage ?: -1)
+                setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage)
 
                 setupExpandableView(device, 35) {
                     val param = device.deviceId.toString().uppercase(Locale.getDefault())
@@ -234,28 +234,30 @@ class DeviceListAdapter(
         }
 
         private fun updateBatteryStatus(device: CHDevices) {
-            val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.userKey?.stateInfo?.batteryPercentage ?: -1
+            val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.userKey?.stateInfo?.batteryPercentage
             setBatteryStatus(batteryLevel)
         }
 
-        private fun setBatteryStatus(batteryLevel: Int) {
+        private fun setBatteryStatus(batteryLevel: Int?) {
             binding.apply {
-                val isVisible = batteryLevel > 0
-                batteryContain.isVisible = isVisible
-                batteryPercent.isVisible = isVisible
+                if (batteryLevel == null) {
+                    batteryContain.isVisible = false
+                    batteryPercent.isVisible = false
+                    return
+                }
 
-                if (isVisible) {
-                    batteryPercent.text = "$batteryLevel%"
-                    btnPecent.apply {
-                        progressDrawable = ContextCompat.getDrawable(
-                            itemView.context,
-                            when {
-                                batteryLevel >= 15 -> R.drawable.progress_blue
-                                else -> R.drawable.progress_red
-                            }
-                        )
-                        progress = batteryLevel
-                    }
+                batteryContain.isVisible = true
+                batteryPercent.isVisible = true
+                batteryPercent.text = "$batteryLevel%"
+                btnPecent.apply {
+                    progressDrawable = ContextCompat.getDrawable(
+                        itemView.context,
+                        when {
+                            batteryLevel >= 15 -> R.drawable.progress_blue
+                            else -> R.drawable.progress_red
+                        }
+                    )
+                    progress = batteryLevel
                 }
             }
         }

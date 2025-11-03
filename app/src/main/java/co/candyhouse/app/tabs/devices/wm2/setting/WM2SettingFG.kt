@@ -11,8 +11,22 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
-import co.candyhouse.app.tabs.account.cheyKeyToUserKey
-import co.candyhouse.server.CHLoginAPIManager
+import co.candyhouse.app.base.BleStatusUpdate
+import co.candyhouse.app.databinding.FgWm2SettingBinding
+import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.app.tabs.devices.ssm2.getIsJustRegister
+import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
+import co.candyhouse.sesame.open.CHBleManager
+import co.candyhouse.sesame.open.CHBleStatusDelegate
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHWifiModule2
+import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
+import co.candyhouse.sesame.open.device.CHWifiModule2MechSettings
+import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
@@ -20,16 +34,6 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
-import co.utils.alerts.ext.inputTextAlert
-import co.candyhouse.app.base.BleStatusUpdate
-import co.candyhouse.app.databinding.FgWm2SettingBinding
-import co.candyhouse.app.tabs.devices.model.bindLifecycle
-import co.candyhouse.app.tabs.devices.ssm2.*
-import co.candyhouse.sesame.open.CHBleManager
-import co.candyhouse.sesame.open.CHBleStatusDelegate
-import co.candyhouse.sesame.open.CHScanStatus
-import co.candyhouse.sesame.open.device.*
-import co.candyhouse.sesame.utils.L
 import co.utils.safeNavigate
 
 class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate, BleStatusUpdate {
@@ -148,7 +152,6 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                 mDeviceModel.ssmLockLiveData.observe(viewLifecycleOwner) { wm2 ->
                     wm2.connect { }
                     bind.deviceModel.text = wm2.productModel.deviceModelName()
-                    bind.nameTxt.text = wm2.getNickname()
                     bind.wm2IdTxt.text = wm2.deviceId.toString()
                     bind.wifiSsidTxt.text = (wm2 as CHWifiModule2).mechSetting?.wifiSSID
                     bind.wifiPassTxt.text = wm2.mechSetting?.wifiPassWord
@@ -218,30 +221,6 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                             }
                     }
                 }
-
-                bind.changeNameZone.setOnClickListener {
-                    context?.inputTextAlert(
-                        null,
-                        getString(R.string.edit_name),
-                        device.getNickname()
-                    ) {
-                        confirmButtonWithText("OK") { alert, name ->
-                            (mDeviceModel.ssmLockLiveData.value!! as CHWifiModule2).setNickname(name)
-                            CHLoginAPIManager.putKey(
-                                cheyKeyToUserKey(
-                                    device.getKey(),
-                                    device.getLevel(),
-                                    device.getNickname()
-                                )
-                            ) {}
-                            getView()?.findViewById<TextView>(R.id.name_txt)?.text = name
-                            dismiss()
-                        }
-                        cancelButton(getString(R.string.cancel))
-                    }?.show()
-                }
-
-
                 bind.apScanZone.setOnClickListener { safeNavigate(R.id.action_WM2SettingFG_to_WM2ScanFG) }
                 bind.addLockerZone.setOnClickListener {
 

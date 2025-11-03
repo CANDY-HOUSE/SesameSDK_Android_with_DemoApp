@@ -6,7 +6,6 @@
     <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="Sesame5us">セサミ 5 北米北欧版</string>
     <string name="title_me">自分</string>
-    <string name="pleaseemail">相手のメールアドレスを入力してください</string>
     <string name="title_list">セサミ</string>
     <string name="default_face_name">顔 🖊️</string>
     <string name="default_palm_name">手のひら静脈🖊️</string>
@@ -33,7 +32,6 @@
     <string name="set_lock_position">施錠の位置を固定する</string>
     <string name="set_unlock_position">解錠の位置を固定する</string>
     <string name="second">後</string>
-    <string name="edit_name">お名前</string>
     <string name="please_configure">施錠・解錠位置を設定してください。</string>
     <string name="please_complete">セサミを完全に施錠・解錠した状態まで手動で回し、画面の設定ボタンをそれぞれタップしてください</string>
     <string name="add_contacts">連絡先の追加</string>
@@ -56,8 +54,6 @@
 
     <string name="reset_the_sesame">このセサミを初期化して削除する</string>
     <string name="trash_key">このセサミを削除する</string>
-    <string name="share_key">このセサミの鍵をシェア</string>
-    <string name="share_management_view">この管理画面をシェア</string>
     <string name="on">オン</string>
     <string name="Off">オフ</string>
     <string name="immediately">すぐに</string>
@@ -127,7 +123,6 @@
 
     <string name="addSesameTo">セサミを追加…</string>
     <string name="wm2NetworkConnectionStatus">ネット接続状態</string>
-    <string name="key_level">役割と権限</string>
     <string name="click_script">台本</string>
     <string name="Wm2WifiOK">WiFiモジュールがネットに接続できました</string>
     <string name="BotModeNormal">押して戻る</string>

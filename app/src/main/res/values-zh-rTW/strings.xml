@@ -6,7 +6,6 @@
     <string name="email">信箱</string>
     <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="second2">秒</string>
-    <string name="pleaseemail">請輸入對方的郵箱號</string>
     <string name="clickaction">點擊⊕添加動作。\n如果秒數為「永遠」並被執行，除非切換到其他劇本並執行，否則SesameBot2的動作不會停止。\n馬達正反轉速度有公差，請讓按下時間比返回稍長一些。</string>
     <string name="delete_account">刪除帳號</string>
     <string name="matterMsg">已進入Matter配網模式，請於十五分鐘內完成配網，萬一失敗請重新進入此頁以重新進入Matter配網模式</string>
@@ -39,7 +38,6 @@
     <string name="set_lock_position">設置上鎖角度</string>
     <string name="set_unlock_position">設置解鎖角度</string>
     <string name="second">後</string>
-    <string name="edit_name">修改名稱</string>
 
     <string name="please_configure">請設置開鎖角度與關鎖角度</string>
     <string name="please_complete">請手轉芝麻設備至 完全上鎖/完全解鎖 位置，\n
@@ -66,8 +64,6 @@
 
     <string name="reset_the_sesame">重置芝麻設備並丟棄鑰匙</string>
     <string name="trash_key">刪除芝麻鑰匙</string>
-    <string name="share_key">共享芝麻鑰匙</string>
-    <string name="share_management_view">共享管理畫面</string>
 
     <string name="on">開啟</string>
     <string name="Off">關閉</string>
@@ -139,7 +135,6 @@
     <string name="addSesameTo">添加芝麻設備…</string>
     <string name="wm2NetworkConnectionStatus">網路狀態</string>
 
-    <string name="key_level">角色與權限</string>
     <string name="click_script">劇本</string>
     <string name="Wm2WifiOK">WiFi模組已連接到網路</string>
     <string name="BotModeNormal">下壓後歸位</string>

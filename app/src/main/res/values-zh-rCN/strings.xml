@@ -6,7 +6,6 @@
     <string name="email">邮箱</string>
     <string name="dfu_status_error_msg">エラーが発生しました</string>
     <string name="second2">秒</string>
-    <string name="pleaseemail">请输入对方的邮箱号</string>
     <string name="matterMsg">已进入Matter配网模式，请于十五分钟内完成配网，万一失败请重新进入此页以重新进入Matter配网模式</string>
 
     <string name="title_friends">通讯录</string>
@@ -36,7 +35,6 @@
     <string name="set_lock_position">设置上锁角度</string>
     <string name="set_unlock_position">设置解锁角度</string>
     <string name="second">后</string>
-    <string name="edit_name">修改名称</string>
 
     <string name="please_configure">请设置开锁角度与关锁角度</string>
     <string name="please_complete">请手转芝麻设备至 完全上锁/完全解锁 位置，\n
@@ -63,8 +61,6 @@
 
     <string name="reset_the_sesame">重置芝麻设备并丢弃钥匙</string>
     <string name="trash_key">删除芝麻钥匙</string>
-    <string name="share_key">共享芝麻钥匙</string>
-    <string name="share_management_view">共享管理画面</string>
 
     <string name="on">开启</string>
     <string name="Off">关闭</string>
@@ -138,7 +134,6 @@
     <string name="addSesameTo">添加芝麻设备…</string>
     <string name="wm2NetworkConnectionStatus">网络状态</string>
 
-    <string name="key_level">角色与权限</string>
     <string name="click_script">剧本</string>
     <string name="Wm2WifiOK">WiFi模块已连接到网络</string>
     <string name="BotModeNormal">下压后归位</string>

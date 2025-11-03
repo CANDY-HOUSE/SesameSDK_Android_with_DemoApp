@@ -21,7 +21,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.clearNFC
 import co.candyhouse.app.tabs.devices.ssm2.getFirmwareName
@@ -29,16 +28,12 @@ import co.candyhouse.app.tabs.devices.ssm2.getFirmwarePath
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
-import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.app.tabs.devices.ssm2.level2Tag
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.setNFC
-import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
 import co.candyhouse.app.tabs.menu.EmbeddedWebViewContent
-import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
 import co.candyhouse.sesame.open.CHScanStatus
@@ -48,15 +43,12 @@ import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
-import co.utils.alerts.ext.inputTextAlert
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
-import com.amazonaws.mobile.client.AWSMobileClient
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.dfu.DfuServiceInitiator
 
@@ -158,8 +150,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         mDeviceModel.ssmLockLiveData.observe(viewLifecycleOwner) { ss2 ->
             getView()?.findViewById<TextView>(R.id.device_model)?.text =
                 ss2.productModel.deviceModelName()
-            getView()?.findViewById<TextView>(R.id.key_level_txt)?.text = level2Tag(ss2.getLevel())
-            getView()?.findViewById<TextView>(R.id.name_txt)?.text = ss2.getNickname()
             getView()?.findViewById<TextView>(R.id.device_uuid_txt)?.text =
                 ss2.deviceId.toString().uppercase()
             getView()?.findViewById<TextView>(R.id.histag_txt)?.text =
@@ -174,33 +164,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     private fun setupListeners(targetDevice: CHDevices) {
-        view?.findViewById<View>(R.id.change_name_zone)?.setOnClickListener {
-            context?.inputTextAlert(
-                "",
-                getString(R.string.edit_name),
-                SharedPreferencesUtils.preferences.getString(
-                    targetDevice.deviceId.toString(),
-                    targetDevice.getNickname()
-                )
-            ) {
-                confirmButtonWithText("OK") { alert, name ->
-                    targetDevice.setNickname(name)
-                    CHLoginAPIManager.putKey(
-                        cheyKeyToUserKey(
-                            targetDevice.getKey(),
-                            targetDevice.getLevel(),
-                            targetDevice.getNickname()
-                        )
-                    ) {}
-                    /* https://ap-northeast-1.console.aws.amazon.com/lambda/home?region=ap-northeast-1#/functions/user_device_put?tab=code
-                    *  Line 91 - 105:  FunctionName: 'update_device_name_in_matter',
-                    *  */
-                    getView()?.findViewById<TextView>(R.id.name_txt)?.text = name
-                    dismiss()
-                }
-                cancelButton(getString(R.string.cancel))
-            }?.show()
-        }
         view?.findViewById<View>(R.id.share_zone)?.setOnClickListener {
             AlertView(getString(R.string.share), "", AlertStyle.IOS).apply {
                 val innerLevel = targetDevice.getLevel()
@@ -386,47 +349,42 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         view?.findViewById<TextView>(R.id.drop_hint_txt)?.text =
             getString(R.string.drop_hint, targetDevice.productModel.modelName())
 
-        if (AWSMobileClient.getInstance().isSignedIn) {
-            view?.findViewById<ComposeView>(R.id.friend_web_view)?.apply {
-                disposeComposition()
+        view?.findViewById<ComposeView>(R.id.device_setting_web_view)?.apply {
+            disposeComposition()
 
-                setContent {
-                    EmbeddedWebViewContent(
-                        scene = "device-user",
-                        deviceId = targetDevice.deviceId.toString().uppercase(),
-                        height = 80.dp,
-                        refreshTrigger = refreshCounter.intValue,
-                        onSchemeIntercept = { uri, params ->
-                            when (uri.path) {
-                                "/webview/open" -> {
-                                    params["url"]?.let { targetUrl ->
-                                        params["notifyName"]?.let { notifyName ->
-                                            L.d("EmbeddedWebView", "EmbeddedWebView-notifyName=$notifyName")
+            setContent {
+                EmbeddedWebViewContent(
+                    scene = "device-setting",
+                    deviceId = targetDevice.deviceId.toString().uppercase(),
+                    keyLevel = targetDevice.getLevel().toString(),
+                    height = 80.dp,
+                    refreshTrigger = refreshCounter.intValue,
+                    onSchemeIntercept = { uri, params ->
+                        when (uri.path) {
+                            "/webview/open" -> {
+                                params["url"]?.let { targetUrl ->
+                                    params["notifyName"]?.let { notifyName ->
+                                        L.d("EmbeddedWebView", "EmbeddedWebView-notifyName=$notifyName")
+                                        when (notifyName) {
+                                            "DeviceMemberChanged" -> {
+                                                L.d("EmbeddedWebView", "EmbeddedWebView-targetUrl=$targetUrl")
+                                                safeNavigate(R.id.action_DeviceMember_to_webViewFragment, Bundle().apply {
+                                                    putString("scene", "device-user")
+                                                    putString("url", targetUrl)
+                                                })
+                                            }
                                         }
-                                        L.d("EmbeddedWebView", "EmbeddedWebView-targetUrl=$targetUrl")
-                                        safeNavigate(R.id.action_DeviceMember_to_webViewFragment, Bundle().apply {
-                                            putString("scene", "device-user")
-                                            putString("url", targetUrl)
-                                        })
                                     }
                                 }
                             }
                         }
-                    )
-                }
+                    }
+                )
             }
         }
 
-        updateFreshTop(targetDevice)
-    }
-
-    private fun updateFreshTop(targetDevice: CHDevices) {
-        if (targetDevice.getLevel() == 0 || targetDevice.getLevel() == 1) {
-            view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setOnRefreshListener {
-                refreshTop()
-            }
-        } else {
-            view?.findViewById<ComposeView>(R.id.friend_web_view)?.visibility = View.GONE
+        view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setOnRefreshListener {
+            refreshTop()
         }
     }
 

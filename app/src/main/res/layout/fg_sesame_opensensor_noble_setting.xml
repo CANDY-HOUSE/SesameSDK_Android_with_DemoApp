@@ -16,6 +16,11 @@
 
     </RelativeLayout>
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -36,7 +41,7 @@
                 android:orientation="vertical">
 
                 <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/friend_web_view"
+                    android:id="@+id/device_setting_web_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
@@ -45,53 +50,6 @@
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp" />
 
-                <RelativeLayout
-                    android:id="@+id/change_name_zone"
-                    android:layout_marginBottom="8dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:background="@color/white">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginLeft="16dp"
-                        android:background="@color/gray0" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="16dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/edit_name"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
-
-                    <TextView
-                        android:id="@+id/name_txt"
-                        android:layout_width="220dp"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="12dp"
-                        android:gravity="end|center"
-                        android:lines="1"
-                        android:scaleType="center"
-                        android:textColor="@color/text_hint"
-                        android:textSize="17dp"
-                        tools:text="111111-1111-1111-1111-1111111111111111" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/gray0" />
-
-                </RelativeLayout>
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
@@ -306,4 +264,5 @@
 
 <!--        </LinearLayout>-->
     </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

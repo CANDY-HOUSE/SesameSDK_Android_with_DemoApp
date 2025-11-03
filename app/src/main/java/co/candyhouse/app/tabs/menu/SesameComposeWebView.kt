@@ -83,6 +83,7 @@ import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
 import co.utils.ContainerPaddingManager
+import co.utils.SharedPreferencesUtils
 import co.utils.WebViewJSBridge
 import co.utils.safeNavigate
 import java.io.File
@@ -134,6 +135,7 @@ internal fun rememberWebUrl(
     scene: String,
     deviceId: String,
     pushToken: String = "",
+    keyLevel: String = "",
     onError: (String) -> Unit = {}
 ): State<String> {
     val webUrl = remember { mutableStateOf(initialUrl) }
@@ -141,14 +143,14 @@ internal fun rememberWebUrl(
     LaunchedEffect(scene) {
         if (scene.isNotEmpty() && initialUrl.isEmpty()) {
             val extInfo = buildMap {
-                when {
-                    pushToken.isNotEmpty() -> {
-                        put("pushToken", pushToken)
-                    }
-
-                    deviceId.isNotEmpty() -> {
-                        put("deviceUUID", deviceId)
-                    }
+                if (pushToken.isNotEmpty()) {
+                    put("pushToken", pushToken)
+                }
+                if (deviceId.isNotEmpty()) {
+                    put("deviceUUID", deviceId)
+                }
+                if (keyLevel.isNotEmpty()) {
+                    put("keyLevel", keyLevel)
                 }
             }
 
@@ -270,8 +272,15 @@ fun SesameComposeWebViewContent(
     val tag = "SesameComposeWebView"
     val scope = rememberCoroutineScope()
 
+    // 设置锁历史记录标题
+    val titleNew = if (scene == "history") {
+        SharedPreferencesUtils.preferences.getString(deviceId.lowercase(), title)
+    } else {
+        title
+    }
+
     // 判断是否需要启用JS桥接
-    val enableJSBridge = scene == "device-notify"
+    val enableJSBridge = scene in setOf("device-notify", "device-user")
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -373,7 +382,7 @@ fun SesameComposeWebViewContent(
     }
 
     LaunchedEffect(Unit) {
-        L.d(tag, "where=$where scene=$scene deviceId=$deviceId title=$title enableJSBridge=$enableJSBridge pushToken=$pushToken")
+        L.d(tag, "where=$where scene=$scene deviceId=$deviceId title=$titleNew enableJSBridge=$enableJSBridge pushToken=$pushToken")
         if (webUrl.isNotEmpty()) L.d(tag, "url=$webUrl")
     }
 
@@ -404,9 +413,9 @@ fun SesameComposeWebViewContent(
         topBar = {
             TopAppBar(
                 title = {
-                    if (title.isNotEmpty()) {
+                    if (!titleNew.isNullOrEmpty()) {
                         Text(
-                            text = title,
+                            text = titleNew,
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center
@@ -662,16 +671,23 @@ fun EmbeddedWebViewContent(
     url: String = "",
     scene: String = "",
     deviceId: String = "",
+    keyLevel: String = "",
     height: Dp = 80.dp,
     refreshTrigger: Int = 0,
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     val tag = "EmbeddedWebView"
+    val scope = rememberCoroutineScope()
+
+    var dynamicHeight by remember { mutableStateOf(height) }
+
+    // 判断是否需要启用JS桥接
+    val enableJSBridge = scene == "device-setting"
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val webUrl by rememberWebUrl(url, scene, deviceId) { errorMsg ->
+    val webUrl by rememberWebUrl(url, scene, deviceId, keyLevel = keyLevel) { errorMsg ->
         error = errorMsg
         loading = false
     }
@@ -680,8 +696,14 @@ fun EmbeddedWebViewContent(
 
     val schemeHandlers = remember { createSchemeHandlers(onSchemeIntercept) }
 
+    var jsBridge by remember { mutableStateOf<WebViewJSBridge?>(null) }
+
     DisposableEffect(Unit) {
         onDispose {
+            if (enableJSBridge) {
+                webViewRef?.removeJavascriptInterface("AndroidHandler")
+                jsBridge = null
+            }
             cleanupWebView(webViewRef)
             webViewRef = null
         }
@@ -697,7 +719,7 @@ fun EmbeddedWebViewContent(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(height)
+            .height(dynamicHeight)
             .background(androidx.compose.ui.graphics.Color.White)
     ) {
         AndroidViewBinding(
@@ -713,6 +735,19 @@ fun EmbeddedWebViewContent(
                     // 使用共享设置，但禁用缩放（局部WebView通常不需要）
                     wv.setupCommonSettings(supportZoom = false)
                     wv.scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
+
+                    if (enableJSBridge) {
+                        L.d(tag, "Adding JS Bridge for scene='$scene'")
+                        jsBridge = WebViewJSBridge(
+                            wv,
+                            scope,
+                            onHeightChanged = { newHeight ->
+                                dynamicHeight = newHeight.dp
+                                L.d(tag, "WebView height updated to: ${newHeight}dp")
+                            }
+                        )
+                        wv.addJavascriptInterface(jsBridge!!, "AndroidHandler")
+                    }
 
                     wv.webViewClient = object : WebViewClient() {
                         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {

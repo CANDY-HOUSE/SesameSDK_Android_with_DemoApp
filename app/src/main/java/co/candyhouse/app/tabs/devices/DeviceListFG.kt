@@ -286,7 +286,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 } else {
                     safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
                         putString("scene", "history")
-                        putString("title", device.getNickname())
                         putString("deviceId", device.deviceId.toString().uppercase())
                         putString("where", "device_history_old")
                     })
@@ -301,7 +300,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 } else {
                     safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
                         putString("scene", "history")
-                        putString("title", device.getNickname())
                         putString("deviceId", device.deviceId.toString().uppercase())
                         putString("where", "device_history_new")
                     })

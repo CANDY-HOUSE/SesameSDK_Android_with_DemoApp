@@ -10,7 +10,6 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import androidx.core.graphics.toColorInt
-import androidx.fragment.app.Fragment
 import co.candyhouse.app.R
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceStatus
@@ -257,19 +256,6 @@ fun CHDevices.getRank(): Int {
     return SharedPreferencesUtils.preferences.getInt("ra" + this.deviceId.toString(), 0)
 }
 
-fun Fragment.level2Tag(level: Int?): String {
-    if (level == 0) {
-        return getString(R.string.owner)
-    }
-    if (level == 1) {
-        return getString(R.string.manager)
-    }
-    if (level == 2) {
-        return getString(R.string.guest)
-    }
-    return "unknown"
-}
-
 fun CHDevices.setNickname(name: String) {
     SharedPreferencesUtils.preferences.edit().putString(this.deviceId.toString(), name).apply()
 }
@@ -284,14 +270,6 @@ fun CHDevices.getNickname(): String {
    return ""
 
 }
-fun CHDevices.setTestLoginCount(name: Int) {
-    SharedPreferencesUtils.preferences.edit().putInt("testloginct" +this.deviceId.toString(), name).apply()
-}
-
-fun CHDevices.getTestLoginCount(): Int {
-    return SharedPreferencesUtils.preferences.getInt("testloginct" +this.deviceId.toString(),0)
-}
-
 
 fun CHDevices.getDistance(): Int {
     val rssiValue = rssi?.toDouble() ?: return Int.MAX_VALUE
