@@ -53,17 +53,15 @@ class TopicSubscriptionManager(private val context: Context) {
     }
 
     private fun shouldRefreshSubscriptions(): Boolean {
-        val lastTokenKey = "fcm_token"
         val lastSubscriptionTimeKey = "last_subscription_time"
 
-        val storedToken = prefs.getString(lastTokenKey, null)
         val lastSubscriptionTime = prefs.getLong(lastSubscriptionTimeKey, 0)
         val lastAppVersion = prefs.getInt(PREF_APP_VERSION, 0)
         val currentTime = System.currentTimeMillis()
         val currentAppVersion = BuildConfig.VERSION_CODE
 
         return when {
-            storedToken == null -> true
+            SharedPreferencesUtils.deviceToken == null -> true
             currentAppVersion > lastAppVersion -> {
                 L.d(tag, "检测到版本更新: $lastAppVersion -> $currentAppVersion")
                 true
@@ -79,19 +77,17 @@ class TopicSubscriptionManager(private val context: Context) {
     }
 
     private fun forceRefreshSubscriptions(token: String) {
-        clearTokenSubscriptions(token)
+        clearAllTokenSubscriptions()
         subscribeToTopicsIfNeeded(token)
     }
 
-    private fun clearTokenSubscriptions(token: String) {
+    private fun clearAllTokenSubscriptions() {
         prefs.edit {
-            val tokenSuffix = token.takeLast(10)
-            topics.forEach { topic ->
-                val key = "topic_${topic}_${tokenSuffix}"
-                remove(key)
-            }
+            prefs.all.keys
+                .filter { it.startsWith("topic_") }
+                .forEach { remove(it) }
         }
-        L.d(tag, "已清除token的订阅记录，将强制重新订阅")
+        L.d(tag, "已清除所有token的订阅记录，将强制重新订阅")
     }
 
     private fun subscribeToTopicsIfNeeded(token: String) {
@@ -99,8 +95,6 @@ class TopicSubscriptionManager(private val context: Context) {
             L.e(tag, "正在订阅中，跳过。Token:$token")
             return
         }
-
-        prefs.edit(commit = true) { putString("fcm_token", token) }
 
         try {
             topics.forEach { topic ->
@@ -127,17 +121,15 @@ class TopicSubscriptionManager(private val context: Context) {
     @SuppressLint("HardwareIds")
     private fun subscribeToTopic(topic: String, token: String, onComplete: (() -> Unit)? = null) {
         // 获取设备唯一标识
-        val androidDeviceId = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ANDROID_ID
-        )
-        L.d(tag, "androidDeviceId=$androidDeviceId")
+        val androidDeviceId = prefs.getString("androidDeviceId", null)
+        val appIdentifyId = androidDeviceId ?: Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+        L.d(tag, "appIdentifyId=$appIdentifyId")
 
         val request = SubscriptionRequest(
             action = "subscribeToTopic",
             topicName = topic,
-            token = token,
-            appDeviceId = androidDeviceId,
+            pushToken = token,
+            appIdentifyId = appIdentifyId,
             platform = "android"
         )
 
@@ -150,7 +142,7 @@ class TopicSubscriptionManager(private val context: Context) {
                     prefs.edit {
                         putBoolean(key, true)
                         putLong("last_subscription_time", System.currentTimeMillis())
-                        putString("androidDeviceId", androidDeviceId)
+                        putString("androidDeviceId", appIdentifyId)
                         putInt(PREF_APP_VERSION, BuildConfig.VERSION_CODE)
                     }
                     L.d(tag, "订阅成功: $topic")
@@ -175,24 +167,8 @@ class TopicSubscriptionManager(private val context: Context) {
     }
 
     fun onNewToken(token: String) {
-        val oldToken = prefs.getString("fcm_token", null)
-        if (oldToken != null && oldToken != token) {
-            L.e(tag, "只清除旧 token 的订阅记录")
-            clearOldTokenSubscriptions(oldToken)
-        }
-
         L.d(tag, "onNewToken…… $token")
-        subscribeToTopicsIfNeeded(token)
+        forceRefreshSubscriptions(token)
     }
 
-    private fun clearOldTokenSubscriptions(oldToken: String) {
-        prefs.edit {
-            val tokenSuffix = oldToken.takeLast(10)
-
-            prefs.all.keys
-                .filter { it.contains(tokenSuffix) }
-                .forEach { remove(it) }
-
-        }
-    }
 }
