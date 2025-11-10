@@ -281,8 +281,8 @@ fun CHDevices.getFirmwareName(): String? {
     return when (productModel) {
         CHProductModel.SS2 -> "sesame_221_0_8c080c"
         CHProductModel.SS4 -> "sesame_421_4_50ce5b"
-        CHProductModel.SS5 -> "sesame5_30_5_1e6f97"
-        CHProductModel.SS5PRO -> "sesame5pro_30_7_1e6f97"
+        CHProductModel.SS5 -> "sesame5_30_5_848a2d"
+        CHProductModel.SS5PRO -> "sesame5pro_30_7_848a2d"
         CHProductModel.WM2 -> null
         CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
         CHProductModel.BiKeLock -> "sesamebike1_21_3_d7162a"
@@ -294,7 +294,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.Remote -> "remote_30_14_03d244"
         CHProductModel.RemoteNano -> "remoten_30_15_03d244"
         CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
-        CHProductModel.SS5US -> "sesame5us_30_16_1e6f97"
+        CHProductModel.SS5US -> "sesame5us_30_16_848a2d"
         CHProductModel.SSMFacePro -> "sesameface1pro_30_18_0ace8d"
         CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_0ace8d"
         CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_0ace8d"
