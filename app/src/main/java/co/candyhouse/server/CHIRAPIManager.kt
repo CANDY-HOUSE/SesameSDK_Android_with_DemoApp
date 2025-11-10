@@ -19,6 +19,7 @@ import co.candyhouse.sesame.open.CHConfiguration
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.getClientRegion
 import co.candyhouse.sesame.utils.toHexString
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.mobileconnectors.apigateway.ApiClientException
 import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
@@ -28,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 
 
@@ -54,6 +56,12 @@ object CHIRAPIManager {
             val factory = ApiClientFactory().credentialsProvider(credentialsProvider).apiKey(
                 CHConfiguration.API_KEY
             ).region("ap-northeast-1")
+                .clientConfiguration(ClientConfiguration().apply {
+                    userAgent = userAgent?.replace(
+                        Regex("\\b[a-z]{2}_[A-Z]{2}\\b"),
+                        Locale.getDefault().toString()
+                    ) ?: userAgent
+                })
             jpAPIClient = factory.build(CHIRAPIClient::class.java)
             isInitialized = true
         }

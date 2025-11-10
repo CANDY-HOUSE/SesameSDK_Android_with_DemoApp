@@ -3,6 +3,7 @@ package co.candyhouse.server
 import co.candyhouse.app.ext.TokenManager
 import co.candyhouse.app.tabs.account.CHUserKey
 import co.utils.SharedPreferencesUtils
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
@@ -11,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias CHResult<T> = (Result<CHResultState<T>>) -> Unit
@@ -26,6 +28,12 @@ object CHLoginAPIManager {
 
     fun setupAPi(provider: AWSCredentialsProvider) {
         val factory = ApiClientFactory().credentialsProvider(provider).region("ap-northeast-1")
+            .clientConfiguration(ClientConfiguration().apply {
+                userAgent = userAgent?.replace(
+                    Regex("\\b[a-z]{2}_[A-Z]{2}\\b"),
+                    Locale.getDefault().toString()
+                ) ?: userAgent
+            })
         jpAPIClient = factory.build(CHLoginAPIClient::class.java)
     }
 

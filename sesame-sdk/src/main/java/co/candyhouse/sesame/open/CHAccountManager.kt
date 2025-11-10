@@ -33,12 +33,14 @@ import co.candyhouse.sesame.utils.getClientRegion
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt24ByteArray
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias HttpResponseCallback<T> = (Result<T>) -> Unit
@@ -60,6 +62,12 @@ object CHAccountManager {
             CHConfiguration.CLIENT_ID!!.getClientRegion() // 區域
         )
         val factory = ApiClientFactory().credentialsProvider(credentialsProvider).apiKey(CHConfiguration.API_KEY).region("ap-northeast-1")
+            .clientConfiguration(ClientConfiguration().apply {
+                userAgent = userAgent?.replace(
+                    Regex("\\b[a-z]{2}_[A-Z]{2}\\b"),
+                    Locale.getDefault().toString()
+                ) ?: userAgent
+            })
 
         jpAPIclient = factory.build(CHPrivateAPIClient::class.java) //        L.d("hcia", "網路設定完了:")
     }

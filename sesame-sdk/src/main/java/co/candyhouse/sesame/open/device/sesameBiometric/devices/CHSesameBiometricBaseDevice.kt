@@ -291,10 +291,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
                 CHDB.CHSS2Model.insert(candyDevice) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                 }
-
-                sendCommand(SesameOS3Payload(SesameItemCode.mechStatus.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
-                    mechStatus = CHSesameTouchProMechStatus(res.payload)
-                }
             }
         }
     }
