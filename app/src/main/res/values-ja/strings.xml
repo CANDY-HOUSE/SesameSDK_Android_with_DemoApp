@@ -2,7 +2,6 @@
     <string name="launching_why_need_location_permission">Android 6.0 またはそれ以上の場合、Bluetoothを適正に作動させるためには位置情報にアクセスする許可が必要です。そうでなければ、アプリがセサミを見つけることができません。</string>
 
     <string name="app_name">Sesame</string>
-    <string name="email">Eメール</string>
     <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="Sesame5us">セサミ 5 北米北欧版</string>
     <string name="title_me">自分</string>
@@ -111,7 +110,6 @@
     <string name="wm2_ssid">WiFi SSID</string>
     <string name="login">ログイン/登録</string>
     <string name="loginNeed">ログインをお願い。</string>
-    <string name="Notification">通知</string>
     <string name="OpenSensor_on">オープンセンサーで施錠</string>
     <string name="remoteNanoTriggerSettingHint">誤作動防止の為の長押して作動させる時間</string>
     <string name="VerificationCode">メールで届いた認証コード</string>
@@ -252,7 +250,6 @@
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
     <string name="network_retry">通信エラーが発生しました。タップして再試行してください</string>
-    <string name="shop">お店</string>
 
 </resources>
 

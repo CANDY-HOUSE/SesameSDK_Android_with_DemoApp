@@ -1,12 +1,11 @@
 package co.candyhouse.app.tabs.account
 
 import android.annotation.SuppressLint
-import android.app.NotificationManager
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -15,20 +14,17 @@ import android.text.style.ClickableSpan
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgMeBinding
 import co.candyhouse.app.ext.CHDeviceWrapperManager
-import co.candyhouse.app.tabs.HomeFragment
+import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
+import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
-import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHSesameLock
@@ -43,35 +39,22 @@ import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.UserState
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class MeFG : HomeFragment<FgMeBinding>() {
+class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
+
+    private val tag = "MeFG"
+    override val webViewName = "me-index"
     override fun getViewBinder() = FgMeBinding.inflate(layoutInflater)
+    override fun getWebViewContainer() = bind.meWebviewContainer
+    override fun getLoadingView() = bind.meLoadingProgress
+    override fun getSwipeRefreshLayout() = bind.meRefresh
 
     private val loginViewModel: CHLoginViewModel by activityViewModels()
     private val deviceViewModel: CHDeviceViewModel by activityViewModels()
-    private var shopHomeUrl: String? = null
 
-    override fun onPause() {
-        super.onPause()
-        activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.gray0)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        bind.sysNotifyMsg.apply {
-            text = if (isNotifyEnable()) getString(R.string.android_notifica_permis_on) else getString(R.string.android_notifica_permis_off)
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun setupUI() {
-        activity?.window?.statusBarColor = Color.WHITE
-        applyRemoteConfig()
+    override fun setupCustomUI() {
         bind.version.apply {
             val text =
                 BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")" + "-" + BuildConfig.GIT_HASH + "-" + BuildConfig.BUILD_TYPE + "-" + Build.MODEL + ":" + Build.VERSION.SDK_INT
@@ -98,44 +81,15 @@ class MeFG : HomeFragment<FgMeBinding>() {
         }
     }
 
-    override fun setupListeners() {
+    override fun setupCustomListeners() {
         bind.logoutZone.setOnClickListener {
             // 登出
             showLogoutConfirmation(0)
         }
         bind.delAccount.setOnClickListener {
-            //删除
+            // 删除
             showLogoutConfirmation(1)
         }
-        bind.nameZone.setOnClickListener {
-            // 名称编辑逻辑
-            handleNameEdit()
-        }
-        bind.deviceNotification.setOnClickListener {
-            // 通知
-            safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                putString("scene", "device-notify")
-                putString("pushToken", SharedPreferencesUtils.deviceToken)
-            })
-        }
-        bind.checkSysNotifyMsg.setOnClickListener {
-            openSettingNotify()
-        }
-        bind.shop.setOnClickListener {
-            safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                putString("scene", CHDeviceManager.SHOP_FLAG)
-                putString("title", getString(R.string.shop))
-                putString("url", shopHomeUrl)
-                putString("where", CHDeviceManager.SHOP_FLAG)
-            })
-        }
-    }
-
-    private fun applyRemoteConfig() {
-        val showShop = Firebase.remoteConfig.getBoolean("show_shop_item")
-        shopHomeUrl = Firebase.remoteConfig.getString("shop_home_url")
-        L.d("RemoteConfig", "showShop is $showShop ,shopHomeUrl is $shopHomeUrl")
-        bind.shop.isVisible = showShop
     }
 
     override fun <T : View> observeViewModelData(view: T) {
@@ -144,6 +98,33 @@ class MeFG : HomeFragment<FgMeBinding>() {
                 updateUIForLoginState(loginState)
             }
         }
+    }
+
+    override fun handleSchemeIntercept(uri: Uri, params: Map<String, String>) {
+        L.e(tag, "uri=$uri")
+        when (uri.path) {
+            "/webview/open" -> {
+                params["url"]?.let { targetUrl ->
+                    val scene = if (targetUrl.contains("device-notify")) {
+                        "device-notify"
+                    } else {
+                        "me"
+                    }
+
+                    safeNavigate(
+                        actionId = R.id.action_to_webViewFragment,
+                        Bundle().apply {
+                            putString("scene", scene)
+                            putString("url", targetUrl)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    override fun getOnRequestLogin(): () -> Unit = {
+        safeNavigate(R.id.action_register_to_LoginMailFG)
     }
 
     private fun showLogoutConfirmation(event: Int) {
@@ -158,7 +139,7 @@ class MeFG : HomeFragment<FgMeBinding>() {
                 AlertAction(
                     "OK",
                     AlertActionStyle.NEGATIVE
-                ) { action ->
+                ) { _ ->
                     performLogout()
                 })
             show(activity as AppCompatActivity)
@@ -191,27 +172,12 @@ class MeFG : HomeFragment<FgMeBinding>() {
             CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, SesameForegroundService::class.java))
         }
         CHDeviceWrapperManager.clear()
-        ContactsWebViewManager.clear()
-    }
-
-    private fun handleNameEdit() {
-        if (loginViewModel.gUserState.value == UserState.SIGNED_IN) {
-            safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                putString("scene", "me")
-            })
-        } else {
-            safeNavigate(R.id.action_register_to_LoginMailFG)
-        }
+        WebViewPoolManager.clearWebView("contacts")
+        reloadRefresh()
     }
 
     private fun updateUIForLoginState(loginState: UserState) {
-        bind.mail.text =
-            if (loginState == UserState.SIGNED_IN) AWSMobileClient.getInstance().username else getString(
-                R.string.email
-            )
         bind.loginStateTxt.text = loginState.name
-        bind.qrcodeZone.visibility =
-            if (loginState == UserState.SIGNED_IN) View.VISIBLE else View.GONE
 
         if (loginState == UserState.SIGNED_IN) {
             handleSignedInState()
@@ -221,7 +187,6 @@ class MeFG : HomeFragment<FgMeBinding>() {
     }
 
     private fun handleSignedInState() {
-        bind.userName.text = SharedPreferencesUtils.nickname ?: "loading..."
         bind.logoutZone.visibility = View.VISIBLE
         bind.delAccount.visibility = View.VISIBLE
 
@@ -232,47 +197,17 @@ class MeFG : HomeFragment<FgMeBinding>() {
     }
 
     private fun handleSignedOutState() {
-        bind.userName.text = getString(R.string.login)
         bind.logoutZone.visibility = View.GONE
         bind.delAccount.visibility = View.GONE
     }
 
-    private suspend fun loadUserNickname() {
+    private fun loadUserNickname() {
         runCatching {
-            val mailName = bind.mail.text.split("@").first()
-            SharedPreferencesUtils.nickname = AWSMobileClient.getInstance().getUserAttributes()["nickname"] ?: mailName
-            //L.d("hcia", "設定名字:" + SharedPreferencesUtils.nickname)
-        }.onFailure {
-            withContext(Dispatchers.Main) {
-                bind.userName.text = SharedPreferencesUtils.nickname
-            }
-        }.onSuccess {
-            withContext(Dispatchers.Main) {
-                bind.userName.text = SharedPreferencesUtils.nickname
-            }
-        }
-    }
-
-    private fun openSettingNotify() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            activity?.apply {
-                val intent = Intent()
-                intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
-                startActivity(intent)
-            }
-        }
-    }
-
-    private fun isNotifyEnable(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val notificationManager = getSystemService(
-                requireContext(),
-                NotificationManager::class.java
-            ) as NotificationManager
-            return notificationManager.areNotificationsEnabled()
-        } else {
-            return true
+            val nickname = AWSMobileClient.getInstance().getUserAttributes()["nickname"]
+            L.d(tag, "nickname=$nickname")
+            SharedPreferencesUtils.nickname = nickname
+        }.onFailure { e ->
+            L.e(tag, "${e.message}")
         }
     }
 }

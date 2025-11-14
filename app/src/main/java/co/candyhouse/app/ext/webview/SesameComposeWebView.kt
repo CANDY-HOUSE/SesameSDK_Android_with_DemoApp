@@ -1,36 +1,26 @@
-package co.candyhouse.app.tabs.menu
+package co.candyhouse.app.ext.webview
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
-import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.CookieManager
-import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +43,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,118 +65,19 @@ import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgComposeWebviewBinding
-import co.candyhouse.app.tabs.friend.ContactsWebViewManager
-import co.candyhouse.server.CHLoginAPIManager.getWebUrlByScene
-import co.candyhouse.server.CHResultState
+import co.candyhouse.app.ext.webview.bridge.JSBridgeFactory
+import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
+import co.candyhouse.app.ext.webview.manager.WebViewCore
+import co.candyhouse.app.ext.webview.manager.WebViewCore.cleanupWebView
+import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
+import co.candyhouse.app.ext.webview.manager.WebViewUrlLoader.rememberWebUrl
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
 import co.utils.ContainerPaddingManager
 import co.utils.SharedPreferencesUtils
-import co.utils.WebViewJSBridge
 import co.utils.safeNavigate
 import java.io.File
-
-/**
- * WebView通用设置
- */
-@SuppressLint("SetJavaScriptEnabled")
-internal fun WebView.setupCommonSettings(supportZoom: Boolean = true) {
-    settings.apply {
-        javaScriptEnabled = true
-        domStorageEnabled = true
-        loadWithOverviewMode = true
-        useWideViewPort = true
-        setSupportZoom(supportZoom)
-        builtInZoomControls = supportZoom
-        displayZoomControls = false
-        cacheMode = WebSettings.LOAD_DEFAULT
-        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        allowFileAccess = false
-        allowContentAccess = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            safeBrowsingEnabled = true
-        }
-    }
-    setBackgroundColor(Color.TRANSPARENT)
-}
-
-/**
- * 创建Scheme处理器
- */
-internal fun createSchemeHandlers(
-    onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)?
-): MutableMap<String, (WebView?, Uri, Map<String, String>) -> Boolean> {
-    return mutableMapOf<String, (WebView?, Uri, Map<String, String>) -> Boolean>().apply {
-        this["ssm"] = { _, uri, params ->
-            onSchemeIntercept?.invoke(uri, params)
-            true
-        }
-    }
-}
-
-/**
- * 通过scene获取WebView URL
- */
-@Composable
-internal fun rememberWebUrl(
-    initialUrl: String,
-    scene: String,
-    deviceId: String,
-    pushToken: String = "",
-    keyLevel: String = "",
-    onError: (String) -> Unit = {}
-): State<String> {
-    val webUrl = remember { mutableStateOf(initialUrl) }
-
-    LaunchedEffect(scene) {
-        if (scene.isNotEmpty() && initialUrl.isEmpty()) {
-            val extInfo = buildMap {
-                if (pushToken.isNotEmpty()) {
-                    put("pushToken", pushToken)
-                }
-                if (deviceId.isNotEmpty()) {
-                    put("deviceUUID", deviceId)
-                }
-                if (keyLevel.isNotEmpty()) {
-                    put("keyLevel", keyLevel)
-                }
-            }
-
-            getWebUrlByScene(scene, extInfo.takeIf { it.isNotEmpty() }) { result ->
-                result.fold(
-                    onSuccess = { state ->
-                        webUrl.value = ((state as? CHResultState.CHResultStateNetworks)?.data ?: "") as String
-                        L.d("SesameComposeWebView", "rememberWebUrl-Web URL: ${webUrl.value}")
-                    },
-                    onFailure = { t ->
-                        val errorMsg = t.message ?: "Load url failed"
-                        L.e("SesameComposeWebView", "rememberWebUrl-Error: $errorMsg")
-                        onError(errorMsg)
-                    }
-                )
-            }
-        }
-    }
-
-    return webUrl
-}
-
-/**
- * WebView清理逻辑
- */
-internal fun cleanupWebView(webView: WebView?) {
-    webView?.let { wv ->
-        wv.stopLoading()
-        wv.clearCache(true)
-        wv.clearHistory()
-        wv.clearFormData()
-        CookieManager.getInstance().removeAllCookies(null)
-        CookieManager.getInstance().flush()
-        wv.removeAllViews()
-        wv.destroy()
-    }
-}
 
 class SesameComposeWebView : Fragment() {
 
@@ -222,12 +112,16 @@ class SesameComposeWebView : Fragment() {
                                 L.e(logTag, "notifyName=$notifyName")
                                 when (notifyName) {
                                     "FriendChanged" -> {
-                                        ContactsWebViewManager.setPendingRefresh()
+                                        WebViewPoolManager.setPendingRefresh("contacts")
                                         findNavController().popBackStack()
                                     }
 
                                     "RefreshList" -> {
-                                        ContactsWebViewManager.setPendingRefresh()
+                                        WebViewPoolManager.setPendingRefresh("contacts")
+                                    }
+
+                                    "UserProfileChanged" -> {
+                                        WebViewPoolManager.setPendingRefresh("me-index")
                                     }
                                 }
                             }
@@ -269,7 +163,7 @@ fun SesameComposeWebViewContent(
     onMoreClick: (String) -> Unit,
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null
 ) {
-    val tag = "SesameComposeWebView"
+    val logTag = "SesameComposeWebView"
     val scope = rememberCoroutineScope()
 
     // 设置锁历史记录标题
@@ -280,7 +174,7 @@ fun SesameComposeWebViewContent(
     }
 
     // 判断是否需要启用JS桥接
-    val enableJSBridge = scene in setOf("device-notify", "device-user")
+    val enableJSBridge = JSBridgeFactory.needsJSBridge(scene)
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -299,9 +193,9 @@ fun SesameComposeWebViewContent(
                     "/webview/open" -> {
                         params["url"]?.let { targetUrl ->
                             params["notifyName"]?.let { notifyName ->
-                                L.e(tag, "notifyName=$notifyName")
+                                L.e(logTag, "notifyName=$notifyName")
                                 if (notifyName == "FriendChanged") {
-                                    L.e(tag, "targetUrl=$targetUrl")
+                                    L.e(logTag, "targetUrl=$targetUrl")
                                     pendingUrl = targetUrl
                                 }
                             }
@@ -363,7 +257,7 @@ fun SesameComposeWebViewContent(
         try {
             fileChooserLauncher.launch(chooserIntent)
         } catch (e: Exception) {
-            L.e(tag, "Cannot open file chooser: ${e.message}")
+            L.e(logTag, "Cannot open file chooser: ${e.message}")
             fileChooserCallback?.onReceiveValue(null)
             fileChooserCallback = null
             cameraPhotoUri = null
@@ -382,8 +276,8 @@ fun SesameComposeWebViewContent(
     }
 
     LaunchedEffect(Unit) {
-        L.d(tag, "where=$where scene=$scene deviceId=$deviceId title=$titleNew enableJSBridge=$enableJSBridge pushToken=$pushToken")
-        if (webUrl.isNotEmpty()) L.d(tag, "url=$webUrl")
+        L.d(logTag, "where=$where scene=$scene enableJSBridge=$enableJSBridge deviceId=$deviceId title=$titleNew pushToken=$pushToken")
+        if (webUrl.isNotEmpty()) L.d(logTag, "url=$webUrl")
     }
 
     DisposableEffect(Unit) {
@@ -459,12 +353,31 @@ fun SesameComposeWebViewContent(
                     webViewRef = wv
 
                     if (!isWebViewInitialized) {
-                        wv.setupCommonSettings(supportZoom = true)
+                        WebViewCore.applyCommonSettings(wv, supportZoom = true)
 
                         if (enableJSBridge) {
-                            L.d(tag, "Adding JS Bridge for scene='$scene'")
-                            jsBridge = WebViewJSBridge(wv, scope)
-                            wv.addJavascriptInterface(jsBridge!!, "AndroidHandler")
+                            jsBridge = JSBridgeFactory.setupJSBridge(
+                                webView = wv,
+                                scene = scene,
+                                scope = scope,
+                                onRequestNotificationSettings = {
+                                    (context as? Activity)?.apply {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            startActivity(
+                                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                                    putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                                                }
+                                            )
+                                        } else {
+                                            startActivity(
+                                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                                    data = Uri.fromParts("package", packageName, null)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            )
                         }
 
                         wv.webChromeClient = object : WebChromeClient() {
@@ -493,7 +406,7 @@ fun SesameComposeWebViewContent(
                                         putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoUri)
                                     }
                                 } catch (e: Exception) {
-                                    L.e(tag, "Cannot create temp file: ${e.message}")
+                                    L.e(logTag, "Cannot create temp file: ${e.message}")
                                 }
 
                                 when {
@@ -516,96 +429,22 @@ fun SesameComposeWebViewContent(
                             }
                         }
 
-                        wv.webViewClient = object : WebViewClient() {
-
-                            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                        wv.webViewClient = WebViewCore.createWebViewClient(
+                            onSchemeIntercept = { uri, params ->
+                                schemeHandlers["ssm"]?.invoke(wv, uri, params)
+                            },
+                            onPageStarted = {
                                 loading = true
                                 error = null
-                            }
-
-                            override fun onPageCommitVisible(view: WebView?, url: String?) {
-                                super.onPageCommitVisible(view, url)
+                            },
+                            onPageFinished = {
+                                loading = false
+                            },
+                            onError = { errorMsg ->
+                                error = errorMsg
                                 loading = false
                             }
-
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                super.onPageFinished(view, url)
-                                loading = false
-                            }
-
-                            override fun shouldOverrideUrlLoading(
-                                view: WebView?,
-                                request: WebResourceRequest?
-                            ): Boolean {
-                                val uri = request?.url ?: return false
-                                val scheme = uri.scheme?.lowercase()
-
-                                scheme?.let {
-                                    schemeHandlers[it]?.let { handler ->
-                                        val params = uri.queryParameterNames.associateWith { key ->
-                                            uri.getQueryParameter(key) ?: ""
-                                        }
-                                        if (handler(view, uri, params)) {
-                                            return true
-                                        }
-                                    }
-                                }
-
-                                if (scheme != "http" && scheme != "https") {
-                                    return try {
-                                        view?.context?.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                                        true
-                                    } catch (_: Exception) {
-                                        false
-                                    }
-                                }
-                                return false
-                            }
-
-                            @RequiresApi(Build.VERSION_CODES.M)
-                            override fun onReceivedError(
-                                view: WebView?,
-                                request: WebResourceRequest?,
-                                errorResp: WebResourceError?
-                            ) {
-                                if (request?.isForMainFrame == true) {
-                                    error = errorResp?.description?.toString() ?: "Load error"
-                                    loading = false
-                                }
-                            }
-
-                            override fun onReceivedError(
-                                view: WebView?,
-                                errorCode: Int,
-                                description: String?,
-                                failingUrl: String?
-                            ) {
-                                error = description ?: "Load error"
-                                loading = false
-                            }
-
-                            @SuppressLint("WebViewClientOnReceivedSslError")
-                            override fun onReceivedSslError(
-                                view: WebView?,
-                                handler: SslErrorHandler?,
-                                err: SslError?
-                            ) {
-                                handler?.cancel()
-                                error = "SSL error"
-                                loading = false
-                            }
-
-                            override fun onReceivedHttpError(
-                                view: WebView?,
-                                request: WebResourceRequest?,
-                                errorResponse: WebResourceResponse?
-                            ) {
-                                if (request?.isForMainFrame == true) {
-                                    error = "HTTP ${errorResponse?.statusCode ?: ""}"
-                                    loading = false
-                                }
-                            }
-                        }
+                        )
 
                         isWebViewInitialized = true
                     }
@@ -619,7 +458,6 @@ fun SesameComposeWebViewContent(
                     // firebase 数据埋点
                     val screenName = when (where) {
                         CHDeviceManager.NOTIFICATION_FLAG -> "WebViewFG_notification"
-                        CHDeviceManager.SHOP_FLAG -> "WebViewFG_shop"
                         else -> null
                     }
                     screenName?.let { AnalyticsUtil.logScreenView(screenName = it) }
@@ -677,13 +515,13 @@ fun EmbeddedWebViewContent(
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
-    val tag = "EmbeddedWebView"
+    val logTag = "EmbeddedWebViewContent"
     val scope = rememberCoroutineScope()
 
     var dynamicHeight by remember { mutableStateOf(height) }
 
     // 判断是否需要启用JS桥接
-    val enableJSBridge = scene == "device-setting"
+    val enableJSBridge = JSBridgeFactory.needsJSBridge(scene)
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -712,7 +550,7 @@ fun EmbeddedWebViewContent(
     LaunchedEffect(refreshTrigger) {
         if (refreshTrigger > 0 && webViewRef != null) {
             webViewRef?.reload()
-            L.d(tag, "Reloading webview due to refresh trigger: $refreshTrigger")
+            L.d(logTag, "Reloading webview due to refresh trigger: $refreshTrigger")
         }
     }
 
@@ -732,74 +570,36 @@ fun EmbeddedWebViewContent(
                 webViewRef = wv
 
                 if (!isWebViewInitialized) {
-                    // 使用共享设置，但禁用缩放（局部WebView通常不需要）
-                    wv.setupCommonSettings(supportZoom = false)
-                    wv.scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
+                    WebViewCore.applyCommonSettings(wv, supportZoom = false)
 
                     if (enableJSBridge) {
-                        L.d(tag, "Adding JS Bridge for scene='$scene'")
-                        jsBridge = WebViewJSBridge(
-                            wv,
-                            scope,
+                        jsBridge = JSBridgeFactory.setupJSBridge(
+                            webView = wv,
+                            scene = scene,
+                            scope = scope,
                             onHeightChanged = { newHeight ->
                                 dynamicHeight = newHeight.dp
-                                L.d(tag, "WebView height updated to: ${newHeight}dp")
+                                L.d(logTag, "WebView height updated to: ${newHeight}dp")
                             }
                         )
-                        wv.addJavascriptInterface(jsBridge!!, "AndroidHandler")
                     }
 
-                    wv.webViewClient = object : WebViewClient() {
-                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    wv.webViewClient = WebViewCore.createWebViewClient(
+                        onSchemeIntercept = { uri, params ->
+                            schemeHandlers["ssm"]?.invoke(wv, uri, params)
+                        },
+                        onPageStarted = {
                             loading = true
                             error = null
-                        }
-
-                        override fun onPageFinished(view: WebView?, url: String?) {
+                        },
+                        onPageFinished = {
+                            loading = false
+                        },
+                        onError = { errorMsg ->
+                            error = errorMsg
                             loading = false
                         }
-
-                        override fun shouldOverrideUrlLoading(
-                            view: WebView?,
-                            request: WebResourceRequest?
-                        ): Boolean {
-                            val uri = request?.url ?: return false
-                            val scheme = uri.scheme?.lowercase()
-
-                            scheme?.let {
-                                schemeHandlers[it]?.let { handler ->
-                                    val params = uri.queryParameterNames.associateWith { key ->
-                                        uri.getQueryParameter(key) ?: ""
-                                    }
-                                    if (handler(view, uri, params)) {
-                                        return true
-                                    }
-                                }
-                            }
-
-                            if (scheme != "http" && scheme != "https") {
-                                return try {
-                                    view?.context?.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                                    true
-                                } catch (_: Exception) {
-                                    false
-                                }
-                            }
-                            return false
-                        }
-
-                        @RequiresApi(Build.VERSION_CODES.M)
-                        override fun onReceivedError(
-                            view: WebView?,
-                            request: WebResourceRequest?,
-                            errorResp: WebResourceError?
-                        ) {
-                            if (request?.isForMainFrame == true) {
-                                error = errorResp?.description?.toString() ?: "Load error"
-                                loading = false
-                            }
-                        }
-                    }
+                    )
 
                     isWebViewInitialized = true
                 }
@@ -809,7 +609,7 @@ fun EmbeddedWebViewContent(
             if (target.isNotEmpty() && wv.url != target) {
                 loading = true
                 wv.loadUrl(target)
-                L.d(tag, "Loading embedded webview: $target")
+                L.d(logTag, "Loading embedded webview: $target")
             }
         }
 
@@ -829,6 +629,17 @@ fun EmbeddedWebViewContent(
             ) {
                 Text(text = error ?: "Failed to load")
             }
+        }
+    }
+}
+
+internal fun createSchemeHandlers(
+    onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)?
+): MutableMap<String, (WebView?, Uri, Map<String, String>) -> Boolean> {
+    return mutableMapOf<String, (WebView?, Uri, Map<String, String>) -> Boolean>().apply {
+        this["ssm"] = { _, uri, params ->
+            onSchemeIntercept?.invoke(uri, params)
+            true
         }
     }
 }

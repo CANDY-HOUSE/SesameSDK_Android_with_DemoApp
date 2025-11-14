@@ -22,8 +22,8 @@ import co.candyhouse.app.base.NfcSetting
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.ext.NfcHandler
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
-import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -122,7 +122,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         super.onDestroy()
         activity = null
         if (isFinishing) {
-            ContactsWebViewManager.clear()
+            WebViewPoolManager.clearAll()
         }
     }
 
@@ -376,7 +376,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     override fun onSharedPreferenceChanged(p0: SharedPreferences?, key: String?) {
         if (key == "isNeedFreshFriend") {
             if (SharedPreferencesUtils.isNeedFreshFriend) {
-                ContactsWebViewManager.setPendingRefresh()
+                WebViewPoolManager.setPendingRefresh("contacts")
                 navController.navigateUp()
                 findViewById<BottomNavigationView>(R.id.bottom_nav)?.setPage(1)
                 SharedPreferencesUtils.isNeedFreshFriend = false

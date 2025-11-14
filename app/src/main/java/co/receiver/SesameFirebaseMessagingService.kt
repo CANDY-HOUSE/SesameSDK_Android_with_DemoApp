@@ -12,17 +12,12 @@ import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.toHexString
 import co.utils.NotificationUtils
 import co.utils.SharedPreferencesUtils
-import co.utils.UserUtils
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONArray
-import org.json.JSONObject
 
 class SesameFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -40,9 +35,6 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        L.d(tag, "onNewToken=$token")
-        SharedPreferencesUtils.isUploadDeveceToken = false
-        SharedPreferencesUtils.deviceToken = token
         baseContext.candyHouseApplication.subscriptionManager.onNewToken(token)
     }
 

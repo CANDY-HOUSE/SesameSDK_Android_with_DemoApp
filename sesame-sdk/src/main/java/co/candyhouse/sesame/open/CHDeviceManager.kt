@@ -34,7 +34,6 @@ object CHDeviceManager {
 
     const val NOTIFICATION_FLAG = "notification"
     const val NOTIFICATION_ACTION = "notification_action"
-    const val SHOP_FLAG = "shop"
 
     init {
         CHIotManager

@@ -3,7 +3,6 @@
     <string name="launching_why_need_location_permission">
         如果您使用的是 Android 6.0 或更高版本，為了讓藍牙正常運作，需要允許應用程式訪問位置資訊。否則，該應用程式將無法找到Sesame。</string>
     <string name="app_name">芝麻</string>
-    <string name="email">信箱</string>
     <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="second2">秒</string>
     <string name="clickaction">點擊⊕添加動作。\n如果秒數為「永遠」並被執行，除非切換到其他劇本並執行，否則SesameBot2的動作不會停止。\n馬達正反轉速度有公差，請讓按下時間比返回稍長一些。</string>
@@ -123,7 +122,6 @@
     <string name="wm2_ssid">WiFi SSID</string>
     <string name="login">登入/註冊</string>
     <string name="loginNeed">請登入。</string>
-    <string name="Notification">通知</string>
     <string name="OpenSensor_on">用 開關傳感器 上鎖</string>
     <string name="remoteNanoTriggerSettingHint">防誤觸之長按啟動時間</string>
     <string name="VerificationCode">已發到您信箱的驗證碼</string>
@@ -274,6 +272,5 @@
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
     <string name="network_retry">網路異常，請點擊重試</string>
-    <string name="shop">小店舖</string>
 
 </resources>

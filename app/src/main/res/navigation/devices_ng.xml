@@ -345,7 +345,7 @@
         android:label="Hub3MatterFG" />
     <fragment
         android:id="@+id/webViewFragment"
-        android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
+        android:name="co.candyhouse.app.ext.webview.SesameComposeWebView"
         android:label="webViewFragment">
         <action
             android:id="@+id/action_mainRoomFG_to_SSM2SettingFG"

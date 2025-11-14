@@ -168,7 +168,15 @@ class TopicSubscriptionManager(private val context: Context) {
 
     fun onNewToken(token: String) {
         L.d(tag, "onNewToken…… $token")
-        forceRefreshSubscriptions(token)
+
+        val oldToken = SharedPreferencesUtils.deviceToken
+        if (oldToken != token) {
+            L.d(tag, "Token已变更，强制刷新订阅")
+            SharedPreferencesUtils.deviceToken = token
+            forceRefreshSubscriptions(token)
+        } else {
+            L.d(tag, "Token未变更，跳过处理")
+        }
     }
 
 }

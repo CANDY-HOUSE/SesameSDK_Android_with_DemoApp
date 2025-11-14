@@ -49,7 +49,7 @@
         android:label="SSM2SetAngleFG" />
     <fragment
         android:id="@+id/webViewFragment"
-        android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
+        android:name="co.candyhouse.app.ext.webview.SesameComposeWebView"
         android:label="webViewFragment" />
 
 </navigation>

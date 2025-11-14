@@ -16,6 +16,7 @@ import cn.bingoogolapple.qrcode.core.QRCodeView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
+import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
@@ -23,7 +24,6 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
-import co.candyhouse.app.tabs.friend.ContactsWebViewManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.BaseFG
 import co.candyhouse.sesame.db.model.CHDevice
@@ -180,7 +180,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
             CHLoginAPIManager.addFriend(it) {
                 it.onSuccess {
                     view?.post {
-                        ContactsWebViewManager.setPendingRefresh()
+                        WebViewPoolManager.setPendingRefresh("contacts")
                         findNavController().navigateUp()
                         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
                             ?.setPage(1)

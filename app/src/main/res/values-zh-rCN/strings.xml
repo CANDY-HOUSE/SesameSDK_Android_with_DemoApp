@@ -3,7 +3,6 @@
     <string name="launching_why_need_location_permission">
         如果使用Android 6.0或更高版本，为了使蓝牙正常工作，需要允许访问位置信息。否则，应用程序将无法找到Sesame。</string>
     <string name="app_name">芝麻</string>
-    <string name="email">邮箱</string>
     <string name="dfu_status_error_msg">エラーが発生しました</string>
     <string name="second2">秒</string>
     <string name="matterMsg">已进入Matter配网模式，请于十五分钟内完成配网，万一失败请重新进入此页以重新进入Matter配网模式</string>
@@ -122,7 +121,6 @@
 
     <string name="login">登入/注册</string>
     <string name="loginNeed">请登入。</string>
-    <string name="Notification">通知</string>
     <string name="OpenSensor_on">用 开关传感器 上锁</string>
     <string name="remoteNanoTriggerSettingHint">防误触之长按启动时间</string>
     <string name="VerificationCode">已发到您邮箱的验证码</string>
@@ -275,6 +273,5 @@
     <string name="hint_enter_card_id">请输入卡ID</string>
 
     <string name="network_retry">网络开小差了，请点击重试</string>
-    <string name="shop">小店铺</string>
 
 </resources>

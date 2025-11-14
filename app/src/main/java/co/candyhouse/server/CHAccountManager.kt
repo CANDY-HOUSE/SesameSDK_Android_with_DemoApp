@@ -93,7 +93,6 @@ object CHLoginAPIManager {
             val res = jpAPIClient.uploadDeviceToken(SharedPreferencesUtils.deviceToken!!)
 
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-            SharedPreferencesUtils.isUploadDeveceToken = true
         }
     }
 

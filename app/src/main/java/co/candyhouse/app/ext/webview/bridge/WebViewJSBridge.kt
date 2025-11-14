@@ -1,13 +1,15 @@
-package co.utils
+package co.candyhouse.app.ext.webview.bridge
 
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import androidx.core.app.NotificationManagerCompat
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.utils.L
+import co.utils.SharedPreferencesUtils
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,17 +18,24 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * JS桥接
+ * 统一的WebView JS Bridge
+ * 支持原生Fragment和Compose两种使用方式
  *
  * @author frey on 2025/10/9
  */
 class WebViewJSBridge(
     private val webView: WebView?,
     private val scope: CoroutineScope,
-    private val onHeightChanged: ((Float) -> Unit)? = null
+    private val config: JSBridgeConfig = JSBridgeConfig()
 ) {
 
     private val tag = "WebViewJSBridge"
+
+    data class JSBridgeConfig(
+        val onHeightChanged: ((Float) -> Unit)? = null,
+        val onRequestLogin: (() -> Unit)? = null,
+        val onRequestNotificationSettings: (() -> Unit)? = null
+    )
 
     @JavascriptInterface
     fun postMessage(message: String) {
@@ -64,8 +73,28 @@ class WebViewJSBridge(
                     val height = json.optDouble("height", 0.0)
                     if (height > 0) {
                         scope.launch(Dispatchers.Main) {
-                            onHeightChanged?.invoke(height.toFloat())
+                            config.onHeightChanged?.invoke(height.toFloat())
                         }
+                    }
+                }
+
+                "requestLogin" -> {
+                    scope.launch(Dispatchers.Main) {
+                        config.onRequestLogin?.invoke()
+                    }
+                }
+
+                "requestPushToken" -> {
+                    SharedPreferencesUtils.deviceToken?.let { handleRequestPushToken(callbackName, it) }
+                }
+
+                "requestNotificationStatus" -> {
+                    handleNotificationPermissionStatus(callbackName)
+                }
+
+                "requestNotificationSettings" -> {
+                    scope.launch(Dispatchers.Main) {
+                        config.onRequestNotificationSettings?.invoke()
                     }
                 }
 
@@ -251,4 +280,31 @@ class WebViewJSBridge(
         }
     }
 
+    private fun handleRequestPushToken(callbackName: String, pushToken: String) {
+        scope.launch {
+            val responseData = JSONObject().apply {
+                put("pushToken", pushToken)
+            }
+
+            scope.launch(Dispatchers.Main) {
+                val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
+                webView?.evaluateJavascript(jsCode, null)
+            }
+        }
+    }
+
+    private fun handleNotificationPermissionStatus(callbackName: String) {
+        scope.launch {
+            val isEnabled = NotificationManagerCompat.from(CHDeviceManager.app).areNotificationsEnabled()
+
+            val responseData = JSONObject().apply {
+                put("enabled", isEnabled)
+            }
+
+            scope.launch(context = Dispatchers.Main) {
+                val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
+                webView?.evaluateJavascript(jsCode, null)
+            }
+        }
+    }
 }

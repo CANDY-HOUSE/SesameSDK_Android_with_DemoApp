@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.databinding.FgVerifyMailBinding
+import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.fragments.toastMSG
@@ -151,6 +152,7 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
     private fun handleLoginSuccess() {
         if (!isAdded) return
 
+        WebViewPoolManager.setPendingRefresh("me-index")
         findNavController().apply {
             popBackStack()
             popBackStack()
@@ -161,6 +163,7 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
         if (!isAdded) return
 
         toastMSG(e.localizedMessage)
+        WebViewPoolManager.setPendingRefresh("me-index")
         findNavController().popBackStack()
         mloginViewModel.isJustLogin = false
     }

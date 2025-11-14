@@ -33,7 +33,7 @@ import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.setNFC
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
-import co.candyhouse.app.tabs.menu.EmbeddedWebViewContent
+import co.candyhouse.app.ext.webview.EmbeddedWebViewContent
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
 import co.candyhouse.sesame.open.CHScanStatus

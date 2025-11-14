@@ -77,7 +77,7 @@
         tools:layout="@layout/fg_verify_mail" />
     <fragment
         android:id="@+id/webViewFragment"
-        android:name="co.candyhouse.app.tabs.menu.SesameComposeWebView"
+        android:name="co.candyhouse.app.ext.webview.SesameComposeWebView"
         android:label="webViewFragment" />
 
 </navigation>

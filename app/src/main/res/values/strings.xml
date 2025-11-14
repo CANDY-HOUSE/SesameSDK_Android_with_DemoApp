@@ -2,7 +2,6 @@
     <!--    todo:缺少add_ssm_hint by Open Sensor的屬性-->
     <string name="launching_why_need_location_permission">On Android 6.0 and up, we need permission for accessing location to make Bluetooth work properly. Without that, this application will not be able to discover Sesames.</string>
     <string name="app_name">Sesame</string>
-    <string name="email">Email</string>
     <string name="second2">second</string>
     <string name="dfu_status_error_msg">Error occurred</string>
     <string name="default_face_name">Face🖊️</string>
@@ -113,7 +112,6 @@
 
     <string name="login">Log In/Sign up</string>
     <string name="loginNeed">Please login.</string>
-    <string name="Notification">Notifications</string>
     <string name="OpenSensor_on">Lock with Open Sensor</string>
     <string name="remoteNanoTriggerSettingHint">Long press time to avoid mis-operation</string>
     <string name="VerificationCode">Verification code sent to your email</string>
@@ -258,6 +256,5 @@
     <string name="hint_enter_card_id">Please enter Card ID</string>
 
     <string name="network_retry">Network error, please tap to retry</string>
-    <string name="shop">Shop</string>
 
 </resources>

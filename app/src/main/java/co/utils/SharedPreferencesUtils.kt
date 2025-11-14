@@ -16,7 +16,6 @@ object SharedPreferencesUtils {
     var isNeedFreshFriend by SharedPreferenceDelegates.boolean(false)
     var isNeedFreshDevice by SharedPreferenceDelegates.boolean(false)
     var deviceToken by SharedPreferenceDelegates.string()
-    var isUploadDeveceToken by SharedPreferenceDelegates.boolean()
     var userId by SharedPreferenceDelegates.string()
 }
 
