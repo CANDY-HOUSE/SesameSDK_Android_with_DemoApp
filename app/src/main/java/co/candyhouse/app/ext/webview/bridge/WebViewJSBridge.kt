@@ -111,7 +111,7 @@ class WebViewJSBridge(
         scope.launch {
             CHDeviceManager.getCandyDevices { result ->
                 result.onSuccess { chResultState ->
-                    val deviceList = when (chResultState) {
+                    val responseData = when (chResultState) {
                         is CHResultState.CHResultStateBLE -> {
                             val devices = chResultState.data
                             L.d(tag, "Found ${devices.size} devices")
@@ -132,10 +132,7 @@ class WebViewJSBridge(
                         else -> "[]"
                     }
 
-                    scope.launch(Dispatchers.Main) {
-                        val jsCode = "if(window.$callbackName) window.$callbackName($deviceList);"
-                        webView?.evaluateJavascript(jsCode, null)
-                    }
+                    sendResponseDataToH5(callbackName, responseData)
                 }
 
                 result.onFailure { error ->
@@ -150,31 +147,21 @@ class WebViewJSBridge(
 
     private fun handleRequestDeviceName(callbackName: String, deviceUUID: String) {
         scope.launch {
-            CHDeviceManager.getCandyDevices { result ->
+            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
                 result.onSuccess { chResultState ->
                     val responseData = when (chResultState) {
                         is CHResultState.CHResultStateBLE -> {
-                            val devices = chResultState.data
-                            val device = devices.find {
-                                it.deviceId.toString().equals(deviceUUID, ignoreCase = true)
-                            }
+                            val device = chResultState.data
 
-                            if (device != null) {
-                                JSONObject().apply {
-                                    put(deviceUUID, device.getNickname())
-                                }.toString()
-                            } else {
-                                "{}"
-                            }
+                            JSONObject().apply {
+                                put(deviceUUID, device.getNickname())
+                            }.toString()
                         }
 
                         else -> "{}"
                     }
 
-                    scope.launch(Dispatchers.Main) {
-                        val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
-                        webView?.evaluateJavascript(jsCode, null)
-                    }
+                    sendResponseDataToH5(callbackName, responseData)
                 }
 
                 result.onFailure { error ->
@@ -189,26 +176,17 @@ class WebViewJSBridge(
 
     private fun handleRequestDeviceRename(callbackName: String, deviceUUID: String, deviceName: String) {
         scope.launch {
-            CHDeviceManager.getCandyDevices { result ->
+            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
                 result.onSuccess { chResultState ->
                     val responseData = when (chResultState) {
                         is CHResultState.CHResultStateBLE -> {
-                            val devices = chResultState.data
-                            val device = devices.find {
-                                it.deviceId.toString().equals(deviceUUID, ignoreCase = true)
-                            }
+                            val device = chResultState.data
 
-                            if (device != null) {
-                                device.setNickname(deviceName)
+                            device.setNickname(deviceName)
 
-                                JSONObject().apply {
-                                    put("success", true)
-                                }.toString()
-                            } else {
-                                JSONObject().apply {
-                                    put("success", false)
-                                }.toString()
-                            }
+                            JSONObject().apply {
+                                put("success", true)
+                            }.toString()
                         }
 
                         else -> {
@@ -218,10 +196,7 @@ class WebViewJSBridge(
                         }
                     }
 
-                    scope.launch(Dispatchers.Main) {
-                        val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
-                        webView?.evaluateJavascript(jsCode, null)
-                    }
+                    sendResponseDataToH5(callbackName, responseData)
                 }
 
                 result.onFailure { error ->
@@ -237,37 +212,27 @@ class WebViewJSBridge(
 
     private fun handleRequestDeviceInfo(callbackName: String, deviceUUID: String) {
         scope.launch {
-            CHDeviceManager.getCandyDevices { result ->
+            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
                 result.onSuccess { chResultState ->
                     val responseData = when (chResultState) {
                         is CHResultState.CHResultStateBLE -> {
-                            val devices = chResultState.data
-                            val device = devices.find {
-                                it.deviceId.toString().equals(deviceUUID, ignoreCase = true)
-                            }
+                            val device = chResultState.data
 
-                            if (device != null) {
-                                val deviceKey = device.getKey()
-                                val gson = Gson()
-                                val jsonObj = run {
-                                    val jsonElement = gson.toJsonTree(deviceKey)
-                                    jsonElement.asJsonObject.apply {
-                                        addProperty("keyLevel", device.getLevel())
-                                    }
+                            val deviceKey = device.getKey()
+                            val gson = Gson()
+                            val jsonObj = run {
+                                val jsonElement = gson.toJsonTree(deviceKey)
+                                jsonElement.asJsonObject.apply {
+                                    addProperty("keyLevel", device.getLevel())
                                 }
-                                jsonObj.toString()
-                            } else {
-                                "{}"
                             }
+                            jsonObj.toString()
                         }
 
                         else -> "{}"
                     }
 
-                    scope.launch(Dispatchers.Main) {
-                        val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
-                        webView?.evaluateJavascript(jsCode, null)
-                    }
+                    sendResponseDataToH5(callbackName, responseData)
                 }
 
                 result.onFailure { error ->
@@ -286,10 +251,7 @@ class WebViewJSBridge(
                 put("pushToken", pushToken)
             }
 
-            scope.launch(Dispatchers.Main) {
-                val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
-                webView?.evaluateJavascript(jsCode, null)
-            }
+            sendResponseDataToH5(callbackName, responseData)
         }
     }
 
@@ -301,10 +263,14 @@ class WebViewJSBridge(
                 put("enabled", isEnabled)
             }
 
-            scope.launch(context = Dispatchers.Main) {
-                val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
-                webView?.evaluateJavascript(jsCode, null)
-            }
+            sendResponseDataToH5(callbackName, responseData)
+        }
+    }
+
+    private fun sendResponseDataToH5(callbackName: String, responseData: Any) {
+        scope.launch(context = Dispatchers.Main) {
+            val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
+            webView?.evaluateJavascript(jsCode, null)
         }
     }
 }

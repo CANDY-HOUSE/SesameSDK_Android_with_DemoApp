@@ -96,6 +96,22 @@ object CHDeviceManager {
         }
     }
 
+    fun getCandyDeviceByUUID(deviceID: String, result: CHResult<CHDevices>) {
+        CHDB.CHSS2Model.getDevice(deviceID.lowercase()) { dbResult ->
+            dbResult.onSuccess { device ->
+                val chDevices = device.toDeviceOrNull()
+                if (chDevices != null) {
+                    result.invoke(Result.success(CHResultState.CHResultStateBLE(chDevices)))
+                } else {
+                    result.invoke(Result.failure(Exception("Device data is invalid or corrupted for ID: $deviceID")))
+                }
+            }
+            dbResult.onFailure { error ->
+                result.invoke(Result.failure(error))
+            }
+        }
+    }
+
     fun dropAllKeys(devices: List<CHDevices>, result: CHResult<CHEmpty>) {
         if (devices.isEmpty()) {
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
