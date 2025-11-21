@@ -1,5 +1,7 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.devices
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
@@ -51,7 +53,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private val tag = "CHSesameBiometricBaseDevice"
 
     // 基本属性
-    override var ssm2KeysMap: MutableMap<String, ByteArray> = mutableMapOf()
+    override var ssm2KeysMap: MutableMap<String, ByteArray> = ObservableMutableMap()
     override var advertisement: CHadv? = null
         set(value) {
             field = value
@@ -115,6 +117,10 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
      */
     override fun clearEventHandlers() {
         eventHandlers.clear()
+    }
+
+    override fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>? {
+        return (ssm2KeysMap as? ObservableMutableMap)?.liveData
     }
 
     // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
@@ -207,21 +213,19 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
                 if (it[21].toInt() == 0x00) {
                     val ss5_id = it.sliceArray(IntRange(0, 15))
                     val ssmID = ss5_id.toHexString().noHashtoUUID().toString()
-                    ssm2KeysMap.put(ssmID, byteArrayOf(0x05, it[22]))
+                    ssm2KeysMap[ssmID] = byteArrayOf(0x05, it[22])
                 } else {
                     val ss2_ir_22 = it.sliceArray(IntRange(0, 21))
                     try {
                         val ssmID = (String(ss2_ir_22) + "==").base64decodeHex().noHashtoUUID().toString()
-                        ssm2KeysMap.put(ssmID, byteArrayOf(0x04, it[22]))
+                        ssm2KeysMap[ssmID] = byteArrayOf(0x04, it[22])
                     } catch (e: Exception) {
-                        L.d("hcia", "🩰  e:" + e)
+                        L.d("hcia", "🩰  e:$e")
                     }
                 }
             }
         }
-        L.d("hcia", "[TPO][ssm2KeysMap] " + ssm2KeysMap)
-        L.d("hcia", "[TPO][ssm2KeysMap] size=${ssm2KeysMap.size}  data=" + ssm2KeysMap)
-        (delegate as? CHDeviceConnectDelegate)?.onSSM2KeysChanged(this, ssm2KeysMap)
+        L.d("ssm2KeysMap", "[TPO][ssm2KeysMap] size=${ssm2KeysMap.size}  data=" + ssm2KeysMap)
     }
 
     /**
@@ -395,4 +399,41 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private fun Map<*, String>.hasWM2Connection(): Boolean =
         any { (_, value) -> value.hexStringToByteArray().firstOrNull()?.toInt() == 1 }
 
+}
+
+class ObservableMutableMap<K, V> : MutableMap<K, V> {
+    private val map = mutableMapOf<K, V>()
+    private val _liveData = MutableLiveData<Map<K, V>>(map)
+    val liveData: LiveData<Map<K, V>> = _liveData
+
+    override fun put(key: K, value: V): V? {
+        val result = map.put(key, value)
+        _liveData.postValue(HashMap(map))
+        return result
+    }
+
+    override fun clear() {
+        map.clear()
+        _liveData.postValue(HashMap(map))
+    }
+
+    override fun remove(key: K): V? {
+        val result = map.remove(key)
+        _liveData.postValue(HashMap(map))
+        return result
+    }
+
+    override fun putAll(from: Map<out K, V>) {
+        map.putAll(from)
+        _liveData.postValue(HashMap(map))
+    }
+
+    override val size: Int get() = map.size
+    override fun containsKey(key: K) = map.containsKey(key)
+    override fun containsValue(value: V) = map.containsValue(value)
+    override fun get(key: K) = map[key]
+    override fun isEmpty() = map.isEmpty()
+    override val entries get() = map.entries
+    override val keys get() = map.keys
+    override val values get() = map.values
 }

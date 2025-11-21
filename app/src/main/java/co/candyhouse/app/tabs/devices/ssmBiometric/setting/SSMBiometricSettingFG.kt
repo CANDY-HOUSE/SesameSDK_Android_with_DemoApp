@@ -11,8 +11,6 @@ import android.os.VibratorManager
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
@@ -33,7 +31,6 @@ import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.ChSubCfp
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
@@ -44,12 +41,12 @@ import co.utils.safeNavigate
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
-import kotlinx.coroutines.launch
 
 class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding>() {
     private val tag = "SSMBiometricSettingFG"
 
     var mDeviceList = ArrayList<LockDeviceStatus>()
+    private var mAdapter: GenericAdapter<LockDeviceStatus>? = null
 
     // 定义雷达灵敏度距离和固件值的查找表
     private val DISTANCE_TO_FIRMWARE_TABLE = listOf(
@@ -63,9 +60,11 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         270 to 16
     )
 
+    private var deviceDelegate: CHDeviceStatusDelegate? = null
+
     override fun getViewBinder() = FgSesameTouchproSettingBinding.inflate(layoutInflater)
 
-    private fun add_ssmTextColor() {
+    private fun addSsmTextColor() {
         val device = mDeviceModel.ssmLockLiveData.value
         var size = 3
         device?.apply {
@@ -91,82 +90,69 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
 
     override fun onResume() {
         super.onResume()
-        if (mDeviceModel.ssmLockLiveData.value !is CHSesameBiometricBase) {
-            return
+        registerDeviceDelegate()
+    }
+
+    private fun registerDeviceDelegate() {
+        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+            ?: return
+
+        deviceDelegate = createDeviceDelegate()
+        deviceDelegate?.bindLifecycle(viewLifecycleOwner)
+        mDeviceModel.ssmosLockDelegates[device] = deviceDelegate as Any
+        device.registerEventDelegate(device, deviceDelegate as CHRemoteNanoDelegate)
+    }
+
+    private fun createDeviceDelegate() = object : CHDeviceStatusDelegate,
+        CHRemoteNanoDelegate, CHDeviceConnectDelegate {
+
+        override fun onBleDeviceStatusChanged(
+            device: CHDevices,
+            status: CHDeviceStatus,
+            shadowStatus: CHDeviceStatus?
+        ) {
+            onChange()
+            onUIDeviceStatus(status)
+            checkVersionTag(status, device)
+            if (device.deviceStatus == CHDeviceStatus.ReceivedAdV && isAdded) {
+                device.connect { }
+            }
+            L.d("onSSM2KeysChanged", "onBleDeviceStatusChanged" + "---")
         }
-        val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase
-//        device.registerEventDelegate(device, mDeviceModel.ssmosLockDelegates[device]!!)
-        val delegate = object : CHDeviceStatusDelegate, CHRemoteNanoDelegate, CHDeviceConnectDelegate {
-            override fun onBleDeviceStatusChanged(
-                device: CHDevices,
-                status: CHDeviceStatus,
-                shadowStatus: CHDeviceStatus?
-            ) {
-                onChange()
-                onUIDeviceStatus(status)
-                checkVersionTag(status, device)
-                if (device.deviceStatus == CHDeviceStatus.ReceivedAdV && isAdded) {
-                    device.connect { }
-                }
-                L.d("onSSM2KeysChanged", "onBleDeviceStatusChanged" + "---")
-            }
 
-            override fun onMechStatus(device: CHDevices) {
-                setBattery(view, device)
-            }
+        override fun onMechStatus(device: CHDevices) {
+            setBattery(view, device)
+        }
 
-            override fun onRadarReceive(device: CHSesameConnector, payload: ByteArray) {
-                setRadarUI(device, payload)
-            }
+        override fun onRadarReceive(device: CHSesameConnector, payload: ByteArray) {
+            setRadarUI(device, payload)
+        }
 
-            override fun onSSM2KeysChanged(
-                device: CHSesameConnector,
-                ssm2keys: Map<String, ByteArray>
-            ) {
-                if (!isAdded) return
-                L.d("onSSM2KeysChanged", "onSSM2KeysChanged" + ssm2keys.size)
-                viewLifecycleOwner.lifecycleScope.launch {
-                    if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                        mDeviceList.clear()
-                        mDeviceList.addAll(ssm2keys.map {
-                            LockDeviceStatus(it.key, it.value[0], it.value[1])
-                        })
-                        add_ssmTextColor()
-                        bind.recy.adapter?.notifyDataSetChanged()
-                        bind.devicesEmptyLogo.visibility = if (mDeviceList.size == 0) View.VISIBLE else View.GONE
-                        bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) View.GONE else View.VISIBLE
-                    }
-                }
-                val list = arrayListOf<ChSubCfp>()
-                ssm2keys.map {
-                    list.add(ChSubCfp(it.key, ""))
-                }
-                isUpload = true
-            }
+        override fun onSSM2KeysChanged(
+            device: CHSesameConnector,
+            ssm2keys: Map<String, ByteArray>
+        ) {}
 
-            override fun onTriggerDelaySecondReceived(
-                device: CHSesameConnector,
-                setting: CHRemoteNanoTriggerSettings
-            ) {
-                if (isAdded && !isDetached) {
-                    bind.triggerWheelview.apply {
-                        post {
-                            setCurrentPosition(setting.triggerDelaySecond.toInt())
-                            bind.triggerStatus.text = String.format(
-                                "%.1f %s",
-                                setting.triggerDelaySecond.toInt() * 0.3,
-                                context.getString(R.string.second2)
-                            )
-                            bind.triggerWheelview.visibility = View.GONE
-                            isWheelViewVisible = false
-                        }
+        @SuppressLint("DefaultLocale")
+        override fun onTriggerDelaySecondReceived(
+            device: CHSesameConnector,
+            setting: CHRemoteNanoTriggerSettings
+        ) {
+            if (isAdded && !isDetached) {
+                bind.triggerWheelview.apply {
+                    post {
+                        setCurrentPosition(setting.triggerDelaySecond.toInt())
+                        bind.triggerStatus.text = String.format(
+                            "%.1f %s",
+                            setting.triggerDelaySecond.toInt() * 0.3,
+                            context.getString(R.string.second2)
+                        )
+                        bind.triggerWheelview.visibility = View.GONE
+                        isWheelViewVisible = false
                     }
                 }
             }
         }
-        delegate.bindLifecycle(viewLifecycleOwner)
-        mDeviceModel.ssmosLockDelegates[device] = delegate
-        device.registerEventDelegate(device, delegate)
     }
 
     private fun setRadarUI(device: CHSesameConnector, payload: ByteArray) {
@@ -286,61 +272,14 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     @SuppressLint("SimpleDateFormat", "DefaultLocale")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (mDeviceModel.ssmLockLiveData.value !is CHSesameBiometricBase) {
-            return
-        }
-        val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase
+        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+            ?: return
+
         device.connect { }
 
         bind.recy.isNestedScrollingEnabled = false
-        bind.recy.apply {
-            mDeviceList.clear()
-            mDeviceList.addAll((mDeviceModel.ssmLockLiveData.value as CHSesameConnector).ssm2KeysMap.map {
-                LockDeviceStatus(it.key, it.value[0], it.value[1])
-            })
-            add_ssmTextColor()
-            bind.devicesEmptyLogo.visibility =
-                if (mDeviceList.size == 0) View.VISIBLE else View.GONE
-            bind.tvAddSsmLogo.visibility = if (mDeviceList.size == 0) View.GONE else View.VISIBLE
-            adapter = object : GenericAdapter<LockDeviceStatus>(mDeviceList) {
-                override fun getLayoutId(position: Int, obj: LockDeviceStatus): Int =
-                    R.layout.wm2_key_cell
-
-                override fun getViewHolder(
-                    view: View,
-                    viewType: Int
-                ): RecyclerView.ViewHolder =
-                    object : RecyclerView.ViewHolder(view), Binder<LockDeviceStatus> {
-                        @SuppressLint("SetTextI18n")
-                        override fun bind(data: LockDeviceStatus, pos: Int) {
-
-                            L.d("LockDeviceStatus", data.toString())
-
-
-                            val title = itemView.findViewById<TextView>(R.id.title)
-                            title.text = data.id
-                            getDeviceNameById(data.id)?.apply {
-                                L.d("deviceNameById", this)
-                                title.text = this
-                            }
-                            itemView.setOnClickListener {
-                                AlertView(title.text.toString(), "", AlertStyle.IOS).apply {
-                                    addAction(
-                                        AlertAction(
-                                            getString(R.string.ssm_delete),
-                                            AlertActionStyle.NEGATIVE
-                                        ) { action ->
-                                            (mDeviceModel.ssmLockLiveData.value!! as CHSesameBiometricBase).removeSesame(
-                                                data.id
-                                            ) {}
-                                        })
-                                    show(activity as AppCompatActivity)
-                                }
-                            }
-                        }
-                    }
-            }
-        }
+        initRecyclerView()
+        observeSSM2Keys()
         if (device.productModel == CHProductModel.RemoteNano) {
             bind.triggertimeZone.apply {
                 visibility = View.VISIBLE
@@ -421,6 +360,61 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         }
 
         setBattery(view, device)
+    }
+
+    private fun initRecyclerView() {
+        bind.recy.apply {
+            mAdapter = object : GenericAdapter<LockDeviceStatus>(mDeviceList) {
+                override fun getLayoutId(position: Int, obj: LockDeviceStatus): Int = R.layout.wm2_key_cell
+
+                override fun getViewHolder(view: View, viewType: Int): RecyclerView.ViewHolder =
+                    object : RecyclerView.ViewHolder(view), Binder<LockDeviceStatus> {
+                        @SuppressLint("SetTextI18n")
+                        override fun bind(data: LockDeviceStatus, pos: Int) {
+                            val title = itemView.findViewById<TextView>(R.id.title)
+                            title.text = data.id
+                            getDeviceNameById(data.id)?.apply {
+                                title.text = this
+                            }
+                            itemView.setOnClickListener {
+                                AlertView(title.text.toString(), "", AlertStyle.IOS).apply {
+                                    addAction(AlertAction(getString(R.string.ssm_delete), AlertActionStyle.NEGATIVE) { _ ->
+                                        (mDeviceModel.ssmLockLiveData.value!! as CHSesameBiometricBase)
+                                            .removeSesame(data.id) {}
+                                    })
+                                    show(activity as AppCompatActivity)
+                                }
+                            }
+                        }
+                    }
+            }
+            adapter = mAdapter
+        }
+    }
+
+    private fun observeSSM2Keys() {
+        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+
+        device?.getSSM2KeysLiveData()?.observe(viewLifecycleOwner) { keys ->
+            L.d("ssm2KeysMap", "getSSM2KeysLiveData size is ${keys.size}")
+            updateDeviceList(keys)
+            isUpload = true
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun updateDeviceList(keys: Map<String, ByteArray>) {
+        mDeviceList.clear()
+        if (keys.isNotEmpty()) {
+            mDeviceList.addAll(keys.map {
+                LockDeviceStatus(it.key, it.value[0], it.value[1])
+            })
+        }
+        addSsmTextColor()
+        mAdapter?.notifyDataSetChanged()
+
+        bind.devicesEmptyLogo.visibility = if (mDeviceList.isEmpty()) View.VISIBLE else View.GONE
+        bind.tvAddSsmLogo.visibility = if (mDeviceList.isEmpty()) View.GONE else View.VISIBLE
     }
 
     private fun setBattery(view: View?, device: CHDevices) {
@@ -509,6 +503,20 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         } else {
             bind.facePalm.visibility = View.GONE
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        unregisterDeviceDelegate()
+    }
+
+    private fun unregisterDeviceDelegate() {
+        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+        device?.let {
+            mDeviceModel.ssmosLockDelegates.remove(it)
+             it.unregisterEventDelegate(deviceDelegate as CHRemoteNanoDelegate)
+        }
+        deviceDelegate = null
     }
 
     override fun onDestroy() {

@@ -18,8 +18,6 @@ class SesameOpenSensorNoBLESettingFG :
 
     override fun onResume() {
         super.onResume()
-        mDeviceModel.ssmLockLiveData.value?.apply {
-        }
     }
 
     @SuppressLint("SimpleDateFormat")

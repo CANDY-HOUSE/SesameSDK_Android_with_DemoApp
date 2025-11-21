@@ -1,5 +1,6 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.devices
 
+import androidx.lifecycle.LiveData
 import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
 import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHCapabilitySupport
@@ -22,4 +23,5 @@ interface CHSesameBiometricBase : CHSesameConnector, CHRemoteNanoCapable, CHCapa
     fun addEventHandler(handler: CHEventHandler)
     fun removeEventHandler(handler: CHEventHandler)
     fun clearEventHandlers()
+    fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>?
 }

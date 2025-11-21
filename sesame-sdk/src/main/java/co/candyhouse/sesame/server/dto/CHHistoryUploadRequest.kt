@@ -19,7 +19,6 @@ internal data class CHModifyGuestKeyRequest(var guestKeyId: String, var keyName:
 
 internal data class CHSS2WebCMDReq(var cmd: Byte, var history: String, var sign: String)
 
-data class ChSubCfp(var id: String,var name:String)
 internal data class CHSS2Infor(
     var fwv: String,
 )
