@@ -76,9 +76,6 @@
     <string name="min30">30 分</string>
     <string name="hr1">1 時間</string>
     <string name="sesame_widget">ウィジェットと手ぶら解錠</string>
-    <string name="owner">オーナー</string>
-    <string name="manager">マネジャー</string>
-    <string name="guest">ゲスト</string>
 
     <string name="WM2">WiFiモジュール</string>
     <string name="Sesame">セサミ</string>
@@ -103,7 +100,6 @@
     <string name="Sesame6Pro">セサミ 6 Pro</string>
 
     <string name="unLoginHistoryTag">未登録利用者</string>
-    <string name="empty_friend">連絡先なし</string>
     <string name="wm2_update">OS更新と再起動</string>
     <string name="wm2_pwk">WiFi パスワード</string>
     <string name="wm2_pwk_hint">WiFi環境のパスワードをご入力ください</string>
@@ -153,8 +149,6 @@
     <string name="WigetOpenAll">Lock All</string>
     <string name="WigetCloseAll">Unlock All</string>
 
-    <string name="ssm_qr_hint">%1$sデバイスの鍵</string>
-
     <string name="wm2_ap_setting_error">すみません🙏 \n
     WiFiパスワードを再度確かめるか、WiFiルーターとの距離を近づけて、再度設定をお試し頂けますでしょうか？\n\n
     一度失敗した場合でも、通常数回お試し頂くと、接続に成功することがほとんどです。🙏</string>
@@ -170,7 +164,6 @@
     <string name="no_scan_devices_hint3">3. 未登録のデバイスが近くにありますか？</string>
     <string name="no_scan_devices_hint4">4. 登録済のデバイスをリセットするには、細い棒でリセットボタンをLED点灯が消えるまで長押ししてください。</string>
 
-    <string name="ssm_qr_hint_1">セサミアプリでQRコードをスキャンしてください</string>
     <string name="pull_fresh_hint">↓引っ張って更新できます</string>
     <string name="latest">(最新)</string>
 
@@ -225,9 +218,6 @@
 
     <string name="sesame_widget_notification">タップしてロック解除ウィジェットを起動</string>
     <string name="delete_failed_tips">削除に失敗しました。再試行してください</string>
-
-    <string name="key">鍵</string>
-    <string name="share">シェア</string>
 
     <string name="distance">距離</string>
     <string name="brightness">明るさ</string>

@@ -83,9 +83,6 @@
     <string name="min30">30 分</string>
     <string name="hr1">1 小时</string>
     <string name="sesame_widget">小组件 和 自动解锁</string>
-    <string name="owner">群主</string>
-    <string name="manager">管理员</string>
-    <string name="guest">成员</string>
 
     <string name="WM2">WiFi模块</string>
     <string name="Sesame">芝麻</string>
@@ -111,8 +108,6 @@
     <string name="Sesame6Pro">芝麻 6 Pro</string>
 
     <string name="unLoginHistoryTag">未登入用户</string>
-
-    <string name="empty_friend">沒有联系人</string>
 
     <string name="wm2_update">软件更新＆重启</string>
     <string name="wm2_pwk">WiFi 密码</string>
@@ -163,8 +158,6 @@
     <string name="WigetOpenAll">全部上锁</string>
     <string name="WigetCloseAll">全部解锁</string>
 
-    <string name="ssm_qr_hint">%1$s 设备的钥匙</string>
-
     <string name="wm2_ap_setting_error">很抱歉🙏\n
         请确认您的WiFi密码，或把WiFi模块设置于尽量接近WiFi路由器的地方 \n\n
         然后多试几次，通常能成功连上线🙏</string>
@@ -190,7 +183,6 @@
         name="no_scan_devices_hint4"
         >4. 若要重置已注册的设备，请用细棒长按重置按钮直到LED灯熄灭。</string>
 
-    <string name="ssm_qr_hint_1">用 芝麻app 扫描钥匙二维码</string>
     <string name="qrcodeNotSupport">该二维码不支持</string>
     <string name="cameraError">相机错误</string>
     <string name="pull_fresh_hint">↓下拉可刷新</string>
@@ -248,9 +240,6 @@
 
     <string name="sesame_widget_notification">请点击启动开锁小组件!</string>
     <string name="delete_failed_tips">删除失败，请重试</string>
-
-    <string name="key">钥匙</string>
-    <string name="share">共享</string>
 
     <string name="distance">距离</string>
     <string name="brightness">亮度</string>

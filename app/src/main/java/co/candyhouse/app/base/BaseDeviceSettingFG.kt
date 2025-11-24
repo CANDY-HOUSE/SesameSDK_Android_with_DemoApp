@@ -21,6 +21,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.webview.EmbeddedWebViewContent
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.clearNFC
 import co.candyhouse.app.tabs.devices.ssm2.getFirmwareName
@@ -33,7 +34,6 @@ import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.setNFC
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
-import co.candyhouse.app.ext.webview.EmbeddedWebViewContent
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
 import co.candyhouse.sesame.open.CHScanStatus
@@ -164,40 +164,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     private fun setupListeners(targetDevice: CHDevices) {
-        view?.findViewById<View>(R.id.share_zone)?.setOnClickListener {
-            AlertView(getString(R.string.share), "", AlertStyle.IOS).apply {
-                val innerLevel = targetDevice.getLevel()
-                if (innerLevel == 0) {
-                    addAction(
-                        AlertAction(
-                            getString(R.string.owner) + getString(R.string.key),
-                            AlertActionStyle.DEFAULT
-                        ) {
-                            mDeviceModel.targetShareLevel = 0
-                            safeNavigate(R.id.action_SesameSetting_to_myKEYFG)
-                        })
-                }
-                if (innerLevel == 0 || innerLevel == 1) {
-                    addAction(
-                        AlertAction(
-                            getString(R.string.manager) + getString(R.string.key),
-                            AlertActionStyle.DEFAULT
-                        ) {
-                            mDeviceModel.targetShareLevel = 1
-                            safeNavigate(R.id.action_SesameSetting_to_myKEYFG)
-                        })
-                }
-                addAction(
-                    AlertAction(
-                        getString(R.string.guest) + getString(R.string.key),
-                        AlertActionStyle.DEFAULT
-                    ) {
-                        mDeviceModel.targetShareLevel = 2
-                        safeNavigate(R.id.action_SesameSetting_to_myKEYFG)
-                    })
-                show(activity as AppCompatActivity)
-            }
-        }
         view?.findViewById<View>(R.id.drop_zone)?.setOnClickListener {
             AlertView("", "", AlertStyle.IOS).apply {
                 addAction(

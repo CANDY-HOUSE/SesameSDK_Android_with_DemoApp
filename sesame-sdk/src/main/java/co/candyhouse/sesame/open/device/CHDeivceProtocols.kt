@@ -16,20 +16,10 @@ import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
 import co.candyhouse.sesame.ble.os3.DeviceProfiles
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.server.dto.CHGuestKey
-import co.candyhouse.sesame.server.dto.CHGuestKeyCut
-import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
-import co.candyhouse.sesame.server.dto.CHRemoveGuestKeyRequest
 import co.candyhouse.sesame.utils.CHMulticastDelegate
-import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.aescmac.AesCmac
-import co.candyhouse.sesame.utils.hexStringToByteArray
-import co.candyhouse.sesame.utils.toHexString
-import co.candyhouse.sesame.utils.toUInt24ByteArray
 import java.util.UUID
 
 enum class MatterProductModel(val value: UByte) {
@@ -233,54 +223,6 @@ interface CHDevices {
     fun reset(result: CHResult<CHEmpty>)
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
 
-    fun createGuestKey(keyName: String, result: CHResult<CHDevice>) {
-        CHAccountManager.generateGuestKey(CHGuestKey(getKey().deviceUUID, getKey().deviceModel, getKey().keyIndex, getKey().secretKey, getKey().sesame2PublicKey, keyName)) {
-            it.onSuccess {
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(getKey().copy(secretKey = it.data, historyTag = null))))
-                L.d("hcia", "生成鑰匙成功:" + it.data)
-            }
-            it.onFailure {
-                result.invoke(Result.failure(it))
-            }
-        }
-    }
-
-    fun getGuestKeys(result: CHResult<Array<CHGuestKeyCut>>) {
-        CHAccountManager.getGuestKeys(this) {
-            it.onSuccess {
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
-            }
-            it.onFailure {
-                result.invoke(Result.failure(it))
-            }
-        }
-    }
-
-    fun removeGuestKey(guestKeyId: String, result: CHResult<CHEmpty>) {
-        val msg = System.currentTimeMillis().toUInt24ByteArray()
-        val keyCheck = (AesCmac(getKey().secretKey.hexStringToByteArray(), 16).computeMac(msg)!!).sliceArray(0..3)
-        CHAccountManager.removeGuestKey(CHRemoveGuestKeyRequest(deviceId.toString().toUpperCase(), guestKeyId, keyCheck.toHexString())) {
-            it.onSuccess {
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
-            }
-            it.onFailure {
-                result.invoke(Result.failure(it))
-            }
-        }
-    }
-
-    fun updateGuestKey(guestKeyId: String, name: String, result: CHResult<CHEmpty>) {
-        CHAccountManager.changeGuestKeyName(deviceId.toString(), CHModifyGuestKeyRequest(guestKeyId, name)) {
-            it.onSuccess {
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
-                L.d("hcia", "it.data:" + it.data)
-            }
-            it.onFailure {
-                result.invoke(Result.failure(it))
-            }
-        }
-    }
-
     fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
         if ((this as CHDeviceUtil).sesame2KeyData == null) {
             result.invoke(Result.failure(CHError.BleUnauth.value))
@@ -294,22 +236,6 @@ interface CHDevices {
 
     fun getHistoryTag(): ByteArray? {
         return (this as CHDeviceUtil).sesame2KeyData?.historyTag
-    }
-
-    fun getTimeSignature(): String? {
-        if (this is CHDeviceUtil) {
-
-
-            try {
-                var secretKey = sesame2KeyData?.secretKey ?: return null
-                val keyCheck = AesCmac(secretKey.hexStringToByteArray(), 16).computeMac(System.currentTimeMillis().toUInt24ByteArray())!!.sliceArray(0..3)
-                return keyCheck.toHexString()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        return null
     }
 
 }

@@ -14,12 +14,8 @@ import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
-import co.candyhouse.sesame.server.dto.CHGuestKey
-import co.candyhouse.sesame.server.dto.CHGuestKeyCut
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
-import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
-import co.candyhouse.sesame.server.dto.CHRemoveGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
@@ -76,7 +72,6 @@ object CHAccountManager {
             runCatching {
                 block()
             }.onFailure {
-//                L.d("hcia", "APIFail!:" + it)
                 onResponse.invoke(Result.failure(it))
             }
         }
@@ -93,32 +88,6 @@ object CHAccountManager {
     internal fun signGuestKey(key: CHRemoveSignKeyRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val guestKeyTag = jpAPIclient.guestKeysSignPost(key)
-//            L.d("hcia", "guestKeyTag:" + guestKeyTag)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(guestKeyTag)))
-        }
-    }
-
-
-    internal fun generateGuestKey(key: CHGuestKey, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val guestKeyTag = jpAPIclient.guestKeyPost(key.deviceUUID, key)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(guestKeyTag)))
-        }
-    }
-
-    internal fun getGuestKeys(device: CHDevices, onResponse: CHResult<Array<CHGuestKeyCut>>) {
-        makeApiCall(onResponse) {
-            val deviceUUID = device.deviceId.toString().uppercase()
-            val keyCheck = (AesCmac((device as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(System.currentTimeMillis().toUInt24ByteArray())!!).sliceArray(0..3)
-
-            val guestKeyTag: Array<CHGuestKeyCut> = jpAPIclient.guestKeysGet(deviceUUID, keyCheck.toHexString())
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(guestKeyTag)))
-        }
-    }
-
-    internal fun removeGuestKey(removeKeyReq: CHRemoveGuestKeyRequest, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val guestKeyTag = jpAPIclient.guestKeysDelete(removeKeyReq.deviceUUID, removeKeyReq)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(guestKeyTag)))
         }
     }
@@ -206,14 +175,6 @@ object CHAccountManager {
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
-
-    internal fun changeGuestKeyName(deviceUUID: String, modifyKeyReq: CHModifyGuestKeyRequest, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val guestKeyTag = jpAPIclient.guestKeysMotify(deviceUUID.toUpperCase(), modifyKeyReq)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(guestKeyTag)))
-        }
-    }
-
 
     internal fun postSS2History(devieID: String, hisHex: String, onResponse: CHResult<Any>) {
         L.d("postSSHistory", "2--${devieID}---${hisHex}")

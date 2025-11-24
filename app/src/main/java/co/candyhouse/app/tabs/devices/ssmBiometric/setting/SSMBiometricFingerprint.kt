@@ -202,16 +202,16 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
             override fun onFingerPrintReceive(
                 device: CHSesameConnector,
                 ID: String,
-                name: String,
+                hexName: String,
                 type: Byte
             ) {
                 // 直接显示从BLE得到的指纹。收完数据后，批量获取指纹名称
                 runOnUiThread {
                     mFingers.remove(mFingers.find { it.id == ID })
-                    if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
-                        mFingers.add(0, FingerPrint(ID, getString(R.string.default_fingerprint_name), type, name.noHashtoUUID().toString()))
+                    if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
+                        mFingers.add(0, FingerPrint(ID, getString(R.string.default_fingerprint_name), type, hexName.noHashtoUUID().toString()))
                     } else {
-                        val matchName = name.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                        val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
                         mFingers.add(0, FingerPrint(ID, matchName, type, matchName))
                     }
                     updateFingerPrintList()
@@ -230,13 +230,13 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
             override fun onFingerPrintChanged(
                 device: CHSesameConnector,
                 ID: String,
-                name: String,
+                hexName: String,
                 type: Byte
             ) {
-                val newFingerprint = if ((name.length == 32) && name.isUUIDv4()) {
-                    FingerPrint(ID, getString(R.string.default_fingerprint_name), type, name.noHashtoUUID().toString())
+                val newFingerprint = if ((hexName.length == 32) && hexName.isUUIDv4()) {
+                    FingerPrint(ID, getString(R.string.default_fingerprint_name), type, hexName.noHashtoUUID().toString())
                 } else {
-                    val matchName = name.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                    val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
                     FingerPrint(ID, matchName, type, matchName)
                 }
                 runOnUiThread {

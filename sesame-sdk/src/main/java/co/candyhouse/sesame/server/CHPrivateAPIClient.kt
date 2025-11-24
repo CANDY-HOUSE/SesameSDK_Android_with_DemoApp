@@ -1,22 +1,18 @@
 package co.candyhouse.sesame.server
 
+import co.candyhouse.sesame.BuildConfig
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
-import co.candyhouse.sesame.server.dto.CHGuestKey
-import co.candyhouse.sesame.server.dto.CHGuestKeyCut
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
-import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
-import co.candyhouse.sesame.server.dto.CHRemoveGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
-import co.candyhouse.sesame.BuildConfig
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
 import com.amazonaws.mobileconnectors.apigateway.annotation.Parameter
 import com.amazonaws.mobileconnectors.apigateway.annotation.Service
@@ -44,30 +40,6 @@ internal interface CHPrivateAPIClient {
 
     @Operation(path = "/device/v1/sesame2/historys", method = "POST")
     fun feedHistory(body: Any): Any
-
-    @Operation(path = "/device/v1/sesame2/{device_id}/guestkey", method = "POST")
-    fun guestKeyPost(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-        body: CHGuestKey
-    ): String
-
-    @Operation(path = "/device/v1/sesame2/{device_id}/guestkeys", method = "GET")
-    fun guestKeysGet(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-        @Parameter(name = "a", location = "query") a: String
-    ): Array<CHGuestKeyCut>
-
-    @Operation(path = "/device/v1/sesame2/{device_id}/guestkey", method = "DELETE")
-    fun guestKeysDelete(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-        body: CHRemoveGuestKeyRequest
-    ): Any
-
-    @Operation(path = "/device/v1/sesame2/{device_id}/guestkey", method = "PUT")
-    fun guestKeysMotify(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-        body: CHModifyGuestKeyRequest
-    ): Any
 
     @Operation(path = "/device/v1/sesame2/sign", method = "POST")
     fun guestKeysSignPost(body: CHRemoveSignKeyRequest): String

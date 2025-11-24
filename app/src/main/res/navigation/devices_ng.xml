@@ -80,14 +80,8 @@
             android:id="@+id/to_HUB3SelectLockerListFG"
             app:destination="@id/HUB3SelectLockerListFG" />
         <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
-        <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/to_MatterQrCodeFG"
-            app:destination="@id/MatterQrCodeFG" />
         <action
             android:id="@+id/to_HUB3ScanSSIDListFG"
             app:destination="@id/HUB3ScanSSIDListFG" />
@@ -109,9 +103,6 @@
         android:name="co.candyhouse.app.tabs.devices.ssm5.setting.SSM5SettingFG"
         android:label="SSM5SettingFG"
         tools:layout="@layout/fg_setting_main">
-        <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
         <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
@@ -140,9 +131,6 @@
         <action
             android:id="@+id/to_SesameKeyboardPassword"
             app:destination="@id/SesameKeyboardPassword" />
-        <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
         <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
@@ -183,14 +171,8 @@
             app:destination="@id/SSM2SetAngleFG"
             app:launchSingleTop="true" />
         <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
-        <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_SSM2SettingFG_to_guestKeyListFG"
-            app:destination="@id/guestKeyListFG" />
         <action
             android:id="@+id/action_to_NoHandLockFG"
             app:destination="@id/SSM2NoHandLockFG" />
@@ -199,13 +181,6 @@
         android:id="@+id/SSM2SetAngleFG"
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2SetAngleFG"
         android:label="SSM2SetAngleFG" />
-    <fragment
-        android:id="@+id/myKEYFG"
-        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.KeyQrCodeFG"
-        android:label="myKEYFG" />
-    <fragment
-        android:id="@+id/MatterQrCodeFG"
-        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.MatterQrCodeFG" />
     <fragment
         android:id="@+id/WM2SettingFG"
         android:name="co.candyhouse.app.tabs.devices.wm2.setting.WM2SettingFG"
@@ -218,9 +193,6 @@
             android:id="@+id/action_WM2SettingFG_to_WM2SelectLockerFG"
             app:destination="@id/WM2SelectLockerFG" />
         <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
-        <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
     </fragment>
@@ -230,14 +202,8 @@
         android:label="SesameBotSettingFG"
         tools:layout="@layout/fg_ssm_bot_setting">
         <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
-        <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_SSM2SettingFG_to_guestKeyListFG"
-            app:destination="@id/guestKeyListFG" />
     </fragment>
     <fragment
         android:id="@+id/WM2ScanFG"
@@ -275,12 +241,6 @@
         android:label="SesameFaceProFaces"
         tools:layout="@layout/fg_ssm_face_faces_list" />
     <fragment
-        android:id="@+id/guestKeyListFG"
-        android:name="co.candyhouse.app.tabs.devices.ssm2.setting.GuestKeyListFG"
-        android:label="GuestKeyListFG">
-        <deepLink app:uri="android-app://example.google.app/settings_fragment_two" />
-    </fragment>
-    <fragment
         android:id="@+id/SesameClickScriptFG"
         android:name="co.candyhouse.app.tabs.devices.ssmbike.setting.SesameClickScriptFG"
         android:label="SesameClickScript"
@@ -290,28 +250,16 @@
         android:name="co.candyhouse.app.tabs.devices.ssmbike.setting.SesameBikeSettingFG"
         android:label="SesameBikeSettingFG">
         <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
-        <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_sesameBikeSettingFG_to_guestKeyListFG"
-            app:destination="@id/guestKeyListFG" />
     </fragment>
     <fragment
         android:id="@+id/SesameBot2SettingFG"
         android:name="co.candyhouse.app.tabs.devices.ssmbot2.setting.SesameBot2SettingFG"
         android:label="SesameBot2SettingFG">
         <action
-            android:id="@+id/action_SesameSetting_to_myKEYFG"
-            app:destination="@id/myKEYFG" />
-        <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_sesameBot2SettingFG_to_guestKeyListFG"
-            app:destination="@id/guestKeyListFG" />
         <action
             android:id="@+id/to_SesameClickScriptFG"
             app:destination="@id/SesameClickScriptFG" />

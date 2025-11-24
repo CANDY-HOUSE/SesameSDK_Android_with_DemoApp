@@ -5,16 +5,22 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.base.BleStatusUpdate
 import co.candyhouse.app.databinding.FgWm2SettingBinding
+import co.candyhouse.app.ext.webview.EmbeddedWebViewContent
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getIsJustRegister
+import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
@@ -39,6 +45,7 @@ import co.utils.safeNavigate
 class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate, BleStatusUpdate {
 
     var mDeviceList = ArrayList<String>()
+    private val refreshCounter = mutableIntStateOf(0)
     var versionTag: MutableLiveData<String?> = MutableLiveData()
     override fun getViewBinder() = FgWm2SettingBinding.inflate(layoutInflater)
 
@@ -143,6 +150,40 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
         val device = mDeviceModel.ssmLockLiveData.value
         device?.apply {
             if (device is CHWifiModule2) {
+                view.findViewById<ComposeView>(R.id.device_setting_web_view)?.apply {
+                    disposeComposition()
+
+                    setContent {
+                        EmbeddedWebViewContent(
+                            scene = "device-setting",
+                            deviceId = device.deviceId.toString().uppercase(),
+                            keyLevel = device.getLevel().toString(),
+                            height = 80.dp,
+                            refreshTrigger = refreshCounter.intValue,
+                            onSchemeIntercept = { uri, params ->
+                                when (uri.path) {
+                                    "/webview/open" -> {
+                                        params["url"]?.let { targetUrl ->
+                                            params["notifyName"]?.let { notifyName ->
+                                                L.d("EmbeddedWebView", "EmbeddedWebView-notifyName=$notifyName")
+                                                when (notifyName) {
+                                                    "DeviceMemberChanged" -> {
+                                                        L.d("EmbeddedWebView", "EmbeddedWebView-targetUrl=$targetUrl")
+                                                        safeNavigate(R.id.action_DeviceMember_to_webViewFragment, Bundle().apply {
+                                                            putString("scene", "device-user")
+                                                            putString("url", targetUrl)
+                                                        })
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+
                 bind.dropHintTxt.text = getString(R.string.drop_hint, getString(R.string.WM2))
                 bind.resetZone.visibility = if (BuildConfig.DEBUG) View.VISIBLE else View.GONE
                 if (device.getIsJustRegister()) {
@@ -288,10 +329,27 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                         show(activity as AppCompatActivity)
                     }
                 }
+
+                view.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setOnRefreshListener {
+                    refreshTop()
+                }
             }
         }
 
     }//end view created
+
+    private fun refreshTop() {
+        view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.post {
+            view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.isRefreshing = true
+        }
+
+        // 触发WebView刷新
+        refreshCounter.intValue++
+
+        view?.postDelayed({
+            view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.isRefreshing = false
+        }, 1500)
+    }
 
     override fun onChange() {
         val device = mDeviceModel.ssmLockLiveData.value

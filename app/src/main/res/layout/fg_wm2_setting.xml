@@ -16,6 +16,7 @@
             android:layout_height="40dp" />
 
     </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/err_zone"
         android:layout_width="match_parent"
@@ -45,500 +46,485 @@
             android:scaleType="center"
             android:textColor="@color/white"
             android:textSize="17dp"
-            tools:text="action"
-
-            />
-
+            tools:text="action" />
 
     </RelativeLayout>
-    <ScrollView
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/status_bg">
+        android:layout_height="match_parent">
 
-
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/gray0"
-            android:orientation="vertical"
-            android:paddingBottom="40dp">
+            android:layout_height="match_parent"
+            android:background="@color/status_bg">
 
-            <RelativeLayout
-                android:layout_marginTop="8dp"
-
-                android:layout_width="match_parent"
-                android:layout_height="53dp"
-                android:background="@color/white">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="17dp"
-                    android:background="@color/white"
-                    android:gravity="center_vertical"
-                    android:text="@string/device_model"
-                    android:textColor="@color/black"
-                    android:textSize="17dp" />
-
-                <TextView
-                    android:id="@+id/device_model"
-                    android:layout_width="200dp"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:gravity="end|center"
-                    android:lines="1"
-                    android:scaleType="center"
-                    android:textColor="@color/text_hint"
-                    android:textSize="17dp"
-                    tools:text="sesame"
-
-                    />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginLeft="17dp"
-                    android:background="@color/gray0" />
-            </RelativeLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:background="@color/gray0"
+                android:orientation="vertical"
+                android:paddingBottom="40dp">
+
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/device_setting_web_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/white" />
 
                 <RelativeLayout
-                    android:id="@+id/ap_scan_zone"
-
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
-                    android:background="@color/white">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/gray0" />
-                    <TextView
-                        android:id="@+id/ssid_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/wm2_ssid"
-
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
-
-                    <ImageView
-                        android:id="@+id/ssid_logo"
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="16dp"
-                        android:layout_toEndOf="@+id/ssid_title"
-                        android:src="@drawable/ic_ap_alert" />
-
-                    <TextView
-                        android:id="@+id/wifi_ssid_txt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:gravity="center"
-                        android:paddingEnd="12dp"
-                        android:scaleType="center"
-                        tools:text="test"
-
-                        android:textColor="@color/text_hint" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginLeft="16dp"
-                        android:background="@color/gray0" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/ap_pwk_zone"
-
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
+                    android:layout_marginTop="8dp"
                     android:background="@color/white">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="17dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
-                        android:text="@string/wm2_pwk"
+                        android:text="@string/device_model"
                         android:textColor="@color/black"
                         android:textSize="17dp" />
 
                     <TextView
-                        android:id="@+id/wifi_pass_txt"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/device_model"
+                        android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:gravity="center"
-                        android:paddingRight="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:gravity="end|center"
+                        android:lines="1"
                         android:scaleType="center"
-
-                        tools:text="11"
-                        android:textColor="@color/text_hint" />
+                        android:textColor="@color/text_hint"
+                        android:textSize="17dp"
+                        tools:text="sesame" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1px"
                         android:layout_alignParentBottom="true"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="17dp"
                         android:background="@color/gray0" />
-
                 </RelativeLayout>
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:background="@color/white">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/ap_scan_zone"
+                        android:layout_width="match_parent"
+                        android:layout_height="53dp"
+                        android:background="@color/white">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/gray0" />
+
+                        <TextView
+                            android:id="@+id/ssid_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/wm2_ssid"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+
+                        <ImageView
+                            android:id="@+id/ssid_logo"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="16dp"
+                            android:layout_toEndOf="@+id/ssid_title"
+                            android:src="@drawable/ic_ap_alert" />
+
+                        <TextView
+                            android:id="@+id/wifi_ssid_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:gravity="center"
+                            android:paddingEnd="12dp"
+                            android:scaleType="center"
+                            android:textColor="@color/text_hint"
+                            tools:text="test" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginLeft="16dp"
+                            android:background="@color/gray0" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/ap_pwk_zone"
+                        android:layout_width="match_parent"
+                        android:layout_height="53dp"
+                        android:background="@color/white">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/wm2_pwk"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+
+                        <TextView
+                            android:id="@+id/wifi_pass_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:gravity="center"
+                            android:paddingRight="12dp"
+                            android:scaleType="center"
+                            android:textColor="@color/text_hint"
+                            tools:text="11" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/gray0" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="53dp"
+                        android:background="@color/white">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/wm2NetworkConnectionStatus"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal">
+
+                            <RelativeLayout
+                                android:layout_width="21dp"
+                                android:layout_height="21dp"
+                                android:layout_margin="2dp">
+
+                                <ProgressBar
+                                    android:id="@+id/aping_icon"
+                                    android:layout_width="21dp"
+                                    android:layout_height="21dp"
+                                    android:src="@drawable/earth"
+                                    android:visibility="invisible" />
+                            </RelativeLayout>
+
+                            <ImageView
+                                android:id="@+id/ap_icon"
+                                android:layout_width="21dp"
+                                android:layout_height="21dp"
+                                android:layout_margin="2dp"
+                                android:src="@drawable/ic_wifi_select" />
+
+                            <RelativeLayout
+                                android:layout_width="21dp"
+                                android:layout_height="21dp"
+                                android:layout_margin="2dp">
+
+                                <ProgressBar
+                                    android:id="@+id/neting_icon"
+                                    android:layout_width="21dp"
+                                    android:layout_height="21dp"
+                                    android:visibility="invisible" />
+
+                                <View
+                                    android:id="@+id/net_ok_line"
+                                    android:layout_width="21dp"
+                                    android:layout_height="1px"
+                                    android:layout_centerVertical="true"
+                                    android:background="@color/unlock_blue"
+                                    android:visibility="invisible" />
+                            </RelativeLayout>
+
+                            <ImageView
+                                android:id="@+id/net_icon"
+                                android:layout_width="21dp"
+                                android:layout_height="21dp"
+                                android:layout_margin="2dp"
+                                android:src="@drawable/ic_world_select" />
+
+                            <RelativeLayout
+                                android:layout_width="21dp"
+                                android:layout_height="21dp"
+                                android:layout_margin="2dp">
+
+                                <ProgressBar
+                                    android:id="@+id/iot_ing_icon"
+                                    android:layout_width="21dp"
+                                    android:layout_height="21dp"
+                                    android:src="@drawable/earth"
+                                    android:visibility="invisible" />
+
+                                <View
+                                    android:id="@+id/iot_ok_line"
+                                    android:layout_width="21dp"
+                                    android:layout_height="1px"
+                                    android:layout_centerVertical="true"
+                                    android:background="@color/unlock_blue"
+                                    android:visibility="invisible" />
+                            </RelativeLayout>
+
+                            <ImageView
+                                android:id="@+id/iot_icon"
+                                android:layout_width="21dp"
+                                android:layout_height="21dp"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/ic_tick_select" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginLeft="16dp"
+                            android:background="@color/gray0" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/dfu_zone"
+                        android:layout_width="match_parent"
+                        android:layout_height="53dp"
+                        android:background="@color/white">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="16dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/wm2_update"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+
+                        <TextView
+                            android:id="@+id/wm2_version_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:gravity="center"
+                            android:paddingRight="12dp"
+                            android:scaleType="center"
+                            android:textColor="@color/text_hint"
+                            tools:text="text_hint" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginLeft="16dp"
+                            android:background="@color/gray0" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="53dp"
+                        android:background="@color/white">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="UUID"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
+
+                        <TextView
+                            android:id="@+id/wm2_id_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:gravity="center"
+                            android:paddingEnd="12dp"
+                            android:scaleType="center"
+                            android:textColor="@color/text_hint"
+                            tools:text="test" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/gray0" />
+
+                    </RelativeLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
                         android:layout_marginStart="16dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/wm2NetworkConnectionStatus"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:layout_marginTop="36dp"
+                        android:text="@string/wm2_hint"
+                        android:textColor="@color/text_hint" />
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:id="@+id/ssm_zone"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="16dp"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="4dp"
+                        android:background="@color/white"
+                        android:orientation="vertical">
 
-                        <RelativeLayout
-                            android:layout_width="21dp"
-                            android:layout_height="21dp"
-                            android:layout_margin="2dp">
-
-                            <ProgressBar
-                                android:id="@+id/aping_icon"
-                                android:layout_width="21dp"
-                                android:layout_height="21dp"
-                                android:src="@drawable/earth"
-                                android:visibility="invisible" />
-                        </RelativeLayout>
-
-
-                        <ImageView
-                            android:id="@+id/ap_icon"
-                            android:layout_width="21dp"
-                            android:layout_height="21dp"
-                            android:layout_margin="2dp"
-                            android:src="@drawable/ic_wifi_select">
-
-                        </ImageView>
-
-                        <RelativeLayout
-                            android:layout_width="21dp"
-
-                            android:layout_height="21dp"
-                            android:layout_margin="2dp">
-
-                            <ProgressBar
-                                android:id="@+id/neting_icon"
-
-                                android:layout_width="21dp"
-                                android:layout_height="21dp"
-                                android:visibility="invisible" />
-
-                            <View
-                                android:id="@+id/net_ok_line"
-
-                                android:layout_width="21dp"
-                                android:layout_height="1px"
-                                android:layout_centerVertical="true"
-                                android:background="@color/unlock_blue"
-                                android:visibility="invisible" />
-                        </RelativeLayout>
-
-                        <ImageView
-                            android:id="@+id/net_icon"
-                            android:layout_width="21dp"
-                            android:layout_height="21dp"
-                            android:layout_margin="2dp"
-                            android:src="@drawable/ic_world_select" />
-
-                        <RelativeLayout
-                            android:layout_width="21dp"
-
-                            android:layout_height="21dp"
-                            android:layout_margin="2dp">
-
-                            <ProgressBar
-                                android:id="@+id/iot_ing_icon"
-
-                                android:layout_width="21dp"
-                                android:layout_height="21dp"
-                                android:src="@drawable/earth"
-                                android:visibility="invisible" />
-
-                            <View
-                                android:id="@+id/iot_ok_line"
-
-                                android:layout_width="21dp"
-
-                                android:layout_height="1px"
-                                android:layout_centerVertical="true"
-                                android:background="@color/unlock_blue"
-                                android:visibility="invisible" />
-                        </RelativeLayout>
-
-                        <ImageView
-                            android:id="@+id/iot_icon"
-
-                            android:layout_width="21dp"
-                            android:layout_height="21dp"
-                            android:layout_margin="5dp"
-                            android:src="@drawable/ic_tick_select" />
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recy"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                     </LinearLayout>
 
-
-                    <View
+                    <RelativeLayout
+                        android:id="@+id/add_locker_zone"
                         android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginLeft="16dp"
-                        android:background="@color/gray0" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/dfu_zone"
-
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-
-                    android:background="@color/white">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="16dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/wm2_update"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
-
-                    <TextView
-                        android:id="@+id/wm2_version_txt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:gravity="center"
-                        tools:text="text_hint"
-                        android:textColor="@color/text_hint"
-                        android:paddingRight="12dp"
-                        android:scaleType="center" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginLeft="16dp"
-                        android:background="@color/gray0" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-
-                    android:background="@color/white">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="UUID"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
-
-                    <TextView
-                        android:id="@+id/wm2_id_txt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:gravity="center"
-                        tools:text="test"
-                        android:textColor="@color/text_hint"
-                        android:paddingEnd="12dp"
-                        android:scaleType="center" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/gray0" />
-
-                </RelativeLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="36dp"
-                    android:text="@string/wm2_hint"
-                    android:textColor="@color/text_hint" />
-
-                <LinearLayout
-                    android:id="@+id/ssm_zone"
-
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:background="@color/white"
-                    android:orientation="vertical">
-
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recy"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-                </LinearLayout>
-
-                <RelativeLayout
-                    android:id="@+id/add_locker_zone"
-
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:background="@color/white">
-
-                    <TextView
-                        android:id="@+id/add_ssm"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/addSesameTo"
-                        android:textColor="@color/black"
-                        android:textSize="17dp" />
-
-                    <ImageView
-                        android:id="@+id/devices_empty_logo"
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="16dp"
-                        android:layout_toEndOf="@+id/add_ssm"
-                        android:src="@drawable/ic_ap_alert"
-                        android:visibility="gone" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="16dp"
-                        android:background="@color/gray0" />
-
-                    <TextView
-                        android:id="@+id/tv_add_ssm_logo"
-                        android:layout_width="wrap_content"
                         android:layout_height="53dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="15dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_alignParentEnd="true"
-                        android:text="+"
-                        android:textColor="@color/black"
-                        android:textSize="28sp" />
+                        android:background="@color/white">
 
-                </RelativeLayout>
+                        <TextView
+                            android:id="@+id/add_ssm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/addSesameTo"
+                            android:textColor="@color/black"
+                            android:textSize="17dp" />
 
+                        <ImageView
+                            android:id="@+id/devices_empty_logo"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="16dp"
+                            android:layout_toEndOf="@+id/add_ssm"
+                            android:src="@drawable/ic_ap_alert"
+                            android:visibility="gone" />
 
-                <RelativeLayout
-                    android:id="@+id/drop_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@color/white">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginStart="16dp"
+                            android:background="@color/gray0" />
+
+                        <TextView
+                            android:id="@+id/tv_add_ssm_logo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="53dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_marginEnd="6dp"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:paddingHorizontal="15dp"
+                            android:text="+"
+                            android:textColor="@color/black"
+                            android:textSize="28sp" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/drop_zone"
+                        android:layout_width="match_parent"
+                        android:layout_height="53dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/white">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:background="@color/white"
+                            android:gravity="center_vertical"
+                            android:text="@string/TrashTheWifiModule2Key"
+                            android:textColor="@color/red"
+                            android:textSize="17dp"
+                            android:textStyle="bold" />
+                    </RelativeLayout>
 
                     <TextView
+                        android:id="@+id/drop_hint_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/TrashTheWifiModule2Key"
-                        android:textColor="@color/red"
-                        android:textSize="17dp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-                <TextView
-                    android:id="@+id/drop_hint_txt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    tools:text="@string/drop_hint"
-                    android:textColor="@color/text_hint" />
-                <RelativeLayout
-                    android:visibility="gone"
-                    android:id="@+id/reset_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@color/white">
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/text_hint"
+                        tools:text="@string/drop_hint" />
 
-                    <TextView
+                    <RelativeLayout
+                        android:id="@+id/reset_zone"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
+                        android:layout_height="53dp"
+                        android:layout_marginTop="8dp"
                         android:background="@color/white"
-                        android:gravity="center"
-                        android:lines="1"
-                        android:text="@string/ResetWifiModule2"
-                        android:textColor="@color/red"
-                        android:textSize="17sp"
-                        android:textStyle="bold"
-                        app:autoSizeTextType="uniform" />
-                </RelativeLayout>
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="16dp"
+                            android:layout_marginRight="16dp"
+                            android:background="@color/white"
+                            android:gravity="center"
+                            android:lines="1"
+                            android:text="@string/ResetWifiModule2"
+                            android:textColor="@color/red"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            app:autoSizeTextType="uniform" />
+                    </RelativeLayout>
+                </LinearLayout>
             </LinearLayout>
-
-
-        </LinearLayout>
-    </ScrollView>
+        </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

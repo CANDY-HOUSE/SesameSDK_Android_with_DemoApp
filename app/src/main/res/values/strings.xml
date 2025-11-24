@@ -76,9 +76,6 @@
     <string name="min30">30 min</string>
     <string name="hr1">1 hr</string>
     <string name="sesame_widget">Widget &amp; Auto Unlock</string>
-    <string name="owner">Owner</string>
-    <string name="manager">Manager</string>
-    <string name="guest">Guest</string>
 
     <string name="WM2">WiFi Module</string>
     <string name="Sesame">Sesame</string>
@@ -104,7 +101,6 @@
     <string name="Sesame6Pro">Sesame 6 Pro</string>
 
     <string name="unLoginHistoryTag">Unlogin user</string>
-    <string name="empty_friend">No Contacts</string>
     <string name="wm2_update">Software Update＆Restart</string>
     <string name="wm2_pwk">WiFi Password</string>
     <string name="wm2_pwk_hint">Please enter the WiFi password</string>
@@ -155,7 +151,6 @@
     <string name="WigetOpenAll">Lock All</string>
     <string name="WigetCloseAll">Unlock All</string>
 
-    <string name="ssm_qr_hint">Key of the %1$s device</string>
     <string name="wm2_ap_setting_error">SORRY🙏\n
         Please double check your WiFi password, or put WiFi Module as close to the WiFi router as possible. \n\n
         Then normally retry for a few times it will get connected successfully.🙏</string>
@@ -174,7 +169,6 @@
     <string name="no_scan_devices_hint3">3. Is the unregistered device nearby？</string>
     <string name="no_scan_devices_hint4">4. To reset the registered device, please press the reset button with a pin until the LED light turns off.</string>
 
-    <string name="ssm_qr_hint_1">Scan the QR code with Sesame app</string>
     <string name="pull_fresh_hint">↓You can pull to refresh</string>
     <string name="latest">(Latest)</string>
 
@@ -231,9 +225,6 @@
 
     <string name="sesame_widget_notification">Tap to start unlock widget!</string>
     <string name="delete_failed_tips">Failed to delete. Please try again</string>
-
-    <string name="key">Key</string>
-    <string name="share">Share</string>
 
     <string name="distance">Distance</string>
     <string name="brightness">Brightness</string>

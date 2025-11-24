@@ -86,9 +86,6 @@
     <string name="min30">30 分</string>
     <string name="hr1">1 小時</string>
     <string name="sesame_widget">Widget 與 自動解鎖</string>
-    <string name="owner">擁有者</string>
-    <string name="manager">管理員</string>
-    <string name="guest">訪客</string>
 
     <string name="WM2">WiFi模組</string>
     <string name="Sesame">芝麻</string>
@@ -115,7 +112,6 @@
 
     <string name="unLoginHistoryTag">未登入用戶</string>
 
-    <string name="empty_friend">沒有聯絡人</string>
     <string name="wm2_update">軟體更新＆重開機</string>
     <string name="wm2_pwk">WiFi 密碼</string>
     <string name="wm2_pwk_hint">請輸入 WiFi 密碼</string>
@@ -164,8 +160,6 @@
     <string name="WigetOpenAll">全部上鎖</string>
     <string name="WigetCloseAll">全部解鎖</string>
 
-    <string name="ssm_qr_hint"> %1$s 設備的鑰匙</string>
-
     <string name="wm2_ap_setting_error">很抱歉🙏\n
         請確認您的WiFi密碼，或把WiFi模組設置於盡量接近WiFi路由器的地方 \n\n
         然後多試幾次，通常能成功連上線🙏</string>
@@ -191,7 +185,6 @@
         name="no_scan_devices_hint4"
         >4. 有時候，重啟手機可以解決問題。</string>
 
-    <string name="ssm_qr_hint_1">用 芝麻app 掃描鑰匙QR code</string>
     <string name="pull_fresh_hint">↓下拉可刷新</string>
     <string name="latest">(最新)</string>
 
@@ -247,9 +240,6 @@
 
     <string name="sesame_widget_notification">請點擊啟動開鎖小工具!</string>
     <string name="delete_failed_tips">刪除失敗，請重試</string>
-
-    <string name="key">鑰匙</string>
-    <string name="share">共享</string>
 
     <string name="distance">距離</string>
     <string name="brightness">亮度</string>
