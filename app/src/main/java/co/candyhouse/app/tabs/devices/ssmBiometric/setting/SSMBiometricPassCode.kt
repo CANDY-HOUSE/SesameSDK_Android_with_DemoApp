@@ -485,15 +485,15 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             }
 
             override fun onKeyBoardReceive(
-                device: CHSesameConnector, ID: String, name: String, type: Byte
+                device: CHSesameConnector, ID: String, hexName: String, type: Byte
             ) {
                 // 直接显示从BLE得到的密码。收完数据后，批量获取密码名称
                 runOnUiThread {
                     mKbSecretList.remove(mKbSecretList.find { it.id == ID })
-                    if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
-                        mKbSecretList.add(0, KeyboardPassCode(ID, getString(R.string.default_passcode_name), type, name.noHashtoUUID().toString()))
+                    if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
+                        mKbSecretList.add(0, KeyboardPassCode(ID, getString(R.string.default_passcode_name), type, hexName.noHashtoUUID().toString()))
                     } else {
-                        val matchName = name.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                        val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
                         mKbSecretList.add(0, KeyboardPassCode(ID, matchName, type, matchName))
                     }
                     updatePassCodeCountDisplay()
@@ -510,12 +510,12 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             }
 
             override fun onKeyBoardChanged(
-                device: CHSesameConnector, ID: String, name: String, type: Byte
+                device: CHSesameConnector, ID: String, hexName: String, type: Byte
             ) {
-                val newPassCode = if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
-                    KeyboardPassCode(ID, getString(R.string.default_passcode_name), type, name.noHashtoUUID().toString())
+                val newPassCode = if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
+                    KeyboardPassCode(ID, getString(R.string.default_passcode_name), type, hexName.noHashtoUUID().toString())
                 } else {
-                    val matchName = name.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                    val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
                     KeyboardPassCode(ID, matchName, type, matchName)
                 }
                 runOnUiThread {

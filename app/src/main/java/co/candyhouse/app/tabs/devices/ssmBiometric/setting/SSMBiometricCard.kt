@@ -481,16 +481,16 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
             override fun onCardReceive(
                 device: CHSesameConnector,
                 cardID: String,
-                name: String,
+                hexName: String,
                 type: Byte
             ) {
                 // 直接显示从BLE得到的卡片。收完数据后，批量获取卡片名称
                 runOnUiThread {
                     mCardList.remove(mCardList.find { it.id == cardID })
-                    if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
-                        mCardList.add(0, SuiCard(cardID, getString(R.string.default_card_name), type, name.noHashtoUUID().toString()))
+                    if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
+                        mCardList.add(0, SuiCard(cardID, getString(R.string.default_card_name), type, hexName.noHashtoUUID().toString()))
                     } else {
-                        val matchName = name.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                        val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
                         mCardList.add(0, SuiCard(cardID, matchName, type, matchName))
                     }
                     updateCardCountDisplay()
@@ -509,13 +509,13 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
             override fun onCardChanged(
                 device: CHSesameConnector,
                 cardID: String,
-                name: String,
+                hexName: String,
                 type: Byte
             ) {
-                val newCard = if ((name.length == 32) && name.isUUIDv4()) { // 是 uuid 格式的名字
-                    SuiCard(cardID, getString(R.string.default_card_name), type, name.noHashtoUUID().toString())
+                val newCard = if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
+                    SuiCard(cardID, getString(R.string.default_card_name), type, hexName.noHashtoUUID().toString())
                 } else {
-                    val matchName = name.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                    val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
                     SuiCard(cardID, matchName, type, matchName)
                 }
                 updateCardList(newCard)

@@ -11,7 +11,6 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.C
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
-import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.hexStringToByteArray
 
 internal class CHFingerPrintCapableImpl() :
@@ -85,11 +84,11 @@ internal class CHFingerPrintCapableImpl() :
         }
     }
 
-    override fun fingerPrintsChange(ID: String, name: String, result: CHResult<CHEmpty>) {
+    override fun fingerPrintsChange(ID: String, hexName: String, result: CHResult<CHEmpty>) {
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_FINGERPRINT_CHANGE.value,
-                byteArrayOf(ID.hexStringToByteArray().size.toByte()) + ID.hexStringToByteArray() + name.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+                byteArrayOf(ID.hexStringToByteArray().size.toByte()) + ID.hexStringToByteArray() + hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))

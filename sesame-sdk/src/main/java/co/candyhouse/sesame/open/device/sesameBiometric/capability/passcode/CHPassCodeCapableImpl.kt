@@ -39,11 +39,11 @@ internal open class CHPassCodeCapableImpl() :
         }
     }
 
-    override fun keyBoardPassCodeAdd(id: ByteArray, name: String, result: CHResult<CHEmpty>) {
+    override fun keyBoardPassCodeAdd(id: ByteArray, hexName: String, result: CHResult<CHEmpty>) {
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_PASSCODE_ADD.value,
-                byteArrayOf(0xF0/*KB_DATA_USED*/.toByte()) + byteArrayOf(0x00/*KB_TYPE_CLOUD*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
+                byteArrayOf(0xF0/*KB_DATA_USED*/.toByte()) + byteArrayOf(0x00/*KB_TYPE_CLOUD*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(hexName.toByteArray().size.toByte()) + hexName.toByteArray().padEnd(16, 0x00.toByte())
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
@@ -130,9 +130,9 @@ internal open class CHPassCodeCapableImpl() :
         }
     }
 
-    override fun keyBoardPassCodeChange(ID: String, name: String, result: CHResult<CHEmpty>) {
+    override fun keyBoardPassCodeChange(ID: String, hexName: String, result: CHResult<CHEmpty>) {
         sendCommandSafely(
-            SesameOS3Payload(SesameItemCode.SSM_OS3_PASSCODE_CHANGE.value, byteArrayOf(ID.hexStringToByteArray().size.toByte()) + ID.hexStringToByteArray() + name.chunked(2).map { it.toInt(16).toByte() }.toByteArray()),
+            SesameOS3Payload(SesameItemCode.SSM_OS3_PASSCODE_CHANGE.value, byteArrayOf(ID.hexStringToByteArray().size.toByte()) + ID.hexStringToByteArray() + hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray()),
             result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))

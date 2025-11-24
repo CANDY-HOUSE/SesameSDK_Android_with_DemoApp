@@ -9,7 +9,7 @@ import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 interface CHFingerPrintCapable {
     fun fingerPrints(result: CHResult<CHEmpty>)
     fun fingerPrintDelete(fingerPrintID: String, deviceId: String, result: CHResult<CHEmpty>)
-    fun fingerPrintsChange(ID: String, name: String, result: CHResult<CHEmpty>)
+    fun fingerPrintsChange(ID: String, hexName: String, result: CHResult<CHEmpty>)
     fun fingerPrintModeGet(result: CHResult<Byte>)
     fun fingerPrintModeSet(mode: Byte, result: CHResult<CHEmpty>)
     fun fingerPrintNameGet(fingerPrintID: String, fingerPrintNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>)

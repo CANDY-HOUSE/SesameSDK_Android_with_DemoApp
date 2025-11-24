@@ -83,11 +83,11 @@ internal open class CHCardCapableImpl() :
         }
     }
 
-    override fun cardAdd(id: ByteArray, name: String, result: CHResult<CHEmpty>) {
+    override fun cardAdd(id: ByteArray, hexName: String, result: CHResult<CHEmpty>) {
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_CARD_ADD.value,
-                byteArrayOf(0xF0/*CARD_DATA_USED*/.toByte())+ byteArrayOf(0x00/*CARD_TYPE_CLOUD_BASE*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(name.toByteArray().size.toByte()) + name.toByteArray().padEnd(16, 0x00.toByte())
+                byteArrayOf(0xF0/*CARD_DATA_USED*/.toByte())+ byteArrayOf(0x00/*CARD_TYPE_CLOUD_BASE*/.toByte()) + byteArrayOf(id.size.toByte()) + id.padEnd(16, 0x00.toByte()) + byteArrayOf(hexName.toByteArray().size.toByte()) + hexName.toByteArray().padEnd(16, 0x00.toByte())
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
@@ -158,11 +158,11 @@ internal open class CHCardCapableImpl() :
     }
 
     // 新方案：设备接收 16位的uuid 作为 name
-    override fun cardChange(ID: String, name: String, result: CHResult<CHEmpty>) {
+    override fun cardChange(ID: String, hexName: String, result: CHResult<CHEmpty>) {
         sendCommandSafely(
             SesameOS3Payload(
                 SesameItemCode.SSM_OS3_CARD_CHANGE.value,
-                byteArrayOf(ID.hexStringToByteArray().size.toByte()) + ID.hexStringToByteArray() + name.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+                byteArrayOf(ID.hexStringToByteArray().size.toByte()) + ID.hexStringToByteArray() + hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
