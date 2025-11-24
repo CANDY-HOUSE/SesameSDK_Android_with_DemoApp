@@ -21,7 +21,6 @@ import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
 import co.candyhouse.sesame.server.dto.CHRemoveGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
-import co.candyhouse.sesame.server.dto.CHSS2Infor
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
 import co.candyhouse.sesame.server.dto.CHSSMHisUploadRequest
@@ -239,20 +238,6 @@ object CHAccountManager {
             val keyCheck = AesCmac((ss2 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(msg)!!.sliceArray(0..3)
             jpAPIclient.ss2CommandToWM2Post(ss2.deviceId.toString().uppercase(), CHSS2WebCMDReq(cmd.value.toByte(), historytag.base64Encode(), keyCheck.toHexString()))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
-        }
-    }
-
-    internal fun putSesameInfor(ss2: CHDevices, fw_tag: String, onResponse: CHResult<CHEmpty>) {
-
-        //        if (ss2.getFwVersion() == fw_tag) {
-        //            L.d("hcia", "一樣不傳 fw_tag:" + fw_tag)
-        //            return
-        //        }
-
-        makeApiCall(onResponse) { //            L.d("hcia", " 不一樣傳 fw_tag:" + fw_tag)
-            //            L.d("hcia", "🐄 historytag:" + historytag.toHexString())
-            val res = jpAPIclient.ss2UploadFwVersion(ss2.deviceId.toString().toUpperCase(), CHSS2Infor(fw_tag)) //            L.d("hcia", "res:" + res)
-//            ss2.setFwVersion(fw_tag)
         }
     }
 

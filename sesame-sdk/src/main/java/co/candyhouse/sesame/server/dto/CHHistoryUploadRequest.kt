@@ -19,10 +19,6 @@ internal data class CHModifyGuestKeyRequest(var guestKeyId: String, var keyName:
 
 internal data class CHSS2WebCMDReq(var cmd: Byte, var history: String, var sign: String)
 
-internal data class CHSS2Infor(
-    var fwv: String,
-)
-
 internal data class CHGuestKey(var deviceUUID: String//16
     , val deviceModel: String//1
     , val keyIndex: String//2

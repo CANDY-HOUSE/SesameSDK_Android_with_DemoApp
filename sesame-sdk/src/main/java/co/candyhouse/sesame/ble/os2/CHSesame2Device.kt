@@ -132,7 +132,6 @@ internal enum class CHError(val value: NSError) {
         if (!isBleAvailable(result)) return
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.versionTag, byteArrayOf())) { res ->
             val gitTag = res.payload.sliceArray(4..15)
-            CHAccountManager.putSesameInfor(this, String(gitTag)) {}
             result.invoke(Result.success(CHResultState.CHResultStateBLE(String(gitTag))))
         }
     }

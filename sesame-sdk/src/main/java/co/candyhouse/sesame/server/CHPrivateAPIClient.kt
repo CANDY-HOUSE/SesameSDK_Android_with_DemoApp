@@ -12,7 +12,6 @@ import co.candyhouse.sesame.server.dto.CHModifyGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
 import co.candyhouse.sesame.server.dto.CHRemoveGuestKeyRequest
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
-import co.candyhouse.sesame.server.dto.CHSS2Infor
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
@@ -29,12 +28,6 @@ internal interface CHPrivateAPIClient {
     fun ss2CommandToWM2Post(
         @Parameter(name = "device_id", location = "path") model: String?,
         body: CHSS2WebCMDReq
-    ): Any
-
-    @Operation(path = "/device/v1/sesame2/{device_id}", method = "PUT")
-    fun ss2UploadFwVersion(
-        @Parameter(name = "device_id", location = "path") model: String?,
-        body: CHSS2Infor
     ): Any
 
     @Operation(path = "/device/v1/sesame2/{device_id}", method = "POST")
