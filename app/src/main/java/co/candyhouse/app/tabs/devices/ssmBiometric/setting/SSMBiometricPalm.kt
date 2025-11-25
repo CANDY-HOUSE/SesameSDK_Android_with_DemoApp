@@ -166,30 +166,6 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
         }
     }
 
-    // 异步操作， 获取服务器上的名字， 然后刷新 UI
-    private fun getPalmName(palm: CHSesameTouchFace, deviceUUID: String) {
-        AWSStatus.getSubUUID()?.let { it ->
-            (mDeviceModel.ssmLockLiveData.value as CHPalmCapable).palmNameGet(palm.id, palm.nameUUID, it, deviceUUID) {
-                it.onSuccess {
-                    palm.name = if (it.data == "") { // 如果服务器上没有名字， 使用默认名称
-                        getString(R.string.default_palm_name)
-                    } else {
-                        it.data
-                    }
-                    runOnUiThread {
-                        updatePalmList(palm)
-                    }
-                }
-            }
-        } ?: run { // 未登录用户， 没有 subUUID
-            // 如果没有 AWSStatus.getSubUUID()， 直接使用默认名称
-            palm.name = getString(R.string.default_palm_name)
-            runOnUiThread {
-                updatePalmList(palm)
-            }
-        }
-    }
-
     private fun setPalmName(palm: CHSesameTouchFace, name: String, deviceUUID: String) {
         val palmNameRequest = CHPalmNameRequest(
             palmNameUUID = palm.nameUUID,

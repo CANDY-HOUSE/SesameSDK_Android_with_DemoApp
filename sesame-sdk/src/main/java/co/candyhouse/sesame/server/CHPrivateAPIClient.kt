@@ -62,14 +62,6 @@ internal interface CHPrivateAPIClient {
         body: CHKeyBoardPassCodeNameRequest,
     ): String
 
-    @Operation(path = "/device/v2/passcode/name", method = "GET")
-    fun getKeyBoardPassCodeName(
-        @Parameter(name = "keyBoardPassCode", location = "query") keyBoardPassCode: String,
-        @Parameter(name = "keyBoardPassCodeNameUUID", location = "query") keyBoardPassCodeNameUUID: String,
-        @Parameter(name = "subUUID", location = "query") subUUID: String,
-        @Parameter(name = "stpDeviceUUID", location = "query") stpDeviceUUID: String,
-    ): String
-
     @Operation(path = "/device/v2/face/name", method = "PUT")
     fun setFaceName(
         body: CHFaceNameRequest,
@@ -78,14 +70,6 @@ internal interface CHPrivateAPIClient {
     @Operation(path = "/device/v2/palm/name", method = "PUT")
     fun setPalmName(
         body: CHPalmNameRequest,
-    ): String
-
-    @Operation(path = "/device/v2/palm/name", method = "GET")
-    fun getPalmName(
-        @Parameter(name = "palmID", location = "query") palmID: String,
-        @Parameter(name = "palmNameUUID", location = "query") palmNameUUID: String,
-        @Parameter(name = "subUUID", location = "query") subUUID: String,
-        @Parameter(name = "stpDeviceUUID", location = "query") stpDeviceUUID: String,
     ): String
 
     @Operation(path = "/device/v2/hub3/{device_id}/status", method = "GET")

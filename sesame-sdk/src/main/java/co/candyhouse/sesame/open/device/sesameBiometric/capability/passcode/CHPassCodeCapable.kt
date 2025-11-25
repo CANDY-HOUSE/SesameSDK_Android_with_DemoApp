@@ -15,7 +15,6 @@ interface CHPassCodeCapable {
     fun keyBoardPassCodeMove(keyBoardPassCodeID: String, touchProUUID: String, result: CHResult<CHEmpty>)
     fun keyBoardPassCodeModeGet(result: CHResult<Byte>)
     fun keyBoardPassCodeModeSet(mode: Byte, result: CHResult<CHEmpty>)
-    fun keyBoardPassCodeNameGet(keyBoardPassCode: String, keyBoardPassCodeNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>)
     fun keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, result: CHResult<String>)
     fun getBoardPassCodeDataSyncCapable(): CHDataSynchronizeCapable
 

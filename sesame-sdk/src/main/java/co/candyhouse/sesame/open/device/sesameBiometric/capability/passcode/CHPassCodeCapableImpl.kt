@@ -143,15 +143,6 @@ internal open class CHPassCodeCapableImpl() :
         sendCommandSafely(SesameOS3Payload(SesameItemCode.SSM_OS3_PASSCODE_GET.value, byteArrayOf()), result) {}
     }
 
-    override fun keyBoardPassCodeNameGet(keyBoardPassCode: String, keyBoardPassCodeNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>) {
-        CHAccountManager.getKeyBoardPassCodeName(keyBoardPassCode, keyBoardPassCodeNameUUID, subUUID, deviceUUID) { it ->
-            it.onSuccess {
-                val keyBoardPassCodeName = it.data
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(keyBoardPassCodeName)))
-            }
-        }
-    }
-
     override fun keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, result: CHResult<String>) {
         CHAccountManager.setKeyBoardPassCodeName(keyBoardPassCodeNameRequest) { it ->
             it.onSuccess {

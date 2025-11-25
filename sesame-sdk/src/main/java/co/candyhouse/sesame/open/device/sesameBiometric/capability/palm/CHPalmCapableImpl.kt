@@ -49,15 +49,6 @@ internal class CHPalmCapableImpl() :
         }
     }
 
-    override fun palmNameGet(palmID: String, palmNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>) {
-        CHAccountManager.getPalmName(palmID, palmNameUUID, subUUID, deviceUUID) { it ->
-            it.onSuccess {
-                val palmName = it.data
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(palmName)))
-            }
-        }
-    }
-
     override fun palmNameSet(palmNameRequest: CHPalmNameRequest, result: CHResult<String>) {
         CHAccountManager.setPalmName(palmNameRequest) { it ->
             it.onSuccess {

@@ -113,24 +113,10 @@ object CHAccountManager {
         }
     }
 
-    internal fun getPalmName(palmID: String, palmNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val palmName = jpAPIclient.getPalmName(palmID, palmNameUUID, subUUID, stpDeviceUUID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(palmName)))
-        }
-    }
-
     internal fun setPalmName(palmNameRequest: CHPalmNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setPalmName(palmNameRequest)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun getKeyBoardPassCodeName(keyBoardPassCode: String, keyBoardPassCodeNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val keyBoardPassCodeName = jpAPIclient.getKeyBoardPassCodeName(keyBoardPassCode, keyBoardPassCodeNameUUID, subUUID, stpDeviceUUID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(keyBoardPassCodeName)))
         }
     }
 
