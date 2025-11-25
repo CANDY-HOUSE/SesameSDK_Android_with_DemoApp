@@ -99,31 +99,10 @@ object CHAccountManager {
         }
     }
 
-    internal fun getCardName(cardID: String, cardNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val cardName = jpAPIclient.getCardName(cardID, cardNameUUID, subUUID, stpDeviceUUID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(cardName)))
-        }
-    }
-
-    internal fun getFingerPrintName(fingerPrintID: String, fingerPrintNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val fingerPrintName = jpAPIclient.getFingerPrintName(fingerPrintID, fingerPrintNameUUID, subUUID, stpDeviceUUID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(fingerPrintName)))
-        }
-    }
-
     internal fun setFingerPrintName(fingerPrintNameRequest: CHFingerPrintNameRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.setFingerPrintName(fingerPrintNameRequest)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun getFaceName(faceID: String, faceNameUUID: String, subUUID: String, stpDeviceUUID: String, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val faceName = jpAPIclient.getFaceName(faceID, faceNameUUID, subUUID, stpDeviceUUID)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(faceName)))
         }
     }
 

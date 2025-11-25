@@ -11,7 +11,6 @@ interface CHFaceCapable {
     fun faceModeGet(result: CHResult<Byte>)
     fun faceListGet(result: CHResult<CHEmpty>)
     fun faceDelete(faceID: String, deviceID: String, result: CHResult<CHEmpty>)
-    fun faceNameGet(faceID: String, faceNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>)
     fun faceNameSet(faceNameRequest: CHFaceNameRequest, result: CHResult<String>)
     fun getFaceDataSyncCapable(): CHDataSynchronizeCapable
 

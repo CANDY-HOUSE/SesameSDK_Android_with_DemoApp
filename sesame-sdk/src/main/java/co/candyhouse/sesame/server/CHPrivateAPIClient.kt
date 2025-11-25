@@ -52,25 +52,9 @@ internal interface CHPrivateAPIClient {
         body: CHCardNameRequest,
     ): String
 
-    @Operation(path = "/device/v2/card/name", method = "GET")
-    fun getCardName(
-        @Parameter(name = "cardID", location = "query") cardID: String,
-        @Parameter(name = "cardNameUUID", location = "query") cardNameUUID: String,
-        @Parameter(name = "subUUID", location = "query") subUUID: String,
-        @Parameter(name = "stpDeviceUUID", location = "query") stpDeviceUUID: String,
-    ): String
-
     @Operation(path = "/device/v2/fingerprint/name", method = "PUT")
     fun setFingerPrintName(
         body: CHFingerPrintNameRequest,
-    ): String
-
-    @Operation(path = "/device/v2/fingerprint/name", method = "GET")
-    fun getFingerPrintName(
-        @Parameter(name = "fingerPrintID", location = "query") fingerPrintID: String,
-        @Parameter(name = "fingerPrintNameUUID", location = "query") fingerPrintNameUUID: String,
-        @Parameter(name = "subUUID", location = "query") subUUID: String,
-        @Parameter(name = "stpDeviceUUID", location = "query") stpDeviceUUID: String,
     ): String
 
     @Operation(path = "/device/v2/passcode/name", method = "PUT")
@@ -89,14 +73,6 @@ internal interface CHPrivateAPIClient {
     @Operation(path = "/device/v2/face/name", method = "PUT")
     fun setFaceName(
         body: CHFaceNameRequest,
-    ): String
-
-    @Operation(path = "/device/v2/face/name", method = "GET")
-    fun getFaceName(
-        @Parameter(name = "faceID", location = "query") faceID: String,
-        @Parameter(name = "faceNameUUID", location = "query") faceNameUUID: String,
-        @Parameter(name = "subUUID", location = "query") subUUID: String,
-        @Parameter(name = "stpDeviceUUID", location = "query") stpDeviceUUID: String,
     ): String
 
     @Operation(path = "/device/v2/palm/name", method = "PUT")

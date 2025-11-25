@@ -16,7 +16,6 @@ interface CHCardCapable {
     fun cardChangeValue(ID: String, newID: String, result: CHResult<CHEmpty>)
     fun cardModeGet(result: CHResult<Byte>)
     fun cardModeSet(mode: Byte, result: CHResult<CHEmpty>)
-    fun cardNameGet(cardID: String, cardNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>)
     fun cardNameSet(cardNameRequest: CHCardNameRequest, result: CHResult<String>)
     fun getCardDataSyncCapable(): CHDataSynchronizeCapable
 

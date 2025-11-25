@@ -127,24 +127,6 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
         }
     }
 
-    // 异步操作， 获取服务器上的名字， 然后刷新 UI
-    private fun getFingerPrintName(fingerPrintNameUUID: String, fingerPrintID: String, type: Byte, deviceUUID: String) {
-        (mDeviceModel.ssmLockLiveData.value as CHFingerPrintCapable).fingerPrintNameGet(fingerPrintID, fingerPrintNameUUID, UserUtils.getUserId()?:"", deviceUUID) {
-            it.onSuccess {
-                val name: String = if (it.data == "") { // 如果服务器上没有名字， 使用默认名称
-                    getString(R.string.default_fingerprint_name)
-                } else {
-                    it.data
-                }
-                runOnUiThread {
-                    mFingers.remove(mFingers.find { it.id == fingerPrintID })
-                    mFingers.add(0, FingerPrint(fingerPrintID, name, type, fingerPrintNameUUID))
-                    updateFingerPrintList()
-                }
-            }
-        }
-    }
-
     private fun setFingerPrintName(data: FingerPrint, name: String, deviceUUID: String) {
         if (!data.fingerPrintNameUUID.isUUIDv4()) {
             val uuid = UUID.randomUUID().toString().lowercase()
@@ -285,13 +267,6 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
                     lifecycleScope.launch(Dispatchers.Main) { toastMSG(error.message) }
                 }
             }
-        }
-    }
-
-    private fun getFingerprintNameInNeed(device: CHSesameConnector,fingerprintID: String, name: String, type: Byte) {
-        if ((name.length == 32) && name.isUUIDv4()) { // 如果是 UUID 格式的名字
-            val fingerPrintNameUUID = name.noHashtoUUID().toString()
-            getFingerPrintName(fingerPrintNameUUID, fingerprintID, type, getDeviceUUID())
         }
     }
 

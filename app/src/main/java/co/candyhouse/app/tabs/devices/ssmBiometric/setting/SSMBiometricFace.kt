@@ -161,30 +161,6 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
         }
     }
 
-    // 异步操作， 获取服务器上的名字， 然后刷新 UI
-    private fun getFaceName(face: CHSesameTouchFace, deviceUUID: String) {
-        AWSStatus.getSubUUID()?.let { it ->
-            (mDeviceModel.ssmLockLiveData.value as CHFaceCapable).faceNameGet(face.id, face.nameUUID, it, deviceUUID) {
-                it.onSuccess {
-                    face.name = if (it.data == "") { // 如果服务器上没有名字， 使用默认名称
-                        getString(R.string.default_face_name)
-                    } else {
-                        it.data
-                    }
-                    runOnUiThread {
-                        updateFaceList(face)
-                    }
-                }
-            }
-        } ?: run { // 未登录用户， 没有 subUUID
-            // 如果没有 AWSStatus.getSubUUID()， 直接使用默认名称
-            face.name = getString(R.string.default_face_name)
-            runOnUiThread {
-                updateFaceList(face)
-            }
-        }
-    }
-
     private fun setFaceName(face: CHSesameTouchFace, name: String, deviceUUID: String) {
         val faceNameRequest = CHFaceNameRequest(
             faceNameUUID = face.nameUUID,

@@ -52,15 +52,6 @@ internal class CHFingerPrintCapableImpl() :
         }
     }
 
-    override fun fingerPrintNameGet(fingerPrintID: String, fingerPrintNameUUID: String, subUUID: String, deviceUUID: String, result: CHResult<String>) {
-        CHAccountManager.getFingerPrintName(fingerPrintID, fingerPrintNameUUID, subUUID, deviceUUID) { it ->
-            it.onSuccess {
-                val fingerPrintName = it.data
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(fingerPrintName)))
-            }
-        }
-    }
-
     override fun fingerPrintNameSet(fingerPrintNameRequest: CHFingerPrintNameRequest, result: CHResult<String>) {
         CHAccountManager.setFingerPrintName(fingerPrintNameRequest) { it ->
             it.onSuccess {

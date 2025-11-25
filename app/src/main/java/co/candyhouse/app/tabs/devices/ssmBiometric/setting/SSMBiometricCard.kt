@@ -387,34 +387,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
         }
     }
 
-    // 异步操作， 获取服务器上的名字， 然后刷新 UI
-    private fun getCardName(cardNameUUID: String, cardID: String, type: Byte, deviceUUID: String) {
-        AWSStatus.getSubUUID()?.let {
-            (mDeviceModel.ssmLockLiveData.value as CHCardCapable).cardNameGet(cardID.uppercase(), cardNameUUID, it, deviceUUID) { it ->
-                it.onSuccess {
-                    val name: String = if (it.data == "") {
-                        getString(R.string.default_card_name)
-                    } else {
-                        it.data
-                    }
-                    runOnUiThread {
-                        mCardList.remove(mCardList.find { it.id == cardID })
-                        mCardList.add(0, SuiCard(cardID, name, type, cardNameUUID))
-                        updateCardCountDisplay()
-                    }
-                }
-            }
-        } ?: run {
-            // 如果没有 AWSStatus.getSubUUID()， 直接使用默认名称
-            val name: String = getString(R.string.default_card_name)
-            runOnUiThread {
-                mCardList.remove(mCardList.find { it.id == cardID })
-                updateCardList(SuiCard(cardID, name, type, cardNameUUID))
-                updateCardCountDisplay()
-            }
-        }
-    }
-
     private fun setCardName(data: SuiCard, name: String, deviceUUID: String) {
         if (!data.cardNameUUID.isUUIDv4()) {
             val uuid = UUID.randomUUID().toString().lowercase()
@@ -586,13 +558,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
                     lifecycleScope.launch(Dispatchers.Main) { toastMSG(error.message) }
                 }
             }
-        }
-    }
-
-    private fun getCardNameInNeed(device: CHSesameConnector, cardID: String, name: String, type: Byte) {
-        if ((name.length == 32) && name.isUUIDv4()) { // 如果是 UUID 格式的名字
-            val cardNameUUID = name.noHashtoUUID().toString()
-            getCardName(cardNameUUID, cardID, type, getDeviceUUID())
         }
     }
 
