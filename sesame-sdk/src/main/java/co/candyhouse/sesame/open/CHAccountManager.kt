@@ -7,12 +7,14 @@ import android.os.Build
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.server.CHPrivateAPIClient
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
+import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
@@ -74,6 +76,13 @@ object CHAccountManager {
             }.onFailure {
                 onResponse.invoke(Result.failure(it))
             }
+        }
+    }
+
+    internal fun cancelNotification(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            val tmpEnable = jpAPIclient.fcmTokenSignDelete(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken))
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(tmpEnable)))
         }
     }
 

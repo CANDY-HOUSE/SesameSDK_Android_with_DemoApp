@@ -5,6 +5,7 @@ import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
+import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
@@ -98,5 +99,8 @@ internal interface CHPrivateAPIClient {
         @Parameter(name = "device_id", location = "path") deviceID: String,
         body: CHBatteryDataReq
     ): Any
+
+    @Operation(path = "/device/v1/token", method = "DELETE")
+    fun fcmTokenSignDelete(body: CHFcmTokenUpload): Any
 
 }

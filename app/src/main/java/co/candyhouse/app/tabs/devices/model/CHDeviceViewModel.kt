@@ -38,6 +38,7 @@ import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
+import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.L
@@ -471,6 +472,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
                     neeReflesh.postValue(BeanDevices(emptyList()))
 
+                    unregisterNotification(targetDevice)
+
                     viewModelScope.launch {
                         result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
                     }
@@ -489,6 +492,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 }
             }
         } else {
+            unregisterNotification(targetDevice)
             targetDevice.dropKey {
                 it.onSuccess {
                     refleshDevices()
@@ -515,6 +519,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             // L.d("hcia", "登入刪除:")
             CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
                 it.onSuccess {
+                    unregisterNotification(targetDevice)
                     targetDevice.reset {
                         it.onSuccess {
                             refleshDevices()
@@ -535,6 +540,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             }
         } else {
             L.d("hcia", "未登入reset")
+            unregisterNotification(targetDevice)
             targetDevice.reset {
                 it.onSuccess {
                     refleshDevices()
@@ -546,6 +552,16 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     viewModelScope.launch {
                         result.invoke(Result.failure(it))
                     }
+                }
+            }
+        }
+    }
+
+    fun unregisterNotification(chDevice: CHDevices) {
+        SharedPreferencesUtils.deviceToken?.let { fcmToken ->
+            (chDevice as? CHSesameLock)?.disableNotification(fcmToken) { result ->
+                result.onSuccess {
+                    L.d("sf", "result is $result")
                 }
             }
         }

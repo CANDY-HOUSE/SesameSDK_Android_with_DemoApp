@@ -158,6 +158,7 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
                     when (device) {
                         is CHSesameLock -> {
                             NotificationManagerCompat.from(CHDeviceManager.app).cancel(device.deviceId.hashCode())
+                            deviceViewModel.unregisterNotification(device)
                         }
                     }
                 }

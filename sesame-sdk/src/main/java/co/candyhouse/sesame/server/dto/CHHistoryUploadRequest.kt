@@ -8,3 +8,5 @@ internal data class CHSS5HisUploadRequest(@SerializedName("s") var device_id: St
 internal data class CHRemoveSignKeyRequest(var deviceId: String, var token: String, var secretKey: String)
 
 internal data class CHSS2WebCMDReq(var cmd: Byte, var history: String, var sign: String)
+
+internal data class CHFcmTokenUpload(var deviceId: String, var token: String)
