@@ -245,34 +245,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             putString("deviceId", hub3.deviceId.toString().uppercase())
             putSerializable("extInfo", hashMapOf("irRemote" to Gson().toJson(irRemote)))
         })
-
-        when (irRemote.type) {
-            IRType.DEVICE_REMOTE_CUSTOM -> {
-                //学习
-                mDeviceViewModel.ssmLockLiveData.value = hub3
-                val bundle = Bundle().apply {
-                    putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
-                    putBoolean(RemoteBundleKeyConfig.editable, false)
-                    putString(RemoteBundleKeyConfig.hub3DeviceId, hub3.deviceId.toString().uppercase())
-                }
-                safeNavigate(R.id.remoteLearnFg, bundle)
-            }
-
-            IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV, IRType.DEVICE_REMOTE_FANS -> {
-                //空调
-                mDeviceViewModel.ssmLockLiveData.value = hub3
-                safeNavigate(R.id.action_to_irgridefg2, Bundle().apply {
-                    putParcelable(RemoteBundleKeyConfig.irDevice, irRemote)
-                    putBoolean(RemoteBundleKeyConfig.isNewDevice, false)
-                    putString(RemoteBundleKeyConfig.hub3DeviceId, hub3.deviceId.toString().uppercase())
-                    putBoolean(RemoteBundleKeyConfig.editable, false)
-                })
-            }
-
-            else -> {
-                L.d(tag, "暂不支持未知类型跳转...")
-            }
-        }
     }
 
     private fun checkAdapterPost(call: () -> Unit) {
