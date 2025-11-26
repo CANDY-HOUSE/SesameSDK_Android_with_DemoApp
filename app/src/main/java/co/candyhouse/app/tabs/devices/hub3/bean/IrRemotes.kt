@@ -14,9 +14,20 @@ data class IrRemoteState(
     val remoteMap: HashMap<String, ArrayList<IrRemote>> = HashMap()
 )
 
-class IrRemoteRepository {
+class IrRemoteRepository private constructor() {
     private val _state = MutableStateFlow(IrRemoteState())
     val state = _state.asStateFlow()
+
+    companion object {
+        @Volatile
+        private var INSTANCE: IrRemoteRepository? = null
+
+        fun getInstance(): IrRemoteRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: IrRemoteRepository().also { INSTANCE = it }
+            }
+        }
+    }
 
     fun addRemote(key: String, remote: IrRemote) {
         val currentMap = _state.value.remoteMap.toMutableMap()

@@ -51,6 +51,7 @@ object WebViewUrlLoader {
         deviceId: String = "",
         pushToken: String = "",
         keyLevel: String = "",
+        paramInfo: Map<String, String>? = null,
         onError: (String) -> Unit = {}
     ): State<String> {
         val webUrl = remember { mutableStateOf(initialUrl) }
@@ -61,6 +62,7 @@ object WebViewUrlLoader {
                     if (pushToken.isNotEmpty()) put("pushToken", pushToken)
                     if (deviceId.isNotEmpty()) put("deviceUUID", deviceId)
                     if (keyLevel.isNotEmpty()) put("keyLevel", keyLevel)
+                    paramInfo?.also { putAll(it) }
                 }
 
                 loadWebUrl(

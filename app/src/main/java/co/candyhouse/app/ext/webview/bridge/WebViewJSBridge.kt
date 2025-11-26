@@ -3,6 +3,7 @@ package co.candyhouse.app.ext.webview.bridge
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.app.NotificationManagerCompat
+import co.candyhouse.app.tabs.devices.hub3.bean.IrRemoteRepository
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
@@ -98,6 +99,13 @@ class WebViewJSBridge(
                     }
                 }
 
+                "updateRemote" -> {
+                    val hub3DeviceId = json.optString("hub3DeviceId")
+                    val remoteId = json.optString("remoteId")
+                    val alias = json.optString("alias")
+                    updateRemote(hub3DeviceId, remoteId, alias)
+                }
+
                 else -> {
                     L.e(tag, "Unknown action: $action")
                 }
@@ -105,6 +113,17 @@ class WebViewJSBridge(
         } catch (e: Exception) {
             L.e(tag, "Error parsing message: ${e.message}")
         }
+    }
+
+    private fun updateRemote(hub3DeviceId: String, remoteId: String, alias: String) {
+        val irRepository = IrRemoteRepository.getInstance()
+        val list = irRepository.getRemotesByKey(hub3DeviceId)
+        for (item in list) {
+            if (item.uuid == remoteId) {
+                item.alias = alias
+            }
+        }
+        irRepository.setRemotes(hub3DeviceId,list)
     }
 
     private fun handleRequestDeviceList(callbackName: String) {

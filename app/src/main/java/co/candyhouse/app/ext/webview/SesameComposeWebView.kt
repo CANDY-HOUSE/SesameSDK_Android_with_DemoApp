@@ -96,6 +96,7 @@ class SesameComposeWebView : Fragment() {
                 where = arguments?.getString("where") ?: "",
                 title = arguments?.getString("title") ?: "",
                 pushToken = arguments?.getString("pushToken") ?: "",
+                extInfo = arguments?.getSerializable("extInfo", HashMap::class.java) as? HashMap<String, String> ?: hashMapOf(),
                 onBackClick = {
                     exit()
                 },
@@ -159,6 +160,7 @@ fun SesameComposeWebViewContent(
     where: String = "",
     title: String = "",
     pushToken: String = "",
+    extInfo: Map<String, String> = hashMapOf<String, String>(),
     onBackClick: () -> Unit,
     onMoreClick: (String) -> Unit,
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null
@@ -178,7 +180,7 @@ fun SesameComposeWebViewContent(
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val webUrl by rememberWebUrl(url, scene, deviceId, pushToken) { errorMsg ->
+    val webUrl by rememberWebUrl(url, scene, deviceId, pushToken, paramInfo = extInfo) { errorMsg ->
         error = errorMsg
         loading = false
     }
@@ -512,6 +514,7 @@ fun EmbeddedWebViewContent(
     keyLevel: String = "",
     height: Dp = 80.dp,
     refreshTrigger: Int = 0,
+    extInfo: Map<String, String> = hashMapOf<String, String>(),
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
@@ -525,7 +528,7 @@ fun EmbeddedWebViewContent(
 
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val webUrl by rememberWebUrl(url, scene, deviceId, keyLevel = keyLevel) { errorMsg ->
+    val webUrl by rememberWebUrl(url, scene, deviceId, keyLevel = keyLevel, paramInfo = extInfo) { errorMsg ->
         error = errorMsg
         loading = false
     }

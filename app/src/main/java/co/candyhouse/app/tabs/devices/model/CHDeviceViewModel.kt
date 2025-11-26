@@ -87,7 +87,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private val delegateManager = DeviceViewModelDelegates(this)
     val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
     private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
-    private val iRRepository = IrRemoteRepository()
+    private val iRRepository = IrRemoteRepository.getInstance()
 
     // 搜索关键词
     val searchQuery = MutableStateFlow("")

@@ -31,6 +31,7 @@ import co.utils.recycle.GenericAdapter
 import co.utils.recycle.SimpleItemTouchHelperCallback
 import co.utils.safeNavigate
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.gson.Gson
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -239,6 +240,12 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
 
     private fun handleCallBackHub3(hub3: CHHub3, irRemote: IrRemote) {
         L.d(tag, "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
+        safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+            putString("scene", "ir_remote")
+            putString("deviceId", hub3.deviceId.toString().uppercase())
+            putSerializable("extInfo", hashMapOf("irRemote" to Gson().toJson(irRemote)))
+        })
+
         when (irRemote.type) {
             IRType.DEVICE_REMOTE_CUSTOM -> {
                 //学习
