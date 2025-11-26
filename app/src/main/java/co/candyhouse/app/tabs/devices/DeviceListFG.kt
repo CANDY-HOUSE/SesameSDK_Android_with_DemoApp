@@ -241,7 +241,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     private fun handleCallBackHub3(hub3: CHHub3, irRemote: IrRemote) {
         L.d(tag, "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
         safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-            putString("scene", "ir_remote")
+            putString("scene", "ir-remote")
             putString("deviceId", hub3.deviceId.toString().uppercase())
             putSerializable("extInfo", hashMapOf("irRemote" to Gson().toJson(irRemote)))
         })

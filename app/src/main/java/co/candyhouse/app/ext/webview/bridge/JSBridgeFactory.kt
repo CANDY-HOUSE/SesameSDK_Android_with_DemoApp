@@ -20,7 +20,7 @@ object JSBridgeFactory {
             "me-index",
             "device-notify",
             "device-user",
-            "ir_remote"
+            "ir-remote"
         )
     }
 
