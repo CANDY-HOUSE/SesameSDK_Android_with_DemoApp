@@ -3,14 +3,12 @@ package co.candyhouse.sesame.open.device.sesameBiometric.capability.card
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.ble.StpItemCode
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHAutoInitCapabilityImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.hexStringToByteArray
@@ -19,7 +17,6 @@ import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toReverseBytes
 import java.lang.Thread.sleep
 import java.util.concurrent.CountDownLatch
-import kotlin.text.chunked
 
 internal open class CHCardCapableImpl() :
     CHAutoInitCapabilityImpl(),
@@ -177,16 +174,6 @@ internal open class CHCardCapableImpl() :
             ), result
         ) { res ->
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-        }
-    }
-
-    override fun cardNameSet(cardNameRequest: CHCardNameRequest, result: CHResult<String>) {
-        CHAccountManager.setCardName(cardNameRequest) { it ->
-            it.onSuccess {
-                val res = it.data
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-            }
-            it.onFailure { result.invoke(Result.failure(it)) }
         }
     }
 

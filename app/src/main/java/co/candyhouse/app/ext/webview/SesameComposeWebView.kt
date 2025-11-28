@@ -76,6 +76,7 @@ import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
 import co.utils.ContainerPaddingManager
 import co.utils.SharedPreferencesUtils
+import co.utils.getSerializableCompat
 import co.utils.safeNavigate
 import java.io.File
 
@@ -96,7 +97,7 @@ class SesameComposeWebView : Fragment() {
                 where = arguments?.getString("where") ?: "",
                 title = arguments?.getString("title") ?: "",
                 pushToken = arguments?.getString("pushToken") ?: "",
-                extInfo = arguments?.getSerializable("extInfo", HashMap::class.java) as? HashMap<String, String> ?: hashMapOf(),
+                extInfo = arguments?.getSerializableCompat<HashMap<String, String>>("extInfo") ?: hashMapOf(),
                 onBackClick = {
                     exit()
                 },
@@ -160,13 +161,14 @@ fun SesameComposeWebViewContent(
     where: String = "",
     title: String = "",
     pushToken: String = "",
-    extInfo: Map<String, String> = hashMapOf<String, String>(),
+    extInfo: Map<String, String> = hashMapOf(),
     onBackClick: () -> Unit,
     onMoreClick: (String) -> Unit,
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null
 ) {
     val logTag = "SesameComposeWebView"
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // 设置锁历史记录标题
     val titleNew = if (scene == "history") {
@@ -181,7 +183,7 @@ fun SesameComposeWebViewContent(
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
     val webUrl by rememberWebUrl(url, scene, deviceId, pushToken, paramInfo = extInfo) { errorMsg ->
-        error = errorMsg
+        error = "URL_LOAD_ERROR:$errorMsg"
         loading = false
     }
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
@@ -215,7 +217,6 @@ fun SesameComposeWebViewContent(
 
     var jsBridge by remember { mutableStateOf<WebViewJSBridge?>(null) }
 
-    val context = LocalContext.current
     var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
     var pendingCameraIntent by remember { mutableStateOf<Intent?>(null) }
@@ -484,6 +485,13 @@ fun SesameComposeWebViewContent(
                         }
                     }
 
+                    errorMsg.startsWith("URL_LOAD_ERROR:") -> {
+                        LaunchedEffect(errorMsg) {
+                            val actualMsg = errorMsg.removePrefix("URL_LOAD_ERROR:")
+                            Toast.makeText(context, actualMsg, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
                     else -> {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
@@ -514,12 +522,13 @@ fun EmbeddedWebViewContent(
     keyLevel: String = "",
     height: Dp = 80.dp,
     refreshTrigger: Int = 0,
-    extInfo: Map<String, String> = hashMapOf<String, String>(),
+    extInfo: Map<String, String> = hashMapOf(),
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     val logTag = "EmbeddedWebViewContent"
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var dynamicHeight by remember { mutableStateOf(height) }
 
@@ -529,7 +538,7 @@ fun EmbeddedWebViewContent(
     var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
     val webUrl by rememberWebUrl(url, scene, deviceId, keyLevel = keyLevel, paramInfo = extInfo) { errorMsg ->
-        error = errorMsg
+        error = "URL_LOAD_ERROR:$errorMsg"
         loading = false
     }
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
@@ -625,12 +634,29 @@ fun EmbeddedWebViewContent(
             )
         }
 
-        if (error != null && !loading) {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = error ?: "Failed to load")
+        error?.takeIf { !loading }?.let { errorMsg ->
+            when {
+                errorMsg.contains("Please log in", ignoreCase = true) -> {
+                    LaunchedEffect(errorMsg) {
+                        Toast.makeText(context, "Please log in", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                errorMsg.startsWith("URL_LOAD_ERROR:") -> {
+                    LaunchedEffect(errorMsg) {
+                        val actualMsg = errorMsg.removePrefix("URL_LOAD_ERROR:")
+                        Toast.makeText(context, actualMsg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                else -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = error ?: "Failed to load")
+                    }
+                }
             }
         }
     }

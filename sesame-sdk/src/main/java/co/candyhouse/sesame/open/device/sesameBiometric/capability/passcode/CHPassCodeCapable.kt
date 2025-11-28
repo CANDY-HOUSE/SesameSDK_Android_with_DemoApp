@@ -4,7 +4,6 @@ import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 
 interface CHPassCodeCapable {
     fun sendKeyBoardPassCodeDataGetCmd(result: CHResult<CHEmpty>)
@@ -15,7 +14,6 @@ interface CHPassCodeCapable {
     fun keyBoardPassCodeMove(keyBoardPassCodeID: String, touchProUUID: String, result: CHResult<CHEmpty>)
     fun keyBoardPassCodeModeGet(result: CHResult<Byte>)
     fun keyBoardPassCodeModeSet(mode: Byte, result: CHResult<CHEmpty>)
-    fun keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, result: CHResult<String>)
     fun getBoardPassCodeDataSyncCapable(): CHDataSynchronizeCapable
 
     fun registerEventDelegate(device: CHSesameBiometricBase, delegate: CHPassCodeDelegate)

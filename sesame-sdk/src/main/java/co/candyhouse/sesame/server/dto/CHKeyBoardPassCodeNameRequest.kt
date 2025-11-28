@@ -12,4 +12,5 @@ data class CHKeyBoardPassCodeNameRequest(
     @SerializedName("name") val name: String,
     @SerializedName("keyBoardPassCode") val keyBoardPassCode: String,
     @SerializedName("timestamp") val timestamp: Long = Timestamp(System.currentTimeMillis()).time,
+    @SerializedName("op") val op: String
 )

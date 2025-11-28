@@ -31,6 +31,7 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode.CHPa
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
 import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
@@ -410,7 +411,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
     }
 
     private fun executeKeyboardPassCodeNameSet(data: KeyboardPassCode, name: String, deviceUUID: String) {
-        val keyBoardPassCodeNameRequest = CHKeyBoardPassCodeNameRequest(
+        val keyBoardPassCodeNameRequest = CHAuthenticationNameRequest.keyBoardPassCode(
             keyBoardPassCodeNameUUID = data.nameUUID,
             subUUID = UserUtils.getUserId() ?: "",
             stpDeviceUUID = deviceUUID,
@@ -418,8 +419,10 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             keyBoardPassCode = data.id.hexStringToIntStr(), // 这里需要转换成十进制
             type = data.type,
         )
-        getPassCodeCapable()?.keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest) { it ->
-            it.onSuccess {
+        getPassCodeCapable()?.getBoardPassCodeDataSyncCapable()?.updateAuthenticationName(keyBoardPassCodeNameRequest){result ->
+            result.onSuccess {
+                val res = it.data
+                L.d(tag, "updateAuthenticationName: $res")
                 if (it.data == "Ok") {
                     data.name = name
                     runOnUiThread { updatePassCodeList(data) }
@@ -427,7 +430,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
                     lifecycleScope.launch(Dispatchers.Main) { toastMSG(it.data) }
                 }
             }
-            it.onFailure { error ->
+            result.onFailure { error ->
                 lifecycleScope.launch(Dispatchers.Main) { toastMSG(error.message) }
             }
         }

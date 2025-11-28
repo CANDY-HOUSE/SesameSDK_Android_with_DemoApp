@@ -12,4 +12,5 @@ data class CHFingerPrintNameRequest(
     @SerializedName("name") val name: String,
     @SerializedName("fingerPrintID") val fingerPrintID: String,
     @SerializedName("timestamp") val timestamp: Long = Timestamp(System.currentTimeMillis()).time,
+    @SerializedName("op") val op: String
 )

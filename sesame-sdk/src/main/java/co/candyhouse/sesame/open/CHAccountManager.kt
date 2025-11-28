@@ -11,13 +11,8 @@ import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.server.CHPrivateAPIClient
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
-import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.server.dto.CHFaceNameRequest
 import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
-import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
-import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
-import co.candyhouse.sesame.server.dto.CHPalmNameRequest
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
@@ -101,41 +96,6 @@ object CHAccountManager {
         }
     }
 
-    internal fun setCardName(cardNameRequest: CHCardNameRequest, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIclient.setCardName(cardNameRequest)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun setFingerPrintName(fingerPrintNameRequest: CHFingerPrintNameRequest, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIclient.setFingerPrintName(fingerPrintNameRequest)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun setFaceName(faceNameRequest: CHFaceNameRequest, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIclient.setFaceName(faceNameRequest)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun setPalmName(palmNameRequest: CHPalmNameRequest, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIclient.setPalmName(palmNameRequest)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun setKeyBoardPassCodeName(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, onResponse: CHResult<String>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIclient.setKeyBoardPassCodeName(keyBoardPassCodeNameRequest)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
     internal fun getHub3StatusFromIot(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.getHub3StatusFromIot(deviceUUID)
@@ -180,6 +140,17 @@ object CHAccountManager {
         makeApiCall(onResponse) {
             try {
                 val res = jpAPIclient.postCredentialListToServer(credentialListRequest)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    internal fun updateAuthenticationName(authData: Any, onResponse: CHResult<String>) {
+        makeApiCall(onResponse) {
+            try {
+                val res = jpAPIclient.postCredential(authData)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 e.printStackTrace()

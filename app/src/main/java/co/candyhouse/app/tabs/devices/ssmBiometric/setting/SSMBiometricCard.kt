@@ -31,6 +31,7 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardDe
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
 import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
@@ -405,25 +406,27 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
     }
 
     private fun executeCardNameSet(data: SuiCard, name: String, deviceUUID: String) {
-        val cardNameRequest = CHCardNameRequest(
+        val cardNameRequest = CHAuthenticationNameRequest.card(
             cardType = data.cardType,
             cardNameUUID = data.cardNameUUID,
             subUUID = UserUtils.getUserId() ?: "",
             stpDeviceUUID = deviceUUID,
             name = name,
-            cardID = data.id,
+            cardID = data.id
         )
-        getCardCapable()?.cardNameSet(cardNameRequest) { it ->
-            it.onSuccess {
+        getCardCapable()?.getCardDataSyncCapable()?.updateAuthenticationName(cardNameRequest){result ->
+            result.onSuccess {
+                val res = it.data
+                L.d(tag, "updateAuthenticationName: $res")
                 if (it.data == "Ok") {
-                    runOnUiThread {
-                        data.name = name
-                        updateCardList(data)
-                    }
+                    data.name = name
+                    runOnUiThread { updateCardList(data) }
+                } else {
+                    lifecycleScope.launch(Dispatchers.Main) { toastMSG(it.data) }
                 }
             }
-            it.onFailure {
-                lifecycleScope.launch(Dispatchers.Main) { toastMSG(it.message) }
+            result.onFailure { error ->
+                lifecycleScope.launch(Dispatchers.Main) { toastMSG(error.message) }
             }
         }
     }

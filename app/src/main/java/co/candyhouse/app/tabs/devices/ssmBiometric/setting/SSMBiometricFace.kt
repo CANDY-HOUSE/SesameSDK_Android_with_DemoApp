@@ -1,5 +1,6 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
+import android.R.attr.data
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -21,6 +22,8 @@ import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometri
 import co.candyhouse.sesame.server.dto.CHFaceNameRequest
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
+import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest.Companion.palm
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -162,7 +165,7 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
     }
 
     private fun setFaceName(face: CHSesameTouchFace, name: String, deviceUUID: String) {
-        val faceNameRequest = CHFaceNameRequest(
+        val faceNameRequest = CHAuthenticationNameRequest.face(
             faceNameUUID = face.nameUUID,
             subUUID = UserUtils.getUserId() ?: "",
             stpDeviceUUID = deviceUUID,
@@ -170,16 +173,18 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
             faceID = face.id,
             type = face.type,
         )
-        getFaceCapable()?.faceNameSet(faceNameRequest) { it ->
-            it.onSuccess {
-                face.name = name
+        getFaceCapable()?.getFaceDataSyncCapable()?.updateAuthenticationName(faceNameRequest){result ->
+            result.onSuccess {
+                val res = it.data
+                L.d(tag, "updateAuthenticationName: $res")
                 if (it.data == "Ok") {
-                    runOnUiThread {
-                        updateFaceList(face)
-                    }
+                    face.name = name
+                    runOnUiThread { updateFaceList(face) }
+                } else {
+                    lifecycleScope.launch(Dispatchers.Main) { toastMSG(it.data) }
                 }
             }
-            it.onFailure { error ->
+            result.onFailure { error ->
                 lifecycleScope.launch(Dispatchers.Main) { toastMSG(error.message) }
             }
         }

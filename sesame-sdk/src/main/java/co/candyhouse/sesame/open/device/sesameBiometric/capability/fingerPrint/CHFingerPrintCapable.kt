@@ -12,7 +12,6 @@ interface CHFingerPrintCapable {
     fun fingerPrintsChange(ID: String, hexName: String, result: CHResult<CHEmpty>)
     fun fingerPrintModeGet(result: CHResult<Byte>)
     fun fingerPrintModeSet(mode: Byte, result: CHResult<CHEmpty>)
-    fun fingerPrintNameSet(fingerPrintNameRequest: CHFingerPrintNameRequest, result: CHResult<String>)
     fun getFingerPrintDataSyncCapable(): CHDataSynchronizeCapable
 
     fun registerEventDelegate(device: CHSesameBiometricBase, delegate: CHFingerPrintDelegate)

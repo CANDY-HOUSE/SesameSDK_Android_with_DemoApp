@@ -3,7 +3,6 @@ package co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.ble.StpItemCode
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHAutoInitCapabilityImpl
@@ -11,7 +10,6 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.C
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.padEnd
@@ -19,7 +17,6 @@ import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toReverseBytes
 import java.lang.Thread.sleep
 import java.util.concurrent.CountDownLatch
-import kotlin.collections.set
 
 internal open class CHPassCodeCapableImpl() :
     CHAutoInitCapabilityImpl(),
@@ -143,15 +140,6 @@ internal open class CHPassCodeCapableImpl() :
         sendCommandSafely(SesameOS3Payload(SesameItemCode.SSM_OS3_PASSCODE_GET.value, byteArrayOf()), result) {}
     }
 
-    override fun keyBoardPassCodeNameSet(keyBoardPassCodeNameRequest: CHKeyBoardPassCodeNameRequest, result: CHResult<String>) {
-        CHAccountManager.setKeyBoardPassCodeName(keyBoardPassCodeNameRequest) { it ->
-            it.onSuccess {
-                val res = it.data
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-            }
-            it.onFailure { result.invoke(Result.failure(it)) }
-        }
-    }
     private val dataSyncCapable = CHDataSynchronizeCapableImpl()
     override fun getBoardPassCodeDataSyncCapable(): CHDataSynchronizeCapable {
         return dataSyncCapable

@@ -17,6 +17,7 @@ import android.os.Parcelable
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
+import java.io.Serializable
 import kotlin.experimental.and
 
 internal fun String.base64decodeHex(): String {
@@ -113,5 +114,14 @@ inline fun <reified T : Parcelable> Bundle.getParcelableArrayListCompat(key: Str
     } else {
         @Suppress("DEPRECATION")
         getParcelableArrayList(key)
+    }
+}
+
+inline fun <reified T : Serializable> Bundle.getSerializableCompat(key: String): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getSerializable(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getSerializable(key) as? T
     }
 }

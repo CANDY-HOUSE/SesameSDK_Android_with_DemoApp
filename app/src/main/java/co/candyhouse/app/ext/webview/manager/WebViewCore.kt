@@ -152,8 +152,10 @@ object WebViewCore {
             wv.clearFormData()
             CookieManager.getInstance().removeAllCookies(null)
             CookieManager.getInstance().flush()
-            wv.removeAllViews()
-            wv.destroy()
+            wv.postDelayed({
+                wv.removeAllViews()
+                wv.destroy()
+            }, 100)
         }
     }
 }

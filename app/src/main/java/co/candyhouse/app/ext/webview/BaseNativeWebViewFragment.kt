@@ -118,6 +118,8 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
                         finishManualRefresh()
                         if (error.contains("Please log in", ignoreCase = true)) {
                             toastMSG("Please log in")
+                        } else {
+                            toastMSG(error)
                         }
                     }
                 }

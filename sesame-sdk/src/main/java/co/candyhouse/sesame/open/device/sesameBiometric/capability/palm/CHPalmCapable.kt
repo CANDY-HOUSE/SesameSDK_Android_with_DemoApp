@@ -11,7 +11,6 @@ interface CHPalmCapable {
     fun palmModeGet(result: CHResult<Byte>)
     fun palmListGet(result: CHResult<CHEmpty>)
     fun palmDelete(palmID: String, deviceId: String, result: CHResult<CHEmpty>)
-    fun palmNameSet(palmNameRequest: CHPalmNameRequest, result: CHResult<String>)
     fun getPalmDataSyncCapable(): CHDataSynchronizeCapable
 
     fun registerEventDelegate(device: CHSesameBiometricBase, delegate: CHPalmDelegate)

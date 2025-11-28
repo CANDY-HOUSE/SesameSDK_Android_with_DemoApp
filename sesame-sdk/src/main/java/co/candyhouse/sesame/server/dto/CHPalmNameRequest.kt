@@ -12,4 +12,5 @@ data class CHPalmNameRequest(
     @SerializedName("name") val name: String,
     @SerializedName("palmID") val palmID: String,
     @SerializedName("timestamp") val timestamp: Long = Timestamp(System.currentTimeMillis()).time,
+    @SerializedName("op") val op: String
 )

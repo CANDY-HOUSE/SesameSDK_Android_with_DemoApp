@@ -12,4 +12,5 @@ data class CHFaceNameRequest(
     @SerializedName("name") val name: String,
     @SerializedName("faceID") val faceID: String,
     @SerializedName("timestamp") val timestamp: Long = Timestamp(System.currentTimeMillis()).time,
+    @SerializedName("op") val op: String
 )

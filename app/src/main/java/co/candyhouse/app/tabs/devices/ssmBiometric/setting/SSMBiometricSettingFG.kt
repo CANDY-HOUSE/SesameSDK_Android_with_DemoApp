@@ -514,7 +514,9 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
         device?.let {
             mDeviceModel.ssmosLockDelegates.remove(it)
-             it.unregisterEventDelegate(deviceDelegate as CHRemoteNanoDelegate)
+            (deviceDelegate as? CHRemoteNanoDelegate)?.let { delegate ->
+                it.unregisterEventDelegate(delegate)
+            }
         }
         deviceDelegate = null
     }

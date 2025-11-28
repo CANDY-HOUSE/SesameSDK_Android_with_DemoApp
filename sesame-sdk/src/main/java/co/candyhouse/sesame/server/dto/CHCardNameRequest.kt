@@ -12,4 +12,5 @@ data class CHCardNameRequest(
     @SerializedName("name") val name: String,
     @SerializedName("cardID") val cardID: String,
     @SerializedName("timestamp") val timestamp: Long = Timestamp(System.currentTimeMillis()).time,
+    @SerializedName("op") val op: String
 )

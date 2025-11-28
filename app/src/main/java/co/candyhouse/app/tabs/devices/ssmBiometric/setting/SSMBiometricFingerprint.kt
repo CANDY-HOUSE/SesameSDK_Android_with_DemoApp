@@ -17,6 +17,8 @@ import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometri
 import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
+import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest.Companion.face
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -146,7 +148,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
     }
 
     private fun executeFingerPrintNameSet(data: FingerPrint, name: String, deviceUUID: String) {
-        val fingerPrintNameRequest = CHFingerPrintNameRequest(
+        val fingerPrintNameRequest = CHAuthenticationNameRequest.fingerPrint(
             fingerPrintNameUUID = data.fingerPrintNameUUID,
             subUUID = UserUtils.getUserId() ?:"",
             stpDeviceUUID = deviceUUID,
@@ -154,8 +156,10 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
             fingerPrintID = data.id,
             type = data.type,
         )
-        getFingerPrintCapable()?.fingerPrintNameSet(fingerPrintNameRequest) { it ->
-            it.onSuccess {
+        getFingerPrintCapable()?.getFingerPrintDataSyncCapable()?.updateAuthenticationName(fingerPrintNameRequest){result ->
+            result.onSuccess {
+                val res = it.data
+                L.d(tag, "updateAuthenticationName: $res")
                 if (it.data == "Ok") {
                     data.name = name
                     runOnUiThread { updateFingerprintList(data) }
@@ -163,7 +167,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
                     lifecycleScope.launch(Dispatchers.Main) { toastMSG(it.data) }
                 }
             }
-            it.onFailure { error ->
+            result.onFailure { error ->
                 lifecycleScope.launch(Dispatchers.Main) { toastMSG(error.message) }
             }
         }

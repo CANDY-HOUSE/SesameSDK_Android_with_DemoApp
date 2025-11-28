@@ -2,7 +2,6 @@ package co.candyhouse.sesame.open.device.sesameBiometric.capability.fingerPrint
 
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHAutoInitCapabilityImpl
@@ -10,7 +9,6 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.C
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.server.dto.CHEmpty
-import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
 import co.candyhouse.sesame.utils.hexStringToByteArray
 
 internal class CHFingerPrintCapableImpl() :
@@ -49,18 +47,6 @@ internal class CHFingerPrintCapableImpl() :
             ), result
         ) {
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-        }
-    }
-
-    override fun fingerPrintNameSet(fingerPrintNameRequest: CHFingerPrintNameRequest, result: CHResult<String>) {
-        CHAccountManager.setFingerPrintName(fingerPrintNameRequest) { it ->
-            it.onSuccess {
-                val res = it.data
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-            }
-            it.onFailure {
-                result.invoke(Result.failure(it))
-            }
         }
     }
 
