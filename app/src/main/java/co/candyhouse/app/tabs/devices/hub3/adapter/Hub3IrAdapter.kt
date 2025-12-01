@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Hub3IrAdapterProvider
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
@@ -57,21 +56,7 @@ class Hub3IrAdapter(
                                         "sf",
                                         "详情……" + data.alias + " " + data.type + " " + data.uuid
                                     )
-                                    when (data.type) {
-                                        IRType.DEVICE_REMOTE_CUSTOM -> {
-                                            // 学习
-                                            hub3IrAdapterProvider.performStudy(data)
-                                        }
-
-                                        IRType.DEVICE_REMOTE_AIR, IRType.DEVICE_REMOTE_LIGHT, IRType.DEVICE_REMOTE_TV, IRType.DEVICE_REMOTE_FANS -> {
-                                            // 空调
-                                            hub3IrAdapterProvider.performAirControl(data)
-                                        }
-
-                                        else -> {
-                                            L.d("sf", "暂不支持未知类型跳转...")
-                                        }
-                                    }
+                                    hub3IrAdapterProvider.performRemote(data)
                                 })
                             addAction(
                                 AlertAction(

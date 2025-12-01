@@ -261,6 +261,4 @@
     <string name="hint_enter_card_id_hex">请输入卡ID（0-9,A-F,a-f）</string>
     <string name="hint_enter_card_id">请输入卡ID</string>
 
-    <string name="network_retry">网络开小差了，请点击重试</string>
-
 </resources>

@@ -5,9 +5,6 @@
     android:id="@+id/list"
     app:startDestination="@+id/deviceListPG">
 
-    <!--红外线模块-->
-    <include app:graph="@navigation/remote_ng" />
-
     <!--“芝麻”界面入口-->
     <fragment
         android:id="@+id/deviceListPG"
@@ -53,23 +50,10 @@
             android:id="@+id/to_SesameBot2SettingFG"
             app:destination="@id/SesameBot2SettingFG" />
         <action
-            android:id="@+id/remoteLearnFg"
-            app:destination="@id/remoteLearnFg" />
-        <action
-            android:id="@+id/action_to_irgridefg2"
-            app:destination="@id/IrGridFg2" />
-        <action
             android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
     </fragment>
 
-    <!--其他fragment-->
-    <fragment
-        android:id="@+id/remoteLearnFg"
-        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.learn.RemoteLearnFG" />
-    <fragment
-        android:id="@+id/IrGridFg2"
-        android:name="co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.RemoteControlFG" />
     <!--Hub3界面入口-->
     <fragment
         android:id="@+id/Hub3SettingFG"
@@ -86,17 +70,11 @@
             android:id="@+id/to_HUB3ScanSSIDListFG"
             app:destination="@id/HUB3ScanSSIDListFG" />
         <action
-            android:id="@+id/action_to_irfg"
-            app:destination="@id/irIrFg" />
-        <action
             android:id="@+id/to_Hub3MatterFG"
             app:destination="@id/Hub3MatterFG" />
         <action
-            android:id="@+id/action_to_irdiy3"
-            app:destination="@id/remoteLearnFg" />
-        <action
-            android:id="@+id/action_to_remoteControlFg"
-            app:destination="@id/IrGridFg2" />
+            android:id="@+id/action_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
     </fragment>
     <fragment
         android:id="@+id/SSM5SettingFG"

@@ -261,6 +261,4 @@
     <string name="hint_enter_card_id_hex">請輸入卡ID（0-9,A-F,a-f）</string>
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
-    <string name="network_retry">網路異常，請點擊重試</string>
-
 </resources>

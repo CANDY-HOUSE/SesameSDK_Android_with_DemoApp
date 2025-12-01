@@ -9,9 +9,6 @@ import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
  */
 interface Hub3IrAdapterProvider {
 
-    fun performStudy(data: IrRemote)
-
-    fun performAirControl(data: IrRemote)
-
+    fun performRemote(data: IrRemote)
     fun deleteIRDevice(data: IrRemote)
 }

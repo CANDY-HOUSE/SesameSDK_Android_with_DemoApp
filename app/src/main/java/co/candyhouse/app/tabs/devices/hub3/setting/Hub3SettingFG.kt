@@ -12,12 +12,9 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgHub3SettingBinding
@@ -25,7 +22,6 @@ import co.candyhouse.app.tabs.devices.hub3.adapter.Hub3IrAdapter
 import co.candyhouse.app.tabs.devices.hub3.adapter.Ssm2DevicesAdapter
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Hub3IrAdapterProvider
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Ssm2DevicesAdapterProvider
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.remoteControl.domain.bizAdapter.bizBase.IRType
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -37,9 +33,9 @@ import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.L
-import co.utils.getParcelableCompat
 import co.utils.safeNavigate
 import co.utils.safeNavigateBack
+import com.google.gson.Gson
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -149,15 +145,13 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
             mDeviceViewModel.ssmLockLiveData.value?.apply {
                 if (this is CHHub3) {
                     val hub3Device: CHHub3 = this
-                    val bundle = Bundle().also {
-                        it.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
-                    }
-                    safeNavigate(R.id.action_to_irfg, bundle)
+                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+                        putString("scene", "ir-types")
+                        putString("deviceId", hub3Device.deviceId.toString().uppercase())
+                    })
                 }
             }
         }
-
-        setupBackViewListener()
     }
 
     private fun observeViewModelData() {
@@ -538,22 +532,6 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         }
     }
 
-    private fun setupBackViewListener() {
-        setFragmentResultListener(RemoteBundleKeyConfig.controlIrDeviceResult) { _, bundle ->
-            var irRemote: IrRemote? = null
-            var chDeviceId: String? = null
-            if (bundle.containsKey(RemoteBundleKeyConfig.irDevice)) {
-                irRemote = bundle.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
-            }
-            if (bundle.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
-                chDeviceId = bundle.getString(RemoteBundleKeyConfig.hub3DeviceId)
-            }
-            if (irRemote != null && !chDeviceId.isNullOrEmpty()) {
-                mDeviceViewModel.updateHub3IrDevice(irRemote, chDeviceId)
-            }
-        }
-    }
-
     override fun getDeviceNameByIdNew(id: String): String? {
         return getDeviceNameById(id)
     }
@@ -562,30 +540,15 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
         (mDeviceViewModel.ssmLockLiveData.value!! as CHHub3).removeSesame(id) {}
     }
 
-    override fun performStudy(data: IrRemote) {
+    override fun performRemote(data: IrRemote) {
         mDeviceViewModel.ssmLockLiveData.value?.apply {
             if (this is CHHub3) {
                 val hub3Device: CHHub3 = this
-                val bundle = Bundle().apply {
-                    putParcelable(RemoteBundleKeyConfig.irDevice, data)
-                    putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
-                }
-                safeNavigate(R.id.action_to_irdiy3, bundle)
-            }
-        }
-    }
-
-    override fun performAirControl(data: IrRemote) {
-        mDeviceViewModel.ssmLockLiveData.value?.apply {
-            if (this is CHHub3) {
-                val hub3Device: CHHub3 = this
-                safeNavigate(
-                    R.id.action_to_remoteControlFg,
-                    Bundle().apply {
-                        this.putParcelable(RemoteBundleKeyConfig.irDevice, data)
-                        this.putBoolean( RemoteBundleKeyConfig.isNewDevice, false)
-                        this.putString(RemoteBundleKeyConfig.hub3DeviceId, hub3Device.deviceId.toString().uppercase())
-                    })
+                safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+                    putString("scene", "ir-remote")
+                    putString("deviceId", hub3Device.deviceId.toString().uppercase())
+                    putSerializable("extInfo", hashMapOf("irRemote" to Gson().toJson(data)))
+                })
             }
         }
     }

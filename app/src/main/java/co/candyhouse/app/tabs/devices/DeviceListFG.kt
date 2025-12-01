@@ -6,7 +6,6 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -16,7 +15,6 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.tabs.HomeFragment
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.RemoteBundleKeyConfig
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -24,7 +22,6 @@ import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.utils.L
-import co.utils.getParcelableCompat
 import co.utils.recycle.DeviceListAdapter
 import co.utils.recycle.GenericAdapter
 import co.utils.recycle.SimpleItemTouchHelperCallback
@@ -93,7 +90,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
 
         setupSearchBehavior()
         setupSearchEditTextListener()
-        setupBackViewListener()
     }
 
     private fun setupSearchBehavior() {
@@ -296,22 +292,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.SSMFaceProAI -> safeNavigate(R.id.to_SesameTouchProSettingFG)
             CHProductModel.SSMFaceAI -> safeNavigate(R.id.to_SesameTouchProSettingFG)
             CHProductModel.SSMOpenSensor2 -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-        }
-    }
-
-    private fun setupBackViewListener() {
-        setFragmentResultListener(RemoteBundleKeyConfig.controlIrDeviceResult) { _, bundle ->
-            var irRemote: IrRemote? = null
-            var chDeviceId: String? = null
-            if (bundle.containsKey(RemoteBundleKeyConfig.irDevice)) {
-                irRemote = bundle.getParcelableCompat<IrRemote>(RemoteBundleKeyConfig.irDevice)
-            }
-            if (bundle.containsKey(RemoteBundleKeyConfig.hub3DeviceId)) {
-                chDeviceId = bundle.getString(RemoteBundleKeyConfig.hub3DeviceId,"")
-            }
-            if (irRemote != null && !chDeviceId.isNullOrEmpty()) {
-                mDeviceViewModel.updateHub3IrDevice(irRemote, chDeviceId)
-            }
         }
     }
 

@@ -20,21 +20,6 @@ data class IrRemote(
         return "IrRemote(model=$model, alias='$alias', uuid='$uuid', state=$state, timestamp=$timestamp, type=$type, code=$code, keys=${keys?.contentToString()?:""}, direction='$direction', haveSave=$haveSave)"
     }
 
-    fun clone(): IrRemote {
-        val newIrRemote = IrRemote(
-            model = this.model,
-            alias = this.alias,
-            uuid = this.uuid,
-            state = this.state,
-            timestamp = this.timestamp,
-            type = this.type,
-            code = this.code,
-            keys = keys?.toList()?.toTypedArray() ?: emptyArray(),
-            direction = this.direction
-        )
-        return newIrRemote
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
