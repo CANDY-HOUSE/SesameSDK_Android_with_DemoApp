@@ -291,7 +291,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMTouch -> "sesametouch1_30_10_5aac19"
         CHProductModel.SSMOpenSensor -> "opensensor1_30_8_baf005"
         CHProductModel.BLEConnector -> "bleconnector_30_11_01be3d"
-        CHProductModel.RemoteNano -> "remoten_30_15_03d244"
+        CHProductModel.RemoteNano -> "remoten_30_15_d623ac"
         CHProductModel.Remote -> "remote_30_14_625867"
         CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
         CHProductModel.SS5US -> "sesame5us_30_16_848a2d"
