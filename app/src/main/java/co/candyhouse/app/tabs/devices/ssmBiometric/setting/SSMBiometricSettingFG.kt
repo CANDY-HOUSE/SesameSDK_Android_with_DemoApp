@@ -68,7 +68,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         val device = mDeviceModel.ssmLockLiveData.value
         var size = 3
         device?.apply {
-            if (this.productModel == CHProductModel.RemoteNano) {
+            if (this.productModel == CHProductModel.RemoteNano || this.productModel == CHProductModel.SSMOpenSensor2) {
                 size = 2
             } else if (this.productModel == CHProductModel.Remote) {
                 size = 4
@@ -76,6 +76,14 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         }
         view?.apply {
             findViewById<TextView>(R.id.add_ssm).setTextColor(
+                if (mDeviceList.size >= size) Color.argb(
+                    90,
+                    Color.red(Color.GRAY),
+                    Color.green(Color.GRAY),
+                    Color.blue(Color.GRAY)
+                ) else Color.BLACK
+            )
+            bind.tvAddSsmLogo.setTextColor(
                 if (mDeviceList.size >= size) Color.argb(
                     90,
                     Color.red(Color.GRAY),
