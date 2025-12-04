@@ -15,6 +15,8 @@ import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
+import co.utils.alertview.fragments.toastMSG
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,17 +30,28 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         if (device is CHSesameBot2) {
             device
         } else {
-            throw IllegalStateException("Device is not CHSesameBot2, actual type: ${device?.javaClass?.simpleName}")
+            FirebaseCrashlytics.getInstance().apply {
+                setCustomKey("expected_type", "CHSesameBot2")
+                setCustomKey("actual_type", device.javaClass.simpleName)
+                setCustomKey("device_uuid", device?.deviceId.toString())
+                log("Wrong device type in SesameBot2SettingFG: ${device.javaClass.simpleName}")
+            }
+            toastMSG("デバイスタイプが一致しません。リストを更新してください。")
+            findNavController().navigateUp()
+            null
         }
     }
 
     private val bot2ScriptCurIndexKey by lazy {
-        bot2.deviceId.toString() + "_ScriptIndex"
+        bot2?.deviceId.toString() + "_ScriptIndex"
     }
 
     override fun onResume() {
         super.onResume()
-        (mDeviceModel.ssmosLockDelegates[bot2]) = object : CHDeviceStatusDelegate {
+        if (bot2 == null) {
+            return
+        }
+        (mDeviceModel.ssmosLockDelegates[bot2!!]) = object : CHDeviceStatusDelegate {
             override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {
                 onChange()
                 onUIDeviceStatus(status)
@@ -56,9 +69,12 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
     override fun getViewBinder() = FgSsmBikeSettingBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (bot2 == null) {
+            return
+        }
         super.onViewCreated(view, savedInstanceState)
         getView()?.findViewById<View>(R.id.click_script_zone)?.setOnClickListener { findNavController().navigate(R.id.to_SesameClickScriptFG) }
-        (mDeviceModel.ssmosLockDelegates[bot2]) = object : CHDeviceStatusDelegate {
+        (mDeviceModel.ssmosLockDelegates[bot2!!]) = object : CHDeviceStatusDelegate {
             override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {
                 // L.d("[say]", "[BaseDeviceSettingFG.kt][onBleDeviceStatusChanged]")
                 onChange()
@@ -76,7 +92,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
             showWheel(false)
         }
 
-        bot2.getScriptNameList {
+        bot2?.getScriptNameList {
             it.onSuccess {
                 L.d("hcia", "setting getNowScript:$it")
                 activity?.runOnUiThread {
@@ -95,7 +111,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
             L.d("hcia", "bind.scriptIdTxt.setOnClickListener")
             showWheel(!bind.wheelview.isVisible)
         }
-        loadWheel(bot2)
+        loadWheel(bot2!!)
 
     }//end view created
 
@@ -150,7 +166,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
 
     // 开启一个协程
 
-    private fun listItem(): List<String> {
-        return bot2.scripts.events.map { String(it.name, Charsets.UTF_8) }
+    private fun listItem(): List<String>? {
+        return bot2?.scripts?.events?.map { String(it.name, Charsets.UTF_8) }
     }
 }

@@ -11,8 +11,6 @@
     <color name="gray0">#eeeeee</color>
     <color name="gray1">#cccccc</color>
     <color name="gray3">#666666</color>
-    <color name="gray5">#88eeeeee</color>
-    <color name="blue">#0000ff</color>
     <color name="blue0">#3366FF</color>
     <color name="text_hint">#999999</color>
     <color name="clear">#00000000</color>
@@ -38,8 +36,5 @@
     <color name="unlock_blue">#28aeb1</color>
     <color name="light_blue">#68c6c8</color>
     <color name="no_grey">@color/gray1</color>
-
-    <color name="text_blue">#28aeb1</color>
-
 
 </resources>
