@@ -295,10 +295,10 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.Remote -> "remote_30_14_625867"
         CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
         CHProductModel.SS5US -> "sesame5us_30_16_848a2d"
-        CHProductModel.SSMFacePro -> "sesameface1pro_30_18_0ace8d"
+        CHProductModel.SSMFacePro -> "sesameface1pro_30_18_0cb19f"
         CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_0ace8d"
         CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_0ace8d"
-        CHProductModel.SSMFace -> "sesameface1_30_19_0ace8d"
+        CHProductModel.SSMFace -> "sesameface1_30_19_0cb19f"
         CHProductModel.SS6Pro -> "sesame6pro_30_21_90dd88"
         CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_d623ac"
         else -> null
