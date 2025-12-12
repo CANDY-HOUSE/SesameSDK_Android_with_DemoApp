@@ -299,7 +299,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_43ca70"
         CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_43ca70"
         CHProductModel.SSMFace -> "sesameface1_30_19_0cb19f"
-        CHProductModel.SS6Pro -> "sesame6pro_30_21_90dd88"
+        CHProductModel.SS6Pro -> "sesame6pro_30_21_07ca91"
         CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_d623ac"
         else -> null
     }
