@@ -103,6 +103,14 @@ object CHAccountManager {
         }
     }
 
+    internal fun updateDeviceFirmwareVersion(deviceUUID: String, versionTag: String, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            val body = mapOf("versionTag" to versionTag)
+            val res = jpAPIclient.updateDeviceFirmwareVersion(deviceUUID, body)
+            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+        }
+    }
+
     internal fun updateHub3Firmware(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val res = jpAPIclient.updateHub3Firmware(deviceUUID)

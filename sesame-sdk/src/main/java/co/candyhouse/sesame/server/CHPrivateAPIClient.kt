@@ -76,4 +76,10 @@ internal interface CHPrivateAPIClient {
     @Operation(path = "/device/v1/token", method = "DELETE")
     fun fcmTokenSignDelete(body: CHFcmTokenUpload): Any
 
+    @Operation(path = "/device/v2/sesame5/{device_id}/fwVer", method = "POST")
+    fun updateDeviceFirmwareVersion(
+        @Parameter(name = "device_id", location = "path") deviceId: String,
+        body: Map<String, Any>
+    ): Any
+
 }

@@ -189,9 +189,9 @@ class DeviceListAdapter(
 
                 updateBleStatusVisibility(device)
 
-                if (device.productModel == CHProductModel.SesameBot2) {
+                if (device is CHSesameBot2 && device.productModel == CHProductModel.SesameBot2) {
                     setupExpandableView(device, 90) {
-                        Bot2ItemView(getScriptList(view, device as CHSesameBot2)) { bot2Item ->
+                        Bot2ItemView(getScriptList(view, device)) { bot2Item ->
                             device.click(bot2Item.id.toUByte()) { }
                         }
                     }

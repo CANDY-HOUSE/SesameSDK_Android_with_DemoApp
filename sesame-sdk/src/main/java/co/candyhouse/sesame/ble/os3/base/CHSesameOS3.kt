@@ -399,9 +399,19 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
             SesameOS3Payload(SesameItemCode.versionTag.value, byteArrayOf()),
             DeviceSegmentType.cipher
         ) { res ->
-            //            val gitTag = res.payload.sliceArray(4..15) //
-            // CHIotManager.updateSS2ShadowVertion(this, String(gitTag))
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(String(res.payload))))
+            val deviceUUID = deviceId.toString().uppercase()
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                val versionTag = String(res.payload)
+                L.d("getVersionTag", "$deviceUUID == $versionTag")
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(versionTag)))
+                CHAccountManager.updateDeviceFirmwareVersion(deviceUUID, versionTag) {
+                    it.onFailure { error ->
+                        L.e("getVersionTag", error.message.toString())
+                    }
+                }
+            } else {
+                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
+            }
         }
     }
 
