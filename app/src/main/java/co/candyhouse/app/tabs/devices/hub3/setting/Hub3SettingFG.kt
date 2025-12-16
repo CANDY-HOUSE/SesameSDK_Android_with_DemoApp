@@ -1,6 +1,5 @@
 package co.candyhouse.app.tabs.devices.hub3.setting
 
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
@@ -14,7 +13,6 @@ import android.view.View.VISIBLE
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgHub3SettingBinding
@@ -22,6 +20,7 @@ import co.candyhouse.app.tabs.devices.hub3.adapter.Hub3IrAdapter
 import co.candyhouse.app.tabs.devices.hub3.adapter.Ssm2DevicesAdapter
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Hub3IrAdapterProvider
 import co.candyhouse.app.tabs.devices.hub3.adapter.provider.Ssm2DevicesAdapterProvider
+import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -259,19 +258,8 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
                 @SuppressLint("SetTextI18n")
                 override fun onOTAProgress(device: CHWifiModule2, percent: Byte) {
                     val targetPercent = percent.toInt()
-
-                    if (targetPercent > currentProgress) {
-                        // 使用 ValueAnimator 来平滑递增到目标百分比
-                        ValueAnimator.ofInt(currentProgress, targetPercent).apply {
-                            duration = 2500 // 动画时长，OTA实测数据
-                            addUpdateListener { animation ->
-                                val animatedValue = animation.animatedValue as Int
-                                bind.deviceVersionTxt.text = "$animatedValue%"
-                            }
-                            start()
-                        }
-                        currentProgress = targetPercent
-                    }
+                    bind.deviceVersionTxt.text = "$targetPercent%"
+                    currentProgress = targetPercent
 
                     // 升级完成后，归0
                     if (currentProgress >= 100) {
@@ -510,6 +498,7 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     }
 
     private fun verTag() {
+        if (currentProgress in 1..99) return
         val currentDevice = (mDeviceViewModel.ssmLockLiveData.value!! as CHHub3)
         if (!(currentDevice.versionTagFromIoT.isNullOrEmpty()) && !(currentDevice.hub3LastFirmwareVer.isNullOrEmpty())) { // IoT 有数据
             versionTag = currentDevice.versionTagFromIoT!!
