@@ -208,6 +208,11 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         ssm2KeysMap.clear()
         val keyDatas = receivePayload.payload.divideArray(23)
         keyDatas.forEach {
+            val allZeros = it.all { byte -> byte == 0x00.toByte() }
+            if (allZeros){
+                // todo: UI 上显示可以添加设备
+                L.d("harry", "还可以添加设备！！！")
+            }
             val lock_status = it[22].toInt()
             if (lock_status != 0) {
                 if (it[21].toInt() == 0x00) {
