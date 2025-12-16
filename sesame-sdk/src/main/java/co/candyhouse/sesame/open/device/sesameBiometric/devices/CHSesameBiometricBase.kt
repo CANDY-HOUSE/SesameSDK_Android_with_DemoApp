@@ -5,8 +5,8 @@ import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
 import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHCapabilitySupport
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHEventHandler
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapable
+import co.candyhouse.sesame.utils.Event
 
 interface CHSesameBiometricBase : CHSesameConnector, CHRemoteNanoCapable, CHCapabilitySupport {
     // 基础属性
@@ -24,4 +24,5 @@ interface CHSesameBiometricBase : CHSesameConnector, CHRemoteNanoCapable, CHCapa
     fun removeEventHandler(handler: CHEventHandler)
     fun clearEventHandlers()
     fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>?
+    fun getSSM2SlotFullLiveData(): LiveData<Event<Boolean>>?
 }

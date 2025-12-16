@@ -261,4 +261,6 @@
     <string name="hint_enter_card_id_hex">请输入卡ID（0-9,A-F,a-f）</string>
     <string name="hint_enter_card_id">请输入卡ID</string>
 
+    <string name="sesame_full">设备已满</string>
+
 </resources>

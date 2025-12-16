@@ -118,13 +118,12 @@ class DialogFragment(private val title: String, private val message: String, pri
 }
 
 
-fun Fragment.toastMSG(msg: String?) {
-    val context = activity ?: return
-    context.runOnUiThread {
+fun Fragment.toastMSG(msg: String?, duration: Int = Toast.LENGTH_SHORT) {
+    activity?.runOnUiThread {
         Toast.makeText(
-            context,
-            msg?:"Message is null",
-            Toast.LENGTH_LONG
+            requireContext(),
+            msg ?: "Message is null",
+            duration
         ).show()
     }
 }

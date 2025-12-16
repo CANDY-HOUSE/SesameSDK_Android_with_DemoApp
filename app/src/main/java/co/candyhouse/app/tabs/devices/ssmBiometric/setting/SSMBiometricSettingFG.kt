@@ -2,7 +2,6 @@ package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -32,9 +31,11 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDev
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.observeEvent
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
+import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
@@ -63,38 +64,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     private var deviceDelegate: CHDeviceStatusDelegate? = null
 
     override fun getViewBinder() = FgSesameTouchproSettingBinding.inflate(layoutInflater)
-
-    private fun addSsmTextColor() {
-        val device = mDeviceModel.ssmLockLiveData.value
-        var size = 3
-        device?.apply {
-            if (this.productModel == CHProductModel.RemoteNano || this.productModel == CHProductModel.SSMOpenSensor2) {
-                size = 2
-            } else if (this.productModel == CHProductModel.Remote) {
-                size = 4
-            }
-        }
-        view?.apply {
-            findViewById<TextView>(R.id.add_ssm).setTextColor(
-                if (mDeviceList.size >= size) Color.argb(
-                    90,
-                    Color.red(Color.GRAY),
-                    Color.green(Color.GRAY),
-                    Color.blue(Color.GRAY)
-                ) else Color.BLACK
-            )
-            bind.tvAddSsmLogo.setTextColor(
-                if (mDeviceList.size >= size) Color.argb(
-                    90,
-                    Color.red(Color.GRAY),
-                    Color.green(Color.GRAY),
-                    Color.blue(Color.GRAY)
-                ) else Color.BLACK
-            )
-        }
-        bind.addLockerZone.isClickable = mDeviceList.size < size
-        bind.addLockerZone.isEnabled = mDeviceList.size < size
-    }
 
     override fun onResume() {
         super.onResume()
@@ -408,6 +377,12 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             updateDeviceList(keys)
             isUpload = true
         }
+
+        device?.getSSM2SlotFullLiveData()?.observeEvent(viewLifecycleOwner) { isFull ->
+            if (isFull) {
+                toastMSG(getString(R.string.sesame_full))
+            }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -418,7 +393,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                 LockDeviceStatus(it.key, it.value[0], it.value[1])
             })
         }
-        addSsmTextColor()
         mAdapter?.notifyDataSetChanged()
 
         bind.devicesEmptyLogo.visibility = if (mDeviceList.isEmpty()) View.VISIBLE else View.GONE

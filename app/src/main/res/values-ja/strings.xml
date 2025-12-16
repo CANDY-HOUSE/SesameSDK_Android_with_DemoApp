@@ -239,6 +239,8 @@
     <string name="hint_enter_card_id_hex">カードIDを入力してください（0-9,A-F,a-f）</string>
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
+    <string name="sesame_full">デバイス満杯</string>
+
 </resources>
 
 

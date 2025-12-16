@@ -39,6 +39,7 @@ import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
+import co.candyhouse.sesame.utils.Event
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64decodeHex
@@ -121,6 +122,10 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
     override fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>? {
         return (ssm2KeysMap as? ObservableMutableMap)?.liveData
+    }
+
+    override fun getSSM2SlotFullLiveData(): LiveData<Event<Boolean>>? {
+        return (ssm2KeysMap as? ObservableMutableMap)?.slotFullLiveData
     }
 
     // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
@@ -207,12 +212,9 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         L.d("hcia", "[ds][PUB][KEY]===>:" + receivePayload.payload.toHexString())
         ssm2KeysMap.clear()
         val keyDatas = receivePayload.payload.divideArray(23)
+        val hasEmptySlot = keyDatas.any { it.all { byte -> byte == 0x00.toByte() } }
+        (ssm2KeysMap as? ObservableMutableMap)?.setSlotFull(!hasEmptySlot)
         keyDatas.forEach {
-            val allZeros = it.all { byte -> byte == 0x00.toByte() }
-            if (allZeros){
-                // todo: UI 上显示可以添加设备
-                L.d("harry", "还可以添加设备！！！")
-            }
             val lock_status = it[22].toInt()
             if (lock_status != 0) {
                 if (it[21].toInt() == 0x00) {
@@ -410,6 +412,12 @@ class ObservableMutableMap<K, V> : MutableMap<K, V> {
     private val map = mutableMapOf<K, V>()
     private val _liveData = MutableLiveData<Map<K, V>>(map)
     val liveData: LiveData<Map<K, V>> = _liveData
+    private val _slotFullLiveData = MutableLiveData<Event<Boolean>>()
+    val slotFullLiveData: LiveData<Event<Boolean>> = _slotFullLiveData
+
+    fun setSlotFull(isFull: Boolean) {
+        _slotFullLiveData.postValue(Event(isFull))
+    }
 
     override fun put(key: K, value: V): V? {
         val result = map.put(key, value)
