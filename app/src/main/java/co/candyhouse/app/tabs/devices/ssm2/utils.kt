@@ -289,7 +289,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.BiKeLock2 -> "sesamebike2_30_6_990e7f"
         CHProductModel.SSMTouchPro -> "sesametouch1pro_30_9_5aac19"
         CHProductModel.SSMTouch -> "sesametouch1_30_10_5aac19"
-        CHProductModel.SSMOpenSensor -> "opensensor1_30_8_baf005"
+        CHProductModel.SSMOpenSensor -> "opensensor1_30_8_b634a9"
         CHProductModel.BLEConnector -> "bleconnector_30_11_01be3d"
         CHProductModel.RemoteNano -> "remoten_30_15_d623ac"
         CHProductModel.Remote -> "remote_30_14_625867"
@@ -300,7 +300,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_43ca70"
         CHProductModel.SSMFace -> "sesameface1_30_19_5c6590"
         CHProductModel.SS6Pro -> "sesame6pro_30_21_07ca91"
-        CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_d623ac"
+        CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_b634a9"
         else -> null
     }
 }
