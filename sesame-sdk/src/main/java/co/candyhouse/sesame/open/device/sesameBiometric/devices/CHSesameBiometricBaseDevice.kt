@@ -212,7 +212,12 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         L.d("hcia", "[ds][PUB][KEY]===>:" + receivePayload.payload.toHexString())
         ssm2KeysMap.clear()
         val keyDatas = receivePayload.payload.divideArray(23)
-        val hasEmptySlot = keyDatas.any { it.all { byte -> byte == 0x00.toByte() } }
+        // 针对特殊机型opensenor系列，保留一个槽位给hub3，所以需要超过1个空槽位才算有空余
+        val hasEmptySlot = if (productModel == CHProductModel.SSMOpenSensor || productModel == CHProductModel.SSMOpenSensor2) {
+            keyDatas.count { it.all { byte -> byte == 0x00.toByte() } } > 1
+        } else {
+            keyDatas.any { it.all { byte -> byte == 0x00.toByte() } }
+        }
         (ssm2KeysMap as? ObservableMutableMap)?.setSlotFull(!hasEmptySlot)
         keyDatas.forEach {
             val lock_status = it[22].toInt()
