@@ -301,6 +301,10 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMFace -> "sesameface1_30_19_5c6590"
         CHProductModel.SS6Pro -> "sesame6pro_30_21_07ca91"
         CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_b634a9"
+        CHProductModel.SSMTouchPro2 -> ""
+        CHProductModel.SSMTouch2 -> ""
+        CHProductModel.SSMFace2 -> ""
+        CHProductModel.SSMFacePro2 -> ""
         else -> null
     }
 }
@@ -356,5 +360,9 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFaceAI -> CHDeviceManager.app.getString(R.string.SSMFaceAI)
         CHProductModel.SS6Pro -> CHDeviceManager.app.getString(R.string.Sesame6Pro)
         CHProductModel.SSMOpenSensor2 -> CHDeviceManager.app.getString(R.string.SesameOpenSensor2)
+        CHProductModel.SSMTouchPro2 -> CHDeviceManager.app.getString(R.string.SSMTouchPro2)
+        CHProductModel.SSMTouch2 -> CHDeviceManager.app.getString(R.string.SSMTouch2)
+        CHProductModel.SSMFace2 -> CHDeviceManager.app.getString(R.string.SSMFace2)
+        CHProductModel.SSMFacePro2 -> CHDeviceManager.app.getString(R.string.SSMFacePro2)
     }
 }

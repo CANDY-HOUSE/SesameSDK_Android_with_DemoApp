@@ -265,9 +265,9 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                     })
                 }
             }
+
             CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
-            CHProductModel.BiKeLock -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
-            CHProductModel.BiKeLock2 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
+            CHProductModel.BiKeLock, CHProductModel.BiKeLock2 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
             CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro, CHProductModel.BLEConnector -> {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)
@@ -280,18 +280,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
 
-            CHProductModel.SSMOpenSensor -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
-            CHProductModel.SSMTouchPro -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-            CHProductModel.SSMTouch -> safeNavigate(R.id.to_SesameTouchProSettingFG)
             CHProductModel.Hub3 -> safeNavigate(R.id.to_Hub3SettingFG)
-            CHProductModel.Remote -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-            CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.SesameBot2 -> safeNavigate(R.id.to_SesameBot2SettingFG)
-            CHProductModel.SSMFace -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-            CHProductModel.SSMFacePro -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-            CHProductModel.SSMFaceProAI -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-            CHProductModel.SSMFaceAI -> safeNavigate(R.id.to_SesameTouchProSettingFG)
-            CHProductModel.SSMOpenSensor2 -> safeNavigate(R.id.to_SesameTouchProSettingFG)
+            CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
+            CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro, CHProductModel.SSMFace,
+            CHProductModel.SSMFace2, CHProductModel.SSMFacePro, CHProductModel.SSMFacePro2, CHProductModel.SSMFaceProAI, CHProductModel.SSMFaceAI,
+            CHProductModel.SSMOpenSensor2, CHProductModel.SSMTouchPro2 -> safeNavigate(
+                R.id.to_SesameTouchProSettingFG
+            )
         }
     }
 

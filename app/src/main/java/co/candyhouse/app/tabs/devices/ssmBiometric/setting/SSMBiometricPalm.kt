@@ -91,7 +91,7 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
     private fun setFaceTips() {
         val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase
         when (device.productModel) {
-            CHProductModel.SSMFace -> bind.palmIvTips.setImageResource(R.drawable.palm_tips)
+            CHProductModel.SSMFace,CHProductModel.SSMFace2 -> bind.palmIvTips.setImageResource(R.drawable.palm_tips)
             else -> bind.palmIvTips.setImageResource(R.drawable.palmpro_tips)
         }
     }

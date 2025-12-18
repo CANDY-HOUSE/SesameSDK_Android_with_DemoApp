@@ -312,7 +312,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         setupPalmZoneView()
         checkBiometricDeviceView()
 
-        if (device.productModel === CHProductModel.SSMFace || device.productModel === CHProductModel.SSMFacePro || device.productModel === CHProductModel.SSMFaceProAI || device.productModel === CHProductModel.SSMFaceAI) {
+        if (device.productModel === CHProductModel.SSMFace || device.productModel === CHProductModel.SSMFace2 || device.productModel === CHProductModel.SSMFacePro || device.productModel === CHProductModel.SSMFacePro2 || device.productModel === CHProductModel.SSMFaceProAI || device.productModel === CHProductModel.SSMFaceAI) {
             bind.facePalm.visibility = View.VISIBLE
             if (device.deviceStatus == CHDeviceStatus.Unlocked) {
                 // 只有Face刷卡机才显示雷达灵敏度

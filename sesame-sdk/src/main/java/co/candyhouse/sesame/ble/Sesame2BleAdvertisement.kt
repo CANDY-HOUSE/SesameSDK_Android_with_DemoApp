@@ -73,7 +73,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                     null
                 }
 
-                CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SSMOpenSensor, CHProductModel.SSMTouchPro, CHProductModel.SSMTouch, CHProductModel.BiKeLock2, CHProductModel.BLEConnector, CHProductModel.Hub3, CHProductModel.Remote, CHProductModel.RemoteNano, CHProductModel.SS5US, CHProductModel.SesameBot2, CHProductModel.SSMFace, CHProductModel.SSMFacePro, CHProductModel.SSMFaceAI, CHProductModel.SSMFaceProAI, CHProductModel.SS6Pro, CHProductModel.SSMOpenSensor2 -> return try {
+                CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SSMOpenSensor, CHProductModel.SSMTouchPro, CHProductModel.SSMTouchPro2, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.BiKeLock2, CHProductModel.BLEConnector, CHProductModel.Hub3, CHProductModel.Remote, CHProductModel.RemoteNano, CHProductModel.SS5US, CHProductModel.SesameBot2, CHProductModel.SSMFace, CHProductModel.SSMFace2, CHProductModel.SSMFacePro, CHProductModel.SSMFacePro2, CHProductModel.SSMFaceAI, CHProductModel.SSMFaceProAI, CHProductModel.SS6Pro, CHProductModel.SSMOpenSensor2 -> return try {
 //                    L.d("hcia", "[ss5] isRegistered:" + isRegistered)
 //                    L.d("hcia", "[ss5] advBytes:" + advBytes.toHexString())
 //                    L.d("hcia", "[ss5] deviceName:" + deviceName)

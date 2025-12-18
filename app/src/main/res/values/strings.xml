@@ -99,6 +99,10 @@
     <string name="SSMFaceAI">Sesame Face AI</string>
     <string name="SSMFace">Sesame Face</string>
     <string name="Sesame6Pro">Sesame 6 Pro</string>
+    <string name="SSMTouchPro2">Sesame Touch 2 Pro</string>
+    <string name="SSMTouch2">Sesame Touch 2</string>
+    <string name="SSMFace2">Sesame Face 2</string>
+    <string name="SSMFacePro2">Sesame Face 2 Pro</string>
 
     <string name="unLoginHistoryTag">Unlogin user</string>
     <string name="wm2_update">Software Update＆Restart</string>

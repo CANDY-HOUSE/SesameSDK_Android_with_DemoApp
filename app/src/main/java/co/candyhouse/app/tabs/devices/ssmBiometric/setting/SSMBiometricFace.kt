@@ -90,7 +90,7 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
     private fun setFaceTips() {
         val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase
         when (device.productModel) {
-            CHProductModel.SSMFace -> bind.faceIvTips.setImageResource(R.drawable.face_tips)
+            CHProductModel.SSMFace,CHProductModel.SSMFace2 -> bind.faceIvTips.setImageResource(R.drawable.face_tips)
             else -> bind.faceIvTips.setImageResource(R.drawable.facepro_tips)
         }
     }

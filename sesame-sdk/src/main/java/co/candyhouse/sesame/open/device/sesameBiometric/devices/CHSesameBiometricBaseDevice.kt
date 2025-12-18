@@ -90,10 +90,14 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
         private val IOT_DEVICE_MODELS = setOf(
             CHProductModel.SSMTouch,
+            CHProductModel.SSMTouch2,
             CHProductModel.SSMTouchPro,
+            CHProductModel.SSMTouchPro2,
             CHProductModel.SSMFace,
+            CHProductModel.SSMFace2,
             CHProductModel.SSMFaceAI,
             CHProductModel.SSMFacePro,
+            CHProductModel.SSMFacePro2,
             CHProductModel.SSMFaceProAI
         )
         private const val TOPIC_OPENSENSOR_PREFIX = "opensensor/"
