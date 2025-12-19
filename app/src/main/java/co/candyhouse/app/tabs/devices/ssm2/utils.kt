@@ -301,10 +301,10 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMFace -> "sesameface1_30_19_5c6590"
         CHProductModel.SS6Pro -> "sesame6pro_30_21_07ca91"
         CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_b634a9"
-        CHProductModel.SSMTouchPro2 -> ""
-        CHProductModel.SSMTouch2 -> ""
-        CHProductModel.SSMFace2 -> ""
-        CHProductModel.SSMFacePro2 -> ""
+        CHProductModel.SSMTouchPro2 -> "sesametouch2pro_30_26_5c6590"
+        CHProductModel.SSMTouch2 -> "sesametouch2_30_25_5c6590"
+        CHProductModel.SSMFace2 -> "sesameface2_30_27_5c6590"
+        CHProductModel.SSMFacePro2 -> "sesameface2pro_30_28_5c6590"
         else -> null
     }
 }
