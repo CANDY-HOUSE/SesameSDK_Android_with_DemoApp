@@ -284,8 +284,8 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.SesameBot2 -> safeNavigate(R.id.to_SesameBot2SettingFG)
             CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro, CHProductModel.SSMFace,
-            CHProductModel.SSMFace2, CHProductModel.SSMFacePro, CHProductModel.SSMFacePro2, CHProductModel.SSMFaceProAI, CHProductModel.SSMFaceAI,
-            CHProductModel.SSMOpenSensor2, CHProductModel.SSMTouchPro2 -> safeNavigate(
+            CHProductModel.SSMFace2, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceProAI, CHProductModel.SSMFaceAI,
+            CHProductModel.SSMOpenSensor2, CHProductModel.SSMTouch2Pro -> safeNavigate(
                 R.id.to_SesameTouchProSettingFG
             )
         }

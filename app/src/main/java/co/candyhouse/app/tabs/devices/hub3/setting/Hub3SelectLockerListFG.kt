@@ -32,12 +32,12 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
         CHProductModel.SSMFace,
         CHProductModel.SSMFace2,
         CHProductModel.SSMFacePro,
-        CHProductModel.SSMFacePro2,
+        CHProductModel.SSMFace2Pro,
         CHProductModel.SSMFaceProAI,
         CHProductModel.SSMFaceAI,
         CHProductModel.BLEConnector,
         CHProductModel.SS6Pro,
-        CHProductModel.SSMTouchPro2
+        CHProductModel.SSMTouch2Pro
     )
 
 
@@ -66,7 +66,7 @@ class Hub3SelectLockerListFG : BaseDeviceFG<FgHub3SelectLockerListBinding>(), CH
                                     title.text = this
                                 }
                                 itemView.setOnClickListener {
-                                    if ((locker.productModel == CHProductModel.SSMFace) || (locker.productModel == CHProductModel.SSMFace2) || (locker.productModel == CHProductModel.SSMTouchPro) || (locker.productModel == CHProductModel.SSMTouchPro2) || (locker.productModel == CHProductModel.SSMTouch) || (locker.productModel == CHProductModel.SSMTouch2) || (locker.productModel == CHProductModel.SSMFacePro) || (locker.productModel == CHProductModel.SSMFacePro2) || (locker.productModel == CHProductModel.SSMFaceProAI) || (locker.productModel == CHProductModel.SSMFaceAI) ) {
+                                    if ((locker.productModel == CHProductModel.SSMFace) || (locker.productModel == CHProductModel.SSMFace2) || (locker.productModel == CHProductModel.SSMTouchPro) || (locker.productModel == CHProductModel.SSMTouch2Pro) || (locker.productModel == CHProductModel.SSMTouch) || (locker.productModel == CHProductModel.SSMTouch2) || (locker.productModel == CHProductModel.SSMFacePro) || (locker.productModel == CHProductModel.SSMFace2Pro) || (locker.productModel == CHProductModel.SSMFaceProAI) || (locker.productModel == CHProductModel.SSMFaceAI) ) {
                                         (mDeviceModel.ssmLockLiveData.value!! as CHHub3).insertSesame(locker, locker.getNickname(), MatterProductModel.None) {
                                             it.onSuccess { activity?.runOnUiThread { findNavController().navigateUp() } }
                                         }

@@ -298,11 +298,11 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMTouchPro -> "sesametouch1pro_30_9_5aac19"
         CHProductModel.SSMTouch -> "sesametouch1_30_10_5aac19"
         CHProductModel.SSMTouch2 -> "sesametouch2_30_25_5c6590"
-        CHProductModel.SSMTouchPro2 -> "sesametouch2pro_30_26_5c6590"
+        CHProductModel.SSMTouch2Pro -> "sesametouch2pro_30_26_5c6590"
         CHProductModel.SSMFacePro -> "sesameface1pro_30_18_5c6590"
         CHProductModel.SSMFace -> "sesameface1_30_19_5c6590"
         CHProductModel.SSMFace2 -> "sesameface2_30_27_5c6590"
-        CHProductModel.SSMFacePro2 -> "sesameface2pro_30_28_5c6590"
+        CHProductModel.SSMFace2Pro -> "sesameface2pro_30_28_5c6590"
         CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_811d1f"
         CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_811d1f"
         else -> null
@@ -360,9 +360,9 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFaceAI -> CHDeviceManager.app.getString(R.string.SSMFaceAI)
         CHProductModel.SS6Pro -> CHDeviceManager.app.getString(R.string.Sesame6Pro)
         CHProductModel.SSMOpenSensor2 -> CHDeviceManager.app.getString(R.string.SesameOpenSensor2)
-        CHProductModel.SSMTouchPro2 -> CHDeviceManager.app.getString(R.string.SSMTouchPro2)
+        CHProductModel.SSMTouch2Pro -> CHDeviceManager.app.getString(R.string.SSMTouch2Pro)
         CHProductModel.SSMTouch2 -> CHDeviceManager.app.getString(R.string.SSMTouch2)
         CHProductModel.SSMFace2 -> CHDeviceManager.app.getString(R.string.SSMFace2)
-        CHProductModel.SSMFacePro2 -> CHDeviceManager.app.getString(R.string.SSMFacePro2)
+        CHProductModel.SSMFace2Pro -> CHDeviceManager.app.getString(R.string.SSMFace2Pro)
     }
 }
