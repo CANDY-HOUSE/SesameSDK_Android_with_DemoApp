@@ -92,12 +92,12 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
             CHProductModel.SSMTouch,
             CHProductModel.SSMTouch2,
             CHProductModel.SSMTouchPro,
-            CHProductModel.SSMTouchPro2,
+            CHProductModel.SSMTouch2Pro,
             CHProductModel.SSMFace,
             CHProductModel.SSMFace2,
             CHProductModel.SSMFaceAI,
             CHProductModel.SSMFacePro,
-            CHProductModel.SSMFacePro2,
+            CHProductModel.SSMFace2Pro,
             CHProductModel.SSMFaceProAI
         )
         private const val TOPIC_OPENSENSOR_PREFIX = "opensensor/"
