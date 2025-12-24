@@ -182,7 +182,7 @@ enum class CHProductModel {
     },
     SSMTouch2Pro {
         override fun productType() = 26
-        override fun deviceModel() = "ssm_touch_pro_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModel() = "ssm_touch_2_pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Touch 2 Pro"
         override fun deviceFactory() =
             CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH_PRO, DeviceProfiles.SESAME_TOUCH_PRO)
@@ -195,7 +195,7 @@ enum class CHProductModel {
     },
     SSMFace2Pro {
         override fun productType() = 28
-        override fun deviceModel() = "sesame_face_Pro_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModel() = "ssm_face_2_pro" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 2 Pro"
         override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO, DeviceProfiles.SESAME_FACE_PRO)
     };
