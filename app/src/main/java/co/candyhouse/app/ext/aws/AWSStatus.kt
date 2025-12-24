@@ -1,7 +1,6 @@
 package co.candyhouse.app.ext.aws
 
 import android.content.Context
-import co.candyhouse.sesame.open.isInternetAvailable
 import co.candyhouse.sesame.utils.L
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
@@ -94,11 +93,7 @@ class AWSStatus {
         }
 
         fun getAWSLoginStatus(): Boolean {
-            return if (isInitialized && isLogin) {
-                isInternetAvailable()
-            } else {
-                false
-            }
+            return isInitialized && isLogin
         }
     }
 }

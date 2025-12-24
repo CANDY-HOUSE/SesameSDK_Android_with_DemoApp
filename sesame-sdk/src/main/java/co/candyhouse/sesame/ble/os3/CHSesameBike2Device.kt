@@ -98,7 +98,7 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
         }
         makeApiCall(result) {
             val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret))
+            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret))
             deviceStatus = CHDeviceStatus.Registering
             sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
                 var ecdhSecret = byteArrayOf()

@@ -234,7 +234,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         deviceStatus = CHDeviceStatus.Registering
         makeApiCall(result) {
             val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(
+            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(
                 deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
             )// todo 不需要server 認證註解此行
             deviceStatus = CHDeviceStatus.Registering

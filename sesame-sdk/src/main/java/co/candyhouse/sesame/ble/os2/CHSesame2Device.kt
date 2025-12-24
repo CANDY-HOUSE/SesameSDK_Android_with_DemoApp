@@ -422,7 +422,7 @@ internal enum class CHError(val value: NSError) {
 
                 L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
              //   val registerSesame1 = CHServerAuth.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
-                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIclient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
+                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIClient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
                 deviceStatus = CHDeviceStatus.Registering
 
                 val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)

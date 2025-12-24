@@ -337,16 +337,14 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                 data.data.forEach { device ->
                     device.setLevel(level!!.toInt())
                     device.setNickname(customName!!)
-                    if (device.getLevel() != -1) {
-                        // 上传到云端
-                        CHLoginAPIManager.putKey(
-                            cheyKeyToUserKey(
-                                device.getKey(),
-                                device.getLevel(),
-                                device.getNickname()
-                            )
-                        ) {}
-                    }
+                    // 上传到云端
+                    CHLoginAPIManager.putKey(
+                        cheyKeyToUserKey(
+                            device.getKey(),
+                            device.getLevel(),
+                            device.getNickname()
+                        )
+                    ) {}
                 }
 
                 mDeviceModel.updateDevices()

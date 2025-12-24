@@ -10,6 +10,7 @@ import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.receiver.TopicSubscriptionManager
+import co.utils.AppIdentifyIdUtil
 import co.utils.SharedPreferencesUtils
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +51,7 @@ open class BaseApp : Application() {
             CHIRAPIManager.initialize(this)
             SharedPreferencesUtils.init(PreferenceManager.getDefaultSharedPreferences(this))
         }
+        AppIdentifyIdUtil.warmUp(this)
         setupCrashlytics()
         initializeAWS()
         setupSubscriptionManager()

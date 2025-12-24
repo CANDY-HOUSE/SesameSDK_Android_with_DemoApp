@@ -18,6 +18,7 @@ import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
 import co.candyhouse.sesame.server.dto.CHSSMHisUploadRequest
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
+import co.candyhouse.sesame.utils.ApiClientConfigBuilder
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64Encode
@@ -25,14 +26,10 @@ import co.candyhouse.sesame.utils.getClientRegion
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt24ByteArray
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.CognitoCachingCredentialsProvider
-import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias HttpResponseCallback<T> = (Result<T>) -> Unit
@@ -45,23 +42,22 @@ sealed class CHResultState<T>(val data: T) {
 }
 
 object CHAccountManager {
-    internal var jpAPIclient: CHPrivateAPIClient
+    internal var jpAPIClient: CHPrivateAPIClient
     private var httpScope = CoroutineScope(IO)
 
     init {
-        val credentialsProvider = CognitoCachingCredentialsProvider(
-            CHBleManager.appContext, CHConfiguration.CLIENT_ID,  // 身份集區 ID
-            CHConfiguration.CLIENT_ID!!.getClientRegion() // 區域
+        val credentialsProvider = ApiClientConfigBuilder.createCredentialsProvider(
+            appContext = CHBleManager.appContext,
+            identityPoolId = CHConfiguration.CLIENT_ID,
+            region = CHConfiguration.CLIENT_ID.getClientRegion()
         )
-        val factory = ApiClientFactory().credentialsProvider(credentialsProvider).apiKey(CHConfiguration.API_KEY).region("ap-northeast-1")
-            .clientConfiguration(ClientConfiguration().apply {
-                userAgent = userAgent?.replace(
-                    Regex("\\b[a-z]{2}_[A-Z]{2}\\b"),
-                    Locale.getDefault().toString()
-                ) ?: userAgent
-            })
+        val factory = ApiClientConfigBuilder.buildApiClientFactory(
+            credentialsProvider = credentialsProvider,
+            apiKey = CHConfiguration.API_KEY,
+            region = "ap-northeast-1"
+        )
 
-        jpAPIclient = factory.build(CHPrivateAPIClient::class.java) //        L.d("hcia", "網路設定完了:")
+        jpAPIClient = factory.build(CHPrivateAPIClient::class.java)
     }
 
     internal fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, block: T.() -> R) {
@@ -76,14 +72,14 @@ object CHAccountManager {
 
     internal fun cancelNotification(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val tmpEnable = jpAPIclient.fcmTokenSignDelete(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken))
+            val tmpEnable = jpAPIClient.fcmTokenSignDelete(CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(tmpEnable)))
         }
     }
 
     internal fun getVersion(onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val version = jpAPIclient.getVersion()
+            val version = jpAPIClient.getVersion()
 
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(version)))
         }
@@ -91,14 +87,14 @@ object CHAccountManager {
 
     internal fun signGuestKey(key: CHRemoveSignKeyRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
-            val guestKeyTag = jpAPIclient.guestKeysSignPost(key)
+            val guestKeyTag = jpAPIClient.guestKeysSignPost(key)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(guestKeyTag)))
         }
     }
 
     internal fun getHub3StatusFromIot(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val res = jpAPIclient.getHub3StatusFromIot(deviceUUID)
+            val res = jpAPIClient.getHub3StatusFromIot(deviceUUID)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -106,14 +102,14 @@ object CHAccountManager {
     internal fun updateDeviceFirmwareVersion(deviceUUID: String, versionTag: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             val body = mapOf("versionTag" to versionTag)
-            val res = jpAPIclient.updateDeviceFirmwareVersion(deviceUUID, body)
+            val res = jpAPIClient.updateDeviceFirmwareVersion(deviceUUID, body)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
     internal fun updateHub3Firmware(deviceUUID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val res = jpAPIclient.updateHub3Firmware(deviceUUID)
+            val res = jpAPIClient.updateHub3Firmware(deviceUUID)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -121,7 +117,7 @@ object CHAccountManager {
     internal fun postSS2History(devieID: String, hisHex: String, onResponse: CHResult<Any>) {
         L.d("postSSHistory", "2--${devieID}---${hisHex}")
         makeApiCall(onResponse) {
-            val chHistoryUploadRes = jpAPIclient.feedHistory(CHSSMHisUploadRequest(devieID, hisHex))
+            val chHistoryUploadRes = jpAPIClient.feedHistory(CHSSMHisUploadRequest(devieID, hisHex))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(chHistoryUploadRes)))
         }
     }
@@ -129,7 +125,7 @@ object CHAccountManager {
     internal fun postSS5History(devieID: String, hisHex: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             L.d("postSSHistory", "5--${devieID}---${hisHex}")
-            val chHistoryUploadRes = jpAPIclient.feedHistory(CHSS5HisUploadRequest(devieID, hisHex, "5"))
+            val chHistoryUploadRes = jpAPIClient.feedHistory(CHSS5HisUploadRequest(devieID, hisHex, "5"))
             L.d("hcia", "[ss5][postSS5History]:$chHistoryUploadRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(chHistoryUploadRes)))
         }
@@ -139,7 +135,7 @@ object CHAccountManager {
         makeApiCall(onResponse) {
             val msg = System.currentTimeMillis().toUInt24ByteArray()
             val keyCheck = AesCmac((ss2 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(msg)!!.sliceArray(0..3)
-            jpAPIclient.ss2CommandToWM2Post(ss2.deviceId.toString().uppercase(), CHSS2WebCMDReq(cmd.value.toByte(), historytag.base64Encode(), keyCheck.toHexString()))
+            jpAPIClient.ss2CommandToWM2Post(ss2.deviceId.toString().uppercase(), CHSS2WebCMDReq(cmd.value.toByte(), historytag.base64Encode(), keyCheck.toHexString()))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
         }
     }
@@ -147,7 +143,7 @@ object CHAccountManager {
     internal fun postCredentialListToServer(credentialListRequest: AuthenticationDataWrapper, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             try {
-                val res = jpAPIclient.postCredentialListToServer(credentialListRequest)
+                val res = jpAPIClient.postCredentialListToServer(credentialListRequest)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -158,7 +154,7 @@ object CHAccountManager {
     internal fun updateAuthenticationName(authData: Any, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             try {
-                val res = jpAPIclient.postCredential(authData)
+                val res = jpAPIClient.postCredential(authData)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -169,7 +165,7 @@ object CHAccountManager {
     internal fun deleteCredentialInfo(request: AuthenticationDataWrapper, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
             try {
-                val res = jpAPIclient.deleteCredentialInfo(request)
+                val res = jpAPIClient.deleteCredentialInfo(request)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -180,14 +176,14 @@ object CHAccountManager {
 
     fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val subscribeMesg = jpAPIclient.subscribeToTopic(body)
+            val subscribeMesg = jpAPIClient.subscribeToTopic(body)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(subscribeMesg)))
         }
     }
 
     internal fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val postBatteryDataRes = jpAPIclient.postBatteryData(deviceID, CHBatteryDataReq(payloadString))
+            val postBatteryDataRes = jpAPIClient.postBatteryData(deviceID, CHBatteryDataReq(payloadString))
             L.d("harry", "[postBatteryData]: $postBatteryDataRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postBatteryDataRes)))
         }

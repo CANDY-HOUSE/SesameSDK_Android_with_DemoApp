@@ -40,10 +40,12 @@ import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
+import co.candyhouse.sesame.open.isInternetAvailable
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.receiver.widget.SesameReceiver
+import co.utils.GuestUploadFlag
 import co.utils.JsonUtil
 import co.utils.JsonUtil.parseList
 import co.utils.SharedPreferencesUtils
@@ -63,6 +65,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.security.MessageDigest
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -78,8 +81,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     CHHub3Delegate {
 
     private var syncJob: Job? = null
-    var targetShareLevel: Int = 0
-    var guestKeyId: String? = null
     val myChDevices = MutableStateFlow(ArrayList<CHDevices>())
     var neeReflesh = MutableLiveData<BeanDevices>()
     val ssmLockLiveData = MutableLiveData<CHDevices>()
@@ -91,6 +92,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     // 搜索关键词
     val searchQuery = MutableStateFlow("")
+
     // 过滤后的设备列表
     val filteredDevices = combine(myChDevices, searchQuery) { devices, query ->
         if (query.isEmpty()) {
@@ -109,7 +111,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     // 更新搜索关键词
     fun updateSearchQuery(query: String) {
-        L.e("DeviceListFG","updateSearchQuery $query")
+        L.e("DeviceListFG", "updateSearchQuery $query")
         searchQuery.value = query
     }
 
@@ -199,14 +201,80 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         }
     }
 
-    fun refleshDevices() {
-        val status = AWSStatus.getAWSLoginStatus()
-        L.d("hcia", "👘 refleshDevices islogin:$status")
-        if (status) {
+    fun refreshDevices() {
+        val isSignedIn = AWSStatus.getAWSLoginStatus()
+        if (isSignedIn) {
             syncDeviceFromServer()
         } else {
-            updateDevices()
+            refreshDevicesAsGuest()
         }
+    }
+
+    private fun refreshDevicesAsGuest() {
+        CHDeviceManager.getCandyDevices { result ->
+            result.onFailure {
+                neeReflesh.postValue(BeanDevices(emptyList()))
+            }
+
+            result.onSuccess { state ->
+                val local = state.data
+                val localFp = fingerprintOfDevices(local)
+                val uploadedFp = GuestUploadFlag.getFingerprint()
+
+                val hasInternet = isInternetAvailable()
+
+                if (localFp == "empty") {
+                    if (hasInternet) syncDeviceFromServer() else updateDevices(emptyList())
+                    return@onSuccess
+                }
+
+                val needUpload = uploadedFp == null || uploadedFp != localFp
+                if (needUpload) {
+                    uploadLocalDevicesForGuest(local, localFp)
+                    return@onSuccess
+                }
+
+                if (hasInternet) syncDeviceFromServer() else updateDevices(local)
+            }
+        }
+    }
+
+    private fun uploadLocalDevicesForGuest(local: List<CHDevices>, localFp: String) {
+        CHLoginAPIManager.upLoadKeys(
+            local.map {
+                cheyKeyToUserKey(
+                    it.getKey(),
+                    it.getLevel(),
+                    it.getNickname()
+                )
+            }
+        ) { uploadResult ->
+
+            uploadResult.onSuccess {
+                GuestUploadFlag.setFingerprint(localFp)
+            }
+
+            if (isInternetAvailable()) {
+                syncDeviceFromServer()
+            } else {
+                updateDevices(local)
+            }
+        }
+    }
+
+    private fun fingerprintOfDevices(devices: List<CHDevices>): String {
+        val joined = devices
+            .mapNotNull { it.deviceId?.toString()?.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .sorted()
+            .joinToString("|")
+
+        if (joined.isEmpty()) return "empty"
+
+        val md = MessageDigest.getInstance("SHA-256")
+        val hash = md.digest(joined.toByteArray(Charsets.UTF_8))
+        return hash.joinToString("") { "%02x".format(it) }
     }
 
     fun updateDevices() {
@@ -246,8 +314,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         ssmosLockDelegates[chDevices] = sharedDelegate
     }
 
-    // 在主线程里使用 setValue 方法更新 LiveData； 防止数据竞争， 快速post时会丢失数据， 修复bug:
-    // 【ID1001306】【Android】【app】关掉手机蓝牙，设备列表中的Sesame设备蓝牙图标不会自动置灰显示或置灰速度慢,需手动刷新才置灰(ios端正常)
     private fun updateNeeRefresh(device: CHDevices) {
         MainScope().launch {
             neeReflesh.value = BeanDevices(myChDevices.value, device.deviceId.toString())
@@ -465,48 +531,28 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun dropDevice(result: CHResult<CHEmpty>) {
         val targetDevice: CHDevices = ssmLockLiveData.value!!
-        if (AWSStatus.getAWSLoginStatus()) {
-            CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
-                it.onSuccess {
-                    myChDevices.value =
-                        myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
-                    neeReflesh.postValue(BeanDevices(emptyList()))
+        CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
+            it.onSuccess {
+                myChDevices.value =
+                    myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
+                neeReflesh.postValue(BeanDevices(emptyList()))
 
-                    unregisterNotification(targetDevice)
+                unregisterNotification(targetDevice)
 
-                    viewModelScope.launch {
-                        result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
-                    }
-                    targetDevice.dropKey {
-                        it.onSuccess {
-                            SharedPreferencesUtils.preferences.edit() {
-                                remove(targetDevice.deviceId.toString())
-                            }
+                viewModelScope.launch {
+                    result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
+                }
+                targetDevice.dropKey {
+                    it.onSuccess {
+                        SharedPreferencesUtils.preferences.edit() {
+                            remove(targetDevice.deviceId.toString())
                         }
                     }
                 }
-                it.onFailure {
-                    viewModelScope.launch {
-                        result.invoke(Result.failure(it))
-                    }
-                }
             }
-        } else {
-            unregisterNotification(targetDevice)
-            targetDevice.dropKey {
-                it.onSuccess {
-                    refleshDevices()
-                    SharedPreferencesUtils.preferences.edit() {
-                        remove(targetDevice.deviceId.toString())
-                    }
-                    viewModelScope.launch {
-                        result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
-                    }
-                }
-                it.onFailure {
-                    viewModelScope.launch {
-                        result.invoke(Result.failure(it))
-                    }
+            it.onFailure {
+                viewModelScope.launch {
+                    result.invoke(Result.failure(it))
                 }
             }
         }
@@ -514,45 +560,25 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun resetDevice(result: CHResult<CHEmpty>) {
         val targetDevice: CHDevices = ssmLockLiveData.value!!
-
-        if (AWSStatus.getAWSLoginStatus()) {
-            // L.d("hcia", "登入刪除:")
-            CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
-                it.onSuccess {
-                    unregisterNotification(targetDevice)
-                    targetDevice.reset {
-                        it.onSuccess {
-                            refleshDevices()
-                            viewModelScope.launch {
-                                result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
-                            }
-                        }
-                        it.onFailure {
-                            viewModelScope.launch {
-                                result.invoke(Result.failure(it))
-                            }
+        CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
+            it.onSuccess {
+                unregisterNotification(targetDevice)
+                targetDevice.reset {
+                    it.onSuccess {
+                        refreshDevices()
+                        viewModelScope.launch {
+                            result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
                         }
                     }
-                }
-                it.onFailure {
-                    L.d("hcia", "it:$it")
+                    it.onFailure {
+                        viewModelScope.launch {
+                            result.invoke(Result.failure(it))
+                        }
+                    }
                 }
             }
-        } else {
-            L.d("hcia", "未登入reset")
-            unregisterNotification(targetDevice)
-            targetDevice.reset {
-                it.onSuccess {
-                    refleshDevices()
-                    viewModelScope.launch {
-                        result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
-                    }
-                }
-                it.onFailure {
-                    viewModelScope.launch {
-                        result.invoke(Result.failure(it))
-                    }
-                }
+            it.onFailure {
+                L.d("hcia", "it:$it")
             }
         }
     }
@@ -563,17 +589,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 result.onSuccess {
                     L.d("sf", "result is $result")
                 }
-            }
-        }
-    }
-
-    fun updateHub3IrDevice(irRemote: IrRemote, chDeviceId: String) {
-        val localIrRemotes = iRRepository.getRemotesByKey(chDeviceId)
-        localIrRemotes.let {
-            val index = it.indexOfFirst { it.uuid == irRemote.uuid }
-            if (index != -1) {
-                it[index].state = irRemote.state
-                iRRepository.setRemotes(chDeviceId, it)
             }
         }
     }

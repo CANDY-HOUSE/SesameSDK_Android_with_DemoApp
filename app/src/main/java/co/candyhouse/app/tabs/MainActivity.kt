@@ -80,10 +80,10 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     }
 
     private fun setupAWSFeatures() {
-        CHLoginAPIManager.setupAPi(AWSMobileClient.getInstance())
+        CHLoginAPIManager.setupAPi(this, AWSMobileClient.getInstance())
         val userState = AWSStatus.getCachedUserState()
         loginViewModel.gUserState.value = userState
-        deviceViewModel.refleshDevices()
+        deviceViewModel.refreshDevices()
     }
 
     private fun initNeedSharedParams() {
@@ -384,7 +384,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         }
         if (key == "isNeedFreshDevice") {
             if (SharedPreferencesUtils.isNeedFreshDevice) {
-                deviceViewModel.refleshDevices()
+                deviceViewModel.refreshDevices()
                 SharedPreferencesUtils.isNeedFreshDevice = false
             }
         }

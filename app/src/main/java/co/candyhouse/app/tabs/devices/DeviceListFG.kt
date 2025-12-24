@@ -85,7 +85,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             L.d(tag, "下拉刷新...")
             bind.swiperefresh.isRefreshing = true
             CHDeviceManager.isRefresh.set(true)
-            mDeviceViewModel.refleshDevices()
+            mDeviceViewModel.refreshDevices()
         }
 
         setupSearchBehavior()

@@ -1,18 +1,18 @@
 package co.candyhouse.server
 
+import android.content.Context
 import co.candyhouse.app.ext.TokenManager
 import co.candyhouse.app.tabs.account.CHUserKey
+import co.candyhouse.sesame.utils.ApiClientConfigBuilder
+import co.utils.AppIdentifyIdUtil
 import co.utils.SharedPreferencesUtils
-import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias CHResult<T> = (Result<CHResultState<T>>) -> Unit
@@ -24,88 +24,76 @@ sealed class CHResultState<T>(val data: T) {
 
 object CHLoginAPIManager {
     private lateinit var jpAPIClient: CHLoginAPIClient
-    private var httpScope = CoroutineScope(IO)
+    private lateinit var appContext: Context
+    private val httpScope = CoroutineScope(IO + SupervisorJob())
 
-    fun setupAPi(provider: AWSCredentialsProvider) {
-        val factory = ApiClientFactory().credentialsProvider(provider).region("ap-northeast-1")
-            .clientConfiguration(ClientConfiguration().apply {
-                userAgent = userAgent?.replace(
-                    Regex("\\b[a-z]{2}_[A-Z]{2}\\b"),
-                    Locale.getDefault().toString()
-                ) ?: userAgent
-            })
+    fun setupAPi(context: Context, provider: AWSCredentialsProvider) {
+        appContext = context.applicationContext
+        val factory = ApiClientConfigBuilder.buildApiClientFactory(
+            credentialsProvider = provider,
+            region = "ap-northeast-1"
+        )
+
         jpAPIClient = factory.build(CHLoginAPIClient::class.java)
     }
 
-    private fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, requireSignIn: Boolean = true, block: T.() -> R) {
-        if (requireSignIn && !AWSMobileClient.getInstance().isSignedIn) {
-            onResponse.invoke(Result.failure(Throwable("isSignedIn???")))
-            return
-        }
+    private fun <T, R, A> T.makeApiCall(onResponse: CHResult<A>, block: T.() -> R) {
         httpScope.launch(EmptyCoroutineContext, CoroutineStart.DEFAULT) {
-            runCatching {
-                block()
-            }.onFailure {
-                onResponse.invoke(Result.failure(it))
-            }.onSuccess {}
+            runCatching { block() }
+                .onFailure { onResponse.invoke(Result.failure(it)) }
         }
     }
 
     fun upLoadKeys(keys: List<CHUserKey>, onResponse: CHResult<Array<CHUserKey>>) {
         makeApiCall(onResponse) {
-            val res = jpAPIClient.updateKeys(keys)
+            val res = jpAPIClient.updateKeys(AppIdentifyIdUtil.get(appContext), keys)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
     fun putKey(key: CHUserKey, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val res = jpAPIClient.putKey(key)
+            val res = jpAPIClient.putKey(AppIdentifyIdUtil.get(appContext), key)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
     fun getDevicesList(onResponse: CHResult<Array<CHUserKey>>) {
         makeApiCall(onResponse) {
-            val res = jpAPIClient.getDevicesList()
+            val res = jpAPIClient.getDevicesList(AppIdentifyIdUtil.get(appContext))
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
     fun removeKey(keyId: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val res = jpAPIClient.removeKey(keyId)
+            val res = jpAPIClient.removeKey(AppIdentifyIdUtil.get(appContext), keyId)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
-
     fun addFriend(friendID: String, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) {
-            val res = jpAPIClient.addFriend(friendID)
+            val res = jpAPIClient.addFriend(AppIdentifyIdUtil.get(appContext), friendID)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
     fun uploadUserDeviceToken(onResponse: CHResult<Any>) {
-
         makeApiCall(onResponse) {
-            val res = jpAPIClient.uploadDeviceToken(SharedPreferencesUtils.deviceToken!!)
-
+            val res = jpAPIClient.uploadDeviceToken(AppIdentifyIdUtil.get(appContext), SharedPreferencesUtils.deviceToken!!)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
 
-    fun getWebUrlByScene(scene: String, extInfo: Map<String, String>? = null, onResponse: CHResult<Any>,) {
-        makeApiCall(onResponse, requireSignIn = false) {
+    fun getWebUrlByScene(scene: String, extInfo: Map<String, String>? = null, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
             TokenManager.getValidToken { result ->
                 result.fold(
                     onSuccess = {
                         val token = result.getOrNull()
-
                         val requestBody = ScenePayload(scene = scene, token = token, extInfo = extInfo)
-                        val response = jpAPIClient.getWebUrlByScene(requestBody)
-
+                        val response = jpAPIClient.getWebUrlByScene(AppIdentifyIdUtil.get(appContext), requestBody)
                         val urlString = Gson().toJsonTree(response).asJsonObject.get("url").asString
                         onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(data = urlString)))
                     },

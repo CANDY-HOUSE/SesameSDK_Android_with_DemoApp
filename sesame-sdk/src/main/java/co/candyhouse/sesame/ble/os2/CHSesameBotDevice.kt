@@ -471,7 +471,7 @@ import java.util.*
             deviceStatus = CHDeviceStatus.Registering
             makeApiCall(resultRegister) {
                 L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIclient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
+                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIClient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
                 val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
                 val appPubKey = EccKey.getPubK().hexStringToByteArray()
                 val serverToken = registerSesame1.st.base64decodeByteArray()

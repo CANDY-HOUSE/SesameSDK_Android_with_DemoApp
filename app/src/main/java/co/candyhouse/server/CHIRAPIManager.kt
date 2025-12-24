@@ -3,16 +3,13 @@ package co.candyhouse.server
 import android.content.Context
 import co.candyhouse.server.dto.IrDeviceDeleteRequest
 import co.candyhouse.sesame.open.CHConfiguration
+import co.candyhouse.sesame.utils.ApiClientConfigBuilder
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.getClientRegion
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.CognitoCachingCredentialsProvider
-import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 
 
@@ -31,19 +28,16 @@ object CHIRAPIManager {
             return
         }
         httpScope.launch(IO) {
-            val credentialsProvider = CognitoCachingCredentialsProvider(
-                appContext, CHConfiguration.CLIENT_ID,  // 身份集區 ID
-                CHConfiguration.CLIENT_ID.getClientRegion() // 區域
+            val credentialsProvider = ApiClientConfigBuilder.createCredentialsProvider(
+                appContext = appContext,
+                identityPoolId = CHConfiguration.CLIENT_ID,
+                region = CHConfiguration.CLIENT_ID.getClientRegion()
             )
-            val factory = ApiClientFactory().credentialsProvider(credentialsProvider).apiKey(
-                CHConfiguration.API_KEY
-            ).region("ap-northeast-1")
-                .clientConfiguration(ClientConfiguration().apply {
-                    userAgent = userAgent?.replace(
-                        Regex("\\b[a-z]{2}_[A-Z]{2}\\b"),
-                        Locale.getDefault().toString()
-                    ) ?: userAgent
-                })
+            val factory = ApiClientConfigBuilder.buildApiClientFactory(
+                credentialsProvider = credentialsProvider,
+                apiKey = CHConfiguration.API_KEY,
+                region = "ap-northeast-1"
+            )
             jpAPIClient = factory.build(CHIRAPIClient::class.java)
             isInitialized = true
         }

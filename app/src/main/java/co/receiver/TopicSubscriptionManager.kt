@@ -2,12 +2,12 @@ package co.receiver
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.provider.Settings
 import androidx.core.content.edit
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.L
+import co.utils.AppIdentifyIdUtil
 import co.utils.SharedPreferencesUtils
 import com.google.firebase.messaging.FirebaseMessaging
 import java.util.concurrent.ConcurrentHashMap
@@ -47,7 +47,7 @@ class TopicSubscriptionManager(private val context: Context) {
             }
         } else {
             L.e(tag, "检查现有订阅...")
-            L.d(tag, "androidDeviceId=" + prefs.getString("androidDeviceId", null))
+            L.d(tag, "androidDeviceId=" + AppIdentifyIdUtil.get(context))
             SharedPreferencesUtils.deviceToken?.let { subscribeToTopicsIfNeeded(it) }
         }
     }
@@ -121,8 +121,7 @@ class TopicSubscriptionManager(private val context: Context) {
     @SuppressLint("HardwareIds")
     private fun subscribeToTopic(topic: String, token: String, onComplete: (() -> Unit)? = null) {
         // 获取设备唯一标识
-        val androidDeviceId = prefs.getString("androidDeviceId", null)
-        val appIdentifyId = androidDeviceId ?: Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+        val appIdentifyId = AppIdentifyIdUtil.get(context)
         L.d(tag, "appIdentifyId=$appIdentifyId")
 
         val request = SubscriptionRequest(
@@ -142,7 +141,6 @@ class TopicSubscriptionManager(private val context: Context) {
                     prefs.edit {
                         putBoolean(key, true)
                         putLong("last_subscription_time", System.currentTimeMillis())
-                        putString("androidDeviceId", appIdentifyId)
                         putInt(PREF_APP_VERSION, BuildConfig.VERSION_CODE)
                     }
                     L.d(tag, "订阅成功: $topic")

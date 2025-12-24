@@ -279,7 +279,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
         makeApiCall(result) {
             val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIclient.myDevicesRegisterSesame5Post(
+            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(
                 deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
             )
 

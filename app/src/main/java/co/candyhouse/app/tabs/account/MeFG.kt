@@ -30,6 +30,7 @@ import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
+import co.utils.GuestUploadFlag
 import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.alertview.AlertView
@@ -173,6 +174,7 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
             CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, SesameForegroundService::class.java))
         }
         CHDeviceWrapperManager.clear()
+        GuestUploadFlag.clear()
         WebViewPoolManager.clearWebView("contacts")
         reloadRefresh()
     }
