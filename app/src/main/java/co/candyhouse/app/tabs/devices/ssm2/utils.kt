@@ -291,7 +291,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.BiKeLock -> "sesamebike1_21_3_d7162a"
         CHProductModel.BiKeLock2 -> "sesamebike2_30_6_990e7f"
         CHProductModel.SSMOpenSensor -> "opensensor1_30_8_b634a9"
-        CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_1ce5ad"
+        CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_b634a9"
         CHProductModel.BLEConnector -> "bleconnector_30_11_01be3d"
         CHProductModel.Remote -> "remote_30_14_625867"
         CHProductModel.RemoteNano -> "remoten_30_15_d623ac"
