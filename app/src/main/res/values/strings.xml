@@ -103,6 +103,7 @@
     <string name="SSMTouch2">Sesame Touch 2</string>
     <string name="SSMFace2">Sesame Face 2</string>
     <string name="SSMFace2Pro">Sesame Face 2 Pro</string>
+    <string name="SSM_MIWA">Sesame miwa</string>
 
     <string name="unLoginHistoryTag">Unlogin user</string>
     <string name="wm2_update">Software Update＆Restart</string>
@@ -251,6 +252,5 @@
     <string name="hint_enter_card_id">Please enter Card ID</string>
 
     <string name="sesame_full">Device Full</string>
-    <string name="SSM_MIWA">sesame miwa</string>
 
 </resources>

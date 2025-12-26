@@ -202,7 +202,7 @@ enum class CHProductModel {
     SSM_MIWA {
         override fun productType() = 29
         override fun deviceModel() = "sesame_miwa" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "sesame miwa"
+        override fun deviceModelName() = "Sesame miwa"
         override fun deviceFactory() = CHSesame5Device()
     };
 

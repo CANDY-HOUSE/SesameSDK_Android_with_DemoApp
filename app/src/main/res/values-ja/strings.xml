@@ -102,6 +102,7 @@
     <string name="SSMTouch2">セサミタッチ 2</string>
     <string name="SSMFace2">セサミフェイス 2</string>
     <string name="SSMFace2Pro">セサミフェイス 2 Pro</string>
+    <string name="SSM_MIWA">Sesame miwa</string>
 
     <string name="unLoginHistoryTag">未登録利用者</string>
     <string name="wm2_update">OS更新と再起動</string>
@@ -244,7 +245,6 @@
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
     <string name="sesame_full">デバイス満杯</string>
-    <string name="SSM_MIWA">sesame miwa</string>
 
 </resources>
 

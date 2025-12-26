@@ -113,6 +113,7 @@
     <string name="SSMTouch2">Sesame Touch 2</string>
     <string name="SSMFace2">Sesame Face 2</string>
     <string name="SSMFace2Pro">Sesame Face 2 Pro</string>
+    <string name="SSM_MIWA">Sesame miwa</string>
 
     <string name="unLoginHistoryTag">未登入用戶</string>
 
@@ -266,6 +267,5 @@
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
     <string name="sesame_full">設備已滿</string>
-    <string name="SSM_MIWA">sesame miwa</string>
 
 </resources>
