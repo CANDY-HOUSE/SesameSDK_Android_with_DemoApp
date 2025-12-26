@@ -364,5 +364,6 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMTouch2 -> CHDeviceManager.app.getString(R.string.SSMTouch2)
         CHProductModel.SSMFace2 -> CHDeviceManager.app.getString(R.string.SSMFace2)
         CHProductModel.SSMFace2Pro -> CHDeviceManager.app.getString(R.string.SSMFace2Pro)
+        CHProductModel.SSM_MIWA -> CHDeviceManager.app.getString(R.string.SSM_MIWA)
     }
 }

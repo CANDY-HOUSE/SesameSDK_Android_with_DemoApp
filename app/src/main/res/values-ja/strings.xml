@@ -244,6 +244,7 @@
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
     <string name="sesame_full">デバイス満杯</string>
+    <string name="SSM_MIWA">sesame miwa</string>
 
 </resources>
 

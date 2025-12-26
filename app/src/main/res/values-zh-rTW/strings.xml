@@ -266,5 +266,6 @@
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
     <string name="sesame_full">設備已滿</string>
+    <string name="SSM_MIWA">sesame miwa</string>
 
 </resources>
