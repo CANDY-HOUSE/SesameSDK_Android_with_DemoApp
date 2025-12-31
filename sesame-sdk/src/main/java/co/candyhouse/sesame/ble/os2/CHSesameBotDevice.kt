@@ -49,7 +49,7 @@ import java.util.*
             deviceId = advertisement!!.deviceID
             isRegistered = advertisement!!.isRegistered
 
-            if (deviceStatus.value == CHDeviceLoginStatus.Login && !isRegistered) {
+            if (deviceStatus.value == CHDeviceLoginStatus.logined && !isRegistered) {
                 deviceStatus = CHDeviceStatus.Reset
             }
 
@@ -68,7 +68,7 @@ import java.util.*
 //        L.d("hcia", "goIOT:")
         CHIotManager.subscribeSesame2Shadow(this) {
             it.onSuccess {
-                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
 //                    L.d("hcia", "[bot 影子] it.data.state.reported.mechst:" + it.data.state.reported.mechst)
                     it.data.state.reported.mechst?.let {
                         var tmp = CHSesameBotMechStatus(it.hexStringToByteArray())
@@ -313,7 +313,7 @@ import java.util.*
 
 
     override fun toggle(historyTag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.hisTagC(historyTag), result)
             return
         }
@@ -326,7 +326,7 @@ import java.util.*
 
     override fun lock(historyTag: ByteArray?, result: CHResult<CHEmpty>) {
 
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.hisTagC(historyTag), result)
             return
         }
@@ -343,7 +343,7 @@ import java.util.*
     }
 
     override fun unlock(historyTag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historyTag), result)
             return
         }
@@ -361,7 +361,7 @@ import java.util.*
 
 //        L.d("hcia", "click deviceStatus.value:" + deviceStatus.value)
 //        L.d("hcia", "isConnectedByWM2:" + isConnectedByWM2)
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.click, this, sesame2KeyData!!.hisTagC(historyTag), result)
 
         }

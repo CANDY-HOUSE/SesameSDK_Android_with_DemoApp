@@ -16,7 +16,7 @@ import java.util.Locale
 object ApiClientConfigBuilder {
 
     private const val DEFAULT_REGION = "ap-northeast-1"
-    private val USER_AGENT_PATTERN = """\\b[a-z]{2}_[A-Z]{2}\\b""".toRegex()
+    private val USER_AGENT_PATTERN = """\b[a-z]{2}_[A-Z]{2}\b""".toRegex()
 
     /**
      * 通用的客户端配置

@@ -19,4 +19,5 @@ interface CHHub3 : CHWifiModule2 {
     fun setHub3Brightness(brightness: Byte, result: CHResult<Byte>)
     fun subscribeTopic(topic: String, result: CHResult<ByteArray>)
     fun unsubscribeTopic(topic: String)
+    fun <T> isBleAvailable(result: CHResult<T>): Boolean
 }

@@ -2,12 +2,9 @@ package co.candyhouse.app.tabs.devices.ssmbot.setting
 
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.lifecycle.Lifecycle
-import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmBotSettingBinding
-import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.sesame.open.device.*
 
 class SesameBotSettingFG : BaseDeviceSettingFG<FgSsmBotSettingBinding>() {
@@ -15,7 +12,7 @@ class SesameBotSettingFG : BaseDeviceSettingFG<FgSsmBotSettingBinding>() {
 
     override fun onUIDeviceStatus(status: CHDeviceStatus) {
         super.onUIDeviceStatus(status)
-        if (status.value == CHDeviceLoginStatus.Login) {
+        if (status.value == CHDeviceLoginStatus.logined) {
 
             (mDeviceModel.ssmLockLiveData.value as? CHSesameBot)?.mechSetting?.let { setting ->
                 // Check if the view lifecycle is at least in the STARTED state

@@ -3,20 +3,12 @@ package co.candyhouse.app.ext.webview.bridge
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.app.NotificationManagerCompat
-import co.candyhouse.app.tabs.devices.hub3.bean.IrRemoteRepository
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
-import co.candyhouse.app.tabs.devices.ssm2.getLevel
-import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.utils.L
 import co.utils.SharedPreferencesUtils
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -32,12 +24,32 @@ class WebViewJSBridge(
 ) {
 
     private val tag = "WebViewJSBridge"
+    var hub3Bridge: Hub3JSBridge? = null
 
     data class JSBridgeConfig(
         val onHeightChanged: ((Float) -> Unit)? = null,
         val onRequestLogin: (() -> Unit)? = null,
-        val onRequestNotificationSettings: (() -> Unit)? = null
+        val onRequestNotificationSettings: (() -> Unit)? = null,
+        val onRequestDestroySelf: (() -> Unit)? = null,
+        val onRequestRefreshApp: (() -> Unit)? = null,
+        val onRequestWifiConfig: (() -> Unit)? = null,
+        val onEnablePullRefresh: ((Boolean) -> Unit)? = null
     )
+
+    companion object {
+        const val requestRefreshApp = "requestRefreshApp"
+        const val requestEnablePullRefresh = "requestEnablePullRefresh"
+        const val requestDestroySelf = "requestDestroySelf"
+        const val requestAutoLayoutHeight = "requestAutoLayoutHeight"
+        const val requestLogin = "requestLogin"
+        const val requestPushToken = "requestPushToken"
+        const val requestNotificationStatus = "requestNotificationStatus"
+        const val requestNotificationSettings = "requestNotificationSettings"
+        const val requestBLEConnect = "requestBLEConnect"
+        const val requestConfigureInternet = "requestConfigureInternet"
+        const val requestMonitorInternet = "requestMonitorInternet"
+        const val requestDeviceFWUpgrade = "requestDeviceFWUpgrade"
+    }
 
     @JavascriptInterface
     fun postMessage(message: String) {
@@ -51,27 +63,37 @@ class WebViewJSBridge(
             L.d(tag, "Action: $action, Callback: $callbackName")
 
             when (action) {
-                "requestDeviceList" -> {
-                    handleRequestDeviceList(callbackName)
+                requestBLEConnect -> {
+                    hub3Bridge?.handleRequestBLEConnect(json)
                 }
 
-                "requestDeviceName" -> {
-                    val deviceUUID = json.optString("deviceUUID")
-                    handleRequestDeviceName(callbackName, deviceUUID)
+                requestConfigureInternet -> {
+                    hub3Bridge?.handleRequestConfigureInternet(json)
                 }
 
-                "requestDeviceRename" -> {
-                    val deviceUUID = json.optString("deviceUUID")
-                    val deviceName = json.optString("deviceName")
-                    handleRequestDeviceRename(callbackName, deviceUUID, deviceName)
+                requestMonitorInternet -> {
+                    hub3Bridge?.handleRequestMonitorInternet(json)
                 }
 
-                "requestDeviceInfo" -> {
-                    val deviceUUID = json.optString("deviceUUID")
-                    handleRequestDeviceInfo(callbackName, deviceUUID)
+                requestRefreshApp -> {
+                    scope.launch(Dispatchers.Main) {
+                        config.onRequestRefreshApp?.invoke()
+                    }
                 }
 
-                "requestAutoLayoutHeight" -> {
+                requestDestroySelf -> {
+                    scope.launch(Dispatchers.Main) {
+                        config.onRequestDestroySelf?.invoke()
+                    }
+                }
+
+                requestEnablePullRefresh -> {
+                    scope.launch(Dispatchers.Main) {
+                        config.onEnablePullRefresh?.invoke(true)
+                    }
+                }
+
+                requestAutoLayoutHeight -> {
                     val height = json.optDouble("height", 0.0)
                     if (height > 0) {
                         scope.launch(Dispatchers.Main) {
@@ -80,41 +102,23 @@ class WebViewJSBridge(
                     }
                 }
 
-                "requestLogin" -> {
+                requestLogin -> {
                     scope.launch(Dispatchers.Main) {
                         config.onRequestLogin?.invoke()
                     }
                 }
 
-                "requestPushToken" -> {
+                requestPushToken -> {
                     SharedPreferencesUtils.deviceToken?.let { handleRequestPushToken(callbackName, it) }
                 }
 
-                "requestNotificationStatus" -> {
+                requestNotificationStatus -> {
                     handleNotificationPermissionStatus(callbackName)
                 }
 
-                "requestNotificationSettings" -> {
+                requestNotificationSettings -> {
                     scope.launch(Dispatchers.Main) {
                         config.onRequestNotificationSettings?.invoke()
-                    }
-                }
-
-                "updateRemote" -> {
-                    val hub3DeviceId = json.optString("hub3DeviceId")
-                    val remoteId = json.optString("remoteId")
-                    val alias = json.optString("alias")
-                    updateRemote(hub3DeviceId, remoteId, alias)
-                }
-
-                "addRemote" -> {
-                    try {
-                        val hub3DeviceId = json.optString("hub3DeviceId")
-                        val remoteString = json.optString("remote")
-                        val remote: IrRemote = Gson().fromJson(remoteString, IrRemote::class.java)
-                        addRemote(hub3DeviceId, remote)
-                    } catch (e: Exception) {
-                        L.e(tag, "Error parsing message: ${e.message}")
                     }
                 }
 
@@ -124,162 +128,6 @@ class WebViewJSBridge(
             }
         } catch (e: Exception) {
             L.e(tag, "Error parsing message: ${e.message}")
-        }
-    }
-
-    private fun updateRemote(hub3DeviceId: String, remoteId: String, alias: String) {
-        val irRepository = IrRemoteRepository.getInstance()
-        val list = irRepository.getRemotesByKey(hub3DeviceId)
-        for (item in list) {
-            if (item.uuid == remoteId) {
-                item.alias = alias
-            }
-        }
-        irRepository.setRemotes(hub3DeviceId,list)
-    }
-
-    private fun addRemote(hub3DeviceId: String, remote: IrRemote) {
-        val irRepository = IrRemoteRepository.getInstance()
-        val list = irRepository.getRemotesByKey(hub3DeviceId).toMutableList()
-        list.add(remote)
-        irRepository.setRemotes(hub3DeviceId, list)
-    }
-
-    private fun handleRequestDeviceList(callbackName: String) {
-        scope.launch {
-            CHDeviceManager.getCandyDevices { result ->
-                result.onSuccess { chResultState ->
-                    val responseData = when (chResultState) {
-                        is CHResultState.CHResultStateBLE -> {
-                            val devices = chResultState.data
-                            L.d(tag, "Found ${devices.size} devices")
-
-                            val deviceArray = JSONArray()
-                            devices.forEach { device ->
-                                val deviceJson = JSONObject().apply {
-                                    put("deviceUUID", device.deviceId.toString().uppercase())
-                                    put("deviceName", device.getNickname())
-                                    put("deviceModel", device.productModel.deviceModel())
-                                    put("keyLevel", device.getLevel().toString())
-                                }
-                                deviceArray.put(deviceJson)
-                            }
-                            deviceArray.toString()
-                        }
-
-                        else -> "[]"
-                    }
-
-                    sendResponseDataToH5(callbackName, responseData)
-                }
-
-                result.onFailure { error ->
-                    L.e(tag, "Failed: ${error.message}")
-                    scope.launch(Dispatchers.Main) {
-                        webView?.evaluateJavascript("if(window.$callbackName) window.$callbackName([]);", null)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleRequestDeviceName(callbackName: String, deviceUUID: String) {
-        scope.launch {
-            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
-                result.onSuccess { chResultState ->
-                    val responseData = when (chResultState) {
-                        is CHResultState.CHResultStateBLE -> {
-                            val device = chResultState.data
-
-                            JSONObject().apply {
-                                put(deviceUUID, device.getNickname())
-                            }.toString()
-                        }
-
-                        else -> "{}"
-                    }
-
-                    sendResponseDataToH5(callbackName, responseData)
-                }
-
-                result.onFailure { error ->
-                    L.e(tag, "Failed to get device name: ${error.message}")
-                    scope.launch(Dispatchers.Main) {
-                        webView?.evaluateJavascript("if(window.$callbackName) window.$callbackName({});", null)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleRequestDeviceRename(callbackName: String, deviceUUID: String, deviceName: String) {
-        scope.launch {
-            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
-                result.onSuccess { chResultState ->
-                    val responseData = when (chResultState) {
-                        is CHResultState.CHResultStateBLE -> {
-                            val device = chResultState.data
-
-                            device.setNickname(deviceName)
-
-                            JSONObject().apply {
-                                put("success", true)
-                            }.toString()
-                        }
-
-                        else -> {
-                            JSONObject().apply {
-                                put("success", false)
-                            }.toString()
-                        }
-                    }
-
-                    sendResponseDataToH5(callbackName, responseData)
-                }
-
-                result.onFailure { error ->
-                    L.e(tag, "Failed to rename device: ${error.message}")
-                    scope.launch(Dispatchers.Main) {
-                        val jsCode = """if(window.$callbackName) window.$callbackName({"success": false});"""
-                        webView?.evaluateJavascript(jsCode, null)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleRequestDeviceInfo(callbackName: String, deviceUUID: String) {
-        scope.launch {
-            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
-                result.onSuccess { chResultState ->
-                    val responseData = when (chResultState) {
-                        is CHResultState.CHResultStateBLE -> {
-                            val device = chResultState.data
-
-                            val deviceKey = device.getKey()
-                            val gson = Gson()
-                            val jsonObj = run {
-                                val jsonElement = gson.toJsonTree(deviceKey)
-                                jsonElement.asJsonObject.apply {
-                                    addProperty("keyLevel", device.getLevel())
-                                }
-                            }
-                            jsonObj.toString()
-                        }
-
-                        else -> "{}"
-                    }
-
-                    sendResponseDataToH5(callbackName, responseData)
-                }
-
-                result.onFailure { error ->
-                    L.e(tag, "Failed to get device name: ${error.message}")
-                    scope.launch(Dispatchers.Main) {
-                        webView?.evaluateJavascript("if(window.$callbackName) window.$callbackName({});", null)
-                    }
-                }
-            }
         }
     }
 
@@ -310,5 +158,10 @@ class WebViewJSBridge(
             val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
             webView?.evaluateJavascript(jsCode, null)
         }
+    }
+
+    fun cleanup() {
+        hub3Bridge?.cleanup()
+        hub3Bridge = null
     }
 }

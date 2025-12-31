@@ -20,7 +20,6 @@ import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
-import kotlinx.coroutines.*
 import java.util.*
 import kotlin.experimental.and
 
@@ -70,7 +69,7 @@ import kotlin.experimental.and
                 }
 
                 //                L.d("hcia", "ssm2KeysMapFromIOT:" + ssm2KeysMapFromIOT)
-                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     ssm2KeysMap.clear()
                     ssm2KeysMap.putAll(ssm2KeysMapFromIOT)
                     (delegate as? CHWifiModule2Delegate)?.onSSM2KeysChanged(this, ssm2KeysMapFromIOT)
@@ -389,7 +388,7 @@ import kotlin.experimental.and
 
     override fun getVersionTag(result: CHResult<String>) {
 
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
             return
         }
         sendCommand(SesameOS3Payload(WM2ActionCode.VERSION_TAG.value, byteArrayOf())) { res ->
@@ -403,7 +402,7 @@ import kotlin.experimental.and
 
     override fun reset(result: CHResult<CHEmpty>) {
         L.d("hcia", "resetWifiModule2 deviceStatus:" + deviceStatus)
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
             result.invoke(Result.failure(CHError.BleInvalidAction.value))
         }
 

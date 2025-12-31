@@ -97,7 +97,7 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
         if (index != null) {
             itemCode = SesameItemCode.values().find { it.value == (SesameItemCode.BOT2_ITEM_CODE_RUN_SCRIPT_0.value + index).toUByte() } ?: SesameItemCode.click
         }
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && deviceShadowStatus != null) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAccountManager.cmdSesame(itemCode, this, byteArrayOf(), result)
             return
         }

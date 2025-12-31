@@ -51,7 +51,7 @@ class SSM2SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
     } //end view created
 
     override fun onUIDeviceStatus(status: CHDeviceStatus) {
-        if (status.value == CHDeviceLoginStatus.Login) {
+        if (status.value == CHDeviceLoginStatus.logined) {
 
             if (mDeviceModel.ssmLockLiveData.value is CHSesame2) {
 

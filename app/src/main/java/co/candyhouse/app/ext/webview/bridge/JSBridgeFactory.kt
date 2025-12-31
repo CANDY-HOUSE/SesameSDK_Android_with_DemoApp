@@ -1,6 +1,8 @@
 package co.candyhouse.app.ext.webview.bridge
 
+import android.content.Context
 import android.webkit.WebView
+import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CoroutineScope
 
@@ -21,7 +23,8 @@ object JSBridgeFactory {
             "device-notify",
             "device-user",
             "ir-remote",
-            "ir-types"
+            "ir-types",
+            "wifi-module"
         )
     }
 
@@ -32,9 +35,15 @@ object JSBridgeFactory {
         webView: WebView,
         scene: String,
         scope: CoroutineScope,
+        context: Context,
+        deviceModel: CHDeviceViewModel? = null,
         onHeightChanged: ((Float) -> Unit)? = null,
         onRequestLogin: (() -> Unit)? = null,
-        onRequestNotificationSettings: (() -> Unit)? = null
+        onRequestNotificationSettings: (() -> Unit)? = null,
+        onRequestDestroySelf: (() -> Unit)? = null,
+        onRequestRefreshApp: (() -> Unit)? = null,
+        onRequestWifiConfig: (() -> Unit)? = null,
+        onEnablePullRefresh: ((Boolean) -> Unit)? = null
     ): WebViewJSBridge? {
         if (!needsJSBridge(scene)) {
             return null
@@ -43,10 +52,23 @@ object JSBridgeFactory {
         val config = WebViewJSBridge.JSBridgeConfig(
             onHeightChanged = onHeightChanged,
             onRequestLogin = onRequestLogin,
-            onRequestNotificationSettings = onRequestNotificationSettings
+            onRequestNotificationSettings = onRequestNotificationSettings,
+            onRequestDestroySelf = onRequestDestroySelf,
+            onRequestRefreshApp = onRequestRefreshApp,
+            onRequestWifiConfig = onRequestWifiConfig,
+            onEnablePullRefresh = onEnablePullRefresh
         )
 
         val jsBridge = WebViewJSBridge(webView, scope, config)
+        if (scene == "wifi-module") {
+            jsBridge.hub3Bridge = Hub3JSBridge(
+                webView = webView,
+                scope = scope,
+                context = context,
+                deviceModel = deviceModel,
+                onRequestWifiConfig = onRequestWifiConfig
+            )
+        }
         webView.addJavascriptInterface(jsBridge, "AndroidHandler")
         L.d("JSBridgeFactory", "Added JS Bridge for scene: $scene")
 

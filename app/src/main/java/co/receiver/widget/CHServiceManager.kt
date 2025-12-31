@@ -87,11 +87,11 @@ object CHServiceManager {
         notificationLayout.setImageViewResource(R.id.toggle, ssm5UIParser(locker))
         notificationLayout.setImageViewResource(
             R.id.bl_img,
-            if (locker.deviceStatus.value == CHDeviceLoginStatus.Login) R.drawable.ic_bluetooth else R.drawable.ic_bluetooth_grey
+            if (locker.deviceStatus.value == CHDeviceLoginStatus.logined) R.drawable.ic_bluetooth else R.drawable.ic_bluetooth_grey
         )
         notificationLayout.setImageViewResource(
             R.id.wifi_img,
-            if (locker.deviceShadowStatus?.value == CHDeviceLoginStatus.Login) R.drawable.ic_wifi_blue else R.drawable.ic_wifi_grey
+            if (locker.deviceShadowStatus?.value == CHDeviceLoginStatus.logined) R.drawable.ic_wifi_blue else R.drawable.ic_wifi_grey
         )
         val autounlockResouse =
             if (locker.getIsNOHandG()) R.drawable.ic_autounlock_active else R.drawable.ic_autounlock

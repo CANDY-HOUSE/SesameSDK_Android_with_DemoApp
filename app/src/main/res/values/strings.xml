@@ -1,5 +1,4 @@
 <resources>
-    <!--    todo:缺少add_ssm_hint by Open Sensor的屬性-->
     <string name="launching_why_need_location_permission">On Android 6.0 and up, we need permission for accessing location to make Bluetooth work properly. Without that, this application will not be able to discover Sesames.</string>
     <string name="app_name">Sesame</string>
     <string name="second2">second</string>
@@ -18,7 +17,6 @@
     <string name="ssm_update">SesameOS Update＆Restart</string>
     <string name="autolock">Auto-lock timer</string>
     <string name="ssm_delete">Delete</string>
-
 
     <string name="door_lock">Door Lock</string>
     <string name="on_off_switch">Switch</string>
@@ -160,14 +158,12 @@
         Please double check your WiFi password, or put WiFi Module as close to the WiFi router as possible. \n\n
         Then normally retry for a few times it will get connected successfully.🙏</string>
 
-
     <string name="auto_mode">Auto Unlock</string>
     <string name="sesame_autounlock_hint">1. Setup the red circle area. While your smartphone GPS going out and coming back into the red circle, your smartphone will automatically unlock the door via Bluetooth. \n
         2. If your GPS is unstable, please extend the red area. You can adjust Sesame\'s location by tapping the map. \n
         3. Restart your smartphone if Auto Unlock is not functional.</string>
 
     <string name="Mode">Mode</string>
-
 
     <string name="no_scan_devices_hint1">1. Are Bluetooth and Location Service permissions on Android are both enabled？</string>
     <string name="no_scan_devices_hint2">2. Sometimes restarting the android phone can solve the problem.</string>
@@ -213,7 +209,6 @@
 
     <string name="judge_the_sesame">Horizontal calibration</string>
     <string name="device_model">Model</string>
-<!--    <string name="load_fail">Failed to load data</string>-->
     <string name="battary">Battery level</string>
     <string name="open_sensor_status">Status</string>
     <string name="open_sensor_last_update_time">Update Time</string>
@@ -252,5 +247,18 @@
     <string name="hint_enter_card_id">Please enter Card ID</string>
 
     <string name="sesame_full">Device Full</string>
+
+    <string name="reset">Reset</string>
+    <string name="receivedBle">Received Ble</string>
+    <string name="bleConnecting">Ble Connecting</string>
+    <string name="waitingGatt">Waiting gatt</string>
+    <string name="waitingForAuth">Waiting auth</string>
+    <string name="bleLogining">Ble Loging in</string>
+    <string name="readyToRegister">Ready to register</string>
+    <string name="noSettings">No settings</string>
+    <string name="locked">Locked</string>
+    <string name="unlocked">Unlocked</string>
+    <string name="moved">Moved</string>
+    <string name="registering">Registering</string>
 
 </resources>

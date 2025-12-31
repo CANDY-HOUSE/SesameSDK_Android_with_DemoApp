@@ -61,22 +61,24 @@ import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgComposeWebviewBinding
 import co.candyhouse.app.ext.webview.bridge.JSBridgeFactory
 import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
+import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.manager.WebViewCore
 import co.candyhouse.app.ext.webview.manager.WebViewCore.cleanupWebView
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.ext.webview.manager.WebViewUrlLoader.rememberWebUrl
+import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
 import co.utils.ContainerPaddingManager
 import co.utils.SharedPreferencesUtils
-import co.utils.getSerializableCompat
 import co.utils.safeNavigate
 import java.io.File
 
@@ -84,20 +86,22 @@ class SesameComposeWebView : Fragment() {
 
     private val logTag = "SesameComposeWebView"
 
+    private val mDeviceModel: CHDeviceViewModel by activityViewModels()
+    private var currentScene: String = ""
+    private var wifiModuleJsBridge: WebViewJSBridge? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = ComposeView(requireContext()).apply {
         setContent {
+            val config = WebViewConfig.fromArguments(arguments)
+            LaunchedEffect(config.scene) {
+                currentScene = config.scene
+            }
             SesameComposeWebViewContent(
-                url = arguments?.getString("url") ?: "",
-                scene = arguments?.getString("scene") ?: "",
-                deviceId = arguments?.getString("deviceId") ?: "",
-                where = arguments?.getString("where") ?: "",
-                title = arguments?.getString("title") ?: "",
-                pushToken = arguments?.getString("pushToken") ?: "",
-                extInfo = arguments?.getSerializableCompat<HashMap<String, String>>("extInfo") ?: hashMapOf(),
+                config = config,
                 onBackClick = {
                     exit()
                 },
@@ -129,6 +133,16 @@ class SesameComposeWebView : Fragment() {
                             }
                         }
                     }
+                },
+                onRequestWifiConfig = {
+                    safeNavigate(R.id.to_HUB3ScanSSIDListFG)
+                },
+                onRequestRefreshApp = {
+                    mDeviceModel.refreshDevices()
+                },
+                deviceModel = mDeviceModel,
+                onJSBridgeCreated = { bridge ->
+                    if (config.scene == "wifi-module") wifiModuleJsBridge = bridge
                 }
             )
         }
@@ -144,6 +158,14 @@ class SesameComposeWebView : Fragment() {
         ContainerPaddingManager.releaseClearPadding(this)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (currentScene == "wifi-module") {
+            wifiModuleJsBridge?.cleanup()
+            wifiModuleJsBridge = null
+        }
+    }
+
     private fun exit() {
         if (!findNavController().popBackStack()) {
             findNavController().navigate(R.id.deviceListPG)
@@ -155,34 +177,32 @@ class SesameComposeWebView : Fragment() {
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun SesameComposeWebViewContent(
-    url: String = "",
-    scene: String = "",
-    deviceId: String = "",
-    where: String = "",
-    title: String = "",
-    pushToken: String = "",
-    extInfo: Map<String, String> = hashMapOf(),
+    config: WebViewConfig,
     onBackClick: () -> Unit,
     onMoreClick: (String) -> Unit,
-    onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null
+    onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
+    onRequestWifiConfig: (() -> Unit)? = null,
+    onRequestRefreshApp: (() -> Unit)? = null,
+    deviceModel: CHDeviceViewModel? = null,
+    onJSBridgeCreated: ((WebViewJSBridge?) -> Unit)? = null
 ) {
     val logTag = "SesameComposeWebView"
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // 设置锁历史记录标题
-    val titleNew = if (scene == "history") {
-        SharedPreferencesUtils.preferences.getString(deviceId.lowercase(), title)
+    val titleNew = if (config.scene == "history") {
+        SharedPreferencesUtils.preferences.getString(config.deviceId.lowercase(), config.title)
     } else {
-        title
+        config.title
     }
 
     // 判断是否需要启用JS桥接
-    val enableJSBridge = JSBridgeFactory.needsJSBridge(scene)
+    val enableJSBridge = JSBridgeFactory.needsJSBridge(config.scene)
 
-    var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
+    var loading by remember { mutableStateOf(config.scene.isNotEmpty() && config.url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val webUrl by rememberWebUrl(url, scene, deviceId, pushToken, paramInfo = extInfo) { errorMsg ->
+    val webUrl by rememberWebUrl(config.url, config.scene, config.buildExtInfo()) { errorMsg ->
         error = "URL_LOAD_ERROR:$errorMsg"
         loading = false
     }
@@ -279,7 +299,10 @@ fun SesameComposeWebViewContent(
     }
 
     LaunchedEffect(Unit) {
-        L.d(logTag, "where=$where scene=$scene enableJSBridge=$enableJSBridge deviceId=$deviceId title=$titleNew pushToken=$pushToken")
+        L.d(
+            logTag,
+            "where=${config.where} scene=${config.scene} enableJSBridge=$enableJSBridge deviceId=${config.deviceId} title=$titleNew pushToken=${config.pushToken}"
+        )
         if (webUrl.isNotEmpty()) L.d(logTag, "url=$webUrl")
     }
 
@@ -287,7 +310,6 @@ fun SesameComposeWebViewContent(
         onDispose {
             if (enableJSBridge) {
                 webViewRef?.removeJavascriptInterface("AndroidHandler")
-                jsBridge = null
             }
             cleanupWebView(webViewRef)
             webViewRef = null
@@ -332,8 +354,8 @@ fun SesameComposeWebViewContent(
                     }
                 },
                 actions = {
-                    if (scene == "history") {
-                        IconButton(onClick = { onMoreClick(where) }) {
+                    if (config.scene == "history") {
+                        IconButton(onClick = { onMoreClick(config.where) }) {
                             Icon(painter = painterResource(id = R.drawable.ic_icons_filled_more), contentDescription = "More")
                         }
                     } else {
@@ -352,6 +374,12 @@ fun SesameComposeWebViewContent(
             AndroidViewBinding(FgComposeWebviewBinding::inflate, modifier = Modifier.fillMaxSize()) {
                 val wv = composeWebView
 
+                swipeRefresh.isEnabled = false
+                swipeRefresh.setOnRefreshListener {
+                    wv.reload()
+                    swipeRefresh.isRefreshing = false
+                }
+
                 if (webViewRef !== wv) {
                     webViewRef = wv
 
@@ -361,8 +389,10 @@ fun SesameComposeWebViewContent(
                         if (enableJSBridge) {
                             jsBridge = JSBridgeFactory.setupJSBridge(
                                 webView = wv,
-                                scene = scene,
+                                scene = config.scene,
                                 scope = scope,
+                                context = context,
+                                deviceModel = deviceModel,
                                 onRequestNotificationSettings = {
                                     (context as? Activity)?.apply {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -379,8 +409,17 @@ fun SesameComposeWebViewContent(
                                             )
                                         }
                                     }
+                                },
+                                onRequestDestroySelf = {
+                                    onBackClick()
+                                },
+                                onRequestRefreshApp = onRequestRefreshApp,
+                                onRequestWifiConfig = onRequestWifiConfig,
+                                onEnablePullRefresh = { enabled ->
+                                    swipeRefresh.isEnabled = (config.scene == "wifi-module") && enabled
                                 }
                             )
+                            onJSBridgeCreated?.invoke(jsBridge)
                         }
 
                         wv.webChromeClient = object : WebChromeClient() {
@@ -459,7 +498,7 @@ fun SesameComposeWebViewContent(
                     wv.loadUrl(target)
 
                     // firebase 数据埋点
-                    val screenName = when (where) {
+                    val screenName = when (config.where) {
                         CHDeviceManager.NOTIFICATION_FLAG -> "WebViewFG_notification"
                         else -> null
                     }
@@ -516,13 +555,9 @@ fun SesameComposeWebViewContent(
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun EmbeddedWebViewContent(
-    url: String = "",
-    scene: String = "",
-    deviceId: String = "",
-    keyLevel: String = "",
+    config: WebViewConfig,
     height: Dp = 80.dp,
     refreshTrigger: Int = 0,
-    extInfo: Map<String, String> = hashMapOf(),
     onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
@@ -533,11 +568,11 @@ fun EmbeddedWebViewContent(
     var dynamicHeight by remember { mutableStateOf(height) }
 
     // 判断是否需要启用JS桥接
-    val enableJSBridge = JSBridgeFactory.needsJSBridge(scene)
+    val enableJSBridge = JSBridgeFactory.needsJSBridge(config.scene)
 
-    var loading by remember { mutableStateOf(scene.isNotEmpty() && url.isEmpty()) }
+    var loading by remember { mutableStateOf(config.scene.isNotEmpty() && config.url.isEmpty()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val webUrl by rememberWebUrl(url, scene, deviceId, keyLevel = keyLevel, paramInfo = extInfo) { errorMsg ->
+    val webUrl by rememberWebUrl(config.url, config.scene, config.buildExtInfo()) { errorMsg ->
         error = "URL_LOAD_ERROR:$errorMsg"
         loading = false
     }
@@ -587,8 +622,9 @@ fun EmbeddedWebViewContent(
                     if (enableJSBridge) {
                         jsBridge = JSBridgeFactory.setupJSBridge(
                             webView = wv,
-                            scene = scene,
+                            scene = config.scene,
                             scope = scope,
+                            context = context,
                             onHeightChanged = { newHeight ->
                                 dynamicHeight = newHeight.dp
                                 L.d(logTag, "WebView height updated to: ${newHeight}dp")

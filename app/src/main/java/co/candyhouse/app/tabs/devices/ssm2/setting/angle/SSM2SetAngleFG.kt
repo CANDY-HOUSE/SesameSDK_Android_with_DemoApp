@@ -3,8 +3,6 @@ package co.candyhouse.app.tabs.devices.ssm2.setting.angle
 import android.os.Bundle
 import android.view.View
 import co.candyhouse.app.base.BaseDeviceFG
-import co.candyhouse.app.R
-import co.candyhouse.app.databinding.FgNoHandBinding
 import co.candyhouse.app.databinding.FgSetAngleBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -48,7 +46,7 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
 
             bind.setunlockZone.setOnClickListener {
 
-                if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     return@setOnClickListener
                 }
 
@@ -70,7 +68,7 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                 }
             }
             bind.setlockZone.setOnClickListener {
-                if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     return@setOnClickListener
                 }
 

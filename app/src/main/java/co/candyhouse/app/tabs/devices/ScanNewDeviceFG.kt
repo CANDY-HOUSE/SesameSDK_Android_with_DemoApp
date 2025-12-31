@@ -206,7 +206,13 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                     safeNavigate(R.id.action_to_SSM2SetAngleFG)
                 }
                 is CHSesame5 -> safeNavigate(R.id.action_to_SSM2SetAngleFG)
-                is CHHub3 -> safeNavigate(R.id.to_Hub3SettingFG)
+                is CHHub3 -> {
+                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+                        putString("scene", "wifi-module")
+                        putString("deviceId", device.deviceId.toString().uppercase())
+                        putString("keyLevel", device.getLevel().toString())
+                    })
+                }
                 is CHWifiModule2 -> safeNavigate(R.id.to_WM2SettingFG)
                 is CHSesameBiometricDevice -> safeNavigate(actionId = R.id.to_SesameTouchProSettingFG)
             }

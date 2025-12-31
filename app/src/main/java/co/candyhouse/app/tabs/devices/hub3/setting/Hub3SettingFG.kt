@@ -85,7 +85,7 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
     override fun onDestroy() {
         super.onDestroy()
         // 若蓝牙固件升级中不断开连接，避免离开再进入进度消失
-        if (mDeviceViewModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.Login
+        if (mDeviceViewModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.logined
             && (currentProgress in 1..99)
         ) {
             L.d("sf", "固件-蓝牙升级中……")
@@ -172,7 +172,7 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
                     bind.wifiSsidTxt.text = hub3.mechSetting?.wifiSSID
                     bind.wifiPassTxt.text = hub3.mechSetting?.wifiPassWord
 
-                    if (hub3.deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                    if (hub3.deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                         if (status.isIOTWork == true) { // IOT 状态是从AWS拿的。 其他状态的显示需要等到蓝牙连上之后才会刷新， 在没连上蓝牙之前，需要保持UI显示的一致性。
                             true.also { bind.apIcon.isSelected = it }
                             true.also { bind.netIcon.isSelected = it }
@@ -273,7 +273,7 @@ class Hub3SettingFG : BaseDeviceSettingFG<FgHub3SettingBinding>(), CHHub3Delegat
                     val status: CHWifiModule2NetWorkStatus? =
                         (device.mechStatus as? CHWifiModule2NetWorkStatus)
 
-                    if (device.deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                    if (device.deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                         if (status?.isIOTWork == true) { // IOT 状态是从AWS拿的。 其他状态的显示需要等到蓝牙连上之后才会刷新， 在没连上蓝牙之前，需要保持UI显示的一致性。
                             bind.apIcon.isSelected = true
                             bind.netIcon.isSelected = true

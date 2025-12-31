@@ -115,7 +115,7 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
     }
 
     override fun onUIDeviceStatus(status: CHDeviceStatus) {
-        if (status.value == CHDeviceLoginStatus.Login) {
+        if (status.value == CHDeviceLoginStatus.logined) {
             val ss5 = mDeviceModel.ssmLockLiveData.value
             if (ss5 is CHSesame5) {
 

@@ -1,5 +1,4 @@
 <resources>
-    <!--    todo:缺少add_ssm_hint by Open Sensor的屬性-->
     <string name="launching_why_need_location_permission">
         如果使用Android 6.0或更高版本，为了使蓝牙正常工作，需要允许访问位置信息。否则，应用程序将无法找到Sesame。</string>
     <string name="app_name">芝麻</string>
@@ -13,10 +12,8 @@
     <string name="sesamepalmMsg">靠近 %1$s 连蓝牙, 点击 ⊕ 输入掌静脉。输入后点击 X。安装好后再注册，识别率会极高。</string>
     <string name="DelFace">删除人脸</string>
     <string name="title_list">芝麻</string>
-    3
     <string name="forever">永远</string>
     <string name="logout">登出</string>
-    <!--?-->
     <string name="delete_account">删除账号</string>
     <!--    更新Ssm名稱用↓-->
     <string name="change_sesame_angle">设定角度</string>
@@ -159,7 +156,6 @@
     <string name="historyAUTOLOCK_UPDATED">自动上锁设置被更新</string>
     <string name="historyAUTOLOCK">自动上锁</string>
 
-
     <string name="WigetOpenAll">全部上锁</string>
     <string name="WigetCloseAll">全部解锁</string>
 
@@ -175,27 +171,17 @@
 
     <string name="Mode">模式</string>
 
-    <string
-        name="no_scan_devices_hint1"
-        >1. 您已经允许了手机的蓝牙和位置权限吗？</string>
-    <string
-        name="no_scan_devices_hint2"
-        >2. 有时候，重新启动手机可以解决问题。</string>
-    <string
-        name="no_scan_devices_hint3"
-        >3. 附近是否有未注册的设备？</string>
-    <string
-        name="no_scan_devices_hint4"
-        >4. 若要重置已注册的设备，请用细棒长按重置按钮直到LED灯熄灭。</string>
+    <string name="no_scan_devices_hint1">1. 您已经允许了手机的蓝牙和位置权限吗？</string>
+    <string name="no_scan_devices_hint2">2. 有时候，重新启动手机可以解决问题。</string>
+    <string name="no_scan_devices_hint3">3. 附近是否有未注册的设备？</string>
+    <string name="no_scan_devices_hint4">4. 若要重置已注册的设备，请用细棒长按重置按钮直到LED灯熄灭。</string>
 
     <string name="qrcodeNotSupport">该二维码不支持</string>
     <string name="cameraError">相机错误</string>
     <string name="pull_fresh_hint">↓下拉可刷新</string>
     <string name="latest">(最新)</string>
     <string name="addFail">添加失败</string>
-    <string
-        name="upload_keys_fail"
-        >网络现在不太稳，下拉刷新或登出可能导致芝麻设备清单消失。</string>
+    <string name="upload_keys_fail">网络现在不太稳，下拉刷新或登出可能导致芝麻设备清单消失。</string>
 
     <string name="TouchEmptyFingerHint">靠近%1$s连蓝牙, 点击 ⊕, 将手指放在%2$s上以添加指纹。添加后点击 X。\n\n另外，多次改变手指角度 输入同一手指，可以大幅提高识别率👍</string>
     <string name="TouchEmptyNFCHint">靠近%1$s连蓝牙, 点击 ⊕, 将NFC卡放在%2$s上以添加NFC卡。添加后点击 X。\n\nAndroid手机或手表通常内置有多张NFC卡，每次添加的NFC卡号可能会变动，我们建议您添加所有内置的NFC卡，以减少误判的可能性。</string>
@@ -229,7 +215,6 @@
 
     <string name="judge_the_sesame">水平校正</string>
     <string name="device_model">机种</string>
-<!--    <string name="load_fail">加载数据失败</string>-->
     <string name="battary">电池电量</string>
     <string name="open_sensor_status">开关状态</string>
     <string name="open_sensor_last_update_time">最后上报</string>
@@ -267,5 +252,18 @@
     <string name="hint_enter_card_id">请输入卡ID</string>
 
     <string name="sesame_full">设备已满</string>
+
+    <string name="reset">重置</string>
+    <string name="receivedBle">收到蓝牙信号了</string>
+    <string name="bleConnecting">蓝牙连接中</string>
+    <string name="waitingGatt">等待 GATT</string>
+    <string name="waitingForAuth">等待认证中</string>
+    <string name="bleLogining">蓝牙登入中</string>
+    <string name="readyToRegister">可以注册</string>
+    <string name="noSettings">未设置</string>
+    <string name="locked">上锁</string>
+    <string name="unlocked">没上锁</string>
+    <string name="moved">被转到了</string>
+    <string name="registering">注册中</string>
 
 </resources>

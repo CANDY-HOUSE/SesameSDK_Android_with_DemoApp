@@ -119,7 +119,7 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                     shadowStatus: CHDeviceStatus?
                 ) {
                     if (device is CHWifiModule2) {
-                        if (status.value == CHDeviceLoginStatus.Login) {
+                        if (status.value == CHDeviceLoginStatus.logined) {
                             device.getVersionTag { versionTag.postValue(it.getOrNull()?.data) }
                         }
                         if (device.deviceStatus == CHDeviceStatus.ReceivedAdV) {
@@ -306,7 +306,7 @@ class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate,
                 view?.findViewById<TextView>(R.id.err_title)?.text = getString(R.string.NoBleSignal)
             }
 
-            device is CHWifiModule2 && device.deviceStatus.value == CHDeviceLoginStatus.UnLogin -> {
+            device is CHWifiModule2 && device.deviceStatus.value == CHDeviceLoginStatus.unlogined -> {
                 view?.findViewById<View>(R.id.err_zone)?.visibility = View.VISIBLE
                 view?.findViewById<TextView>(R.id.err_title)?.text = device.deviceStatus.toString()
             }

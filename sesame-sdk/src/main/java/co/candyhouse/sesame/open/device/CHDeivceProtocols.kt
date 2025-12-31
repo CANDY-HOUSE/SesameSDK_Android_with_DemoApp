@@ -349,28 +349,29 @@ interface CHDeviceStatusDelegate {
 }
 
 enum class CHDeviceStatus(val value: CHDeviceLoginStatus) {
-    NoBleSignal(CHDeviceLoginStatus.UnLogin),
-    ReceivedAdV(CHDeviceLoginStatus.UnLogin),
-    BleConnecting(CHDeviceLoginStatus.UnLogin),
-    DiscoverServices(CHDeviceLoginStatus.UnLogin),
-    BleLogining(CHDeviceLoginStatus.UnLogin),
-    Registering(CHDeviceLoginStatus.UnLogin),
-    ReadyToRegister(CHDeviceLoginStatus.UnLogin),
-    WaitingForAuth(CHDeviceLoginStatus.UnLogin),
-    NoSettings(CHDeviceLoginStatus.Login),
-    Reset(CHDeviceLoginStatus.UnLogin),
-    DfuMode(CHDeviceLoginStatus.UnLogin),
-    Busy(CHDeviceLoginStatus.UnLogin),
-    Locked(CHDeviceLoginStatus.Login),
-    Moved(CHDeviceLoginStatus.Login),
-    Unlocked(CHDeviceLoginStatus.Login),
-    WaitApConnect(CHDeviceLoginStatus.Login),
-    IotConnected(CHDeviceLoginStatus.Login),
-    IotDisconnected(CHDeviceLoginStatus.Login)
+    NoBleSignal(CHDeviceLoginStatus.unlogined),
+    ReceivedAdV(CHDeviceLoginStatus.unlogined),
+    BleConnecting(CHDeviceLoginStatus.unlogined),
+    DiscoverServices(CHDeviceLoginStatus.unlogined),
+    BleLogining(CHDeviceLoginStatus.unlogined),
+    Registering(CHDeviceLoginStatus.unlogined),
+    ReadyToRegister(CHDeviceLoginStatus.unlogined),
+    WaitingGatt(CHDeviceLoginStatus.unlogined),
+    WaitingForAuth(CHDeviceLoginStatus.unlogined),
+    NoSettings(CHDeviceLoginStatus.logined),
+    Reset(CHDeviceLoginStatus.unlogined),
+    DfuMode(CHDeviceLoginStatus.unlogined),
+    Busy(CHDeviceLoginStatus.unlogined),
+    Locked(CHDeviceLoginStatus.logined),
+    Moved(CHDeviceLoginStatus.logined),
+    Unlocked(CHDeviceLoginStatus.logined),
+    WaitApConnect(CHDeviceLoginStatus.logined),
+    IotConnected(CHDeviceLoginStatus.logined),
+    IotDisconnected(CHDeviceLoginStatus.logined)
 }
 
 enum class CHDeviceLoginStatus {
-    Login, UnLogin,
+    logined, unlogined
 }
 
 class NSError(message: String, var domain: String, var code: Int) : Error(message)

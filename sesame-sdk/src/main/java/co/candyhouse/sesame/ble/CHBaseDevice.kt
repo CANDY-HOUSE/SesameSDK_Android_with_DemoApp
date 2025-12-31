@@ -172,7 +172,7 @@ internal fun <T> CHDevices.isBleAvailable(result: CHResult<T>): Boolean {
         result.invoke(Result.failure(CHError.BlePoweroff.value))
         return false
     }
-    if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+    if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
         result.invoke(Result.failure(CHError.SesameUnlogin.value))
         return false
     }

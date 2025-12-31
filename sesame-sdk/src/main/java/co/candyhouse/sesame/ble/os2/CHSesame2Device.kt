@@ -80,7 +80,7 @@ internal enum class CHError(val value: NSError) {
 //        L.d("hcia", "goIOT:" +this.deviceId)
         CHIotManager.subscribeSesame2Shadow(this) { result ->
             result.onSuccess { resourse ->
-                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     resourse.data.state.reported.mechst?.let { mechShadow ->
                         mechStatus = CHSesame2MechStatus(mechShadow.hexStringToByteArray())
                     }
@@ -110,7 +110,7 @@ internal enum class CHError(val value: NSError) {
             isRegistered = advertisement!!.isRegistered
             productModel = advertisement!!.productModel!!
 
-            if (deviceStatus.value == CHDeviceLoginStatus.Login && !isRegistered) {
+            if (deviceStatus.value == CHDeviceLoginStatus.logined && !isRegistered) {
                 deviceStatus = CHDeviceStatus.Reset
             }
 
@@ -166,7 +166,7 @@ internal enum class CHError(val value: NSError) {
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
 
 
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
 
@@ -179,7 +179,7 @@ internal enum class CHError(val value: NSError) {
     }
 
     override fun lock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
             if (!isBleAvailable(result)) return
@@ -195,7 +195,7 @@ internal enum class CHError(val value: NSError) {
 
     override fun unlock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
 
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
             if (!isBleAvailable(result)) return

@@ -90,8 +90,8 @@ class SSMCellView @JvmOverloads constructor(
     }
 
     private fun lockState(sesame: CHDevices) {
-        val isBleConnect = sesame.deviceStatus.value == CHDeviceLoginStatus.Login
-        val isWifiConnect = sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.Login
+        val isBleConnect = sesame.deviceStatus.value == CHDeviceLoginStatus.logined
+        val isWifiConnect = sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.logined
         if (!isBleConnect && !isWifiConnect) {
             setBallColor(isConnect = false, isLock = false)
             invalidate()

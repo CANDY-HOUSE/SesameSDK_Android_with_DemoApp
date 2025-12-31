@@ -81,7 +81,7 @@ internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil 
 
     /** 指令發送  */
     override fun unlock(tag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.Login && isBleAvailable(result)) {
+        if (deviceStatus.value == CHDeviceLoginStatus.logined && isBleAvailable(result)) {
             sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, byteArrayOf()), DeviceSegmentType.cipher) {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             }

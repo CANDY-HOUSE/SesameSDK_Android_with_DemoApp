@@ -48,23 +48,13 @@ object WebViewUrlLoader {
     fun rememberWebUrl(
         initialUrl: String,
         scene: String,
-        deviceId: String = "",
-        pushToken: String = "",
-        keyLevel: String = "",
-        paramInfo: Map<String, String>? = null,
+        extInfo: Map<String, String> = emptyMap(),
         onError: (String) -> Unit = {}
     ): State<String> {
         val webUrl = remember { mutableStateOf(initialUrl) }
 
         LaunchedEffect(scene) {
             if (scene.isNotEmpty() && initialUrl.isEmpty()) {
-                val extInfo = buildMap {
-                    if (pushToken.isNotEmpty()) put("pushToken", pushToken)
-                    if (deviceId.isNotEmpty()) put("deviceUUID", deviceId)
-                    if (keyLevel.isNotEmpty()) put("keyLevel", keyLevel)
-                    paramInfo?.also { putAll(it) }
-                }
-
                 loadWebUrl(
                     scene = scene,
                     extInfo = extInfo.takeIf { it.isNotEmpty() },

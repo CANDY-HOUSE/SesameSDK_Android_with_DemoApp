@@ -1,5 +1,4 @@
 <resources>
-<!--    todo:缺少add_ssm_hint by Open Sensor的屬性-->
     <string name="launching_why_need_location_permission">
         如果您使用的是 Android 6.0 或更高版本，為了讓藍牙正常運作，需要允許應用程式訪問位置資訊。否則，該應用程式將無法找到Sesame。</string>
     <string name="app_name">芝麻</string>
@@ -17,11 +16,10 @@
     <string name="title_list">芝麻</string>
     <string name="forever">永远</string>
     <string name="logout">登出</string>
-    <!--?-->
     <string name="hub3_hint_ir">添加距離此Hub3 5米內要連接的紅外設備：</string>
     <string name="addFail">添加失敗</string>
     <string name="cameraError">相機錯誤</string>
-<!--    更新Ssm名稱用↓-->
+    <!--    更新Ssm名稱用↓-->
     <string name="change_sesame_angle">設定角度</string>
     <string name="ssm_update">SesameOS更新＆重開機</string>
     <string name="autolock">倒數自動上鎖</string>
@@ -143,8 +141,6 @@
     <string name="wm2_select_ssid">選擇您的WiFi網路</string>
     <string name="nfc_hint">將手機靠近NFC標籤進行設置</string>
     <string name="nfc_reset">刪除NFC標籤</string>
-<!--    <string name="no_scan_devices">Bluetooth devices not found</string>-->
-<!--    <string name="wm2_pwk_hint">Please enter the WiFi password</string>-->
 
     <string name="noble">手機藍芽未開啟</string>
     <string name="NoBleSignal">找不到藍牙訊號, 請靠近</string>
@@ -161,7 +157,6 @@
     <string name="historyAUTOLOCK_UPDATED">自動上鎖設置被更新</string>
     <string name="historyAUTOLOCK">自動上鎖</string>
 
-
     <string name="WigetOpenAll">全部上鎖</string>
     <string name="WigetCloseAll">全部解鎖</string>
 
@@ -177,25 +172,15 @@
 
     <string name="Mode">模式</string>
 
-    <string
-        name="no_scan_devices_hint1"
-        >1. 您已經允許了手機的藍牙和位置權限嗎？</string>
-    <string
-        name="no_scan_devices_hint2"
-        >2. 附近是否有未註冊的設備？</string>
-    <string
-        name="no_scan_devices_hint3"
-        >3. 若要重置已註冊的設備，請用針戳長按重置按鈕直到LED燈熄滅</string>
-    <string
-        name="no_scan_devices_hint4"
-        >4. 有時候，重啟手機可以解決問題。</string>
+    <string name="no_scan_devices_hint1">1. 您已經允許了手機的藍牙和位置權限嗎？</string>
+    <string name="no_scan_devices_hint2">2. 附近是否有未註冊的設備？</string>
+    <string name="no_scan_devices_hint3">3. 若要重置已註冊的設備，請用針戳長按重置按鈕直到LED燈熄滅</string>
+    <string name="no_scan_devices_hint4">4. 有時候，重啟手機可以解決問題。</string>
 
     <string name="pull_fresh_hint">↓下拉可刷新</string>
     <string name="latest">(最新)</string>
 
-    <string
-        name="upload_keys_fail"
-        >現在網路狀態不太穩定，下拉刷新或登出可能導致芝麻設備清單消失。</string>
+    <string name="upload_keys_fail">現在網路狀態不太穩定，下拉刷新或登出可能導致芝麻設備清單消失。</string>
 
     <string name="TouchEmptyFingerHint">靠近%1$s連藍牙, 點擊 ⊕, 將手指放在%2$s上以添加指紋。添加後點擊 X。\n\n另外，多次改變手指角度 輸入同一手指，可以大幅提高識別率👍</string>
     <string name="TouchEmptyNFCHint">靠近%1$s連藍牙, 點擊 ⊕, 將NFC卡放在%2$s上以添加NFC卡。添加後點擊 X。\n\nAndroid手機或手錶通常內置有多張NFC卡，每次添加的NFC卡號可能會變動，我們建議您添加所有內置的NFC卡，以減少誤判的可能性。</string>
@@ -230,7 +215,6 @@
 
     <string name="judge_the_sesame">水平校正</string>
     <string name="device_model">機種</string>
-<!--    <string name="load_fail">加載數據失敗</string>-->
     <string name="facepalm">管理掌靜脈</string>
     <string name="battary">電池電量</string>
     <string name="open_sensor_status">開關狀態</string>
@@ -267,5 +251,18 @@
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
     <string name="sesame_full">設備已滿</string>
+
+    <string name="reset">重設</string>
+    <string name="receivedBle">收到藍芽訊號了</string>
+    <string name="bleConnecting">藍芽連接中</string>
+    <string name="waitingGatt">等待 GATT</string>
+    <string name="waitingForAuth">等待認證中</string>
+    <string name="bleLogining">藍芽登入中</string>
+    <string name="readyToRegister">可以註冊</string>
+    <string name="noSettings">未設定</string>
+    <string name="locked">上鎖</string>
+    <string name="unlocked">沒上鎖</string>
+    <string name="moved">被轉到了</string>
+    <string name="registering">註冊中</string>
 
 </resources>

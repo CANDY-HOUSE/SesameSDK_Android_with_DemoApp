@@ -53,7 +53,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     /** 其他功能: history  */
     var isHistory: Boolean = false
         set(value) {
-            if (deviceStatus.value == CHDeviceLoginStatus.Login) {
+            if (deviceStatus.value == CHDeviceLoginStatus.logined) {
                 field = value
                 if (field) {
                     readHistoryCommand()
@@ -149,7 +149,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     }
 
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.Login && isBleAvailable(result)) {
+        if (deviceStatus.value == CHDeviceLoginStatus.logined && isBleAvailable(result)) {
             if (deviceStatus == CHDeviceStatus.Locked) {
                 unlock(historytag, result)
             } else {
@@ -183,7 +183,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         if (historytag == null) {
             buildHistoryTagWithUUID()
         }
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && deviceShadowStatus != null) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
@@ -204,7 +204,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         if (historytag == null) {
             buildHistoryTagWithUUID()
         }
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && deviceShadowStatus != null) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }

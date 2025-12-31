@@ -246,7 +246,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
-                                if (device.deviceStatus.value == CHDeviceLoginStatus.Login) {
+                                if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
                                     device.unlock {}
                                     return@launch
                                 }
@@ -262,7 +262,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
-                                if (device.deviceStatus.value == CHDeviceLoginStatus.Login) {
+                                if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
                                     device.unlock {}
                                     return@launch
                                 }
@@ -278,7 +278,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
-                                if (device.deviceStatus.value == CHDeviceLoginStatus.Login) {
+                                if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
                                     device.click {}
                                     return@launch
                                 }

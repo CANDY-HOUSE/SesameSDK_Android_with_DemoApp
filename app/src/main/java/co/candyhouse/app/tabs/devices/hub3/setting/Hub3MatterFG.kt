@@ -15,13 +15,11 @@ import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgMatterBinding
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.fragments.toastMSG
-import co.utils.toHexString
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +45,7 @@ class Hub3MatterFG : BaseDeviceFG<FgMatterBinding>() {
         val isWifiConnect = (targetDevice.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork == true
         val isStatus = targetDevice.deviceStatus.value
         isStatus?.apply {
-            if (this == CHDeviceLoginStatus.UnLogin) {
+            if (this == CHDeviceLoginStatus.unlogined) {
                 toastMSG("4 - Bluetooth is off")
             }
         }

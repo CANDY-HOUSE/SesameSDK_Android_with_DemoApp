@@ -22,6 +22,7 @@ import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.ext.webview.EmbeddedWebViewContent
+import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.clearNFC
 import co.candyhouse.app.tabs.devices.ssm2.getFirmwareName
@@ -111,7 +112,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     open fun checkVersionTag(status: CHDeviceStatus, device: CHDevices) {
-        if (status.value == CHDeviceLoginStatus.Login) {
+        if (status.value == CHDeviceLoginStatus.logined) {
             device.getVersionTag {
                 it.onSuccess { va ->
                     if (isAdded && !isDetached) {
@@ -231,7 +232,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         view?.findViewById<View>(R.id.dfu_zone)?.setOnClickListener {
             //对齐iOS统一弹出升级对话框风格
             if (targetDevice.productModel != CHProductModel.Hub3
-                && mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.UnLogin
+                && mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined
             ) {
                     toastMSG(getString(R.string.toastBleNotReadyForDFU))
                     return@setOnClickListener
@@ -320,9 +321,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
             setContent {
                 EmbeddedWebViewContent(
-                    scene = "device-setting",
-                    deviceId = targetDevice.deviceId.toString().uppercase(),
-                    keyLevel = targetDevice.getLevel().toString(),
+                    config = WebViewConfig(
+                        scene = "device-setting",
+                        deviceId = targetDevice.deviceId.toString().uppercase(),
+                        keyLevel = targetDevice.getLevel().toString()
+                    ),
                     height = 80.dp,
                     refreshTrigger = refreshCounter.intValue,
                     onSchemeIntercept = { uri, params ->
@@ -419,7 +422,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 }
             }
 
-            mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.UnLogin -> {
+            mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined -> {
                 view?.findViewById<View>(R.id.err_zone)?.visibility = View.VISIBLE
                 view?.findViewById<TextView>(R.id.err_title)?.text =
                     mDeviceModel.ssmLockLiveData.value!!.deviceStatus.toString()

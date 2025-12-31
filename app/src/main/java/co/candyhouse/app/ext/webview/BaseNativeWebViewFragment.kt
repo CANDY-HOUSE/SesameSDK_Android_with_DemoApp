@@ -180,6 +180,7 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
                 webView = wv,
                 scene = webViewName,
                 scope = GlobalScope,
+                context = requireContext(),
                 onRequestLogin = {
                     activeFragments[webViewName]?.get()?.let { fragment ->
                         if (fragment.isAdded && fragment.isVisible) {

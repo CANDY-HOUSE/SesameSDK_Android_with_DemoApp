@@ -367,3 +367,27 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSM_MIWA -> CHDeviceManager.app.getString(R.string.SSM_MIWA)
     }
 }
+
+fun CHDevices.localizedDescription(context: Context): String? {
+    return when (deviceStatus) {
+        CHDeviceStatus.Reset -> context.getString(R.string.reset)
+        CHDeviceStatus.NoBleSignal -> context.getString(R.string.NoBleSignal)
+        CHDeviceStatus.ReceivedAdV -> context.getString(R.string.receivedBle)
+        CHDeviceStatus.BleConnecting -> context.getString(R.string.bleConnecting)
+        CHDeviceStatus.DiscoverServices -> context.getString(R.string.waitingGatt)
+        CHDeviceStatus.WaitingGatt -> context.getString(R.string.waitingGatt)
+        CHDeviceStatus.WaitingForAuth -> context.getString(R.string.waitingForAuth)
+        CHDeviceStatus.BleLogining -> context.getString(R.string.bleLogining)
+        CHDeviceStatus.ReadyToRegister -> context.getString(R.string.readyToRegister)
+        CHDeviceStatus.Locked -> context.getString(R.string.locked)
+        CHDeviceStatus.Unlocked -> context.getString(R.string.unlocked)
+        CHDeviceStatus.NoSettings -> context.getString(R.string.noSettings)
+        CHDeviceStatus.Moved -> context.getString(R.string.moved)
+        CHDeviceStatus.Registering -> context.getString(R.string.registering)
+        CHDeviceStatus.DfuMode -> "dfumode"
+        CHDeviceStatus.WaitApConnect -> "waitApConnect"
+        CHDeviceStatus.Busy -> "busy"
+        CHDeviceStatus.IotConnected -> "iotConnected"
+        CHDeviceStatus.IotDisconnected -> "iotDisconnected"
+    }
+}

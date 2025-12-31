@@ -200,7 +200,7 @@ class SesameForegroundService : Service() {
         ) {
             return
         }
-        if (!device.getIsNOHandG() && device.deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+        if (!device.getIsNOHandG() && device.deviceStatus.value == CHDeviceLoginStatus.unlogined) {
             getLastKnownLocation(baseContext.applicationContext) { locationState ->
                 locationState.getOrNull()?.data?.let { location ->
                     val dist = FloatArray(1)
@@ -223,7 +223,7 @@ class SesameForegroundService : Service() {
                 }
             }
         }
-        if (device.deviceStatus.value == CHDeviceLoginStatus.Login) {
+        if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
             device.rssi?.let {
                 if (device.getIsNOHandG()) {
                     if (device.deviceStatus == CHDeviceStatus.Unlocked) {

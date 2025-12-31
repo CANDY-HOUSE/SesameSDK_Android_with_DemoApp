@@ -167,7 +167,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                     val ssmID = (ssks?.substring(i * 38, i * 38 + 36))?.lowercase()
                     ssm5KeysMapFromIOT[ssmID.toString()] = "$i"
                 }
-                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     ssm2KeysMap.clear()
                     ssm2KeysMap.putAll(ssm5KeysMapFromIOT)
                     (delegate as? CHHub3Delegate)?.onSSM2KeysChanged(this, ssm2KeysMap)
@@ -450,6 +450,10 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     override fun unsubscribeTopic(topic: String) {
         L.d("unsubscribeLearnData", "topic: $topic")
         CHIotManager.unsubscribeTopic(topic)
+    }
+
+    override fun <T> isBleAvailable(result: CHResult<T>): Boolean {
+        return (this as CHDevices).isBleAvailable(result)
     }
 
 }

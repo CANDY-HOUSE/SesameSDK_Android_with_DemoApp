@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
+import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.tabs.HomeFragment
 import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
@@ -235,11 +236,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
 
     private fun handleCallBackHub3(hub3: CHHub3, irRemote: IrRemote) {
         L.d(tag, "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
-        safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-            putString("scene", "ir-remote")
-            putString("deviceId", hub3.deviceId.toString().uppercase())
-            putSerializable("extInfo", hashMapOf("irRemote" to Gson().toJson(irRemote)))
-        })
+        val config = WebViewConfig(
+            scene = "ir-remote",
+            deviceId = hub3.deviceId.toString().uppercase(),
+            params = mapOf(
+                "irRemote" to Gson().toJson(irRemote)
+            )
+        )
+        safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
     }
 
     private fun checkAdapterPost(call: () -> Unit) {
@@ -280,7 +284,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
 
-            CHProductModel.Hub3 -> safeNavigate(R.id.to_Hub3SettingFG)
+            CHProductModel.Hub3 -> {
+                safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
+                    putString("scene", "wifi-module")
+                    putString("deviceId", device.deviceId.toString().uppercase())
+                    putString("keyLevel", device.getLevel().toString())
+                })
+            }
+
             CHProductModel.SesameBot2 -> safeNavigate(R.id.to_SesameBot2SettingFG)
             CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro, CHProductModel.SSMFace,

@@ -48,7 +48,7 @@ import java.util.*
             deviceId = advertisement!!.deviceID
             isRegistered = advertisement!!.isRegistered
 
-            if (deviceStatus.value == CHDeviceLoginStatus.Login && !isRegistered) {
+            if (deviceStatus.value == CHDeviceLoginStatus.logined && !isRegistered) {
                 deviceStatus = CHDeviceStatus.Reset
             }
 
@@ -66,7 +66,7 @@ import java.util.*
     override fun goIOT() {
         CHIotManager.subscribeSesame2Shadow(this) { result ->
             result.onSuccess { resource ->
-                if (deviceStatus.value == CHDeviceLoginStatus.UnLogin) {
+                if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     resource.data.state.reported.mechst?.let { mechShadow ->
                         mechStatus = CHSesameBotMechStatus(mechShadow.hexStringToByteArray())// 韌體是用 bot 去改的。格式走 bot
                     }
@@ -267,7 +267,7 @@ import java.util.*
 
 
     override fun unlock(historyTag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.UnLogin && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
             CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historyTag), result)
         }
         if (!isBleAvailable(result)) return

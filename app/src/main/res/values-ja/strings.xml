@@ -1,6 +1,5 @@
 <resources>
     <string name="launching_why_need_location_permission">Android 6.0 またはそれ以上の場合、Bluetoothを適正に作動させるためには位置情報にアクセスする許可が必要です。そうでなければ、アプリがセサミを見つけることができません。</string>
-
     <string name="app_name">Sesame</string>
     <string name="dfu_status_error_msg">發生錯誤</string>
     <string name="Sesame5us">セサミ 5 北米北欧版</string>
@@ -119,7 +118,6 @@
     <string name="TrashTheWifiModule2Key">このWiFiモジュールを削除する</string>
     <string name="TrashTheHub3Module2Key">このHub3を削除する</string>
 
-
     <string name="addSesameTo">セサミを追加…</string>
     <string name="wm2NetworkConnectionStatus">ネット接続状態</string>
     <string name="click_script">台本</string>
@@ -133,7 +131,6 @@
     <string name="wm2_select_ssid">ご使用のWiFi環境をお選びください</string>
     <string name="nfc_reset">NFCタグを削除</string>
 
-
     <string name="noble">Bluetoothがオフ</string>
     <string name="NoBleSignal">Bluetooth信号見つからず、近づいてください</string>
 
@@ -142,7 +139,6 @@
     <string name="drop_hint">%1$sを削除しても%1$sは初期化またリセットされません。%1$sを初期化またリセットするには、細い棒でリセットボタンをLED点灯が消えるまで長押ししてください。</string>
     <string name="drop_hint_press">%1$sを削除しても%1sを削除してもsは初期化またリセットされません。%1$sを初期化またリセットするには、リセットボタンをLED点灯が消えるまで長押ししてください</string>
 
-
     <string name="historyLOCK">が施錠されました</string>
     <string name="historyUNLOCK">が解錠されました</string>
     <string name="historyMANUAL_LOCKED">が手動で施錠されました</string>
@@ -150,14 +146,12 @@
     <string name="historyAUTOLOCK_UPDATED">のオートロックの設定が変更されました</string>
     <string name="historyAUTOLOCK">がオートロックしました</string>
 
-
     <string name="WigetOpenAll">Lock All</string>
     <string name="WigetCloseAll">Unlock All</string>
 
     <string name="wm2_ap_setting_error">すみません🙏 \n
     WiFiパスワードを再度確かめるか、WiFiルーターとの距離を近づけて、再度設定をお試し頂けますでしょうか？\n\n
     一度失敗した場合でも、通常数回お試し頂くと、接続に成功することがほとんどです。🙏</string>
-
 
     <string name="auto_mode">手ぶら解錠</string>
     <string name="sesame_autounlock_hint">1. 赤い円を調整してください。スマホのGPS情報がこの赤い円から出て再度この円の中に入った時にのみスマホがBluetoothでセサミと繋がると手ぶら解錠が作動します。\n2. GPS情報が不安定な場合、赤い円の範囲を広めに設定してください。画面をタップしてセサミ位置を設定できます。\n3. もし手ぶら解錠が作動され難くなった場合、一度スマホを再起動してください。
@@ -208,7 +202,6 @@
 
     <string name="judge_the_sesame">水平の調整</string>
     <string name="device_model">機種</string>
-    <!--    <string name="load_fail">データ読込失敗</string>-->
     <string name="battary">電池残量</string>
     <string name="open_sensor_status">スイッチの状態</string>
     <string name="open_sensor_last_update_time">Update Time</string>
@@ -245,6 +238,19 @@
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
     <string name="sesame_full">デバイス満杯</string>
+
+    <string name="reset">Reset</string>
+    <string name="receivedBle">Received Ble</string>
+    <string name="bleConnecting">Ble Connecting</string>
+    <string name="waitingGatt">Waiting gatt</string>
+    <string name="waitingForAuth">Waiting auth</string>
+    <string name="bleLogining">Ble Loging in</string>
+    <string name="readyToRegister">Ready to register</string>
+    <string name="noSettings">No settings</string>
+    <string name="locked">Locked</string>
+    <string name="unlocked">Unlocked</string>
+    <string name="moved">Moved</string>
+    <string name="registering">Registering</string>
 
 </resources>
 

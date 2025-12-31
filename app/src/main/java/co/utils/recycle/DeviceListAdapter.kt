@@ -221,12 +221,12 @@ class DeviceListAdapter(
         private fun updateConnectionStatus(device: CHDevices) {
             binding.apply {
                 blImg.visibility = View.VISIBLE
-                val isBleConnect = device.deviceStatus.value == CHDeviceLoginStatus.Login
+                val isBleConnect = device.deviceStatus.value == CHDeviceLoginStatus.logined
                 blImg.setImageResource(
                     if (isBleConnect) R.drawable.bl_green else R.drawable.bl_grey
                 )
 
-                val isWifiConnect = device.deviceShadowStatus?.let { it.value == CHDeviceLoginStatus.Login } ?: false
+                val isWifiConnect = device.deviceShadowStatus?.let { it.value == CHDeviceLoginStatus.logined } ?: false
                 wifiImg.setImageResource(
                     if (isWifiConnect) R.drawable.wifi_green else R.drawable.wifi_grey
                 )
@@ -266,14 +266,14 @@ class DeviceListAdapter(
             binding.bleStatus.text = device.deviceStatus.toString()
             binding.bleStatus.visibility = when {
                 device is CHSesameConnector -> {
-                    if (device.deviceStatus.value == CHDeviceLoginStatus.Login ||
+                    if (device.deviceStatus.value == CHDeviceLoginStatus.logined ||
                         device.deviceStatus == CHDeviceStatus.NoBleSignal ||
                         device.deviceStatus == CHDeviceStatus.ReceivedAdV
                     ) View.GONE else View.VISIBLE
                 }
 
                 else -> {
-                    if (device.deviceStatus.value == CHDeviceLoginStatus.Login ||
+                    if (device.deviceStatus.value == CHDeviceLoginStatus.logined ||
                         device.deviceStatus == CHDeviceStatus.NoBleSignal
                     ) View.GONE else View.VISIBLE
                 }

@@ -279,6 +279,9 @@
         <action
             android:id="@+id/action_mainRoomSS5FG_to_SSM5SettingFG"
             app:destination="@id/SSM5SettingFG" />
+        <action
+            android:id="@+id/to_HUB3ScanSSIDListFG"
+            app:destination="@id/HUB3ScanSSIDListFG" />
     </fragment>
 
 </navigation>
