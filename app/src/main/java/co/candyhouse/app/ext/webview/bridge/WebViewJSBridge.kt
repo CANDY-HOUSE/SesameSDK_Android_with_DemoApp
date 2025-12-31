@@ -75,6 +75,10 @@ class WebViewJSBridge(
                     hub3Bridge?.handleRequestMonitorInternet(json)
                 }
 
+                requestDeviceFWUpgrade -> {
+                    hub3Bridge?.handleRequestDeviceFWUpgrade(json)
+                }
+
                 requestRefreshApp -> {
                     scope.launch(Dispatchers.Main) {
                         config.onRequestRefreshApp?.invoke()

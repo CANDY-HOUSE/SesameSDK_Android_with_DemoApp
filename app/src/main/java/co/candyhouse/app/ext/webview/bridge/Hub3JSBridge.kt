@@ -121,6 +121,16 @@ class Hub3JSBridge(
     }
 
     /**
+     * 处理蓝牙状态下OTA升级
+     */
+    fun handleRequestDeviceFWUpgrade(json: JSONObject) {
+        val callbackName = json.optString("callbackName")
+        statusCallbacks[WebViewJSBridge.requestDeviceFWUpgrade] = callbackName
+        val device = currentDevice ?: return
+        device.updateFirmwareBleOnly {}
+    }
+
+    /**
      * 清理连接
      */
     fun cleanup() {
@@ -178,7 +188,25 @@ class Hub3JSBridge(
     }
 
     override fun onOTAProgress(device: CHWifiModule2, percent: Byte) {
-        super.onOTAProgress(device, percent)
+        val cbName = statusCallbacks[WebViewJSBridge.requestDeviceFWUpgrade] ?: return
+
+        val p = percent.toInt() and 0xFF
+        if (p % 10 != 0) return
+
+        scope.launch(Dispatchers.Main) {
+            val jsonData = JSONObject().apply {
+                put("deviceUUID", device.deviceId.toString())
+                put("percent", p.toString())
+            }
+
+            val jsCode = """
+            if(window.$cbName) {
+                window.$cbName($jsonData);
+            }
+        """.trimIndent()
+
+            webView?.evaluateJavascript(jsCode, null)
+        }
     }
 
     private fun sendBLEStatusToH5(callbackName: String, status: String) {

@@ -254,6 +254,7 @@ interface CHDevices {
     fun register(result: CHResult<CHEmpty>)
     fun reset(result: CHResult<CHEmpty>)
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
+    fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {}
 
     fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
         if ((this as CHDeviceUtil).sesame2KeyData == null) {

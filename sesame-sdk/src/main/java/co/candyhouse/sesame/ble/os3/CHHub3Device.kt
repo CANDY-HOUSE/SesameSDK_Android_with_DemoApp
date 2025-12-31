@@ -283,6 +283,21 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     }
 
+    override fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {
+        val result: CHResult<CHEmpty> = { }
+        if (!isBleAvailable(result)) {
+            onResponse.invoke(Result.failure(NSError("BLE unavailable", "SesameSDK", -2)))
+        } else {
+            sendCommand(SesameOS3Payload(SesameItemCode.moveTo.value, byteArrayOf())) { res ->
+                if (res.cmdResultCode == SesameResultCode.success.value) {
+                    onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(advertisement!!.device!!)))
+                } else {
+                    onResponse.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
+                }
+            }
+        }
+    }
+
     override fun insertSesame(sesame: CHDevices, nickName: String, matterProductModel: MatterProductModel, result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
         deleteSesameShadow(sesame)
