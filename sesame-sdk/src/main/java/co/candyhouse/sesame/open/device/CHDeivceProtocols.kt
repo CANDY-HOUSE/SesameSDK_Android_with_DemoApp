@@ -23,13 +23,6 @@ import co.candyhouse.sesame.server.dto.CHEmpty
 import co.candyhouse.sesame.utils.CHMulticastDelegate
 import java.util.UUID
 
-enum class MatterProductModel(val value: UByte) {
-    DoorLock(0u),
-    OnOffSwitch(1u),
-    OnOffSensor(4u), /*https://github.com/CANDY-HOUSE/SesameOS3_esp32c3/blob/master/src/app/zap-templates/zcl/data-model/chip/matter-devices.xml#L1311 */
-    None(255u);
-}
-
 enum class CHProductModel {
     WM2 {
         override fun productType() = 1 // 設備藍芽廣播

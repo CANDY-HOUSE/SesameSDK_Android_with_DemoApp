@@ -285,7 +285,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private fun handleUI(targetDevice: CHDevices) {
         val level = targetDevice.getLevel()
         if (level == 2) {
-            view?.findViewById<View>(R.id.share_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.chenge_angle_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.auto_lock_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.opsensor_zone)?.visibility = View.GONE

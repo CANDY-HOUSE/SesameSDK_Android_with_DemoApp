@@ -6,7 +6,6 @@
     <string name="second2">秒</string>
     <string name="clickaction">點擊⊕添加動作。\n如果秒數為「永遠」並被執行，除非切換到其他劇本並執行，否則SesameBot2的動作不會停止。\n馬達正反轉速度有公差，請讓按下時間比返回稍長一些。</string>
     <string name="delete_account">刪除帳號</string>
-    <string name="matterMsg">已進入Matter配網模式，請於十五分鐘內完成配網，萬一失敗請重新進入此頁以重新進入Matter配網模式</string>
     <string name="qrcodeNotSupport">該二維碼不支持</string>
     <string name="DelFace">删除人臉</string>
     <string name="sesamefaceMsg">靠近 %1$s 連藍牙, 點擊 ⊕ 輸入人臉。輸入後點擊 X。安裝好後再註冊，識別率會極高。</string>
@@ -16,7 +15,6 @@
     <string name="title_list">芝麻</string>
     <string name="forever">永远</string>
     <string name="logout">登出</string>
-    <string name="hub3_hint_ir">添加距離此Hub3 5米內要連接的紅外設備：</string>
     <string name="addFail">添加失敗</string>
     <string name="cameraError">相機錯誤</string>
     <!--    更新Ssm名稱用↓-->
@@ -24,9 +22,6 @@
     <string name="ssm_update">SesameOS更新＆重開機</string>
     <string name="autolock">倒數自動上鎖</string>
     <string name="ssm_delete">刪除</string>
-
-    <string name="door_lock">Door Lock</string>
-    <string name="on_off_switch">Switch</string>
 
     <string name="cancel">取消</string>
     <string name="last_name">姓</string>
@@ -125,9 +120,7 @@
     <string name="remoteNanoTriggerSettingHint">防誤觸之長按啟動時間</string>
     <string name="VerificationCode">已發到您信箱的驗證碼</string>
     <string name="ResetWifiModule2">重置WiFi模組並丟棄鑰匙</string>
-    <string name="ResetHub3">重置Hub3並丟棄鑰匙</string>
     <string name="TrashTheWifiModule2Key">刪除 WiFi模組</string>
-    <string name="TrashTheHub3Module2Key">刪除 Hub3</string>
 
     <string name="addSesameTo">添加芝麻設備…</string>
     <string name="wm2NetworkConnectionStatus">網路狀態</string>
@@ -146,7 +139,6 @@
     <string name="NoBleSignal">找不到藍牙訊號, 請靠近</string>
 
     <string name="wm2_hint">添加距離此WiFi模組 5公尺內要連接的芝麻設備：</string>
-    <string name="hub3_hint">添加距離此Hub3 5公尺內要連接的芝麻設備：</string>
     <string name="drop_hint">刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請用針戳復位鍵LED燈熄滅</string>
     <string name="drop_hint_press">刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請按住復位鍵LED燈熄滅</string>
 
@@ -202,9 +194,6 @@
     <string name="TouchProFingerModify">修改此指紋名稱🖊️</string>
     <string name="TouchProFingerDelete">刪除此指紋</string>
     <string name="TouchProPWDRename">修改此數字密碼名稱🖊️</string>
-    <string name="MatterSettings">Matter Settings</string>
-    <string name="SkipMatterSettings">跳過Matter設定</string>
-    <string name="OpenMatterPairingWindow">Open MATTER Pairing Window</string>
 
     <string name="TouchProPWDDelete">刪除此數字密碼</string>
     <string name="trash_device_key">刪除此 %1$s</string>
@@ -222,16 +211,12 @@
 
     <string name="android_notifica_permis_on">已獲得 安卓的 通知權限</string>
     <string name="android_notifica_permis_off">未獲得 安卓的 通知權限(按這裡)</string>
-    <string name="hub3_addSesameTo">添加紅外線數據...</string>
     <string name="login_fg_input_mail_warn">請輸入正確的電子郵件</string>
-
-    <string name="hub3_details">细节</string>
 
     <string name="sesame_widget_notification">請點擊啟動開鎖小工具!</string>
     <string name="delete_failed_tips">刪除失敗，請重試</string>
 
     <string name="distance">距離</string>
-    <string name="brightness">亮度</string>
     <string name="radar">雷達偵查距離</string>
     <string name="radar_distance_description">・這是雷達喚醒系統的偵測距離。\n・每日人流量超過10次之地方, 設置短距以省電！\n・每日人流量10次以下之地方, 設置最長距離以獲得最爽體驗。\n・即使為最短距離，按下「開鎖按鈕/側面按鈕」將立即啓動人臉或掌靜脈識別，兼顧極度省電與最爽體驗。</string>
 

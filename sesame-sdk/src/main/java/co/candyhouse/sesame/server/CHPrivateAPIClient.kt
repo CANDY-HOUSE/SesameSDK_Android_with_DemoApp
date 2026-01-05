@@ -40,16 +40,8 @@ internal interface CHPrivateAPIClient {
     @Operation(path = "/device/v1/sesame2/sign", method = "POST")
     fun guestKeysSignPost(body: CHRemoveSignKeyRequest): String
 
-    @Operation(path = "/device/v1/version", method = "GET")
-    fun getVersion(): Any
-
     @Operation(path = "/device/v2/hub3/{device_id}/status", method = "GET")
     fun getHub3StatusFromIot(
-        @Parameter(name = "device_id", location = "path") deviceId: String,
-    ): Any
-
-    @Operation(path = "/device/v2/hub3/{device_id}/firmware", method = "POST")
-    fun updateHub3Firmware(
         @Parameter(name = "device_id", location = "path") deviceId: String,
     ): Any
 
@@ -82,4 +74,8 @@ internal interface CHPrivateAPIClient {
         body: Map<String, Any>
     ): Any
 
+    @Operation(path = "/device/v2/ir/{device_id}", method = "GET")
+    fun fetchIRDevices(
+        @Parameter(name = "device_id", location = "path") deviceId: String
+    ): Any
 }

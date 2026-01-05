@@ -77,14 +77,6 @@ object CHAccountManager {
         }
     }
 
-    internal fun getVersion(onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val version = jpAPIClient.getVersion()
-
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(version)))
-        }
-    }
-
     internal fun signGuestKey(key: CHRemoveSignKeyRequest, onResponse: CHResult<String>) {
         makeApiCall(onResponse) {
             val guestKeyTag = jpAPIClient.guestKeysSignPost(key)
@@ -103,13 +95,6 @@ object CHAccountManager {
         makeApiCall(onResponse) {
             val body = mapOf("versionTag" to versionTag)
             val res = jpAPIClient.updateDeviceFirmwareVersion(deviceUUID, body)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
-        }
-    }
-
-    internal fun updateHub3Firmware(deviceUUID: String, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) {
-            val res = jpAPIClient.updateHub3Firmware(deviceUUID)
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
         }
     }
@@ -186,6 +171,17 @@ object CHAccountManager {
             val postBatteryDataRes = jpAPIClient.postBatteryData(deviceID, CHBatteryDataReq(payloadString))
             L.d("harry", "[postBatteryData]: $postBatteryDataRes")
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(postBatteryDataRes)))
+        }
+    }
+
+    fun fetchIRDevices(deviceUUID: String, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) {
+            try {
+                val res = jpAPIClient.fetchIRDevices(deviceUUID)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(res)))
+            } catch (e: Exception) {
+                onResponse.invoke(Result.failure(e))
+            }
         }
     }
 }

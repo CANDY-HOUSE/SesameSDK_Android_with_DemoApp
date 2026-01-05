@@ -326,8 +326,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             bind.radarDistanceSet.visibility = View.GONE
             bind.facePalm.visibility = View.GONE
         }
-        view.findViewById<View>(R.id.share_zone)?.visibility =
-            if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.RemoteNano) View.GONE else View.VISIBLE
 
         val name = device.productModel.modelName()
         bind.addSsmHintByTouchTxt.text = getString(R.string.add_ssm_hint_by_touch, name)

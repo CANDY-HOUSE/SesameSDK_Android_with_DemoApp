@@ -1,5 +1,6 @@
 package co.candyhouse.app.tabs.devices.hub3.setting
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -19,96 +20,150 @@ import co.utils.alerts.ext.inputTextAlert
 import co.utils.recycle.GenericAdapter
 
 class Hub3ScanSSIDListFG : BaseDeviceFG<FgWm2ScanListBinding>(), CHHub3Delegate {
-    var ssidList = ArrayList<WifiRssi>()
-    var ssidMap: MutableMap<String, Short> = mutableMapOf()
-    override fun getViewBinder()= FgWm2ScanListBinding.inflate(layoutInflater)
+
+    private val tag = "Hub3ScanSSIDListFG"
+
+    private val ssidMap: MutableMap<String, Short> = mutableMapOf()
+    private val ssidList: MutableList<WifiRssi> = mutableListOf()
+
+    private val adapter by lazy { WifiListAdapter(ssidList, ::onWifiSelected) }
+
+    override fun getViewBinder() = FgWm2ScanListBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        refleshPage()
-       bind. swiperefresh.setOnRefreshListener { refleshPage() }
-        mDeviceModel.ssmosLockDelegates[(mDeviceModel.ssmLockLiveData.value!! as CHHub3)] = object : CHHub3Delegate {
-            override fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {
-                ssidMap[ssid] = ssidMap[ssid]?.let {
-                    if (it < rssi) {
-                        rssi
-                    } else {
-                        it
-                    }
-                } ?: rssi
-                ssidList.clear()
-                for ((ssid, rssi) in ssidMap) {
-                    ssidList.add(WifiRssi(ssid, rssi))
-                }
-                ssidList.sortByDescending { it.rssi }
-                bind.leaderboardList?.post {
-                    bind.swiperefresh.isRefreshing = false
-                    L.d("hcia", "[hub3]WiFi列表加入:" + ssid)
-                    bind.leaderboardList.adapter?.notifyDataSetChanged()
-                }
-            }
-        }.bindLifecycle(viewLifecycleOwner)
 
-        bind.leaderboardList.apply {
-            adapter = object : GenericAdapter<WifiRssi>(ssidList) {
-                override fun getLayoutId(position: Int, obj: WifiRssi): Int = R.layout.key_cell
-                override fun getViewHolder(view: View, viewType: Int): RecyclerView.ViewHolder =
-                        object : RecyclerView.ViewHolder(view), Binder<WifiRssi> {
-                            var wifiImg = itemView.findViewById<ImageView>(R.id.wifi_img)
-                            var title = itemView.findViewById<TextView>(R.id.title)
-                            var sub_title = itemView.findViewById<TextView>(R.id.sub_title)
-                            override fun bind(wifi_rssi: WifiRssi, pos: Int) {
-                                title.text = wifi_rssi.ssid
-                                sub_title.text = wifi_rssi.rssi.toString()
-                                wifi_rssi.rssi > -50
-                                wifiImg.setImageResource(if (wifi_rssi.rssi > -50) R.drawable.ic_wifi_blue else if (wifi_rssi.rssi > -70) R.drawable.ic_wifi_blue_middle else R.drawable.ic_wifi_blue_weak)
+        setupList()
+        setupRefresh()
+        bindHub3Delegate()
 
-
-                                itemView.setOnClickListener {
-                                    L.d("hcia", "[hub3]選到WiFi:" + wifi_rssi.ssid)
-                                    (mDeviceModel.ssmLockLiveData.value!! as CHHub3).setWifiSSID(wifi_rssi.ssid) {
-                                        it.onSuccess {
-                                        }
-                                    }
-                                    view.post {
-                                        val defaultPWK = if (BuildConfig.DEBUG) "55667788" else null
-                                        context?.inputTextAlert(getString(R.string.wm2_pwk_hint), wifi_rssi.ssid, defaultPWK) {
-                                            confirmButtonWithText("OK") { alert, name ->
-                                                L.d("hcia", "[hub3]設定密碼:$name")
-                                                (mDeviceModel.ssmLockLiveData.value!! as CHHub3).setWifiPassword(name) {}
-                                                dismiss()
-                                                if (isAdded&&!isDetached){
-                                                    try {
-                                                        view. findNavController().navigateUp()
-                                                    }catch (e:Exception){
-                                                        e.printStackTrace()
-                                                    }
-
-                                                }
-
-                                            }
-                                            cancelButton(getString(R.string.cancel))
-                                        }?.show()
-                                    }
-
-                                }
-
-                            }
-                        }
-            }
-        }//end bind.leaderboardList.apply
+        refreshPage()
     }
 
-    private fun refleshPage() {
-        bind.  swiperefresh.isRefreshing = true
-        ssidList.clear() // 清空舊的數據
-        L.d("hcia", "[hub3]送出開啟掃描指令")
-        (mDeviceModel.ssmLockLiveData.value!! as CHHub3).scanWifiSSID {
+    private fun setupList() {
+        bind.leaderboardList.adapter = adapter
+    }
+
+    private fun setupRefresh() {
+        bind.swiperefresh.setOnRefreshListener { refreshPage() }
+    }
+
+    private fun bindHub3Delegate() {
+        val hub3 = currentHub3OrNull() ?: return
+
+        mDeviceModel.ssmosLockDelegates[hub3] = object : CHHub3Delegate {
+            override fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {
+                onWifiScanResult(ssid, rssi)
+            }
+        }.bindLifecycle(viewLifecycleOwner)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun refreshPage() {
+        val hub3 = currentHub3OrNull() ?: run {
+            bind.swiperefresh.isRefreshing = false
+            return
+        }
+
+        bind.swiperefresh.isRefreshing = true
+        ssidMap.clear()
+        ssidList.clear()
+        adapter.notifyDataSetChanged()
+
+        L.d(tag, "[hub3]送出開啟掃描指令")
+        hub3.scanWifiSSID {
             it.onSuccess {
-                L.d("hcia", "[hub3]收到掃描開啟成功")
+                L.d(tag, "[hub3]收到掃描開啟成功")
+            }
+            it.onFailure { e ->
+                bind.swiperefresh.isRefreshing = false
+                L.d(tag, "[hub3]掃描開啟失敗: ${e.message}")
             }
         }
     }
 
-    data class WifiRssi(var ssid: String, var rssi: Short)
+    @SuppressLint("NotifyDataSetChanged")
+    private fun onWifiScanResult(ssid: String, rssi: Short) {
+        val old = ssidMap[ssid]
+        if (old == null || old < rssi) ssidMap[ssid] = rssi
+
+        ssidList.clear()
+        ssidMap.forEach { (k, v) -> ssidList.add(WifiRssi(k, v)) }
+        ssidList.sortByDescending { it.rssi }
+
+        bind.leaderboardList.post {
+            bind.swiperefresh.isRefreshing = false
+            L.d(tag, "[hub3]WiFi列表加入:$ssid")
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun onWifiSelected(itemView: View, wifi: WifiRssi) {
+        val hub3 = currentHub3OrNull() ?: return
+
+        L.d(tag, "[hub3]選到WiFi:${wifi.ssid}")
+        hub3.setWifiSSID(wifi.ssid) { }
+
+        itemView.post {
+            val defaultPWK = if (BuildConfig.DEBUG) "55667788" else null
+            context?.inputTextAlert(
+                getString(R.string.wm2_pwk_hint),
+                wifi.ssid,
+                defaultPWK
+            ) {
+                confirmButtonWithText("OK") { _, pw ->
+                    L.d(tag, "[hub3]設定密碼:$pw")
+                    hub3.setWifiPassword(pw) { }
+                    dismiss()
+                    if (isAdded && !isDetached) {
+                        try {
+                            itemView.findNavController().navigateUp()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+                cancelButton(getString(R.string.cancel))
+            }?.show()
+        }
+    }
+
+    private fun currentHub3OrNull(): CHHub3? {
+        return (mDeviceModel.ssmLockLiveData.value as? CHHub3)
+    }
+
+    data class WifiRssi(val ssid: String, val rssi: Short)
+
+    private class WifiListAdapter(
+        private val data: List<WifiRssi>,
+        private val onClick: (View, WifiRssi) -> Unit
+    ) : GenericAdapter<WifiRssi>(data as MutableList<WifiRssi>) {
+
+        override fun getLayoutId(position: Int, obj: WifiRssi): Int = R.layout.key_cell
+
+        override fun getViewHolder(view: View, viewType: Int): RecyclerView.ViewHolder {
+            return object : RecyclerView.ViewHolder(view), Binder<WifiRssi> {
+
+                private val wifiImg = itemView.findViewById<ImageView>(R.id.wifi_img)
+                private val title = itemView.findViewById<TextView>(R.id.title)
+                private val subTitle = itemView.findViewById<TextView>(R.id.sub_title)
+
+                override fun bind(obj: WifiRssi, pos: Int) {
+                    title.text = obj.ssid
+                    subTitle.text = obj.rssi.toString()
+
+                    val rssi = obj.rssi.toInt()
+                    wifiImg.setImageResource(
+                        when {
+                            rssi > -50 -> R.drawable.ic_wifi_blue
+                            rssi > -70 -> R.drawable.ic_wifi_blue_middle
+                            else -> R.drawable.ic_wifi_blue_weak
+                        }
+                    )
+
+                    itemView.setOnClickListener { onClick(itemView, obj) }
+                }
+            }
+        }
+    }
 }

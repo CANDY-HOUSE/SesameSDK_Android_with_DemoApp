@@ -11,15 +11,11 @@
     <string name="logout">Log Out</string>
     <string name="delete_account">Delete account</string>
     <string name="forever">forever</string>
-    <string name="hub3_hint_ir">Add infrared devices within 5 meters of this Hub3:</string>
 
     <string name="change_sesame_angle">Configure Angles</string>
     <string name="ssm_update">SesameOS Update＆Restart</string>
     <string name="autolock">Auto-lock timer</string>
     <string name="ssm_delete">Delete</string>
-
-    <string name="door_lock">Door Lock</string>
-    <string name="on_off_switch">Switch</string>
 
     <string name="cancel">Cancel</string>
     <string name="last_name">Last Name</string>
@@ -115,10 +111,8 @@
     <string name="remoteNanoTriggerSettingHint">Long press time to avoid mis-operation</string>
     <string name="VerificationCode">Verification code sent to your email</string>
     <string name="ResetWifiModule2">Reset the WiFi Module and trash the key</string>
-    <string name="ResetHub3">Reset the Hub3 and trash the key</string>
 
     <string name="TrashTheWifiModule2Key">Delete the WiFi Module</string>
-    <string name="TrashTheHub3Module2Key">Delete the Hub3</string>
     <string name="qrcodeNotSupport">This QR code does not support</string>
     <string name="addFail">Add Failed</string>
     <string name="cameraError">Camera Error</string>
@@ -140,7 +134,6 @@
     <string name="NoBleSignal">Bluetooth signal not found, please get closer</string>
 
     <string name="wm2_hint">Add Sesame to be connected within 5 meters of this WiFi Module:</string>
-    <string name="hub3_hint">Add Sesame to be connected within 5 meters of this Hub3 :</string>
     <string name="drop_hint">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button with a pin until the LED light turns off.</string>
     <string name="drop_hint_press">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button the LED light turns off.</string>
 
@@ -200,9 +193,6 @@
 
     <string name="TouchProPWDRename">Rename the passcode🖊️</string>
     <string name="TouchProPWDDelete">Delete the passcode</string>
-    <string name="MatterSettings">Matter Settings</string>
-    <string name="SkipMatterSettings">Skip Matter Settings</string>
-    <string name="OpenMatterPairingWindow">Open MATTER Pairing Window</string>
     <string name="trash_device_key">Delete the %1$s</string>
     <string name="default_passcode_name">Passcode🖊️</string>
     <string name="default_fingerprint_name">Fingerprint🖊️</string>
@@ -215,19 +205,13 @@
     <string name="android_notifica_permis_on">Android notification permissions granted</string>
     <string name="android_notifica_permis_off">Android notification permissions NOT granted(Tap here)</string>
 
-    <string name="matterMsg">Matter pairing mode activated. Please complete pairing within fifteen  minutes. If unsuccessful, please re-enter this page to reactivate Matter pairing mode.</string>
-
     <string name="facepalm">Manage Palm Veins</string>
-    <string name="hub3_addSesameTo">Add infrared data...</string>
     <string name="login_fg_input_mail_warn">Please enter a valid email address</string>
-
-    <string name="hub3_details">Details</string>
 
     <string name="sesame_widget_notification">Tap to start unlock widget!</string>
     <string name="delete_failed_tips">Failed to delete. Please try again</string>
 
     <string name="distance">Distance</string>
-    <string name="brightness">Brightness</string>
     <string name="radar">Radar Detection\nDistance</string>
     <string name="radar_distance_description">・This is the Radar wake-up detection range.\n・Over 10 visits/day: shorten range to save power !\n・10 or fewer visits/day: extend to max range for the best experience.\n・Even at minimum range, pressing the Unlock Button/Side Button still triggers radar and instantly starts face or palm-vein recognition, balancing power saving with a supreme user experience.</string>
 

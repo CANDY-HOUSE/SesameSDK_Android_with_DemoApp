@@ -8,11 +8,9 @@
     <string name="default_face_name">顔 🖊️</string>
     <string name="default_palm_name">手のひら静脈🖊️</string>
     <string name="DelFace">顔の削除</string>
-    <string name="matterMsg">Matterペアリングモードに入りました。15分以内にペアリングを完了してください。失敗した場合は、このページに再度アクセスしてMatterペアリングモードを再起動してください</string>
     <string name="qrcodeNotSupport">このQRコードは対応していません</string>
     <string name="sesamefaceMsg">%1$sに近づきBluetooth接続し、⊕ をタップして顔を登録。登録後 X をタップ。取付けた状態で登録した方が認証率が遥かに高い。</string>
     <string name="sesamepalmMsg">%1$sに近づきBluetooth接続し、⊕ をタップして手のひら静脈を登録。登録後 X をタップ。取付けた状態で登録した方が認証率が遥かに高い。</string>
-    <string name="hub3_hint_ir">このHub3から5メートル以内の赤外線デバイスを追加してください：</string>
     <string name="addFail">追加に失敗しました</string>
     <string name="cameraError">カメラエラーError</string>
     <string name="forever">永遠</string>
@@ -114,10 +112,7 @@
     <string name="remoteNanoTriggerSettingHint">誤作動防止の為の長押して作動させる時間</string>
     <string name="VerificationCode">メールで届いた認証コード</string>
     <string name="ResetWifiModule2">このWiFiモジュールを初期化、そして鍵を捨てる</string>
-    <string name="ResetHub3">このHub3を初期化、そして鍵を捨てる</string>
     <string name="TrashTheWifiModule2Key">このWiFiモジュールを削除する</string>
-    <string name="TrashTheHub3Module2Key">このHub3を削除する</string>
-
     <string name="addSesameTo">セサミを追加…</string>
     <string name="wm2NetworkConnectionStatus">ネット接続状態</string>
     <string name="click_script">台本</string>
@@ -135,7 +130,6 @@
     <string name="NoBleSignal">Bluetooth信号見つからず、近づいてください</string>
 
     <string name="wm2_hint">このWiFiモジュールと5メートル以内に接続するセサミを追加してください：</string>
-    <string name="hub3_hint">このHub3と5メートル以内に接続するセサミを追加してください：</string>
     <string name="drop_hint">%1$sを削除しても%1$sは初期化またリセットされません。%1$sを初期化またリセットするには、細い棒でリセットボタンをLED点灯が消えるまで長押ししてください。</string>
     <string name="drop_hint_press">%1$sを削除しても%1sを削除してもsは初期化またリセットされません。%1$sを初期化またリセットするには、リセットボタンをLED点灯が消えるまで長押ししてください</string>
 
@@ -176,9 +170,6 @@
     <string name="TouchProFaceRename">顔の名前変更🖊️</string>
     <string name="TouchProCardDelete">ICカードの削除</string>
 
-    <string name="door_lock">ドア鍵</string>
-    <string name="on_off_switch">スイッチ</string>
-
     <string name="nfcCard">ICカードの管理</string>
     <string name="fingerprint">指紋の管理</string>
     <string name="passcodes">暗証番号の管理</string>
@@ -189,9 +180,6 @@
     <string name="TouchProFingerModify">指紋の名前変更🖊️</string>
     <string name="TouchProFingerDelete">指紋の削除</string>
     <string name="TouchProPWDRename">暗証番号の名前変更🖊️</string>
-    <string name="MatterSettings">Matter Settings</string>
-    <string name="SkipMatterSettings">Matterの設定をスキップ</string>
-    <string name="OpenMatterPairingWindow">Open MATTER Pairing Window</string>
 
     <string name="TouchProPWDDelete">暗証番号の削除</string>
     <string name="trash_device_key">この%1$sを削除する</string>
@@ -209,16 +197,12 @@
     <string name="android_notifica_permis_on">Androidの通知権限を取得済み</string>
     <string name="android_notifica_permis_off">Androidの通知権限がありません(ここをクリック)</string>
     <string name="facepalm">手のひら静脈の管理</string>
-    <string name="hub3_addSesameTo">赤外線データを追加...</string>
     <string name="login_fg_input_mail_warn">正しいメールアドレスを入力してください</string>
-
-    <string name="hub3_details">詳細</string>
 
     <string name="sesame_widget_notification">タップしてロック解除ウィジェットを起動</string>
     <string name="delete_failed_tips">削除に失敗しました。再試行してください</string>
 
     <string name="distance">距離</string>
-    <string name="brightness">明るさ</string>
     <string name="radar">レーダーの\n探知距離</string>
     <string name="radar_distance_description">・レーダーがシステムを睡眠状態から起こす距離です。\n・人通りが一日10回を超える場合、節電のため、レーダーの探知距離を短めに設定して下さい！\n・人通りが一日10回以下の場合、最長距離に設定すると非常に快適にご利用頂けます。\n・最短距離に設定しても、施錠状態で「解錠ボタン/側面ボタン」を押すと、顔認証や手のひら静脈認証が即座に開始されるため、ある程度、極度な省電力と極上のユーザー体験の両立を実現できます。</string>
 

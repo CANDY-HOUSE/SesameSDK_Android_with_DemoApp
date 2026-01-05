@@ -1,6 +1,6 @@
 package co.candyhouse.sesame.server
 
-import android.text.TextUtils
+import co.candyhouse.sesame.BuildConfig
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
@@ -11,14 +11,11 @@ import co.candyhouse.sesame.open.CHResult
 import co.candyhouse.sesame.open.CHResultState
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
-import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.server.dto.Sesame2Shadow
 import co.candyhouse.sesame.server.dto.Sesame5ShadowDocuments
 import co.candyhouse.sesame.server.dto.WM2Shadow
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.getClientRegion
-import co.candyhouse.sesame.utils.toHexString
-import co.candyhouse.sesame.BuildConfig
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
@@ -192,39 +189,20 @@ internal object CHIotManager {
         if (iotStatus != AWSIotMqttClientStatus.Connected) {
             return
         }
-//        val isAuthBefore = (ssm2 as CHDevicesUtil).getAuthed()
-//        L.d("hcia", "isAuthBefore:" + isAuthBefore)
-//        if (isAuthBefore) {
-        doSubscribeSSM(ssm2, onResponse)
-//        } else {
-//            CHAccountManager.sdkAuthIOT(ssm2) { resp ->
-//                resp.onFailure {
-//                    L.d("hcia", "驗證失敗 it:" + it)
-//                }
-//                resp.onSuccess {
-////                    L.d("hcia", "🐖  驗證完畢 連線 :")
-//                    doSubscribeSSM(ssm2, onResponse)
-//                }
-//            }
-//        }
 
+        doSubscribeSSM(ssm2, onResponse)
     }
 
     private fun doSubscribeSSM(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
-//        val ss2Topic = "\$aws/things/sesame2/shadow/name/${ssm2.deviceId.toString().uppercase()}/update/accepted"
         val ss2Topic = "\$aws/things/sesame2/shadow/name/${ssm2.deviceId.toString().uppercase()}/update/documents"
-//        (ssm2 as CHDeviceUtil).setAuthed(true)
         if (ssm2.deviceShadowStatus == null) {
-            mqttManager.subscribeToTopic(ss2Topic,AWSIotMqttQos.QOS0,
+            mqttManager.subscribeToTopic(
+                ss2Topic, AWSIotMqttQos.QOS0,
                 object : AWSIotMqttSubscriptionStatusCallback {
-                    override fun onSuccess() {
-                        // L.d("hub3_ss5", "🐖 訂閱 成功")
-//                    (ssm2 as CHDeviceUtil).isSubIOT = true
-                    }
+                    override fun onSuccess() {}
 
                     override fun onFailure(exception: Throwable?) {
                         L.d("hub3_ss5", "🐖  訂閱失敗 exception")
-//                    (ssm2 as CHDeviceUtil).isSubIOT = false
                     }
 
                 }) { _, data ->
@@ -246,7 +224,7 @@ internal object CHIotManager {
                 GetThingShadowRequest().withThingName("sesame2").withShadowName(ssm2.deviceId.toString().uppercase())
             )
             L.d(tag, "🐖 ss2ShodaowDataHttp:" + String(ss2ShodaowDataHttp.payload.array()))
-            val ss2StateHttp = Gson().fromJson( String(ss2ShodaowDataHttp.payload.array()), Sesame2Shadow::class.java)
+            val ss2StateHttp = Gson().fromJson(String(ss2ShodaowDataHttp.payload.array()), Sesame2Shadow::class.java)
             L.d(tag, "🐖 拿到影子 ss2ShodaowDataHttp:")
             onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateHttp)))
         } catch (e: Exception) {
@@ -254,13 +232,12 @@ internal object CHIotManager {
         }
     }
 
-
     fun subscribeWifiModule2(wm2: CHWifiModule2Device, onResponse: CHResult<WM2Shadow>) {
         if (iotStatus != AWSIotMqttClientStatus.Connected) {
             return
         }
         val topic = "\$aws/things/wm2/shadow/name/" + wm2.deviceId.toString().uppercase().substring(24, 36) + "/update/accepted"
-        mqttManager.subscribeToTopic(topic,AWSIotMqttQos.QOS0) { topic, data -> //                    L.d("hcia", "String(data!!):" + String(data!!))
+        mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { topic, data ->
             try {
                 val ss2StateIOT = Gson().fromJson(String(data!!), WM2Shadow::class.java)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateIOT)))
@@ -274,12 +251,10 @@ internal object CHIotManager {
                 GetThingShadowRequest().withThingName("wm2").withShadowName(wm2.deviceId.toString().toUpperCase().substring(24, 36))
             )
             val wm2StateHttp = Gson().fromJson(String(wm2ShodaowDataHttp.payload.array()), WM2Shadow::class.java)
-//            L.d("hcia", "🐖 拿到影子 wm2StateHttp:")
             onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))
         } catch (e: Exception) {
             L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
         }
-
     }
 
     fun subscribeHub3(hub3: CHHub3Device, onResponse: CHResult<String>) {
@@ -299,48 +274,6 @@ internal object CHIotManager {
         mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { _, data ->
             callback.invoke(Result.success(CHResultState.CHResultStateNetworks(data)))
         }
-    }
-
-    fun unsubscribeTopic(topic: String) {
-        mqttManager.unsubscribeTopic(topic)
-    }
-
-    fun deleteThingShadow(sesame: CHDevices) {
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
-            return
-        }
-        val topic = "\$aws/things/sesame2/shadow/name/${sesame.deviceId.toString().uppercase()}/delete"
-        val data = "{}".toByteArray()
-        L.d(tag, "🥝 deleteThingShadow topic:" + topic + "   data:" + String(data) + "  data:" + data.toHexString())
-        mqttManager.publishData(data, topic, AWSIotMqttQos.QOS0)
-    }
-
-    fun publishData(topic: String, data: ByteArray) {
-        try {
-            if (iotStatus != AWSIotMqttClientStatus.Connected) {
-                L.d(tag, "🥝 publishData topic:$topic   connect is fail")
-                return
-            }
-            if (!TextUtils.isEmpty(topic)) {
-                L.d(tag,"🥝 publishData topic:" + topic + "   data:" + String(data) + "  data:" + data.toHexString())
-                mqttManager.publishData(data, topic, AWSIotMqttQos.QOS0)
-            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-}
-
-public object IoTSubscriptionManager {
-
-    fun subscribeTopic(topic: String, callback: CHResult<ByteArray>) {
-        CHIotManager.subscribeTopic(topic, callback)
-    }
-
-    fun unsubscribeTopic(topic: String) {
-        CHIotManager.unsubscribeTopic(topic)
     }
 
 }

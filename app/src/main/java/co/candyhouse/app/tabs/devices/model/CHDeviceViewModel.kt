@@ -28,10 +28,10 @@ import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.server.CHIRAPIManager
 import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.server.CHResult
 import co.candyhouse.server.CHResultState
+import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
@@ -57,18 +57,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.util.Locale
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class BeanDevices(
     val list: List<CHDevices>,
@@ -362,7 +357,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     private fun fetchIRDevices(device: CHHub3) {
         val uuid = device.deviceId.toString().uppercase(Locale.getDefault())
-        CHIRAPIManager.fetchIRDevices(uuid) { it ->
+        CHAccountManager.fetchIRDevices(uuid) { it ->
             it.onSuccess { result ->
                 L.d("sf", "data==== " + result.data.toString())
                 val jsonString = JsonUtil.toJson(result.data)
@@ -379,64 +374,9 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         }
     }
 
-    private val _channel = Channel<Int>()
-    val channel = _channel.receiveAsFlow()
-    fun deleteIRDevice(uuid: String, subid: String, type: Int) {
-        CHIRAPIManager.deleteIRDevice(uuid, subid) { it ->
-            it.onSuccess { result ->
-                L.d("sf", "data==== " + result.data.toString())
-                viewModelScope.launch {
-                    // 删除成功，发送成功消息
-                    _channel.send(type)
-                }
-            }
-            it.onFailure {
-                L.d("sf", "result==== onFailure ${it.message}")
-            }
-        }
-    }
-
     fun getIrRemoteList(key: String): List<IrRemote> {
         L.d("sf", "获取红外线列表数据……")
         return iRRepository.getRemotesByKey(key)
-    }
-
-    suspend fun getHub3Data(uuid: String): Result<List<IrRemote>> {
-        return withContext(IO) {
-            try {
-                // 先执行网络请求
-                val fetchResult = suspendCoroutine { continuation ->
-                    CHIRAPIManager.fetchIRDevices(uuid) { result ->
-                        result.onSuccess { data ->
-                            L.d("sf", "data==== ${data.data}")
-
-                            val jsonString = JsonUtil.toJson(data.data)
-                            val tempList = jsonString.parseList<IrRemote>()
-
-                            viewModelScope.launch {
-                                L.d("sf", "保存红外遥控器列表数据……")
-                                iRRepository.setRemotes(uuid, tempList)
-                                continuation.resume(true)
-                            }
-                        }
-                        result.onFailure { error ->
-                            L.d("sf", "result==== onFailure ${error.message}")
-                            continuation.resume(false)
-                        }
-                    }
-                }
-
-                // 等待网络请求和数据保存完成后，再获取列表
-                if (fetchResult) {
-                    val result = getIrRemoteList(uuid)
-                    Result.success(result)
-                } else {
-                    Result.failure(Exception("Fetch failed"))
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
     }
 
     fun backgroundAutoConnect(device: CHDevices) {

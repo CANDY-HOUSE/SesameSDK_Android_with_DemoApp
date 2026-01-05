@@ -7,7 +7,6 @@ import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
 import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHWifiModule2
@@ -161,15 +160,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                 }
             }
 
-            override fun onHub3BrightnessReceive(device: CHHub3, brightness: Int) {
-                notifyDelegates(device) {
-                    if (it is CHHub3Delegate) it.onHub3BrightnessReceive(
-                        device,
-                        brightness
-                    )
-                }
-            }
-
             override fun onTriggerDelaySecondReceived(
                 device: CHSesameConnector,
                 setting: CHRemoteNanoTriggerSettings
@@ -218,12 +208,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                 device,
                 percent
             )
-        }
-    }
-
-    override fun onHub3BrightnessReceive(device: CHHub3, brightness: Int) {
-        vm.viewModelScope.launch {
-            (vm.ssmosLockDelegates[device] as? CHHub3Delegate)?.onHub3BrightnessReceive(device, brightness)
         }
     }
 

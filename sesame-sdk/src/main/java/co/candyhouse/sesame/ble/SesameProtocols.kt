@@ -50,9 +50,7 @@ internal enum class SesameItemCode(val value: UByte) {
     SSM_OS3_FACE_MODE_DELETE_NOTIFY(192u),SSM_OS3_PALM_MODE_DELETE_NOTIFY(193u),SSM_OS3_RADAR_PARAM_SET(200u),SSM_OS3_RADAR_PARAM_PUBLISH(201u),
     SSM3_ITEM_CODE_BATTERY_VOLTAGE(202u),
 }
-internal enum class Hub3ItemCode(val value: UByte) {
-    HUB3_ITEM_CODE_LED_DUTY(92u),
-}
+
 internal enum class SSM2OpCode(val value: Byte) {
 
     create(0x01), read(0x02), update(0x03), delete(0x04), sync(0x05), async(0x06), response(0x07), publish(0x08), undefine(0x10), ;

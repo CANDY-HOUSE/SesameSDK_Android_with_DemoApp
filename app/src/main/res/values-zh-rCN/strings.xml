@@ -4,7 +4,6 @@
     <string name="app_name">芝麻</string>
     <string name="dfu_status_error_msg">エラーが発生しました</string>
     <string name="second2">秒</string>
-    <string name="matterMsg">已进入Matter配网模式，请于十五分钟内完成配网，万一失败请重新进入此页以重新进入Matter配网模式</string>
 
     <string name="title_friends">通讯录</string>
     <string name="title_me">我</string>
@@ -20,9 +19,6 @@
     <string name="ssm_update">SesameOS更新＆重启</string>
     <string name="autolock">倒数自动上锁</string>
     <string name="ssm_delete">删除</string>
-
-    <string name="door_lock">门锁</string>
-    <string name="on_off_switch">开关</string>
 
     <string name="cancel">取消</string>
     <string name="last_name">姓</string>
@@ -122,10 +118,8 @@
     <string name="remoteNanoTriggerSettingHint">防误触之长按启动时间</string>
     <string name="VerificationCode">已发到您邮箱的验证码</string>
     <string name="ResetWifiModule2">重置WiFi模块并丢弃钥匙</string>
-    <string name="ResetHub3">重置Hub3并丢弃钥匙</string>
 
     <string name="TrashTheWifiModule2Key">删除WiFi模块</string>
-    <string name="TrashTheHub3Module2Key">删除Hub3</string>
     <string name="addSesameTo">添加芝麻设备…</string>
     <string name="wm2NetworkConnectionStatus">网络状态</string>
 
@@ -143,11 +137,8 @@
     <string name="NoBleSignal">找不到蓝牙信号, 请靠近</string>
 
     <string name="wm2_hint">添加距离此WiFi模块 5米内要连接的芝麻设备：</string>
-    <string name="hub3_hint">添加距离此Hub3 5米内要连接的芝麻设备：</string>
-    <string name="hub3_hint_ir">添加距离此Hub3 5米内要连接的红外设备：</string>
     <string name="drop_hint">删除 %1$s 不会重置 %1$s。\n若要重置 %1$s，请用针戳复位键直到LED灯熄灭。</string>
     <string name="drop_hint_press">删除 %1$s 不会重置 %1$s。\n若要重置 %1$s，请按住复位键直到LED灯熄灭。</string>
-    <string name="hub3_addSesameTo">添加红外线数据...</string>
 
     <string name="historyLOCK">上锁</string>
     <string name="historyUNLOCK">解锁</string>
@@ -202,10 +193,6 @@
     <string name="TouchProFingerDelete">删除此指纹</string>
     <string name="TouchProPWDRename">修改此数字密码的名字🖊️</string>
 
-    <string name="MatterSettings">Matter 设置</string>
-    <string name="SkipMatterSettings">跳过Matter设定</string>
-    <string name="OpenMatterPairingWindow">打开配对模式</string>
-
     <string name="TouchProPWDDelete">删除此数字密码</string>
     <string name="trash_device_key">删除此 %1$s</string>
     <string name="default_passcode_name">数字密码🖊️</string>
@@ -226,13 +213,10 @@
     <string name="default_palm_name">掌静脉🖊️</string>
     <string name="login_fg_input_mail_warn">请输入正确的邮箱</string>
 
-    <string name="hub3_details">详情</string>
-
     <string name="sesame_widget_notification">请点击启动开锁小组件!</string>
     <string name="delete_failed_tips">删除失败，请重试</string>
 
     <string name="distance">距离</string>
-    <string name="brightness">亮度</string>
     <string name="radar">雷达侦查距离</string>
     <string name="radar_distance_description">・这是雷达唤醒系统的侦测距离。\n・每日人流量超过10次之地方, 设置短距以省电！\n・每日人流量10次以下之地方, 设置最长距离以获得最爽体验。\n・即使为最短距离，按下「开锁按钮/侧面按钮」将立即启动人脸或掌静脉识别，兼顾极度省电与最爽体验。</string>
 
