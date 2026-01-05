@@ -299,12 +299,12 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMTouch -> "sesametouch1_30_10_4a4f6d"
         CHProductModel.SSMTouch2 -> "sesametouch2_30_25_4a4f6d"
         CHProductModel.SSMTouch2Pro -> "sesametouch2pro_30_26_4a4f6d"
-        CHProductModel.SSMFacePro -> "sesameface1pro_30_18_5c6590"
-        CHProductModel.SSMFace -> "sesameface1_30_19_5c6590"
         CHProductModel.SSMFace2 -> "sesameface2_30_27_94d448"
         CHProductModel.SSMFace2Pro -> "sesameface2pro_30_28_94d448"
         CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_811d1f"
         CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_811d1f"
+        CHProductModel.SSMFacePro -> "sesameface1pro_30_18_e83a27"
+        CHProductModel.SSMFace -> "sesameface1_30_19_e83a27"
         else -> null
     }
 }
