@@ -151,6 +151,16 @@ class SesameComposeWebView : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ContainerPaddingManager.requestClearPadding(this)
+
+        parentFragmentManager.setFragmentResultListener(
+            "hub3_wifi_ssid_back",
+            this
+        ) { _, bundle ->
+            if (currentScene == "wifi-module" && bundle.getBoolean("clear", false)) {
+                wifiModuleJsBridge?.cleanup()
+                wifiModuleJsBridge = null
+            }
+        }
     }
 
     override fun onDestroyView() {

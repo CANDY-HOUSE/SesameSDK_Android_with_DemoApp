@@ -2,6 +2,7 @@ package co.candyhouse.app.ext.webview.bridge
 
 import android.content.Context
 import android.webkit.WebView
+import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.localizedDescription
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -42,6 +43,8 @@ class Hub3JSBridge(
     private var currentDeviceUUID: String? = null
     private var currentDevice: CHHub3? = null
     private var registeredDeviceForDelegateMap: CHHub3? = null
+    private var pendingApSetting: CHWifiModule2MechSettings? = null
+    private var pendingMechStatus: CHWifiModule2NetWorkStatus? = null
 
     /**
      * 处理蓝牙连接请求
@@ -80,12 +83,20 @@ class Hub3JSBridge(
                                 val code = lastNSError?.code
                                 val isUnlogin = (code == -1)
                                 if (!isUnlogin) {
-                                    sendBLEStatusToH5(callbackName, context.getString(co.candyhouse.app.R.string.noble))
+                                    sendBLEStatusToH5(callbackName, context.getString(R.string.noble))
                                     return@onSuccess
                                 }
                             }
 
-                            device.connect { }
+                            device.connect {
+                                it.onSuccess {
+                                    L.d(tag, "connect Success")
+                                }
+                                it.onFailure { error ->
+                                    L.e(tag, "connect Failure = ${error.message.toString()}")
+                                    sendBLEStatusToH5(callbackName, context.getString(R.string.NoBleSignal))
+                                }
+                            }
                         }
 
                         else -> {
@@ -109,6 +120,9 @@ class Hub3JSBridge(
         val callbackName = json.optString("callbackName")
         statusCallbacks[WebViewJSBridge.requestMonitorInternet] = callbackName
         L.d(tag, "Start monitoring internet: $callbackName")
+
+        pendingApSetting?.let { sendAPSettingToH5(callbackName, it) }
+        pendingMechStatus?.let { sendNetworkStatusToH5(callbackName, "onMechStatus", it) }
     }
 
     /**
@@ -167,18 +181,22 @@ class Hub3JSBridge(
     }
 
     override fun onMechStatus(device: CHDevices) {
+        if (device !is CHHub3) return
+        val status = device.mechStatus as? CHWifiModule2NetWorkStatus ?: return
+
+        pendingMechStatus = status
+
         val callbackName = statusCallbacks[WebViewJSBridge.requestMonitorInternet]
-        if (callbackName != null && device is CHHub3) {
-            val status = device.mechStatus as? CHWifiModule2NetWorkStatus
-            status?.let {
-                sendNetworkStatusToH5(callbackName, "onMechStatus", it)
-            }
+        if (!callbackName.isNullOrEmpty()) {
+            sendNetworkStatusToH5(callbackName, "onMechStatus", status)
         }
     }
 
     override fun onAPSettingChanged(device: CHWifiModule2, settings: CHWifiModule2MechSettings) {
+        pendingApSetting = settings
+
         val callbackName = statusCallbacks[WebViewJSBridge.requestMonitorInternet]
-        if (callbackName != null) {
+        if (!callbackName.isNullOrEmpty()) {
             sendAPSettingToH5(callbackName, settings)
         }
     }
@@ -231,7 +249,7 @@ class Hub3JSBridge(
                 put("isAPWork", status.isAPWork == true)
                 put("isNetwork", status.isNetWork == true)
                 put("isIoTWork", status.isIOTWork == true)
-                put("isBindingAPWork", status.isAPCheck == true)
+                put("isBindingAPWork", status.isAPConnecting)
                 put("isConnectingNetwork", status.isConnectingNet)
                 put("isConnectingIoT", status.isConnectingIOT)
             }
