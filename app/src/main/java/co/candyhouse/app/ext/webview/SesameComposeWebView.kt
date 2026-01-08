@@ -65,7 +65,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
-import co.candyhouse.app.databinding.FgComposeWebviewBinding
+import co.candyhouse.app.databinding.FgEmbeddedComposeWebviewBinding
+import co.candyhouse.app.databinding.FgSesameComposeWebviewBinding
 import co.candyhouse.app.ext.webview.bridge.JSBridgeFactory
 import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
 import co.candyhouse.app.ext.webview.data.WebViewConfig
@@ -381,8 +382,8 @@ fun SesameComposeWebViewContent(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AndroidViewBinding(FgComposeWebviewBinding::inflate, modifier = Modifier.fillMaxSize()) {
-                val wv = composeWebView
+            AndroidViewBinding(FgSesameComposeWebviewBinding::inflate, modifier = Modifier.fillMaxSize()) {
+                val wv = sesameComposeWebView
 
                 swipeRefresh.isEnabled = false
                 swipeRefresh.setOnRefreshListener {
@@ -618,10 +619,10 @@ fun EmbeddedWebViewContent(
             .background(androidx.compose.ui.graphics.Color.White)
     ) {
         AndroidViewBinding(
-            FgComposeWebviewBinding::inflate,
+            FgEmbeddedComposeWebviewBinding::inflate,
             modifier = Modifier.fillMaxSize()
         ) {
-            val wv = composeWebView
+            val wv = embeddedComposeWebView
 
             if (webViewRef !== wv) {
                 webViewRef = wv
