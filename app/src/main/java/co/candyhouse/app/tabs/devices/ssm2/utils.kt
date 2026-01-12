@@ -281,9 +281,9 @@ fun CHDevices.getFirmwareName(): String? {
     return when (productModel) {
         CHProductModel.SS2 -> "sesame_221_0_8c080c"
         CHProductModel.SS4 -> "sesame_421_4_50ce5b"
-        CHProductModel.SS5 -> "sesame5_30_5_848a2d"
-        CHProductModel.SS5PRO -> "sesame5pro_30_7_848a2d"
-        CHProductModel.SS5US -> "sesame5us_30_16_848a2d"
+        CHProductModel.SS5 -> "sesame5_30_5_3fdd17"
+        CHProductModel.SS5PRO -> "sesame5pro_30_7_3fdd17"
+        CHProductModel.SS5US -> "sesame5us_30_16_3fdd17"
         CHProductModel.SS6Pro -> "sesame6pro_30_21_07ca91"
         CHProductModel.WM2 -> null
         CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
