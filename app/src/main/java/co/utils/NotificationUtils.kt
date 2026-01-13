@@ -7,11 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import com.bumptech.glide.Glide
 
@@ -22,8 +23,9 @@ import com.bumptech.glide.Glide
  */
 object NotificationUtils {
     private const val tag = "NotificationUtils"
-    private val uniqueGroupKey = "group_${System.currentTimeMillis()}"
+    private const val GROUP_KEY_MARKETING = "group_marketing"
     private const val CHANNEL_ID = "announcement_channel"
+    private const val ACTION_OPEN_PUSH = "com.candyhouse.action.OPEN_PUSH"
 
     fun sendNotification(
         context: Context,
@@ -34,20 +36,20 @@ object NotificationUtils {
         messageAction: String?
     ) {
         L.d(tag, "[推送] data content: $title $body $url $imageUrl $messageAction")
-
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        // 创建 Intent，传递 action 和 url
         val intent = Intent(context, MainActivity::class.java).apply {
-            this.action = Intent.ACTION_MAIN
-            addCategory(Intent.CATEGORY_LAUNCHER)
-            putExtra(CHDeviceManager.NOTIFICATION_ACTION, messageAction)
-            putExtra("url", url)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            action = ACTION_OPEN_PUSH
+            if (!url.isNullOrBlank()) {
+                data = "candyhouse://open?url=${Uri.encode(url)}&action=$messageAction".toUri()
+            }
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            context, (System.currentTimeMillis() and 0x7fffffff).toInt(), intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -58,7 +60,7 @@ object NotificationUtils {
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
-            .setGroup(uniqueGroupKey)
+            .setGroup(GROUP_KEY_MARKETING)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
@@ -96,6 +98,6 @@ object NotificationUtils {
             notificationManager.createNotificationChannel(channel)
         }
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notificationBuilder.build())
+        notificationManager.notify((System.currentTimeMillis() and 0x7fffffff).toInt(), notificationBuilder.build())
     }
 }

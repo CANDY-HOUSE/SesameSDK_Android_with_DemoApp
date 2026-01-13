@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
@@ -54,6 +53,7 @@ import java.lang.reflect.InvocationTargetException
 class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
 
     private val requestCodeNFC = 100
+    private var pendingOpenWebViewUrl: String? = null
 
     companion object {
         var activity: MainActivity? = null
@@ -105,6 +105,11 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         CHBleManager.enableScan {}
         deviceViewModel.handleAppGoToForeground()
         checkNfcAdapterPermissions()
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        tryOpenPendingWebView()
     }
 
     override fun onPause() {
@@ -391,35 +396,36 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     }
 
     private fun handleNotificationIntent(intent: Intent) {
-        if (intent.action == Intent.ACTION_MAIN) {
-            when (val action = intent.getStringExtra(CHDeviceManager.NOTIFICATION_ACTION)) {
-                "open_webview" -> {
-                    val url = intent.getStringExtra("url")
-                    url?.let {
-                        // 延迟一下，确保主界面已经加载完成
-                        lifecycleScope.launch {
-                            delay(500)
-                            openWebView(url)
-                        }
-                    }
+        L.d("Notification", "handleNotificationIntent called - action=${intent.action} data=${intent.data}")
 
-                    // 埋点：用户点击了通知
+        intent.data?.let { uri ->
+            if (uri.scheme == "candyhouse") {
+                val url = uri.getQueryParameter("url")
+                val action = uri.getQueryParameter("action")
+
+                L.d("Notification", "从 URI 提取: action=$action url=$url")
+
+                if (action == "open_webview" && !url.isNullOrBlank()) {
+                    L.e("Notification", "设置 pendingOpenWebViewUrl=$url")
+                    pendingOpenWebViewUrl = url
+                    intent.data = null
                     AnalyticsUtil.logButtonClick(action)
                 }
             }
         }
     }
 
-    private fun openWebView(url: String) {
+    private fun tryOpenPendingWebView() {
+        val url = pendingOpenWebViewUrl ?: return
+
         try {
             val bundle = Bundle().apply {
                 putString("url", url)
                 putString("where", CHDeviceManager.NOTIFICATION_FLAG)
             }
             navController.navigate(R.id.webViewFragment, bundle)
-        } catch (e: Exception) {
-            L.e("NotificationUtils", "Navigation error", e)
+            pendingOpenWebViewUrl = null
+        } catch (_: Exception) {
         }
     }
-
 }

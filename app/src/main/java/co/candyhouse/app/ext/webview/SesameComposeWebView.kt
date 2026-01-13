@@ -179,7 +179,7 @@ class SesameComposeWebView : Fragment() {
 
     private fun exit() {
         if (!findNavController().popBackStack()) {
-            findNavController().navigate(R.id.deviceListPG)
+            requireActivity().finish()
         }
     }
 }
