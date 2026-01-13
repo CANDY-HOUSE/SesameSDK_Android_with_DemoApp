@@ -1,7 +1,7 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.bytesToUShort
 

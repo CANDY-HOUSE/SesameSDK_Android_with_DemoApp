@@ -14,7 +14,7 @@ import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.sesame.utils.L
 import co.utils.NotificationUtils
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONArray

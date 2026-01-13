@@ -13,10 +13,8 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
@@ -27,14 +25,15 @@ import co.candyhouse.sesame.open.device.CHSesameBot2MechStatus
 import co.candyhouse.sesame.open.device.CHSesamebot2Event
 import co.candyhouse.sesame.open.device.CHSesamebot2Status
 import co.candyhouse.sesame.open.device.NSError
-import co.candyhouse.sesame.open.isInternetAvailable
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
 
@@ -98,11 +97,11 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             itemCode = SesameItemCode.values().find { it.value == (SesameItemCode.BOT2_ITEM_CODE_RUN_SCRIPT_0.value + index).toUByte() } ?: SesameItemCode.click
         }
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
-            CHAccountManager.cmdSesame(itemCode, this, byteArrayOf(), result)
+            CHAPIClientBiz.cmdSesame(itemCode, this, byteArrayOf(), result)
             return
         }
         if (!isBleAvailable(result)) {
-            CHAccountManager.cmdSesame(itemCode, this, byteArrayOf(), result)
+            CHAPIClientBiz.cmdSesame(itemCode, this, byteArrayOf(), result)
             return
         }
         sendCommand(SesameOS3Payload(itemCode.value, byteArrayOf()), DeviceSegmentType.cipher) {
@@ -152,11 +151,21 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
             return
         }
-        makeApiCall(result) {
-            val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret))
-            deviceStatus = CHDeviceStatus.Registering
-            sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
+        deviceStatus = CHDeviceStatus.Registering
+        val serverSecret = mSesameToken.toHexString()
+        CHAPIClientBiz.myDevicesRegisterSesame5Post(
+            deviceId.toString(),
+            CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
+        ) { apiResult ->
+            apiResult.exceptionOrNull()?.let { e ->
+                L.d("hcia", "[ss5][register][server] failed: ${e.message}")
+            }
+            sendCommand(
+                SesameOS3Payload(
+                    SesameItemCode.registration.value,
+                    EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()
+                ), DeviceSegmentType.plain
+            ) { IRRes ->
                 var ecdhSecret = byteArrayOf()
                 try {
                     val eccPublicKeyFromSS5 = IRRes.payload.toHexString().hexStringToByteArray().sliceArray(13..76)
@@ -168,7 +177,11 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                     deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
                     val ecdhSecretPre16 = EccKey.ecdh(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(3..66)).sliceArray(0..15)
                     sesame2KeyData = CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
-                    cipher = SesameOS3BleCipher("customDeviceName", AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
+                    cipher = SesameOS3BleCipher(
+                        "customDeviceName",
+                        AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)!!,
+                        ("00" + mSesameToken.toHexString()).hexStringToByteArray()
+                    )
                     CHDB.CHSS2Model.insert(sesame2KeyData!!) {
                         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                     }
@@ -205,7 +218,7 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
 
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /** 指令接收 */

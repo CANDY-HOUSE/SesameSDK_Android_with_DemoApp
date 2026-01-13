@@ -8,10 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgWm2SelectLockerListBinding
-import co.candyhouse.app.databinding.FgWm2SettingBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.device.*
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.recycle.GenericAdapter
 
 class WM2SelectLockerListFG : BaseDeviceFG<FgWm2SelectLockerListBinding>(), CHWifiModule2Delegate {

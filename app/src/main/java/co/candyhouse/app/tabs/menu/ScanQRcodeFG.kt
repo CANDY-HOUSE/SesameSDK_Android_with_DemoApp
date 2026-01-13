@@ -17,21 +17,21 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
-import co.candyhouse.app.tabs.account.cheyKeyToUserKey
-import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
-import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.BaseFG
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.fragments.toastMSG
 import co.utils.base64decodeHex
+import co.utils.getHistoryTag
 import co.utils.hexStringToByteArray
 import co.utils.noHashtoUUID
 import co.utils.toHexString
@@ -177,7 +177,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
     private fun handleFriendType(receiveUri: Uri) {
         val friendID = receiveUri.getQueryParameter("friend")
         friendID?.let {
-            CHLoginAPIManager.addFriend(it) {
+            CHAPIClientBiz.addFriend(it) {
                 it.onSuccess {
                     view?.post {
                         WebViewPoolManager.setPendingRefresh("contacts")
@@ -339,7 +339,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                     device.setLevel(level!!.toInt())
                     device.setNickname(customName!!)
                     // 上传到云端
-                    CHLoginAPIManager.putKey(
+                    CHAPIClientBiz.putKey(
                         cheyKeyToUserKey(
                             device.getKey(),
                             device.getLevel(),

@@ -1,10 +1,10 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale
 
-import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 
 interface CHDataSynchronizeCapable {
     fun postAuthenticationData(request: AuthenticationDataWrapper, result: CHResult<List<AuthenticationData>>)

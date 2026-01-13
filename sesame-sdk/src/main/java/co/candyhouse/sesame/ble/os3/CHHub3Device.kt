@@ -14,10 +14,8 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
@@ -27,8 +25,9 @@ import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.device.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
@@ -72,7 +71,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         }
 
     override fun getHub3StatusFromIot(deviceUUID: String, result: CHResult<Byte>) {
-        CHAccountManager.getHub3StatusFromIot(deviceUUID) { it ->
+        CHAPIClientBiz.getHub3StatusFromIot(deviceUUID) { it ->
             it.onFailure { }
             it.onSuccess {
                 val jsonResponse = Gson().toJson(it.data)
@@ -169,12 +168,14 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             return
         }
         deviceStatus = CHDeviceStatus.Registering
-        makeApiCall(result) {
-            val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(
-                deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
-            )// todo 不需要server 認證註解此行
-            deviceStatus = CHDeviceStatus.Registering
+        val serverSecret = mSesameToken.toHexString()
+        CHAPIClientBiz.myDevicesRegisterSesame5Post(
+            deviceId.toString(),
+            CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
+        ) { apiResult ->
+            apiResult.exceptionOrNull()?.let { e ->
+                L.d("hcia", "[ss5][register][server] failed: ${e.message}")
+            }
             sendCommand(
                 SesameOS3Payload(
                     SesameItemCode.registration.value,

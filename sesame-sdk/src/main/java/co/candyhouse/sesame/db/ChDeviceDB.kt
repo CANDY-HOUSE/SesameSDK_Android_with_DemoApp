@@ -13,7 +13,7 @@ import androidx.room.Update
 import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHBleManager
-import co.candyhouse.sesame.open.HttpResponseCallback
+import co.candyhouse.sesame.utils.HttpResponseCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

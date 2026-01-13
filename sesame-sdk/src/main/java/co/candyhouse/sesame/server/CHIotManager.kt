@@ -5,10 +5,9 @@ import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
 import co.candyhouse.sesame.open.CHBleManager
-import co.candyhouse.sesame.open.CHConfiguration
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.server.dto.Sesame2Shadow
@@ -178,8 +177,8 @@ internal object CHIotManager {
     private fun createCredentialsProvider(): CognitoCachingCredentialsProvider {
         return CognitoCachingCredentialsProvider(
             CHBleManager.appContext,
-            CHConfiguration.CLIENT_ID,
-            CHConfiguration.CLIENT_ID.getClientRegion()
+            BuildConfig.API_GATEWAY_CLIENT_ID,
+            BuildConfig.API_GATEWAY_CLIENT_ID.getClientRegion()
         )
     }
 

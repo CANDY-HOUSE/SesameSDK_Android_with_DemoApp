@@ -30,13 +30,11 @@ import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.db.model.createHistag
 import co.candyhouse.sesame.db.model.hisTagC
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.CHScanStatus
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
@@ -44,19 +42,19 @@ import co.candyhouse.sesame.open.device.CHSesame2
 import co.candyhouse.sesame.open.device.CHSesame2MechSettings
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
 import co.candyhouse.sesame.open.device.NSError
-import co.candyhouse.sesame.open.isInternetAvailable
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReqSig1
-import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64Encode
 import co.candyhouse.sesame.utils.base64decodeByteArray
 import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toReverseBytes
@@ -167,7 +165,7 @@ internal enum class CHError(val value: NSError) {
 
 
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.hisTagC(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
 
             if (mechStatus?.isInLockRange == true) {
@@ -180,7 +178,7 @@ internal enum class CHError(val value: NSError) {
 
     override fun lock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.hisTagC(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
             if (!isBleAvailable(result)) return
             sendEncryptCommand(SSM2Payload(SSM2OpCode.async, SesameItemCode.lock, sesame2KeyData!!.createHistag(historytag))) { res ->
@@ -196,7 +194,7 @@ internal enum class CHError(val value: NSError) {
     override fun unlock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
 
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
             if (!isBleAvailable(result)) return
             val his = sesame2KeyData!!.createHistag(historytag)
@@ -405,53 +403,80 @@ internal enum class CHError(val value: NSError) {
 
 
     override fun register(resultRegister: CHResult<CHEmpty>) {
-
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             resultRegister.invoke(Result.failure(CHError.BUSY.value))
             return
         }
-
-
         semaphore = Channel(capacity = 1)
+        sendEncryptCommand(
+            SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf()),
+            DeviceSegmentType.plain
+        ) { IRRes ->
 
-        sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf()), DeviceSegmentType.plain) { IRRes ->
             L.d("hcia", "IRER:" + IRRes.payload.toHexString())
             val ER = IRRes.payload.drop(16).toByteArray().toHexString()
 
-            makeApiCall(resultRegister) {
+            L.d("hcia", "註冊請求開始 ==> deviceStatus:$deviceStatus deviceId:$deviceId")
 
-                L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-             //   val registerSesame1 = CHServerAuth.getRegisterKey(KeyQues(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER))
-                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIClient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
-                deviceStatus = CHDeviceStatus.Registering
+            deviceStatus = CHDeviceStatus.Registering
 
-                val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
-                val appPubKey = EccKey.getPubK().hexStringToByteArray()
-                val serverToken = registerSesame1.st.base64decodeByteArray()
-                val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
-                val ecdhSecret = EccKey.ecdh(sesamePublicKey)
-                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
-                val payload = sig1 + appPubKey + serverToken
-                val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
+            val req = CHSS2RegisterReq(
+                CHSS2RegisterReqSig1(
+                    EccKey.getRegisterAK(),
+                    mSesameToken.base64Encode(),
+                    ER,
+                    advertisement!!.productModel!!.productType().toString()
+                )
+            )
+            CHAPIClientBiz.myDevicesRegisterSesame2Post(
+                deviceId.toString(),
+                req
+            ) { apiResult ->
 
-                val sessionToken = serverToken + mSesameToken
-                val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
-                val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())!!
-                val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
-                cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
-                sendEncryptCommand(cmd, DeviceSegmentType.plain) {
+                apiResult.fold(
+                    onSuccess = { state ->
+                        val registerSesame1 = state.data  // CHSS2RegisterRes
+                        val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
+                        val appPubKey = EccKey.getPubK().hexStringToByteArray()
+                        val serverToken = registerSesame1.st.base64decodeByteArray()
+                        val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
 
-                    isRegistered = true
-                    mResultRegister = resultRegister
-                    val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", ownerKey.toHexString(), sesamePublicKey.toHexString())
-                    sesame2KeyData = candyDevice
+                        val ecdhSecret = EccKey.ecdh(sesamePublicKey)
+                        val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                        val payload = sig1 + appPubKey + serverToken
 
-                    CHDB.CHSS2Model.insert(candyDevice) {}
-                }
+                        val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
+
+                        val sessionToken = serverToken + mSesameToken
+                        val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
+                        val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())!!
+                        val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
+
+                        cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
+
+                        sendEncryptCommand(cmd, DeviceSegmentType.plain) {
+                            isRegistered = true
+                            mResultRegister = resultRegister
+
+                            val candyDevice = CHDevice(
+                                deviceId.toString(),
+                                advertisement!!.productModel!!.deviceModel(),
+                                null,
+                                "0000",
+                                ownerKey.toHexString(),
+                                sesamePublicKey.toHexString()
+                            )
+
+                            sesame2KeyData = candyDevice
+                            CHDB.CHSS2Model.insert(candyDevice) {}
+                        }
+                    },
+                    onFailure = { err ->
+                        resultRegister.invoke(Result.failure(err))
+                    }
+                )
             }
-
         }
-
     }
 
     private fun sendEncryptCommand(payload: SSM2Payload, isCipher: DeviceSegmentType = DeviceSegmentType.cipher, onResponse: SesameOS2ResponseCallback) {
@@ -496,7 +521,7 @@ internal enum class CHError(val value: NSError) {
                     val appPublicKeyBytes = EccKey.getPubK().hexStringToByteArray()
                     val sessionToken = mAppToken + mSesameToken
                     val signPayload = userIdx + appPublicKeyBytes + sessionToken
-                    CHAccountManager.signGuestKey(CHRemoveSignKeyRequest(deviceId.toString().uppercase(), signPayload.toHexString(), sesame2KeyData!!.secretKey)) {
+                    CHAPIClientBiz.signGuestKey(CHRemoveSignKeyRequest(deviceId.toString().uppercase(), signPayload.toHexString(), sesame2KeyData!!.secretKey)) {
                         it.onSuccess {
                             login(it.data)
                         }
@@ -587,7 +612,7 @@ internal enum class CHError(val value: NSError) {
                 if (res.payload.size >= 13) {  // 添加边界检查
                     val data = res.payload.toHexString()
                     if (isInternetAvailable()) {
-                        CHAccountManager.postSS2History(deviceId.toString().uppercase(), data) {}
+                        CHAPIClientBiz.postSS2History(deviceId.toString().uppercase(), data) {}
                     }
                 }
             }

@@ -23,21 +23,21 @@ import co.candyhouse.sesame.ble.SesameNotifypayload
 import co.candyhouse.sesame.ble.SesameResultCode
 import co.candyhouse.sesame.ble.isBleAvailable
 import co.candyhouse.sesame.ble.os2.CHError
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.NSError
-import co.candyhouse.sesame.open.isInternetAvailable
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.utils.BleBaseType
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toHexString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -404,7 +404,7 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
                 val versionTag = String(res.payload)
                 L.d("getVersionTag", "$deviceUUID == $versionTag")
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(versionTag)))
-                CHAccountManager.updateDeviceFirmwareVersion(deviceUUID, versionTag) {
+                CHAPIClientBiz.updateDeviceFirmwareVersion(deviceUUID, versionTag) {
                     it.onFailure { error ->
                         L.e("getVersionTag", error.message.toString())
                     }
@@ -469,7 +469,7 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
             if (isRegistered) {
                 L.d("[say]", "isNeedAuthFromServer: " + isNeedAuthFromServer.toString())
                 if (isNeedAuthFromServer == true) {
-                    CHAccountManager.signGuestKey(
+                    CHAPIClientBiz.signGuestKey(
                         CHRemoveSignKeyRequest(
                             deviceId.toString().uppercase(),
                             mSesameToken.toHexString(),

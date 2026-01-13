@@ -26,11 +26,11 @@ import co.candyhouse.app.R
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
-import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.applyInsetsPadding
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.UserState
@@ -161,7 +161,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                         } catch (_: Exception) {
                         }
                     }
-                    CHLoginAPIManager.uploadUserDeviceToken {}
+                    SharedPreferencesUtils.deviceToken?.let { CHAPIClientBiz.uploadUserDeviceToken(it) {} }
                     if (loginViewModel.isJustLogin) {
                         L.d("hcia", "💋 第一次登入上傳所有鑰匙" + loginViewModel.isJustLogin)
                         loginViewModel.isJustLogin = false

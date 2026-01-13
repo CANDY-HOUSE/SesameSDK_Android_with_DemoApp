@@ -14,7 +14,7 @@ import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.alertview.fragments.toastMSG
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.GlobalScope

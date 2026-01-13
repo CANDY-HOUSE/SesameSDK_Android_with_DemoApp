@@ -1,7 +1,8 @@
 package co.utils
 
-import co.candyhouse.sesame.ble.UUID4HistoryTagTypeEnum
-import co.candyhouse.sesame.utils.L
+import co.candyhouse.app.R
+import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.uuidToBytes
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
@@ -39,4 +40,8 @@ object UserUtils {
         }
     }
 
+}
+
+fun getHistoryTag(): ByteArray {
+    return SharedPreferencesUtils.nickname?.toByteArray() ?: CHDeviceManager.app.getString(R.string.unLoginHistoryTag).toByteArray()
 }

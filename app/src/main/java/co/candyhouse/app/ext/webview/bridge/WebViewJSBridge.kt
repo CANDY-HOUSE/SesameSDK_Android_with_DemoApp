@@ -5,7 +5,7 @@ import android.webkit.WebView
 import androidx.core.app.NotificationManagerCompat
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -15,10 +15,8 @@ import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.db.model.historyTagBLE
 import co.candyhouse.sesame.db.model.historyTagIOT
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
@@ -27,14 +25,15 @@ import co.candyhouse.sesame.open.device.CHSesame5MechSettings
 import co.candyhouse.sesame.open.device.CHSesame5MechStatus
 import co.candyhouse.sesame.open.device.CHSesame5OpsSettings
 import co.candyhouse.sesame.open.device.NSError
-import co.candyhouse.sesame.open.isInternetAvailable
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toReverseBytes
@@ -157,7 +156,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             }
         } else {
             sesame2KeyData?.apply {
-                CHAccountManager.cmdSesame(SesameItemCode.toggle, this@CHSesame5Device, this.historyTagIOT(historytag), result)
+                CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this@CHSesame5Device, this.historyTagIOT(historytag), result)
             }
         }
     }
@@ -184,11 +183,11 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             buildHistoryTagWithUUID()
         }
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
-            CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         if (!isBleAvailable(result)) {
-            CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, sesame2KeyData!!.historyTagBLE(historytag)), DeviceSegmentType.cipher) { res ->
@@ -205,11 +204,11 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             buildHistoryTagWithUUID()
         }
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
-            CHAccountManager.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         if (!isBleAvailable(result)) {
-            CHAccountManager.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         sendCommand(SesameOS3Payload(SesameItemCode.lock.value, sesame2KeyData!!.historyTagBLE(historytag)), DeviceSegmentType.cipher) { res ->
@@ -231,10 +230,20 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         deviceStatus = CHDeviceStatus.Registering
 
         L.d("hcia", "register:!!")
-        makeApiCall(result) {
-            val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(advertisement!!.productModel!!.productType().toString(), serverSecret))
-            sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { IRRes ->
+        val serverSecret = mSesameToken.toHexString()
+        CHAPIClientBiz.myDevicesRegisterSesame5Post(
+            deviceId.toString(),
+            CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
+        ) { apiResult ->
+            apiResult.exceptionOrNull()?.let { e ->
+                L.d("hcia", "[ss5][register][server] failed: ${e.message}")
+            }
+            sendCommand(
+                SesameOS3Payload(
+                    SesameItemCode.registration.value,
+                    EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()
+                ), DeviceSegmentType.plain
+            ) { IRRes ->
                 mechStatus = CHSesame5MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..6))
                 mechSetting = CHSesame5MechSettings(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..12))
 
@@ -251,7 +260,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                 }
 
                 deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-
             }
         }
     }
@@ -289,7 +297,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 // 改为 uuid 格式的 hisTag， APP不再兼容旧固件的历史记录， 若有客诉历史记录问题， 请升级锁的固件。
                 if (isConnectNET && !isConnectedByWM2) {
-                    CHAccountManager.postSS5History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
+                    CHAPIClientBiz.postSS5History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
                         // 成功上传历史记录到云端后， 通过蓝牙删除这条历史记录， SS5固件会在它的Flash里删除掉这条历史记录。
                         val recordId = hisPaylaod.sliceArray(0..3)
                         it.onSuccess {
@@ -309,7 +317,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
 
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /** 指令接收 */

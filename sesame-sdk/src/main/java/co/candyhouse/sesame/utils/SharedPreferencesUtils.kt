@@ -1,4 +1,4 @@
-package co.utils
+package co.candyhouse.sesame.utils
 
 import android.content.SharedPreferences
 import androidx.core.content.edit

@@ -1,4 +1,4 @@
-package co.utils
+package co.candyhouse.sesame.utils
 
 import android.annotation.SuppressLint
 import android.content.Context

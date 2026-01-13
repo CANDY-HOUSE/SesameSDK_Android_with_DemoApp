@@ -2,10 +2,26 @@ package co.candyhouse.sesame.ble.os2
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
 import android.os.Build
-import co.candyhouse.sesame.ble.*
+import co.candyhouse.sesame.ble.CHDeviceUtil
+import co.candyhouse.sesame.ble.CHadv
+import co.candyhouse.sesame.ble.DeviceSegmentType
+import co.candyhouse.sesame.ble.SSM2OpCode
+import co.candyhouse.sesame.ble.SSM2ResponsePayload
+import co.candyhouse.sesame.ble.SSM3PublishPayload
+import co.candyhouse.sesame.ble.Sesame2Chracs
+import co.candyhouse.sesame.ble.SesameBleTransmit
+import co.candyhouse.sesame.ble.SesameItemCode
+import co.candyhouse.sesame.ble.SesameNotifypayload
+import co.candyhouse.sesame.ble.SesameResultCode
+import co.candyhouse.sesame.ble.isBleAvailable
 import co.candyhouse.sesame.ble.os2.base.CHSesameOS2
 import co.candyhouse.sesame.ble.os2.base.SSM2Payload
 import co.candyhouse.sesame.ble.os2.base.SesameOS2BleCipher
@@ -14,20 +30,40 @@ import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.db.model.createHistag
 import co.candyhouse.sesame.db.model.hisTagC
-import co.candyhouse.sesame.open.*
-import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
+import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatus
+import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.device.CHSesameBike
+import co.candyhouse.sesame.open.device.CHSesameBotMechSettings
+import co.candyhouse.sesame.open.device.CHSesameBotMechStatus
+import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.*
-import co.candyhouse.sesame.utils.*
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
+import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
+import co.candyhouse.sesame.server.dto.CHSS2RegisterReqSig1
+import co.candyhouse.sesame.utils.EccKey
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
+import co.candyhouse.sesame.utils.base64Encode
+import co.candyhouse.sesame.utils.base64decodeByteArray
+import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.isInternetAvailable
+import co.candyhouse.sesame.utils.toBigLong
+import co.candyhouse.sesame.utils.toHexString
+import co.candyhouse.sesame.utils.toUInt32ByteArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 @SuppressLint("MissingPermission") internal class CHSesameBikeDevice() : CHSesameOS2(), CHSesameBike, CHDeviceUtil {
 
@@ -240,7 +276,7 @@ import java.util.*
                     val appPublicKeyBytes = EccKey.getPubK().hexStringToByteArray()
                     val sessionToken = mAppToken + mSesameToken
                     val signPayload = userIdx + appPublicKeyBytes + sessionToken
-                    CHAccountManager.signGuestKey(CHRemoveSignKeyRequest(deviceId.toString().uppercase(), signPayload.toHexString(), sesame2KeyData!!.secretKey)) {
+                    CHAPIClientBiz.signGuestKey(CHRemoveSignKeyRequest(deviceId.toString().uppercase(), signPayload.toHexString(), sesame2KeyData!!.secretKey)) {
                         it.onSuccess {
                             login(it.data)
                         }
@@ -268,7 +304,7 @@ import java.util.*
 
     override fun unlock(historyTag: ByteArray?, result: CHResult<CHEmpty>) {
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
-            CHAccountManager.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historyTag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historyTag), result)
         }
         if (!isBleAvailable(result)) return
         val his = sesame2KeyData!!.createHistag(historyTag)
@@ -337,7 +373,6 @@ import java.util.*
     }
 
     override fun register(resultRegister: CHResult<CHEmpty>) {
-
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             resultRegister.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
             return
@@ -346,40 +381,58 @@ import java.util.*
         sendPlainCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf())) { IRRes ->
             val ER = IRRes.payload.drop(16).toByteArray().toHexString()
 
-//        L.d("hcia", "註冊開始 ==>" + " adv deviceName:" + advertisement!!.deviceName + " mSesameToken:" + mSesameToken.toHexString())
-            makeApiCall(resultRegister) {
-                L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
-                val registerSesame1: CHSS2RegisterRes = CHAccountManager.jpAPIClient.myDevicesRegisterSesame2Post(deviceId.toString(), CHSS2RegisterReq(CHSS2RegisterReqSig1(EccKey.getRegisterAK(), mSesameToken.base64Encode(), ER, advertisement!!.productModel!!.productType().toString())))
-                deviceStatus = CHDeviceStatus.Registering
+            L.d("hcia", "註冊請求開始 ==> deviceStatus:" + deviceStatus + " deviceId:" + deviceId)
+            deviceStatus = CHDeviceStatus.Registering
+            val req = CHSS2RegisterReq(
+                CHSS2RegisterReqSig1(
+                    EccKey.getRegisterAK(),
+                    mSesameToken.base64Encode(),
+                    ER,
+                    advertisement!!.productModel!!.productType().toString()
+                )
+            )
+            CHAPIClientBiz.myDevicesRegisterSesame2Post(
+                deviceId.toString(),
+                req
+            ) { apiResult ->
 
-                val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
-                val appPubKey = EccKey.getPubK().hexStringToByteArray()
-                val serverToken = registerSesame1.st.base64decodeByteArray()
-                val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
-                val ecdhSecret = EccKey.ecdh(sesamePublicKey)
-                val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
-                val payload = sig1 + appPubKey + serverToken
+                apiResult.fold(
+                    onSuccess = { state ->
+                        val registerSesame1 = state.data
+                        val sig1 = registerSesame1.sig1.base64decodeByteArray().sliceArray(0..3)
+                        val appPubKey = EccKey.getPubK().hexStringToByteArray()
+                        val serverToken = registerSesame1.st.base64decodeByteArray()
+                        val sesamePublicKey = registerSesame1.pubkey.base64decodeByteArray()
+                        val ecdhSecret = EccKey.ecdh(sesamePublicKey)
+                        val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
+                        val payload = sig1 + appPubKey + serverToken
 
-                val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
-                L.d("hcia", "註冊指令==>")
-                val sessionToken = serverToken + mSesameToken
-                val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
-                val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())
-                val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
+                        val cmd = SSM2Payload(SSM2OpCode.create, SesameItemCode.registration, payload)
+                        L.d("hcia", "註冊指令==>")
+                        val sessionToken = serverToken + mSesameToken
+                        val registerKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
+                        val ownerKey = AesCmac(registerKey!!, 16).computeMac("owner_key".toByteArray())
+                        val sessionKey = AesCmac(registerKey, 16).computeMac(sessionToken)
 
-                cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
-                sendPlainCommand(cmd) { result ->
+                        cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
+                        sendPlainCommand(cmd) { result ->
+                            val candyDevice = CHDevice(
+                                deviceId.toString(), CHProductModel.BiKeLock.deviceModel(),//sesame_2
+                                null, "0000", ownerKey!!.toHexString(), sesamePublicKey.toHexString()
+                            )
+                            sesame2KeyData = candyDevice
 
-                    val candyDevice = CHDevice(deviceId.toString(), CHProductModel.BiKeLock.deviceModel(),//sesame_2
-                        null, "0000", ownerKey!!.toHexString(), sesamePublicKey.toHexString())
-                    sesame2KeyData = candyDevice
+                            CHDB.CHSS2Model.insert(candyDevice) {
+                                resultRegister.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 
-                    CHDB.CHSS2Model.insert(candyDevice) {
-                        resultRegister.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-
+                            }
+                            L.d("hcia", "<===我成功註冊腳車了 device_id::" + deviceId)
+                        }
+                    },
+                    onFailure = { err ->
+                        resultRegister.invoke(Result.failure(err))
                     }
-                    L.d("hcia", "<===我成功註冊腳車了 device_id::" + deviceId)
-                }
+                )
             }
         }
     }

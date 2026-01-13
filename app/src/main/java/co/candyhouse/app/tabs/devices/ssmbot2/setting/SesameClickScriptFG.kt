@@ -10,9 +10,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.sesame.open.device.Bot2Action
-import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHSesameBot2
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.recycle.GenericAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.weigan.loopview.LoopView

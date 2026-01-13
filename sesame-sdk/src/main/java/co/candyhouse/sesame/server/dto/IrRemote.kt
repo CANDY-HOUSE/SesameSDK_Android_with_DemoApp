@@ -1,4 +1,4 @@
-package co.candyhouse.app.tabs.devices.hub3.setting.ir.bean
+package co.candyhouse.sesame.server.dto
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

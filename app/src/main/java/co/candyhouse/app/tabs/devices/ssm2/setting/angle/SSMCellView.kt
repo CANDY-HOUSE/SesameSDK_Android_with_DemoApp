@@ -16,7 +16,7 @@ import androidx.core.graphics.drawable.toBitmap
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.ssm5UIParser
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.LockDeviceState
+import co.candyhouse.sesame.utils.LockDeviceState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices

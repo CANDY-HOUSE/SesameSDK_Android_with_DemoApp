@@ -16,10 +16,10 @@ import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
 import co.candyhouse.sesame.ble.os3.DeviceProfiles
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHMulticastDelegate
 import java.util.UUID
 
@@ -275,7 +275,7 @@ interface CHSesameConnector : CHDevices {
 
 interface CHSesameLock : CHDevices {
     fun disableNotification(fcmToken: String, result: CHResult<Any>) {
-        CHAccountManager.cancelNotification(this, fcmToken) { it ->
+        CHAPIClientBiz.cancelNotification(this, fcmToken) { it ->
             it.onSuccess {
                 result.invoke(Result.success(CHResultState.CHResultStateNetworks(it.data)))
             }

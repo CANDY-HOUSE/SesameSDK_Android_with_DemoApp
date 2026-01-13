@@ -1,9 +1,9 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.capability.palm
 
-import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHPalmNameRequest
 
 interface CHPalmCapable {

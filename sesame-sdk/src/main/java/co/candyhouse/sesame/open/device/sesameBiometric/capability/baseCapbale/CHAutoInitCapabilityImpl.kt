@@ -2,7 +2,7 @@ package co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale
 
 import co.candyhouse.sesame.ble.SSM3ResponsePayload
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
-import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.L
 
 /**

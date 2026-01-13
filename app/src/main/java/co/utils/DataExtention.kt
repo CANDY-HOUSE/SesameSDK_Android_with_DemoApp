@@ -6,14 +6,14 @@ import android.util.Base64
 import com.google.android.gms.location.LocationServices
 import java.nio.charset.StandardCharsets
 import java.util.*
-import co.candyhouse.server.CHResult
-import co.candyhouse.server.CHResultState
 import android.location.Location
 import androidx.core.app.ActivityCompat
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task

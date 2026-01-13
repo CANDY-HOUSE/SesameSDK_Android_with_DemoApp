@@ -15,7 +15,7 @@ import co.candyhouse.sesame.open.device.CHSesameConnector
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.recycle.GenericAdapter
 
 class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBinding>(),

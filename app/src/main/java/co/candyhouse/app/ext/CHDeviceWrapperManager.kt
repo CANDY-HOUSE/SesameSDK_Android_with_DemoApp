@@ -1,7 +1,7 @@
 package co.candyhouse.app.ext
 
-import co.candyhouse.app.tabs.account.CHUserKey
 import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.server.dto.CHUserKey
 
 /**
  * 统一管理设备和UserKey的关联

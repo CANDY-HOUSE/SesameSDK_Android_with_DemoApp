@@ -23,7 +23,6 @@ import co.candyhouse.app.ext.NfcHandler
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
-import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -35,12 +34,11 @@ import co.candyhouse.sesame.open.device.CHSesameBot
 import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.widget.SesameForegroundService
 import co.utils.AnalyticsUtil
-import co.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.toHexString
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -80,7 +78,6 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     }
 
     private fun setupAWSFeatures() {
-        CHLoginAPIManager.setupAPi(this, AWSMobileClient.getInstance())
         val userState = AWSStatus.getCachedUserState()
         loginViewModel.gUserState.value = userState
         deviceViewModel.refreshDevices()

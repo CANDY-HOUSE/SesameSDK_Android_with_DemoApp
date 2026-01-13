@@ -1,4 +1,4 @@
-package co.candyhouse.app.ext
+package co.candyhouse.sesame.utils
 
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback

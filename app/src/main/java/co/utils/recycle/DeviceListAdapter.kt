@@ -7,16 +7,13 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.SesameDevicesListLayoutBinding
 import co.candyhouse.app.ext.userKey
-import co.candyhouse.app.tabs.account.cheyKeyToUserKey
 import co.candyhouse.app.tabs.devices.hub3.recycle.Hub3ItemView
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.createOpensensorStateText
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
 import co.candyhouse.app.tabs.devices.ssm2.setRank
-import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -35,12 +32,14 @@ import co.candyhouse.sesame.open.device.CHSesameOpenSensorMechStatus
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.device.OpenSensorData
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.IrRemote
+import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 class DeviceListAdapter(
     private val mDeviceViewModel: CHDeviceViewModel,
@@ -59,7 +58,7 @@ class DeviceListAdapter(
                 mDeviceViewModel.myChDevices.value.forEachIndexed { index, chDevices ->
                     chDevices.setRank(-index)
                 }
-                CHLoginAPIManager.upLoadKeys(mDeviceViewModel.myChDevices.value.map {
+                CHAPIClientBiz.upLoadKeys(mDeviceViewModel.myChDevices.value.map {
                     cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname(), it.getRank())
                 }) { isUploading = false }
             } catch (e: Exception) {
@@ -136,8 +135,7 @@ class DeviceListAdapter(
                 setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage)
 
                 setupExpandableView(device, 35) {
-                    val param = device.deviceId.toString().uppercase(Locale.getDefault())
-                    val irRemoteList = mDeviceViewModel.getIrRemoteList(param)
+                    val irRemoteList = device.userKey?.stateInfo?.remoteList ?: emptyList()
                     Hub3ItemView(irRemoteList) { bot2Item ->
                         callBackHub3(device, bot2Item)
                     }

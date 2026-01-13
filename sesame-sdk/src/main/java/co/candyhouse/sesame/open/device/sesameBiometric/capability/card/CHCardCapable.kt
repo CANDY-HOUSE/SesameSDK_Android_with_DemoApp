@@ -1,9 +1,9 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.capability.card
 
-import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 
 interface CHCardCapable {
     fun sendNfcCardsDataGetCmd(deviceUUID: String, result: CHResult<String>)

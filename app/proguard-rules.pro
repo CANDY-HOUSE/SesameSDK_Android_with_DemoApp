@@ -47,8 +47,6 @@
 -if interface * { @retrofit2.http.* <methods>; }
 -keep,allowobfuscation interface <1>
 
-
--keep class co.candyhouse.sesame.** { *; }
 -dontwarn co.candyhouse.sesame.**
 
 -keep class co.candyhouse.server.** { *; }
@@ -82,40 +80,6 @@
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
 
-# 数据模型类
--keep class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.** { *; }
--keepclassmembers class co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.** { *; }
--keep class co.candyhouse.app.tabs.account.CHUserKey { *; }
--keep class co.candyhouse.app.tabs.account.StateInfo { *; }
--keepclassmembers class co.candyhouse.app.tabs.account.CHUserKey {
-    <fields>;
-}
--keepclassmembers class co.candyhouse.app.tabs.account.StateInfo {
-    <fields>;
-}
 
-
-# AWS相关
--keep class com.amazonaws.services.cognitoidentityprovider.** { *; }
--dontwarn com.amazonaws.mobile.auth.facebook.FacebookButton
--dontwarn com.amazonaws.mobile.auth.facebook.FacebookSignInProvider
--dontwarn com.amazonaws.mobile.auth.google.GoogleButton
--dontwarn com.amazonaws.mobile.auth.google.GoogleSignInProvider
--dontwarn com.amazonaws.mobile.auth.ui.AuthUIConfiguration$Builder
--dontwarn com.amazonaws.mobile.auth.ui.AuthUIConfiguration
--dontwarn com.amazonaws.mobile.auth.ui.SignInUI$LoginBuilder
--dontwarn com.amazonaws.mobile.auth.ui.SignInUI
--dontwarn com.amazonaws.mobile.auth.userpools.CognitoUserPoolsSignInProvider
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.Auth$Builder
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.Auth
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.AuthUserSession
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.activities.CustomTabsManagerActivity
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.exceptions.AuthClientException
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.exceptions.AuthServiceException
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.handlers.AuthHandler
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.tokens.AccessToken
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.tokens.IdToken
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.tokens.RefreshToken
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.util.Pkce
 -dontwarn com.android.org.conscrypt.SSLParametersImpl
 -dontwarn org.apache.harmony.xnet.provider.jsse.SSLParametersImpl

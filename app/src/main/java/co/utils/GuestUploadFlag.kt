@@ -1,6 +1,7 @@
 package co.utils
 
 import androidx.core.content.edit
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 
 /**
  * 访客上传标记

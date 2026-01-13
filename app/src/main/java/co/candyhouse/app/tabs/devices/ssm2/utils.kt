@@ -19,7 +19,7 @@ import co.candyhouse.sesame.open.device.CHSesameBot
 import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date

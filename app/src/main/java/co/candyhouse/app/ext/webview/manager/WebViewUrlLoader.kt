@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import co.candyhouse.server.CHLoginAPIManager.getWebUrlByScene
-import co.candyhouse.server.CHResultState
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.server.CHAPIClientBiz.getWebUrlByScene
 
 /**
  * WebView URL加载管理

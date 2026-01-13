@@ -27,7 +27,7 @@ import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.device.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle

@@ -18,39 +18,33 @@ import co.candyhouse.app.R
 import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.account.CHUserKey
-import co.candyhouse.app.tabs.account.cheyKeyToUserKey
-import co.candyhouse.app.tabs.account.getHistoryTag
-import co.candyhouse.app.tabs.account.userKeyToCHKey
-import co.candyhouse.app.tabs.devices.hub3.bean.IrRemoteRepository
-import co.candyhouse.app.tabs.devices.hub3.setting.ir.bean.IrRemote
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.server.CHLoginAPIManager
-import co.candyhouse.server.CHResult
-import co.candyhouse.server.CHResultState
-import co.candyhouse.sesame.open.CHAccountManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHHub3Delegate
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
-import co.candyhouse.sesame.open.isInternetAvailable
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.CHUserKey
+import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
+import co.candyhouse.sesame.server.dto.userKeyToCHKey
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.isInternetAvailable
 import co.receiver.widget.SesameForegroundService
 import co.receiver.widget.SesameReceiver
 import co.utils.GuestUploadFlag
-import co.utils.JsonUtil
-import co.utils.JsonUtil.parseList
-import co.utils.SharedPreferencesUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
+import co.utils.getHistoryTag
 import co.utils.isAutoConnect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +57,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
-import java.util.Locale
 
 class BeanDevices(
     val list: List<CHDevices>,
@@ -83,7 +76,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private val delegateManager = DeviceViewModelDelegates(this)
     val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
     private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
-    private val iRRepository = IrRemoteRepository.getInstance()
 
     // 搜索关键词
     val searchQuery = MutableStateFlow("")
@@ -114,7 +106,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         CHDeviceManager.getCandyDevices { it ->
             it.onSuccess { chResultState ->
                 if (chResultState.data.isNotEmpty()) {
-                    CHLoginAPIManager.upLoadKeys(chResultState.data.map {
+                    CHAPIClientBiz.upLoadKeys(chResultState.data.map {
                         cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname())
                     }) {
                         it.onFailure {
@@ -145,7 +137,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         syncJob?.cancel()
 
         syncJob = viewModelScope.launch {
-            CHLoginAPIManager.getDevicesList {
+            CHAPIClientBiz.getDevicesList {
                 receiveKeysFromServer(it)
             }
         }
@@ -235,7 +227,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     private fun uploadLocalDevicesForGuest(local: List<CHDevices>, localFp: String) {
-        CHLoginAPIManager.upLoadKeys(
+        CHAPIClientBiz.upLoadKeys(
             local.map {
                 cheyKeyToUserKey(
                     it.getKey(),
@@ -332,12 +324,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     // 锁、bike、bot自动连接蓝牙
                     backgroundAutoConnect(device)
 
-                    // 红外设备
-                    if (device is CHHub3) {
-                        L.d("hcia", "fetchIRDevices...")
-                        fetchIRDevices(device)
-                    }
-
                     // 监听器（设备状态变化时会触发）
                     listerChDeviceStatus(device) {
                         L.d("hcia", "刷新锁-ID=${device.deviceId}")
@@ -353,30 +339,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 }
             }
         }
-    }
-
-    private fun fetchIRDevices(device: CHHub3) {
-        val uuid = device.deviceId.toString().uppercase(Locale.getDefault())
-        CHAccountManager.fetchIRDevices(uuid) { it ->
-            it.onSuccess { result ->
-                L.d("sf", "data==== " + result.data.toString())
-                val jsonString = JsonUtil.toJson(result.data)
-                val tempList = jsonString.parseList<IrRemote>()
-                viewModelScope.launch {
-                    L.d("sf", "保存红外遥控器列表数据……")
-                    iRRepository.setRemotes(uuid, tempList)
-                    updateNeeRefresh(device)
-                }
-            }
-            it.onFailure {
-                L.d("sf", "result==== onFailure ${it.message}")
-            }
-        }
-    }
-
-    fun getIrRemoteList(key: String): List<IrRemote> {
-        L.d("sf", "获取红外线列表数据……")
-        return iRRepository.getRemotesByKey(key)
     }
 
     fun backgroundAutoConnect(device: CHDevices) {
@@ -471,7 +433,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun dropDevice(result: CHResult<CHEmpty>) {
         val targetDevice: CHDevices = ssmLockLiveData.value!!
-        CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
+        CHAPIClientBiz.removeKey(targetDevice.deviceId.toString()) {
             it.onSuccess {
                 myChDevices.value =
                     myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
@@ -500,14 +462,14 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun resetDevice(result: CHResult<CHEmpty>) {
         val targetDevice: CHDevices = ssmLockLiveData.value!!
-        CHLoginAPIManager.removeKey(targetDevice.deviceId.toString()) {
+        CHAPIClientBiz.removeKey(targetDevice.deviceId.toString()) {
             it.onSuccess {
                 unregisterNotification(targetDevice)
                 targetDevice.reset {
                     it.onSuccess {
                         refreshDevices()
                         viewModelScope.launch {
-                            result.invoke(Result.success(CHResultState.CHResultStateBle(CHEmpty())))
+                            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                         }
                     }
                     it.onFailure {

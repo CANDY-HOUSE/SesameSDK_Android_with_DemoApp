@@ -17,7 +17,7 @@ import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
 import co.candyhouse.sesame.open.device.*
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import java.util.*
@@ -322,7 +322,7 @@ import kotlin.experimental.and
     }
 
     override fun connectWifi(result: CHResult<CHEmpty>) {
-        val company = CHConfiguration.CLIENT_ID!!.replace(":", "").replace("-", "")
+        val company = co.candyhouse.sesame.BuildConfig.API_GATEWAY_CLIENT_ID!!.replace(":", "").replace("-", "")
         //        L.d("hcia", "company.toByteArray():" + company.toByteArray().toHexString())
         val verification = company + ":" + deviceId.toString().uppercase().split('-').last()
         L.d("wm2", "verification: $verification")

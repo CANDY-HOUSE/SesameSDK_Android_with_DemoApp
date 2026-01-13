@@ -15,10 +15,8 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHAccountManager.makeApiCall
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
@@ -34,9 +32,9 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDev
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
-import co.candyhouse.sesame.open.isInternetAvailable
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.Event
@@ -45,6 +43,7 @@ import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64decodeHex
 import co.candyhouse.sesame.utils.divideArray
 import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.noHashtoUUID
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
@@ -135,7 +134,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[stp][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        CHAccountManager.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
     }
 
     /**
@@ -277,14 +276,14 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
         deviceStatus = CHDeviceStatus.Registering
 
-        makeApiCall(result) {
-            val serverSecret = mSesameToken.toHexString()
-            CHAccountManager.jpAPIClient.myDevicesRegisterSesame5Post(
-                deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
-            )
-
-            deviceStatus = CHDeviceStatus.Registering
-
+        val serverSecret = mSesameToken.toHexString()
+        CHAPIClientBiz.myDevicesRegisterSesame5Post(
+            deviceId.toString(),
+            CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
+        ) { apiResult ->
+            apiResult.exceptionOrNull()?.let { e ->
+                L.d("hcia", "[ss5][register][server] failed: ${e.message}")
+            }
             sendCommand(
                 SesameOS3Payload(
                     SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()

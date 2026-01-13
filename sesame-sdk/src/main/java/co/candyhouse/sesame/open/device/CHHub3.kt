@@ -1,6 +1,6 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.open.CHResult
+import co.candyhouse.sesame.utils.CHResult
 
 interface CHHub3Delegate : CHWifiModule2Delegate {}
 

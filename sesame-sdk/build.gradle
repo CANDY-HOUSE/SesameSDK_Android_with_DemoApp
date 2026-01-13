@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -12,6 +13,8 @@ android {
     defaultConfig {
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
+
+        consumerProguardFiles "consumer-rules.pro"
 
         // AWS Gateway 配置
         buildConfigField("String", "API_GATEWAY_CLIENT_ID", "\"${rootProject.ext['aws.apigateway.clientId']}\"")
@@ -24,18 +27,12 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile(
-                    'proguard-android-optimize.txt'),
-                    'proguard-rules.pro'
-            buildConfigField("String", "chjpserver", "\"${rootProject.ext['candyhouse.sesame.sdk.api.dev']}\"")
+            buildConfigField("String", "ch_server", "\"${rootProject.ext['candyhouse.sesame.api.dev']}\"")
         }
 
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile(
-                    'proguard-android-optimize.txt'),
-                    'proguard-rules.pro'
-            buildConfigField("String", "chjpserver", "\"${rootProject.ext['candyhouse.sesame.sdk.api.prod']}\"")
+            minifyEnabled false
+            buildConfigField("String", "ch_server", "\"${rootProject.ext['candyhouse.sesame.api.prod']}\"")
         }
     }
 

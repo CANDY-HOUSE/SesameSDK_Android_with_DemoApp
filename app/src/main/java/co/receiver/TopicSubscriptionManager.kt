@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.content.edit
 import co.candyhouse.app.BuildConfig
-import co.candyhouse.sesame.open.CHAccountManager
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.L
-import co.utils.AppIdentifyIdUtil
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.AppIdentifyIdUtil
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import com.google.firebase.messaging.FirebaseMessaging
 import java.util.concurrent.ConcurrentHashMap
 
@@ -132,7 +132,7 @@ class TopicSubscriptionManager(private val context: Context) {
             platform = "android"
         )
 
-        CHAccountManager.subscribeToTopic(request) { result ->
+        CHAPIClientBiz.subscribeToTopic(request) { result ->
             result.onSuccess { response ->
                 L.d(tag, "Response data: ${response.data}")
 

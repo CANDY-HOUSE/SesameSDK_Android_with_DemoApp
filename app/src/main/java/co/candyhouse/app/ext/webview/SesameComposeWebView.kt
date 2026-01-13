@@ -79,7 +79,7 @@ import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.utils.AnalyticsUtil
 import co.utils.ContainerPaddingManager
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.safeNavigate
 import java.io.File
 

@@ -25,13 +25,12 @@ import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
-import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.utils.GuestUploadFlag
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
@@ -214,53 +213,3 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         }
     }
 }
-
-fun cheyKeyToUserKey(key: CHDevice, level: Int, nickName: String, rank: Int? = null): CHUserKey {
-    return CHUserKey(
-        key.deviceUUID,
-        key.deviceModel,
-        key.keyIndex,
-        key.secretKey,
-        key.sesame2PublicKey,
-        nickName,
-        level,
-        rank
-    )
-}
-
-fun userKeyToCHKey(key: CHUserKey, historyTag: ByteArray? = null): CHDevice {
-    val deviceModel = key.deviceModel
-
-    return CHDevice(
-        key.deviceUUID,
-        deviceModel,
-        historyTag,
-        key.keyIndex,
-        key.secretKey,
-        key.sesame2PublicKey
-    )
-}
-
-fun getHistoryTag(): ByteArray {
-    return SharedPreferencesUtils.nickname?.toByteArray() ?: CHDeviceManager.app.getString(R.string.unLoginHistoryTag).toByteArray()
-}
-
-data class CHUserKey(
-    var deviceUUID: String,
-    val deviceModel: String,
-    val keyIndex: String,
-    val secretKey: String,
-    val sesame2PublicKey: String,
-    var deviceName: String?,
-    var keyLevel: Int,
-    var rank: Int? = null,
-    val subUUID: String = "",
-    val stateInfo: StateInfo = StateInfo()
-)
-
-data class StateInfo(
-    val batteryPercentage: Int? = null,
-    val CHSesame2Status: String? = null,
-    val timestamp: Long? = null,
-    val wm2State: Boolean? = null
-)

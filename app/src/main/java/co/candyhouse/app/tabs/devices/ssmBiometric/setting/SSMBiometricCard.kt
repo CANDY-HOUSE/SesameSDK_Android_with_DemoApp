@@ -32,9 +32,8 @@ import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometri
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
-import co.candyhouse.sesame.server.dto.CHCardNameRequest
 import co.candyhouse.sesame.utils.L
-import co.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
 import co.utils.alertview.AlertView

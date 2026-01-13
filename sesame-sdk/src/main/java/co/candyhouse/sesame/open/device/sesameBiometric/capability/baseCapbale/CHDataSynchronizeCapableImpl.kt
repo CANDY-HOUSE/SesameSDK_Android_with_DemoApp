@@ -1,12 +1,12 @@
 package co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale
 
-import co.candyhouse.sesame.open.CHAccountManager
-import co.candyhouse.sesame.open.CHResult
-import co.candyhouse.sesame.open.CHResultState
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
-import co.candyhouse.sesame.server.dto.CHEmpty
+import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CredentialListResponse
 import co.candyhouse.sesame.utils.L
 import com.google.gson.Gson
@@ -15,7 +15,7 @@ class CHDataSynchronizeCapableImpl : CHDataSynchronizeCapable {
 
     override fun postAuthenticationData(request: AuthenticationDataWrapper, result: CHResult<List<AuthenticationData>>) {
         request.operation += "_post"
-        CHAccountManager.postCredentialListToServer(request) { it ->
+        CHAPIClientBiz.postCredentialListToServer(request) { it ->
             it.onSuccess {
                 val res = it.data
                 val jsonString = Gson().toJson(res)
@@ -30,7 +30,7 @@ class CHDataSynchronizeCapableImpl : CHDataSynchronizeCapable {
 
     override fun putAuthenticationData(request: AuthenticationDataWrapper, result: CHResult<CHEmpty>) {
         request.operation += "_put"
-        CHAccountManager.postCredentialListToServer(request) { it ->
+        CHAPIClientBiz.postCredentialListToServer(request) { it ->
             it.onSuccess {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             }
@@ -42,7 +42,7 @@ class CHDataSynchronizeCapableImpl : CHDataSynchronizeCapable {
 
     override fun deleteAuthenticationData(deleteReq: AuthenticationDataWrapper, result: CHResult<CHEmpty>) {
         deleteReq.operation += "_delete"
-        CHAccountManager.deleteCredentialInfo(deleteReq) { it ->
+        CHAPIClientBiz.deleteCredentialInfo(deleteReq) { it ->
             it.onSuccess {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             }
@@ -65,7 +65,7 @@ class CHDataSynchronizeCapableImpl : CHDataSynchronizeCapable {
             is CHAuthenticationNameRequest.KeyBoardPassCode -> data.request
         }
 
-        CHAccountManager.updateAuthenticationName(authData) { it ->
+        CHAPIClientBiz.updateAuthenticationName(authData) { it ->
             it.onSuccess {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(it.data)))
             }

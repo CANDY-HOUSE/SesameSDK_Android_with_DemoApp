@@ -14,14 +14,11 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.FgRgDeviceBinding
-import co.candyhouse.app.tabs.account.cheyKeyToUserKey
-import co.candyhouse.app.tabs.account.getHistoryTag
 import co.candyhouse.app.tabs.devices.ssm2.getDistance
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
-import co.candyhouse.server.CHLoginAPIManager
 import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManagerDelegate
@@ -32,8 +29,11 @@ import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHSesame2
 import co.candyhouse.sesame.open.device.CHSesame5
 import co.candyhouse.sesame.open.device.CHWifiModule2
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.fragments.toastMSG
+import co.utils.getHistoryTag
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
 import com.amazonaws.mobileconnectors.apigateway.ApiClientException
@@ -171,7 +171,7 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                     device.setLevel(0)
                     device.setIsJustRegister(true)
                     mDeviceViewModel.updateDevices()
-                    CHLoginAPIManager.putKey(
+                    CHAPIClientBiz.putKey(
                         cheyKeyToUserKey(
                             device.getKey(),
                             device.getLevel(),
