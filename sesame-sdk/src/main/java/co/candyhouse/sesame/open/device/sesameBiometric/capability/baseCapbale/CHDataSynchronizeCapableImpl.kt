@@ -67,7 +67,7 @@ class CHDataSynchronizeCapableImpl : CHDataSynchronizeCapable {
 
         CHAPIClientBiz.updateAuthenticationName(authData) { it ->
             it.onSuccess {
-                result.invoke(Result.success(CHResultState.CHResultStateBLE(it.data)))
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(it.data as String)))
             }
             it.onFailure {
                 result.invoke(Result.failure(it))

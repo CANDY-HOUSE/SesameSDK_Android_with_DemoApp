@@ -55,7 +55,7 @@
     <string name="BleTooManyConnections">"android連了太多藍芽而不靈光了,請重開android藍芽"</string>
 
     <string name="reset_the_sesame">重置芝麻設備並丟棄鑰匙</string>
-    <string name="trash_key">刪除芝麻鑰匙</string>
+    <string name="trash_key">删除芝麻</string>
 
     <string name="on">開啟</string>
     <string name="Off">關閉</string>
@@ -196,7 +196,7 @@
     <string name="TouchProPWDRename">修改此數字密碼名稱🖊️</string>
 
     <string name="TouchProPWDDelete">刪除此數字密碼</string>
-    <string name="trash_device_key">刪除此 %1$s</string>
+    <string name="trash_device_key">刪除 %1$s</string>
     <string name="default_passcode_name">數字密碼🖊️</string>
     <string name="default_fingerprint_name">指紋🖊️</string>
     <string name="TouchProPalmRename">重新命名掌靜脈🖊️</string>

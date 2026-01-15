@@ -30,6 +30,7 @@ import co.candyhouse.app.tabs.devices.ssm2.getFirmwarePath
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
@@ -171,7 +172,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                     AlertAction(
                         getString(
                             R.string.trash_device_key,
-                            targetDevice.productModel.modelName()
+                            targetDevice.getNickname()
                         ), AlertActionStyle.NEGATIVE
                     ) {
                         mDeviceModel.dropDevice {

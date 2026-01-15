@@ -166,13 +166,13 @@ object CHAPIClientBiz {
         }
 
     fun postCredentialListToServer(credentialListRequest: AuthenticationDataWrapper, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.postCredentialListToServer(credentialListRequest) }
+        makeApiCall(onResponse) { cHApiClient.credentialOperation(credentialListRequest) }
 
-    fun updateAuthenticationName(authData: Any, onResponse: CHResult<String>) =
-        makeApiCall(onResponse) { cHApiClient.postCredential(authData) }
+    fun updateAuthenticationName(authData: Any, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) { cHApiClient.credentialOperation(authData) }
 
     fun deleteCredentialInfo(request: AuthenticationDataWrapper, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.deleteCredentialInfo(request) }
+        makeApiCall(onResponse) { cHApiClient.credentialOperation(request) }
 
     fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.subscribeToTopic(body) }

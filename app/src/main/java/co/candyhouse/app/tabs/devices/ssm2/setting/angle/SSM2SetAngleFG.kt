@@ -1,40 +1,39 @@
 package co.candyhouse.app.tabs.devices.ssm2.setting.angle
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSetAngleBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
-import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHSesame2
+import co.candyhouse.sesame.open.device.CHSesame5
 import co.utils.UserUtils
 
-
 class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
+
     override fun getViewBinder() = FgSetAngleBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        L.d("hcia", "SSM2SetAngleFG onViewCreated:")
         mDeviceModel.ssmLockLiveData.value.apply {
-            this?.apply {
-                bind.titlec.text = mDeviceModel.ssmLockLiveData.value!!.getNickname()
-            }
-
             (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.let {
-                bind.ssmView.setLock(it)
+                updateLockView(it)
                 mDeviceModel.ssmosLockDelegates[it] = object : CHDeviceStatusDelegate {
                     override fun onMechStatus(device: CHDevices) {
-                        bind.ssmView.setLock(it)
+                        updateLockView(it)
                     }
                 }.bindLifecycle(viewLifecycleOwner)
                 bind.magnetZone.visibility = View.GONE
             }
             (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.let {
-                bind.ssmView.setLock(it)
+                updateLockView(it)
                 mDeviceModel.ssmosLockDelegates[it] = object : CHDeviceStatusDelegate {
                     override fun onMechStatus(device: CHDevices) {
-                        bind.ssmView.setLock(it)
+                        updateLockView(it)
                     }
                 }.bindLifecycle(viewLifecycleOwner)
             }
@@ -43,9 +42,7 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                 (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.toggle() {}
                 (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {}
             }
-
             bind.setunlockZone.setOnClickListener {
-
                 if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     return@setOnClickListener
                 }
@@ -71,7 +68,6 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                 if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     return@setOnClickListener
                 }
-
                 (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.let { device ->
                     device.configureLockPosition(
                         device.mechStatus!!.position,
@@ -93,10 +89,16 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                 (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.magnet {}
             }
         }
+    }
 
-
-    }//end view created
-
+    @SuppressLint("SetTextI18n")
+    fun updateLockView(device: CHDevices) {
+        bind.angleTv.text = device.mechStatus?.position.toString() + "°"
+        when (device) {
+            is CHSesame2 -> bind.ssmView.setLock(device)
+            is CHSesame5 -> bind.ssmView.setLock(device)
+        }
+    }
 
 }
 

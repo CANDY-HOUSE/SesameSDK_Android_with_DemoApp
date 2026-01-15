@@ -15,7 +15,7 @@
     <string name="logout">登出</string>
     <string name="delete_account">删除账号</string>
     <!--    更新Ssm名稱用↓-->
-    <string name="change_sesame_angle">设定角度</string>
+    <string name="change_sesame_angle">设置角度</string>
     <string name="ssm_update">SesameOS更新＆重启</string>
     <string name="autolock">倒数自动上锁</string>
     <string name="ssm_delete">删除</string>
@@ -52,7 +52,7 @@
     <string name="BleTooManyConnections">"android连了太多蓝芽而不灵光了,请重开android蓝芽"</string>
 
     <string name="reset_the_sesame">重置芝麻设备并丢弃钥匙</string>
-    <string name="trash_key">删除芝麻钥匙</string>
+    <string name="trash_key">删除芝麻</string>
 
     <string name="on">开启</string>
     <string name="Off">关闭</string>
@@ -194,7 +194,7 @@
     <string name="TouchProPWDRename">修改此数字密码的名字🖊️</string>
 
     <string name="TouchProPWDDelete">删除此数字密码</string>
-    <string name="trash_device_key">删除此 %1$s</string>
+    <string name="trash_device_key">删除 %1$s</string>
     <string name="default_passcode_name">数字密码🖊️</string>
     <string name="default_fingerprint_name">指纹🖊️</string>
     <string name="TouchProPalmRename">重新命名掌静脉🖊️</string>

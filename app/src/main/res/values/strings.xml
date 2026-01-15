@@ -193,7 +193,7 @@
 
     <string name="TouchProPWDRename">Rename the passcode🖊️</string>
     <string name="TouchProPWDDelete">Delete the passcode</string>
-    <string name="trash_device_key">Delete the %1$s</string>
+    <string name="trash_device_key">Delete %1$s</string>
     <string name="default_passcode_name">Passcode🖊️</string>
     <string name="default_fingerprint_name">Fingerprint🖊️</string>
 

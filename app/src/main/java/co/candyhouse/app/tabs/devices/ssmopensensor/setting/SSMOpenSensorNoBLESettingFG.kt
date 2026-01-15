@@ -33,9 +33,9 @@ class SesameOpenSensorNoBLESettingFG :
         bind.openSensorLastUpdateTimeZone.visibility = View.GONE
         if (device != null) {
             bind.pleaseResetOpenSensor.text =
-                getString(R.string.pleaseResetOpenSensor, device.productModel.modelName())
+                getString(R.string.pleaseResetOpenSensor, device.getNickname())
             bind.trashDeviceKeyTxt.text =
-                getString(R.string.trash_device_key, device.productModel.modelName())
+                getString(R.string.trash_device_key, device.getNickname())
         }
     }
 }

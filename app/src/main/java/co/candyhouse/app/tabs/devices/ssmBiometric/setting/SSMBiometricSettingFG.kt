@@ -17,6 +17,7 @@ import co.candyhouse.app.databinding.FgSesameTouchproSettingBinding
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.app.tabs.devices.ssm2.setting.remotenanoSecondSettingValue
 import co.candyhouse.sesame.ble.os3.BiometricCapability
@@ -327,7 +328,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             bind.facePalm.visibility = View.GONE
         }
 
-        val name = device.productModel.modelName()
+        val name = device.getNickname()
         bind.addSsmHintByTouchTxt.text = getString(R.string.add_ssm_hint_by_touch, name)
         bind.trashDeviceKeyTxt.text = getString(R.string.trash_device_key, name)
         bind.addLockerZone.setOnClickListener {

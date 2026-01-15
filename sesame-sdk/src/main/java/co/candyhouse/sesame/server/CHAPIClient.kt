@@ -1,7 +1,6 @@
 package co.candyhouse.sesame.server
 
 import co.candyhouse.sesame.BuildConfig
-import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
@@ -72,14 +71,14 @@ internal interface CHAPIClient {
         body: CHSS2WebCMDReq
     ): Any
 
-    // 注册设备
+    // 注册设备（os2）
     @Operation(path = "/device/v1/sesame2/{device_id}", method = "POST")
     fun myDevicesRegisterSesame2Post(
         @Parameter(name = "device_id", location = "path") model: String?,
         body: CHSS2RegisterReq?
     ): CHSS2RegisterRes
 
-    // 注册设备
+    // 注册设备（os3）
     @Operation(path = "/device/v1/sesame5/{device_id}", method = "POST")
     fun myDevicesRegisterSesame5Post(
         @Parameter(name = "device_id", location = "path") model: String?,
@@ -102,17 +101,7 @@ internal interface CHAPIClient {
 
     // 生物识别数据操作 (通用)
     @Operation(path = "/device/v2/credential", method = "POST")
-    fun postCredentialListToServer(
-        credentialListRequest: AuthenticationDataWrapper
-    ): Any
-
-    // 生物识别数据操作 (通用)
-    @Operation(path = "/device/v2/credential", method = "POST")
-    fun deleteCredentialInfo(deleteRequest: AuthenticationDataWrapper): Any
-
-    // 生物识别数据操作 (通用)
-    @Operation(path = "/device/v2/credential", method = "POST")
-    fun postCredential(body: Any): String
+    fun credentialOperation(body: Any): Any
 
     // 订阅 SNS 主题
     @Operation(path = "/device/v1/subscribe", method = "POST")
