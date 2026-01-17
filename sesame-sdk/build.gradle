@@ -12,6 +12,7 @@ android {
 
     defaultConfig {
         minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
 
         consumerProguardFiles "consumer-rules.pro"
 
@@ -44,7 +45,6 @@ android {
     lint {
         abortOnError false
         checkReleaseBuilds false
-        targetSdk 35
     }
 
     compileOptions {
@@ -61,9 +61,6 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
-    }
-    testOptions {
-        targetSdk 35
     }
 }
 
