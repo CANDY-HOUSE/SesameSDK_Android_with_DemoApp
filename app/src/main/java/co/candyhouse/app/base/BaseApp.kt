@@ -1,11 +1,14 @@
 package co.candyhouse.app.base
 
 import android.app.Application
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.preference.PreferenceManager
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.ext.AppLifecycleObserver
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.webview.manager.WebViewSafeInitializer
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManagerPublic
@@ -54,6 +57,7 @@ open class BaseApp : Application() {
         AppIdentifyIdUtil.warmUp(this)
         setupCrashlytics()
         initializeAWS()
+        initializeWebViewProvider()
         setupSubscriptionManager()
     }
 
@@ -64,6 +68,12 @@ open class BaseApp : Application() {
     private fun initializeAWS() {
         AWSStatus.initAWSMobileClient(this)
         setCHAPIClient()
+    }
+
+    private fun initializeWebViewProvider() {
+        Handler(Looper.getMainLooper()).post {
+            WebViewSafeInitializer.preloadWebViewProvider(this)
+        }
     }
 
     fun initIoTConnection() {

@@ -30,6 +30,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.util.Locale
+import java.util.Locale.getDefault
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -247,7 +249,7 @@ internal object CHIotManager {
 
         try {
             val wm2ShodaowDataHttp = iotDataClient.getThingShadow(
-                GetThingShadowRequest().withThingName("wm2").withShadowName(wm2.deviceId.toString().toUpperCase().substring(24, 36))
+                GetThingShadowRequest().withThingName("wm2").withShadowName(wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36))
             )
             val wm2StateHttp = Gson().fromJson(String(wm2ShodaowDataHttp.payload.array()), WM2Shadow::class.java)
             onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))

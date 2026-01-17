@@ -4,6 +4,8 @@ import java.io.File
 import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
+import java.util.Locale
+import java.util.Locale.getDefault
 import java.util.regex.Pattern
 
 class Enums {
@@ -118,7 +120,7 @@ object Validators {
      */
     @Throws(IllegalArgumentException::class)
     fun validateKmsKeyUriAndRemovePrefix(expectedPrefix: String, kmsKeyUri: String): String {
-        require(kmsKeyUri.toLowerCase().startsWith(expectedPrefix)) { String.format("key URI must start with %s", expectedPrefix) }
+        require(kmsKeyUri.lowercase(getDefault()).startsWith(expectedPrefix)) { String.format("key URI must start with %s", expectedPrefix) }
         return kmsKeyUri.substring(expectedPrefix.length)
     }
 

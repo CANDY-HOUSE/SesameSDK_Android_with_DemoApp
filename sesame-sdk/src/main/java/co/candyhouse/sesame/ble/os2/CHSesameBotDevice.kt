@@ -63,6 +63,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import java.util.Locale
+import java.util.Locale.getDefault
 import java.util.UUID
 
 @SuppressLint("MissingPermission") internal class CHSesameBotDevice() : CHSesameOS2(), CHSesameBot, CHDeviceUtil {
@@ -311,7 +313,7 @@ import java.util.UUID
                     val appPublicKeyBytes = EccKey.getPubK().hexStringToByteArray()
                     val sessionToken = mAppToken + mSesameToken
                     val signPayload = userIdx + appPublicKeyBytes + sessionToken
-                    CHAPIClientBiz.signGuestKey(CHRemoveSignKeyRequest(deviceId.toString().toUpperCase(), signPayload.toHexString(), sesame2KeyData!!.secretKey)) {
+                    CHAPIClientBiz.signGuestKey(CHRemoveSignKeyRequest(deviceId.toString().uppercase(getDefault()), signPayload.toHexString(), sesame2KeyData!!.secretKey)) {
                         it.onSuccess {
                             login(it.data)
                         }

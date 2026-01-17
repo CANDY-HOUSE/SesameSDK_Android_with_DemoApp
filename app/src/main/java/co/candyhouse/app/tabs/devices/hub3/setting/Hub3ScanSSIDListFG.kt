@@ -116,15 +116,7 @@ class Hub3ScanSSIDListFG : BaseDeviceFG<FgWm2ScanListBinding>(), CHHub3Delegate 
                     hub3.setWifiPassword(pw) { }
                     dismiss()
                     if (isAdded && !isDetached) {
-                        try {
-                            parentFragmentManager.setFragmentResult(
-                                "hub3_wifi_ssid_back",
-                                Bundle().apply { putBoolean("clear", true) }
-                            )
-                            itemView.findNavController().navigateUp()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                        itemView.findNavController().navigateUp()
                     }
                 }
                 cancelButton(getString(R.string.cancel))

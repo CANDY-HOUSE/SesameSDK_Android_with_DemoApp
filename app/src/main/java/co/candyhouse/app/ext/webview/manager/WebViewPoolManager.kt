@@ -31,13 +31,20 @@ object WebViewPoolManager {
         onPageFinished: (() -> Unit)? = null,
         onError: ((String) -> Unit)? = null,
         onLoadingChanged: ((Boolean) -> Unit)? = null
-    ): WebView {
+    ): WebView? {
         val state = stateMap.getOrPut(webViewName) { WebViewState() }
 
-        val webView = webViewMap.getOrPut(webViewName) {
-            WebView(context.applicationContext).apply {
-                WebViewCore.applyCommonSettings(this, supportZoom = false)
+        var webView = webViewMap[webViewName]
+        if (webView == null) {
+            webView = WebViewSafeInitializer.createWebViewSafely(context)
+
+            if (webView == null) {
+                onError?.invoke("WebView initialization failed")
+                return null
             }
+
+            WebViewCore.applyCommonSettings(webView, supportZoom = false)
+            webViewMap[webViewName] = webView
         }
         webView.webViewClient = WebViewCore.createWebViewClient(
             onSchemeIntercept = onSchemeIntercept,

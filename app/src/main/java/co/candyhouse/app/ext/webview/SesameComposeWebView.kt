@@ -17,11 +17,13 @@ import android.view.ViewGroup
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,39 +32,37 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgEmbeddedComposeWebviewBinding
@@ -73,13 +73,14 @@ import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.manager.WebViewCore
 import co.candyhouse.app.ext.webview.manager.WebViewCore.cleanupWebView
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
+import co.candyhouse.app.ext.webview.manager.WebViewSafeInitializer.isWebViewAvailable
 import co.candyhouse.app.ext.webview.manager.WebViewUrlLoader.rememberWebUrl
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.AnalyticsUtil
 import co.utils.ContainerPaddingManager
-import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.safeNavigate
 import java.io.File
 
@@ -143,7 +144,10 @@ class SesameComposeWebView : Fragment() {
                 },
                 deviceModel = mDeviceModel,
                 onJSBridgeCreated = { bridge ->
-                    if (config.scene == "wifi-module") wifiModuleJsBridge = bridge
+                    if (config.scene == "wifi-module") {
+                        wifiModuleJsBridge?.cleanup()
+                        wifiModuleJsBridge = bridge
+                    }
                 }
             )
         }
@@ -152,16 +156,6 @@ class SesameComposeWebView : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ContainerPaddingManager.requestClearPadding(this)
-
-        parentFragmentManager.setFragmentResultListener(
-            "hub3_wifi_ssid_back",
-            this
-        ) { _, bundle ->
-            if (currentScene == "wifi-module" && bundle.getBoolean("clear", false)) {
-                wifiModuleJsBridge?.cleanup()
-                wifiModuleJsBridge = null
-            }
-        }
     }
 
     override fun onDestroyView() {
@@ -252,6 +246,11 @@ fun SesameComposeWebViewContent(
     var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
     var pendingCameraIntent by remember { mutableStateOf<Intent?>(null) }
 
+    var retryTrigger by remember { mutableIntStateOf(0) }
+    val isWebViewAvailable = remember(retryTrigger) { isWebViewAvailable() }
+    var webViewInflateError by remember { mutableStateOf(false) }
+    val showFallback = !isWebViewAvailable || webViewInflateError
+
     val fileChooserLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -339,56 +338,63 @@ fun SesameComposeWebViewContent(
         if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    if (!titleNew.isNullOrEmpty()) {
-                        Text(
-                            text = titleNew,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        val wv = webViewRef
-                        if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier.rotate(180f)
-                        )
-                    }
-                },
-                actions = {
-                    if (config.scene == "history") {
-                        IconButton(onClick = { onMoreClick(config.where) }) {
-                            Icon(painter = painterResource(id = R.drawable.ic_icons_filled_more), contentDescription = "More")
-                        }
-                    } else {
-                        Box(modifier = Modifier.width(48.dp))
-                    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        SafeAndroidViewBinding(
+            factory = FgSesameComposeWebviewBinding::inflate,
+            modifier = Modifier.fillMaxSize(),
+            onInflateError = { e ->
+                L.e(logTag, "WebView inflate failed", e)
+                webViewInflateError = true
+            }
+        ) { binding ->
+            binding.backSub.backIcon.setOnClickListener {
+                val wv = webViewRef
+                if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
+            }
+            if (!titleNew.isNullOrEmpty()) {
+                binding.centerTitle.visibility = View.VISIBLE
+                binding.centerTitle.text = titleNew
+            } else {
+                binding.centerTitle.visibility = View.GONE
+            }
+            if (config.scene == "history") {
+                binding.moreIcon.visibility = View.VISIBLE
+                binding.moreIcon.setOnClickListener {
+                    onMoreClick(config.where)
                 }
-            )
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            AndroidViewBinding(FgSesameComposeWebviewBinding::inflate, modifier = Modifier.fillMaxSize()) {
-                val wv = sesameComposeWebView
+            } else {
+                binding.moreIcon.visibility = View.GONE
+            }
 
-                swipeRefresh.isEnabled = false
-                swipeRefresh.setOnRefreshListener {
+            if (showFallback) {
+                binding.swipeRefresh.visibility = View.GONE
+                binding.errorComposeView.visibility = View.VISIBLE
+                binding.errorComposeView.setContent {
+                    WebViewErrorContent(
+                        message = "ページを読み込めませんでした",
+                        subMessage = "しばらくしてから再試行してください",
+                        onRetry = {
+                            webViewInflateError = false
+                            isWebViewInitialized = false
+                            webViewRef = null
+                            retryTrigger++
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            } else {
+                binding.swipeRefresh.visibility = View.VISIBLE
+                binding.errorComposeView.visibility = View.GONE
+                val wv = binding.sesameComposeWebView
+                binding.swipeRefresh.isEnabled = false
+                binding.swipeRefresh.setOnRefreshListener {
                     wv.reload()
-                    swipeRefresh.isRefreshing = false
+                    binding.swipeRefresh.isRefreshing = false
                 }
 
                 if (webViewRef !== wv) {
@@ -427,7 +433,7 @@ fun SesameComposeWebViewContent(
                                 onRequestRefreshApp = onRequestRefreshApp,
                                 onRequestWifiConfig = onRequestWifiConfig,
                                 onEnablePullRefresh = { enabled ->
-                                    swipeRefresh.isEnabled = (config.scene == "wifi-module") && enabled
+                                    binding.swipeRefresh.isEnabled = (config.scene == "wifi-module") && enabled
                                 }
                             )
                             onJSBridgeCreated?.invoke(jsBridge)
@@ -498,7 +504,6 @@ fun SesameComposeWebViewContent(
                                 loading = false
                             }
                         )
-
                         isWebViewInitialized = true
                     }
                 }
@@ -516,47 +521,42 @@ fun SesameComposeWebViewContent(
                     screenName?.let { AnalyticsUtil.logScreenView(screenName = it) }
                 }
             }
+        }
 
-            if (loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(top = 8.dp)
-                        .size(20.dp),
-                    strokeWidth = 2.dp
-                )
-            }
+        if (loading && !showFallback) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = 8.dp)
+                    .size(20.dp),
+                strokeWidth = 2.dp
+            )
+        }
 
-            error?.takeIf { !loading }?.let { errorMsg ->
-                when {
-                    errorMsg.contains("Please log in", ignoreCase = true) -> {
-                        LaunchedEffect(errorMsg) {
-                            Toast.makeText(context, "Please log in", Toast.LENGTH_SHORT).show()
-                        }
+        error?.takeIf { !loading }?.let { errorMsg ->
+            when {
+                errorMsg.contains("Please log in", ignoreCase = true) -> {
+                    LaunchedEffect(errorMsg) {
+                        Toast.makeText(context, "Please log in", Toast.LENGTH_SHORT).show()
                     }
+                }
 
-                    errorMsg.startsWith("URL_LOAD_ERROR:") -> {
-                        LaunchedEffect(errorMsg) {
-                            val actualMsg = errorMsg.removePrefix("URL_LOAD_ERROR:")
-                            Toast.makeText(context, actualMsg, Toast.LENGTH_SHORT).show()
-                        }
+                errorMsg.startsWith("URL_LOAD_ERROR:") -> {
+                    LaunchedEffect(errorMsg) {
+                        val actualMsg = errorMsg.removePrefix("URL_LOAD_ERROR:")
+                        Toast.makeText(context, actualMsg, Toast.LENGTH_SHORT).show()
                     }
+                }
 
-                    else -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = errorMsg)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = {
-                                error = null
-                                webViewRef?.reload()
-                            }) {
-                                Text("Retry")
-                            }
-                        }
-                    }
+                else -> {
+                    WebViewErrorContent(
+                        message = errorMsg,
+                        onRetry = {
+                            error = null
+                            webViewRef?.reload()
+                        },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }
@@ -594,6 +594,10 @@ fun EmbeddedWebViewContent(
 
     var jsBridge by remember { mutableStateOf<WebViewJSBridge?>(null) }
 
+    val isWebViewAvailable = remember { isWebViewAvailable() }
+    var webViewInflateError by remember { mutableStateOf(false) }
+    val showFallback = !isWebViewAvailable || webViewInflateError
+
     DisposableEffect(Unit) {
         onDispose {
             if (enableJSBridge) {
@@ -618,61 +622,77 @@ fun EmbeddedWebViewContent(
             .height(dynamicHeight)
             .background(androidx.compose.ui.graphics.Color.White)
     ) {
-        AndroidViewBinding(
-            FgEmbeddedComposeWebviewBinding::inflate,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val wv = embeddedComposeWebView
+        if (showFallback) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "読み込めませんでした",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            SafeAndroidViewBinding(
+                factory = FgEmbeddedComposeWebviewBinding::inflate,
+                modifier = Modifier.fillMaxSize(),
+                onInflateError = { e ->
+                    L.e(logTag, "Embedded WebView inflate failed", e)
+                    webViewInflateError = true
+                }
+            ) { binding ->
+                val wv = binding.embeddedComposeWebView
 
-            if (webViewRef !== wv) {
-                webViewRef = wv
+                if (webViewRef !== wv) {
+                    webViewRef = wv
 
-                if (!isWebViewInitialized) {
-                    WebViewCore.applyCommonSettings(wv, supportZoom = false)
+                    if (!isWebViewInitialized) {
+                        WebViewCore.applyCommonSettings(wv, supportZoom = false)
 
-                    if (enableJSBridge) {
-                        jsBridge = JSBridgeFactory.setupJSBridge(
-                            webView = wv,
-                            scene = config.scene,
-                            scope = scope,
-                            context = context,
-                            onHeightChanged = { newHeight ->
-                                dynamicHeight = newHeight.dp
-                                L.d(logTag, "WebView height updated to: ${newHeight}dp")
+                        if (enableJSBridge) {
+                            jsBridge = JSBridgeFactory.setupJSBridge(
+                                webView = wv,
+                                scene = config.scene,
+                                scope = scope,
+                                context = context,
+                                onHeightChanged = { newHeight ->
+                                    dynamicHeight = newHeight.dp
+                                    L.d(logTag, "WebView height updated to: ${newHeight}dp")
+                                }
+                            )
+                        }
+
+                        wv.webViewClient = WebViewCore.createWebViewClient(
+                            onSchemeIntercept = { uri, params ->
+                                schemeHandlers["ssm"]?.invoke(wv, uri, params)
+                            },
+                            onPageStarted = {
+                                loading = true
+                                error = null
+                            },
+                            onPageFinished = {
+                                loading = false
+                            },
+                            onError = { errorMsg ->
+                                error = errorMsg
+                                loading = false
                             }
                         )
+                        isWebViewInitialized = true
                     }
-
-                    wv.webViewClient = WebViewCore.createWebViewClient(
-                        onSchemeIntercept = { uri, params ->
-                            schemeHandlers["ssm"]?.invoke(wv, uri, params)
-                        },
-                        onPageStarted = {
-                            loading = true
-                            error = null
-                        },
-                        onPageFinished = {
-                            loading = false
-                        },
-                        onError = { errorMsg ->
-                            error = errorMsg
-                            loading = false
-                        }
-                    )
-
-                    isWebViewInitialized = true
                 }
-            }
 
-            val target = webUrl
-            if (target.isNotEmpty() && wv.url != target) {
-                loading = true
-                wv.loadUrl(target)
-                L.d(logTag, "Loading embedded webview: $target")
+                val target = webUrl
+                if (target.isNotEmpty() && wv.url != target) {
+                    loading = true
+                    wv.loadUrl(target)
+                    L.d(logTag, "Loading embedded webview: $target")
+                }
             }
         }
 
-        if (loading) {
+        if (loading && !showFallback) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -718,4 +738,89 @@ internal fun createSchemeHandlers(
             true
         }
     }
+}
+
+@Composable
+fun WebViewErrorContent(
+    message: String,
+    subMessage: String? = null,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = message,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        if (!subMessage.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = subMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = onRetry) {
+            Text("再試行")
+        }
+    }
+}
+
+@Composable
+fun <T : ViewBinding> SafeAndroidViewBinding(
+    factory: (LayoutInflater, ViewGroup, Boolean) -> T,
+    modifier: Modifier = Modifier,
+    onInflateError: (Exception) -> Unit = {},
+    update: (T) -> Unit = {}
+) {
+    var binding by remember { mutableStateOf<T?>(null) }
+    var hasError by remember { mutableStateOf(false) }
+
+    if (hasError) {
+        Box(modifier = modifier)
+        return
+    }
+
+    AndroidView(
+        factory = { context ->
+            try {
+                val parent = FrameLayout(context)
+                val inflater = LayoutInflater.from(context)
+                val viewBinding = factory(inflater, parent, true)
+                binding = viewBinding
+                parent
+            } catch (e: Exception) {
+                hasError = true
+                onInflateError(e)
+                FrameLayout(context)
+            }
+        },
+        modifier = modifier,
+        update = {
+            binding?.let { b ->
+                try {
+                    update(b)
+                } catch (e: Exception) {
+                    L.e("SafeAndroidViewBinding", "Update error", e)
+                }
+            }
+        }
+    )
 }

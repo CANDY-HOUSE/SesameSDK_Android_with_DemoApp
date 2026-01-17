@@ -83,6 +83,11 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
             }
         )
 
+        if (webView == null) {
+            getLoadingView().visibility = View.GONE
+            return
+        }
+
         val container = getWebViewContainer()
         container.removeAllViews()
         container.addView(webView)

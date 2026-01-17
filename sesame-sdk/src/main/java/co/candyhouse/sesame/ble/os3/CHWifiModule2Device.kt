@@ -21,6 +21,8 @@ import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import java.util.*
+import java.util.Locale
+import java.util.Locale.getDefault
 import kotlin.experimental.and
 
 @SuppressLint("MissingPermission") internal class CHWifiModule2Device : CHSesameOS3(), CHWifiModule2, CHDeviceUtil {
@@ -378,7 +380,7 @@ import kotlin.experimental.and
 
     override fun removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>) {
         L.d("hcia", "removeSesame:" + sesameKeyTag)
-        sendCommand(SesameOS3Payload(WM2ActionCode.DELETE_SESAME.value, sesameKeyTag.toUpperCase().toByteArray())) { res ->
+        sendCommand(SesameOS3Payload(WM2ActionCode.DELETE_SESAME.value, sesameKeyTag.uppercase(getDefault()).toByteArray())) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             }

@@ -6,7 +6,6 @@ import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.localizedDescription
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
@@ -16,12 +15,17 @@ import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
+import kotlin.coroutines.resume
 
 /**
  * Hub3桥接
@@ -38,13 +42,13 @@ class Hub3JSBridge(
 
     private val tag = "Hub3JSBridge"
 
-    // 存储回调和设备信息
     private var statusCallbacks = mutableMapOf<String, String>()
     private var currentDeviceUUID: String? = null
-    private var currentDevice: CHHub3? = null
     private var registeredDeviceForDelegateMap: CHHub3? = null
     private var pendingApSetting: CHWifiModule2MechSettings? = null
     private var pendingMechStatus: CHWifiModule2NetWorkStatus? = null
+    private var connectJob: Job? = null
+    private var isConnecting = false
 
     /**
      * 处理蓝牙连接请求
@@ -57,57 +61,45 @@ class Hub3JSBridge(
         currentDeviceUUID = deviceUUID
 
         scope.launch {
-            CHDeviceManager.getCandyDeviceByUUID(deviceUUID) { result ->
-                result.onSuccess { chResultState ->
-                    when (chResultState) {
-                        is CHResultState.CHResultStateBLE -> {
-                            val device = chResultState.data as? CHHub3 ?: return@onSuccess
-                            currentDevice = device
+            val device = getCurrentDevice(deviceUUID)
+            if (device == null) {
+                L.e(tag, "Device not found")
+                sendBLEStatusToH5(callbackName, "Device not found")
+                return@launch
+            }
 
-                            deviceModel?.ssmosLockDelegates?.set(device, this@Hub3JSBridge)
-                            registeredDeviceForDelegateMap = device
+            deviceModel?.ssmosLockDelegates?.set(device, this@Hub3JSBridge)
+            registeredDeviceForDelegateMap = device
 
-                            if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
-                                sendBLEStatusToH5(callbackName, device.deviceStatus.value.toString())
-                                return@onSuccess
-                            }
+            if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
+                L.i(tag, "蓝牙已连接……${device.deviceStatus.value}")
+                sendBLEStatusToH5(callbackName, device.deviceStatus.value.toString())
+                return@launch
+            }
 
-                            var lastNSError: NSError? = null
-                            val okToProceed = device.isBleAvailable<CHDevices> { r ->
-                                r.onFailure { e ->
-                                    lastNSError = e as? NSError
-                                }
-                            }
-
-                            if (!okToProceed) {
-                                val code = lastNSError?.code
-                                val isUnlogin = (code == -1)
-                                if (!isUnlogin) {
-                                    sendBLEStatusToH5(callbackName, context.getString(R.string.noble))
-                                    return@onSuccess
-                                }
-                            }
-
-                            device.connect {
-                                it.onSuccess {
-                                    L.d(tag, "connect Success")
-                                }
-                                it.onFailure { error ->
-                                    L.e(tag, "connect Failure = ${error.message.toString()}")
-                                    sendBLEStatusToH5(callbackName, context.getString(R.string.NoBleSignal))
-                                }
-                            }
-                        }
-
-                        else -> {
-                            L.e(tag, "Device not found or wrong type")
-                        }
-                    }
+            var lastNSError: NSError? = null
+            val okToProceed = device.isBleAvailable<CHDevices> { r ->
+                r.onFailure { e ->
+                    lastNSError = e as? NSError
                 }
+            }
 
-                result.onFailure { error ->
-                    L.e(tag, "Failed to get device: ${error.message}")
-                    sendBLEStatusToH5(callbackName, "Device not found")
+            if (!okToProceed) {
+                val code = lastNSError?.code
+                val isUnlogin = (code == -1)
+                if (!isUnlogin) {
+                    sendBLEStatusToH5(callbackName, context.getString(R.string.noble))
+                    return@launch
+                }
+            }
+
+            device.connect {
+                it.onSuccess {
+                    L.d(tag, "connect Success")
+                }
+                it.onFailure { error ->
+                    L.e(tag, "connect Failure = ${error.message.toString()}")
+                    sendBLEStatusToH5(callbackName, context.getString(R.string.NoBleSignal))
                 }
             }
         }
@@ -140,22 +132,32 @@ class Hub3JSBridge(
     fun handleRequestDeviceFWUpgrade(json: JSONObject) {
         val callbackName = json.optString("callbackName")
         statusCallbacks[WebViewJSBridge.requestDeviceFWUpgrade] = callbackName
-        val device = currentDevice ?: return
-        device.updateFirmwareBleOnly {}
+        scope.launch {
+            currentDeviceUUID?.let { uuid ->
+                val device = getCurrentDevice(uuid) ?: return@launch
+                device.updateFirmwareBleOnly {}
+            }
+        }
     }
 
     /**
      * 清理连接
      */
     fun cleanup() {
+        connectJob?.cancel()
+        connectJob = null
+        isConnecting = false
         registeredDeviceForDelegateMap?.let { dev ->
             deviceModel?.ssmosLockDelegates?.remove(dev)
         }
         registeredDeviceForDelegateMap = null
-        currentDevice?.disconnect { }
-        currentDevice = null
+        currentDeviceUUID?.let { uuid ->
+            disconnectDevice(uuid)
+        }
         statusCallbacks.clear()
         currentDeviceUUID = null
+        pendingMechStatus = null
+        pendingApSetting = null
     }
 
     override fun onBleDeviceStatusChanged(
@@ -164,9 +166,23 @@ class Hub3JSBridge(
         shadowStatus: CHDeviceStatus?
     ) {
         if (status == CHDeviceStatus.ReceivedAdV) {
-            scope.launch {
+            if (isConnecting) {
+                L.d(tag, "Already connecting, skip")
+                return
+            }
+            connectJob?.cancel()
+            connectJob = scope.launch {
                 delay(1000)
-                device.connect { }
+                isConnecting = true
+                device.connect { result ->
+                    isConnecting = false
+                    result.onSuccess {
+                        L.d(tag, "ReceivedAdV connect Success")
+                    }
+                    result.onFailure { error ->
+                        L.e(tag, "ReceivedAdV connect Failure = ${error.message}")
+                    }
+                }
             }
         }
         val callbackName = statusCallbacks[WebViewJSBridge.requestBLEConnect]
@@ -277,6 +293,34 @@ class Hub3JSBridge(
                 }
             """.trimIndent()
             webView?.evaluateJavascript(jsCode, null)
+        }
+    }
+
+    private suspend fun getCurrentDevice(uuid: String): CHHub3? {
+        return suspendCancellableCoroutine { continuation ->
+            CHDeviceManager.getCandyDeviceByUUID(uuid) { result ->
+                result.onSuccess { state ->
+                    val device = (state as? CHResultState.CHResultStateBLE)?.data as? CHHub3
+                    continuation.resume(device)
+                }
+                result.onFailure {
+                    continuation.resume(null)
+                }
+            }
+        }
+    }
+
+    private fun disconnectDevice(uuid: String) {
+        L.d(tag, "disconnectDevice:$uuid")
+        scope.launch(NonCancellable) {
+            getCurrentDevice(uuid)?.disconnect { result ->
+                result.onSuccess {
+                    L.d(tag, "disconnect Success")
+                }
+                result.onFailure { error ->
+                    L.e(tag, "disconnect Failure = ${error.message}")
+                }
+            }
         }
     }
 }

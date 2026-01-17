@@ -32,8 +32,8 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         } else {
             FirebaseCrashlytics.getInstance().apply {
                 setCustomKey("expected_type", "CHSesameBot2")
-                setCustomKey("actual_type", device.javaClass.simpleName)
-                setCustomKey("device_uuid", device?.deviceId.toString())
+                setCustomKey("actual_type", device!!.javaClass.simpleName)
+                setCustomKey("device_uuid", device.deviceId.toString())
                 log("Wrong device type in SesameBot2SettingFG: ${device.javaClass.simpleName}")
             }
             toastMSG("デバイスタイプが一致しません。リストを更新してください。")

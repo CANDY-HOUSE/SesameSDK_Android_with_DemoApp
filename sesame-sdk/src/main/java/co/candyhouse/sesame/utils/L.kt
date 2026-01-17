@@ -36,6 +36,20 @@ class L {
         }
 
         @JvmStatic
+        fun w(tag: String = "hcia", msg: String) {
+            if (BuildConfig.DEBUG) {
+                val stackTrace = Thread.currentThread().stackTrace// StackTraceElement[]
+                val index = 3
+                val className = stackTrace[index].fileName
+                val lineNumber = stackTrace[index].lineNumber
+                val stringBuilder = StringBuilder()
+                stringBuilder.append(isUIthread()).append("(").append(className).append(":")
+                    .append(lineNumber).append(") ")
+                Log.w(tag, "$msg  | $stringBuilder")
+            }
+        }
+
+        @JvmStatic
         fun e(tag: String = "hcia", msg: String) {
             if (BuildConfig.DEBUG) {
                 val stackTrace = Thread.currentThread().stackTrace// StackTraceElement[]
