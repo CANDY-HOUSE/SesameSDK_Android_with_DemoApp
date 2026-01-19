@@ -142,7 +142,7 @@ object CHAPIClientBiz {
 
     fun updateDeviceFirmwareVersion(deviceUUID: String, versionTag: String, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) {
-            cHApiClient.updateDeviceFirmwareVersion(deviceUUID, mapOf("versionTag" to versionTag))
+            cHApiClient.postFirmwareVersion(deviceUUID, mapOf("versionTag" to versionTag))
         }
 
     fun postSS2History(deviceID: String, hisHex: String, onResponse: CHResult<Any>) =
@@ -166,13 +166,13 @@ object CHAPIClientBiz {
         }
 
     fun postCredentialListToServer(credentialListRequest: AuthenticationDataWrapper, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.credentialOperation(credentialListRequest) }
+        makeApiCall(onResponse) { cHApiClient.biometricsOperation(credentialListRequest) }
 
     fun updateAuthenticationName(authData: Any, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.credentialOperation(authData) }
+        makeApiCall(onResponse) { cHApiClient.biometricsOperation(authData) }
 
     fun deleteCredentialInfo(request: AuthenticationDataWrapper, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.credentialOperation(request) }
+        makeApiCall(onResponse) { cHApiClient.biometricsOperation(request) }
 
     fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.subscribeToTopic(body) }

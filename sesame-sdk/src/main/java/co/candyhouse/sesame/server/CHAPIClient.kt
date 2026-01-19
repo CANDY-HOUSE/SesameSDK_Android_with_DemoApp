@@ -94,21 +94,21 @@ internal interface CHAPIClient {
     fun guestKeysSignPost(body: CHRemoveSignKeyRequest): String
 
     // 获取Hub3状态
-    @Operation(path = "/device/v2/hub3/{device_id}/status", method = "GET")
+    @Operation(path = "/device/v1/wifi_module/{device_id}/status", method = "GET")
     fun getHub3StatusFromIot(
         @Parameter(name = "device_id", location = "path") deviceId: String,
     ): Any
 
     // 生物识别数据操作 (通用)
-    @Operation(path = "/device/v2/credential", method = "POST")
-    fun credentialOperation(body: Any): Any
+    @Operation(path = "/device/v1/biometrics", method = "POST")
+    fun biometricsOperation(body: Any): Any
 
     // 订阅 SNS 主题
     @Operation(path = "/device/v1/subscribe", method = "POST")
     fun subscribeToTopic(body: SubscriptionRequest): Any
 
     // 上传电池数据
-    @Operation(path = "/device/v2/sesame5/{device_id}/battery", method = "POST")
+    @Operation(path = "/device/v1/sesame5/{device_id}/battery", method = "POST")
     fun postBatteryData(
         @Parameter(name = "device_id", location = "path") deviceID: String,
         body: CHBatteryDataReq
@@ -119,8 +119,8 @@ internal interface CHAPIClient {
     fun fcmTokenSignDelete(body: CHFcmTokenUpload): Any
 
     // 上传固件版本号
-    @Operation(path = "/device/v2/sesame5/{device_id}/fwVer", method = "POST")
-    fun updateDeviceFirmwareVersion(
+    @Operation(path = "/device/v1/sesame5/{device_id}/fwVer", method = "POST")
+    fun postFirmwareVersion(
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: Map<String, Any>
     ): Any
