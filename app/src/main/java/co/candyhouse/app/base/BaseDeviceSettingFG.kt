@@ -21,8 +21,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
-import co.candyhouse.app.ext.webview.EmbeddedWebViewContent
 import co.candyhouse.app.ext.webview.data.WebViewConfig
+import co.candyhouse.app.ext.webview.util.EmbeddedWebViewContent
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.clearNFC
 import co.candyhouse.app.tabs.devices.ssm2.getFirmwareName
