@@ -1,15 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics.gradle)
-    alias(libs.plugins.ksp)
 }
 
 android {
     namespace 'co.candyhouse.app'
-
     compileSdk = rootProject.ext.compileSdkVersion
 
     signingConfigs {
@@ -64,20 +61,16 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
-            // 添加调试符号，debug is true
             debuggable true
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
                 nativeSymbolUploadEnabled = false
-                unstrippedNativeLibsDir = null
-                strippedNativeLibsDir = null
             }
         }
 
         release {
             minifyEnabled true
             shrinkResources true
-            // 添加调试符号，release is false
             debuggable false
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
@@ -101,22 +94,9 @@ android {
 
     }
 
-    // CI环境中重写versionCode
-    applicationVariants.configureEach { variant ->
-        if (variant.buildType.name == 'ci') {
-            variant.outputs.configureEach { output ->
-                // 检查是否在 CI 环境中
-                if (System.getenv("CI") == "true") {
-                    output.versionCodeOverride = Integer.parseInt(System.getenv("VERSION_CODE"))
-                    println "Set CI version: ${output.versionCodeOverride}"
-                }
-            }
-        }
-    }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -124,13 +104,19 @@ android {
         buildConfig true
         compose true
     }
+}
 
-    composeOptions {
-        kotlinCompilerExtensionVersion '1.5.10'
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
+androidComponents {
+    onVariants(selector().withBuildType("ci")) { variant ->
+        if (System.getenv("CI") == "true") {
+            def versionCode = System.getenv("VERSION_CODE")
+            if (versionCode != null) {
+                variant.outputs.forEach { output ->
+                    output.versionCode.set(Integer.parseInt(versionCode))
+                    println "Set CI version: ${versionCode}"
+                }
+            }
+        }
     }
 }
 
@@ -155,7 +141,6 @@ dependencies {
     implementation libs.material
     implementation libs.dfu
     implementation libs.wheelpicker
-    implementation libs.autoresizeedittext
     implementation libs.indicatorseekbar
     implementation libs.loopview
     implementation libs.glide
@@ -168,6 +153,4 @@ dependencies {
     implementation libs.firebase.analytics.ktx
     implementation libs.firebase.messaging.ktx
     implementation libs.firebase.crashlytics.ktx
-
-    ksp libs.androidx.room.compiler
 }

@@ -1,13 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
     namespace 'co.candyhouse.sesame'
-
     compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
@@ -44,26 +41,16 @@ android {
     lint {
         abortOnError false
         checkReleaseBuilds false
-        targetSdk 35
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-        freeCompilerArgs += ["-Xjvm-default=all"]
-
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildFeatures {
         viewBinding true
         buildConfig true
-    }
-    testOptions {
-        targetSdk 35
     }
 }
 
@@ -91,4 +78,6 @@ dependencies {
     api libs.androidx.navigation.compose
 
     api libs.rxjava
+
+    ksp libs.androidx.room.compiler
 }

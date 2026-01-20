@@ -1,9 +1,7 @@
 package co.candyhouse.sesame.server.dto
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
-@Parcelize
 data class IrRemote(
     var model: String?, // 品牌名称
     var alias: String,  //别名
@@ -15,7 +13,7 @@ data class IrRemote(
     val keys: Array<String>? = emptyArray(), // 键值列表
     val direction: String?,  // 索引
     var haveSave:Boolean = true // 是否已保存,默认为true
-) : Parcelable {
+) : Serializable {
     override fun toString(): String {
         return "IrRemote(model=$model, alias='$alias', uuid='$uuid', state=$state, timestamp=$timestamp, type=$type, code=$code, keys=${keys?.contentToString()?:""}, direction='$direction', haveSave=$haveSave)"
     }
