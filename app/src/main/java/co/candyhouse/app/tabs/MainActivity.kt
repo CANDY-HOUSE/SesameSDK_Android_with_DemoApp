@@ -38,6 +38,7 @@ import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.widget.SesameForegroundService
 import co.utils.AnalyticsUtil
 import co.utils.UserUtils
+import co.utils.getParcelableExtraCompat
 import co.utils.toHexString
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
@@ -140,7 +141,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             // nfc狀態有三種 1. 沒格式化過 2.格式化過 有資料 3 格式化沒資料
             if (intent?.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
                 // 3 格式化沒資料 ?? 不確定了。有點忘了 還是ＡＰＰ在前景時近入？？tse
-                val tag: Tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)!!
+                val tag = intent.getParcelableExtraCompat<Tag>(NfcAdapter.EXTRA_TAG)!!
                 val nfcHexID = tag.id.toHexString()
                 supportFragmentManager.fragments.firstOrNull()?.childFragmentManager?.fragments?.forEach {
                     if (it is NfcSetting) {//查找當前頁面fragment 如果是設定頁面。調用設定ＮＦＣ方法 onNfcId（）
@@ -151,7 +152,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
 
             if (intent?.action == NfcAdapter.ACTION_NDEF_DISCOVERED) {
                 // 2.格式化過 有資料??  還是ＡＰＰ在背景時近入？？tse
-                val tag: Tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)!!
+                val tag = intent.getParcelableExtraCompat<Tag>(NfcAdapter.EXTRA_TAG)!!
                 val nfcHexID = tag.id.toHexString()
 
                 CHDeviceManager.getCandyDevices {//查出設備

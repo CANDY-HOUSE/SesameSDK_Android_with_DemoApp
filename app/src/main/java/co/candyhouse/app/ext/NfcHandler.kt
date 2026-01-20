@@ -9,6 +9,7 @@ import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.nfc.tech.NfcA
 import co.candyhouse.sesame.utils.L
+import co.utils.getParcelableExtraCompat
 
 object NfcHandler {
     fun nfcCheckInetent(intent: Intent?) {
@@ -16,7 +17,7 @@ object NfcHandler {
 
         if (intent?.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
             //   寫入 candynfc 這個無用字段到nfc 貼紙裡面。背景感應會沒有作用
-            val tag: Tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG) ?: return
+            val tag = intent.getParcelableExtraCompat<Tag>(NfcAdapter.EXTRA_TAG) ?: return
             val ndef = Ndef.get(tag)
             if (ndef != null) {
                 ndef.connect()
