@@ -11,6 +11,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.ValueCallback
@@ -81,7 +82,7 @@ import java.io.File
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("SetJavaScriptEnabled")
+@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility", "LocalContextResourcesRead")
 @Composable
 fun SesameComposeWebViewContent(
     config: WebViewConfig,
@@ -210,6 +211,19 @@ fun SesameComposeWebViewContent(
         pendingCameraIntent = null
     }
 
+    val handleBack: () -> Unit = {
+        val wv = webViewRef
+        if (config.scene == "wifi-module") {
+            if (wv?.url == webUrl || wv?.canGoBack() != true) {
+                onBackClick()
+            } else {
+                wv.goBack()
+            }
+        } else {
+            if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
+        }
+    }
+
     LaunchedEffect(Unit) {
         L.d(
             logTag,
@@ -235,10 +249,7 @@ fun SesameComposeWebViewContent(
         }
     }
 
-    BackHandler {
-        val wv = webViewRef
-        if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
-    }
+    BackHandler { handleBack() }
 
     Box(
         modifier = Modifier
@@ -254,10 +265,7 @@ fun SesameComposeWebViewContent(
                 webViewInflateError = true
             }
         ) { binding ->
-            binding.backSub.backIcon.setOnClickListener {
-                val wv = webViewRef
-                if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
-            }
+            binding.backSub.backIcon.setOnClickListener { handleBack() }
             if (!titleNew.isNullOrEmpty()) {
                 binding.centerTitle.visibility = View.VISIBLE
                 binding.centerTitle.text = titleNew
@@ -292,8 +300,31 @@ fun SesameComposeWebViewContent(
                 binding.errorComposeView.visibility = View.GONE
                 val wv = binding.sesameComposeWebView
                 binding.swipeRefresh.isEnabled = false
+                var isInnerScrolled = false
+                wv.setOnTouchListener { _, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        val density = context.resources.displayMetrics.density
+                        val x = event.x / density
+                        val y = event.y / density
+                        val js =
+                            "(function(){var el=document.elementFromPoint($x,$y);while(el&&el!==document.body){if(el.scrollTop>0)return true;el=el.parentElement}return false})()"
+                        wv.evaluateJavascript(js) { result ->
+                            isInnerScrolled = result == "true"
+                        }
+                    } else if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
+                        isInnerScrolled = false
+                    }
+                    false
+                }
+                binding.swipeRefresh.setOnChildScrollUpCallback { _, _ ->
+                    isInnerScrolled
+                }
                 binding.swipeRefresh.setOnRefreshListener {
-                    wv.reload()
+                    if (config.scene == "wifi-module") {
+                        wv.loadUrl(webUrl)
+                    } else {
+                        wv.reload()
+                    }
                     binding.swipeRefresh.isRefreshing = false
                 }
 
