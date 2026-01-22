@@ -59,9 +59,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
             }
 
             override fun onMechStatus(device: CHDevices) {
-                view?.findViewById<TextView>(R.id.battery)?.post {
-                    view?.findViewById<TextView>(R.id.battery)?.text = "${device.mechStatus?.getBatteryPrecentage() ?: 0} %"
-                }
+                updateBattery()
             }
         }.bindLifecycle(viewLifecycleOwner)
     }
@@ -83,9 +81,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
             }
 
             override fun onMechStatus(device: CHDevices) {
-                view.findViewById<TextView>(R.id.battery)?.post {
-                    view.findViewById<TextView>(R.id.battery)?.text = "${device.mechStatus?.getBatteryPrecentage() ?: 0} %"
-                }
+                updateBattery()
             }
         }.bindLifecycle(viewLifecycleOwner)
         bind.llview.setOnClickListener {
@@ -113,7 +109,12 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         }
         loadWheel(bot2!!)
 
+        updateBattery()
     }//end view created
+
+    private fun updateBattery(){
+        showBatteryLevel(bind.battery, bot2)
+    }
 
     private fun textToIntValue(tv: TextView): Int {
         return try {

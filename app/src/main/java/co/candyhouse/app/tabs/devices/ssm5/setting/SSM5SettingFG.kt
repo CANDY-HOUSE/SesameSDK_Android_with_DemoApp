@@ -100,6 +100,7 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             bind.chengeAngleZone.setOnClickListener {
                 safeNavigate(R.id.action_SSM2SettingFG_to_SSM2SetAngleFG)
             }
+            showBatteryLevel(bind.battery, ss5)
         }
         bind.autolockStatus.setOnClickListener {
             L.d("ischecaksa","isChecked:"+bind.autolockSwitch.isChecked)

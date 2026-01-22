@@ -21,6 +21,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.util.EmbeddedWebViewContent
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
@@ -93,9 +94,8 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
                 @SuppressLint("SetTextI18n")
                 override fun onMechStatus(device: CHDevices) {
-                    view?.findViewById<TextView>(R.id.battery)?.post {
-                        view?.findViewById<TextView>(R.id.battery)?.text =
-                            "${device.mechStatus?.getBatteryPrecentage() ?: 0} %"
+                    view?.findViewById<TextView>(R.id.battery)?.let {
+                        showBatteryLevel(it, device)
                     }
                 }
             }.bindLifecycle(viewLifecycleOwner)
@@ -109,6 +109,13 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         model?.apply {
             view?.findViewById<TextView>(R.id.drop_hint_txt)?.text =
                 resources.getString(R.string.drop_hint_press, model.productModel.modelName())
+        }
+    }
+
+    fun showBatteryLevel(view: TextView, device: CHDevices?) {
+        val batteryLevel = device?.mechStatus?.getBatteryPrecentage() ?: device?.userKey?.stateInfo?.batteryPercentage
+        view.post {
+            view.text = batteryLevel?.let { "$it%" } ?: ""
         }
     }
 
@@ -279,6 +286,15 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
                 show(activity as AppCompatActivity)
             }
+        }
+
+        view?.findViewById<View>(R.id.battery_zone)?.setOnClickListener{
+            val config = WebViewConfig(
+                scene = "battery-trend",
+                deviceId = targetDevice.deviceId.toString().uppercase(),
+                params = mapOf("deviceName" to targetDevice.productModel.deviceModelName())
+            )
+            safeNavigate(R.id.action_DeviceMember_to_webViewFragment, config.toBundle())
         }
     }
 

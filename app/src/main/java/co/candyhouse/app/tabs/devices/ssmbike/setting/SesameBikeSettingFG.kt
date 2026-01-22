@@ -2,10 +2,8 @@ package co.candyhouse.app.tabs.devices.ssmbike.setting
 
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
-import co.candyhouse.app.databinding.FgSettingMainBinding
 import co.candyhouse.app.databinding.FgSsmBikeSettingBinding
 import co.candyhouse.sesame.utils.L
 
@@ -17,7 +15,7 @@ class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
 
         usePressText()
 
-
+        showBatteryLevel(bind.battery, mDeviceModel.ssmLockLiveData.value)
     }//end view created
     override fun getViewBinder()= FgSsmBikeSettingBinding.inflate(layoutInflater)
 

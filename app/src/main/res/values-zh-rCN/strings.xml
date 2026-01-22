@@ -104,6 +104,8 @@
     <string name="SSMFace2">Sesame Face 2</string>
     <string name="SSMFace2Pro">Sesame Face 2 Pro</string>
     <string name="SSM_MIWA">Sesame miwa</string>
+    <string name="SSMFace2AI">Sesame Face 2 AI</string>
+    <string name="SSMFace2ProAI">Sesame Face 2 Pro AI</string>
 
     <string name="unLoginHistoryTag">未登入用户</string>
 

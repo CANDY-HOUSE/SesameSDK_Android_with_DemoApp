@@ -100,6 +100,8 @@
     <string name="SSMFace2">セサミフェイス 2</string>
     <string name="SSMFace2Pro">セサミフェイス 2 Pro</string>
     <string name="SSM_MIWA">Sesame miwa</string>
+    <string name="SSMFace2AI">セサミフェイス 2 AI</string>
+    <string name="SSMFace2ProAI">セサミフェイス 2 Pro AI</string>
 
     <string name="unLoginHistoryTag">未登録利用者</string>
     <string name="wm2_update">OS更新と再起動</string>
