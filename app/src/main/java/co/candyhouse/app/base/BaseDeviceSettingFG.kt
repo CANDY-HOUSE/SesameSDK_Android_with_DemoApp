@@ -54,6 +54,7 @@ import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.dfu.DfuServiceInitiator
+import kotlin.collections.mapOf
 
 abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSetting,
     BleStatusUpdate, DeviceStatusChange {
@@ -291,8 +292,10 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         view?.findViewById<View>(R.id.battery_zone)?.setOnClickListener{
             val config = WebViewConfig(
                 scene = "battery-trend",
-                deviceId = targetDevice.deviceId.toString().uppercase(),
-                params = mapOf("deviceName" to targetDevice.productModel.deviceModelName())
+                params = mapOf(
+                    "deviceUUID" to targetDevice.deviceId.toString().uppercase(),
+                    "deviceName" to targetDevice.productModel.deviceModelName()
+                )
             )
             safeNavigate(R.id.action_DeviceMember_to_webViewFragment, config.toBundle())
         }
@@ -339,8 +342,10 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 EmbeddedWebViewContent(
                     config = WebViewConfig(
                         scene = "device-setting",
-                        deviceId = targetDevice.deviceId.toString().uppercase(),
-                        keyLevel = targetDevice.getLevel().toString()
+                        params = mapOf(
+                            "deviceUUID" to targetDevice.deviceId.toString().uppercase(),
+                            "keyLevel" to targetDevice.getLevel().toString()
+                        )
                     ),
                     height = 80.dp,
                     refreshTrigger = refreshCounter.intValue,

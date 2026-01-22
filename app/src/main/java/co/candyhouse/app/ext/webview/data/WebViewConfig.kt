@@ -11,11 +11,6 @@ import co.utils.getSerializableCompat
 data class WebViewConfig(
     val url: String = "",
     val scene: String = "",
-    val deviceId: String = "",
-    val where: String = "",
-    val keyLevel: String = "",
-    val title: String = "",
-    val pushToken: String = "",
     val params: Map<String, String> = hashMapOf()
 ) {
     companion object {
@@ -24,11 +19,6 @@ data class WebViewConfig(
             return WebViewConfig(
                 url = arguments?.getString("url") ?: "",
                 scene = arguments?.getString("scene") ?: "",
-                deviceId = arguments?.getString("deviceId") ?: "",
-                where = arguments?.getString("where") ?: "",
-                keyLevel = arguments?.getString("keyLevel") ?: "",
-                title = arguments?.getString("title") ?: "",
-                pushToken = arguments?.getString("pushToken") ?: "",
                 params = arguments?.getSerializableCompat<HashMap<String, String>>("extInfo") ?: hashMapOf()
             )
         }
@@ -39,22 +29,12 @@ data class WebViewConfig(
         return Bundle().apply {
             putString("url", url)
             putString("scene", scene)
-            putString("deviceId", deviceId)
-            putString("where", where)
-            putString("keyLevel", keyLevel)
-            putString("title", title)
-            putString("pushToken", pushToken)
             putSerializable("extInfo", HashMap(params))
         }
     }
 
     // 构建完整的 extInfo（用于 URL 加载）
     fun buildExtInfo(): Map<String, String> {
-        return buildMap {
-            if (pushToken.isNotEmpty()) put("pushToken", pushToken)
-            if (deviceId.isNotEmpty()) put("deviceUUID", deviceId)
-            if (keyLevel.isNotEmpty()) put("keyLevel", keyLevel)
-            putAll(params)
-        }
+        return buildMap { putAll(params) }
     }
 }

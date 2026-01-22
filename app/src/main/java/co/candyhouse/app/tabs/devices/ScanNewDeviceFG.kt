@@ -14,6 +14,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.FgRgDeviceBinding
+import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.tabs.devices.ssm2.getDistance
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -207,11 +208,14 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                 }
                 is CHSesame5 -> safeNavigate(R.id.action_to_SSM2SetAngleFG)
                 is CHHub3 -> {
-                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                        putString("scene", "wifi-module")
-                        putString("deviceId", device.deviceId.toString().uppercase())
-                        putString("keyLevel", device.getLevel().toString())
-                    })
+                    val config = WebViewConfig(
+                        scene = "wifi-module",
+                        params = mapOf(
+                            "deviceUUID" to device.deviceId.toString().uppercase(),
+                            "keyLevel" to device.getLevel().toString()
+                        )
+                    )
+                    safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
                 is CHWifiModule2 -> safeNavigate(R.id.to_WM2SettingFG)
                 is CHSesameBiometricDevice -> safeNavigate(actionId = R.id.to_SesameTouchProSettingFG)

@@ -21,6 +21,7 @@ import co.candyhouse.app.base.NfcSetting
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.ext.NfcHandler
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
 import co.candyhouse.sesame.open.CHBleManager
@@ -417,11 +418,13 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         val url = pendingOpenWebViewUrl ?: return
 
         try {
-            val bundle = Bundle().apply {
-                putString("url", url)
-                putString("where", CHDeviceManager.NOTIFICATION_FLAG)
-            }
-            navController.navigate(R.id.webViewFragment, bundle)
+            val config = WebViewConfig(
+                url = url,
+                params = mapOf(
+                    "where" to CHDeviceManager.NOTIFICATION_FLAG
+                )
+            )
+            navController.navigate(R.id.webViewFragment, config.toBundle())
             pendingOpenWebViewUrl = null
         } catch (_: Exception) {
         }

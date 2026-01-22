@@ -15,13 +15,13 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.tabs.HomeFragment
-import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
 import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.utils.L
 import co.utils.recycle.DeviceListAdapter
 import co.utils.recycle.GenericAdapter
@@ -238,8 +238,8 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         L.d(tag, "点击item：" + irRemote.alias + " " + irRemote.type + " " + irRemote.code)
         val config = WebViewConfig(
             scene = "ir-remote",
-            deviceId = hub3.deviceId.toString().uppercase(),
             params = mapOf(
+                "deviceUUID" to hub3.deviceId.toString().uppercase(),
                 "irRemote" to Gson().toJson(irRemote)
             )
         )
@@ -262,11 +262,14 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.action_deviceListPG_to_SSM2SettingFG)
                 } else {
-                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                        putString("scene", "history")
-                        putString("deviceId", device.deviceId.toString().uppercase())
-                        putString("where", "device_history_old")
-                    })
+                    val config = WebViewConfig(
+                        scene = "history",
+                        params = mapOf(
+                            "deviceUUID" to device.deviceId.toString().uppercase(),
+                            "where" to "device_history_old"
+                        )
+                    )
+                    safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
             }
 
@@ -276,20 +279,26 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)
                 } else {
-                    safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                        putString("scene", "history")
-                        putString("deviceId", device.deviceId.toString().uppercase())
-                        putString("where", "device_history_new")
-                    })
+                    val config = WebViewConfig(
+                        scene = "history",
+                        params = mapOf(
+                            "deviceUUID" to device.deviceId.toString().uppercase(),
+                            "where" to "device_history_new"
+                        )
+                    )
+                    safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
             }
 
             CHProductModel.Hub3 -> {
-                safeNavigate(R.id.action_to_webViewFragment, Bundle().apply {
-                    putString("scene", "wifi-module")
-                    putString("deviceId", device.deviceId.toString().uppercase())
-                    putString("keyLevel", device.getLevel().toString())
-                })
+                val config = WebViewConfig(
+                    scene = "wifi-module",
+                    params = mapOf(
+                        "deviceUUID" to device.deviceId.toString().uppercase(),
+                        "keyLevel" to device.getLevel().toString()
+                    )
+                )
+                safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
             }
 
             CHProductModel.SesameBot2 -> safeNavigate(R.id.to_SesameBot2SettingFG)

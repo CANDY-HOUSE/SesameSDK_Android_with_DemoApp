@@ -100,9 +100,9 @@ fun SesameComposeWebViewContent(
 
     // 设置锁历史记录标题
     val titleNew = if (config.scene == "history") {
-        SharedPreferencesUtils.preferences.getString(config.deviceId.lowercase(), config.title)
+        SharedPreferencesUtils.preferences.getString(config.params["deviceUUID"]?.lowercase(), "")
     } else {
-        config.title
+        config.params["title"]
     }
 
     // 判断是否需要启用JS桥接
@@ -227,7 +227,7 @@ fun SesameComposeWebViewContent(
     LaunchedEffect(Unit) {
         L.d(
             logTag,
-            "where=${config.where} scene=${config.scene} enableJSBridge=$enableJSBridge deviceId=${config.deviceId} title=$titleNew pushToken=${config.pushToken}"
+            "where=${config.params["where"]} scene=${config.scene} enableJSBridge=$enableJSBridge deviceId=${config.params["deviceUUID"]} title=$titleNew"
         )
         if (webUrl.isNotEmpty()) L.d(logTag, "url=$webUrl")
     }
@@ -275,7 +275,7 @@ fun SesameComposeWebViewContent(
             if (config.scene == "history") {
                 binding.moreIcon.visibility = View.VISIBLE
                 binding.moreIcon.setOnClickListener {
-                    onMoreClick(config.where)
+                    onMoreClick(config.params["where"]!!)
                 }
             } else {
                 binding.moreIcon.visibility = View.GONE
@@ -445,7 +445,7 @@ fun SesameComposeWebViewContent(
                     wv.loadUrl(target)
 
                     // firebase 数据埋点
-                    val screenName = when (config.where) {
+                    val screenName = when (config.params["where"]) {
                         CHDeviceManager.NOTIFICATION_FLAG -> "WebViewFG_notification"
                         else -> null
                     }
@@ -460,7 +460,8 @@ fun SesameComposeWebViewContent(
                     .align(Alignment.Center)
                     .padding(top = 8.dp)
                     .size(20.dp),
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
+                color = Color(0xFF28AEB1)
             )
         }
 
@@ -627,7 +628,8 @@ fun EmbeddedWebViewContent(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(16.dp),
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
+                color = Color(0xFF28AEB1)
             )
         }
 
