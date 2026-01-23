@@ -40,12 +40,7 @@ android {
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 266
         versionName '3.0.266'
-        vectorDrawables.useSupportLibrary = true
         buildConfigField("String", "GIT_HASH", "\"${getGitHash}\"")
-        ndk {
-            debugSymbolLevel 'FULL'
-        }
-
         // AWS Cognito 配置
         buildConfigField("String", "AWS_IDENTITY_POOL_ID", "\"${rootProject.ext['aws.cognito.identityPoolId']}\"")
         buildConfigField("String", "AWS_USER_POOL_ID", "\"${rootProject.ext['aws.cognito.userPoolId']}\"")
@@ -61,7 +56,6 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
-            debuggable true
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
                 nativeSymbolUploadEnabled = false
@@ -71,7 +65,6 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            debuggable false
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
