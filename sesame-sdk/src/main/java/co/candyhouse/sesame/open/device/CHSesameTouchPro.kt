@@ -31,14 +31,14 @@ class CHSesameOpenSensorMechStatus(openSensorData: OpenSensorData) : CHSesamePro
     // OpenSensor 用的电池是 CR1632, 与 Touch Pro 用的电池 CR123A 不同。
     override fun getBatteryPrecentage(): Int {
         val voltage = getBatteryVoltage()
-        /*
-        *    修正电池电量显示不准的问题。
-        *    在刷卡机的曲线上， 实测低于8%的电量开始， 会出现偶尔丢失蓝牙信号的问题。
-        *    低于2%就会关机，按reset物理按键，无响应。
-        *    用 PPK 供电， 实测， OpenSensor 读到的电压值， 比 PPK 的设置值， 低 70mV 左右。
-        *    根据 CR1632 电池的规格书上的放电曲线图修正后， CR1632 电量显示表格如下：
-        * */
-        val blocks: List<Float> = listOf(5.85f, 5.82f, 5.79f, 5.76f, 5.73f, 5.7f, 5.65f, 5.6f, 5.55f,  5.5f,  5.4f,  5.2f,  5.1f,   5.0f,   4.8f,   4.6f).map{ it - 0.3f } //放水讓用戶開心,電力曲線整體下降0.3V, 用更低的電壓對應更高的電量百分比 
+        /*  在刷卡機的曲線上，實測低於8%的電量開始，會出現偶爾丟失藍牙信號的問題。低於2%就會關機，按reset物理按鍵，無響應。
+        *   【修正 Open Sensor 1 電池電量顯示不准的問題】
+        *   用 PPK 供電，實測 OpenSensor1 讀到的電壓值，比 PPK 的設置值，低 70mV 左右。
+        *   Anyway..., CR1632 與 CR123A 同為 錳酸鋰LiMnO2 化學成分相同。但用戶抱怨新CR1632電池往往從 40% 開始,
+        *   故哲明研判是內電阻等物理性質不同, 故基於CR123A的電池曲線, 全部統一減去0.3V, 5.85V-0.3V也就是CR123A約40%的電壓。
+        *   放水讓用戶開心,電力曲線整體下降0.3V, 用更低的電壓對應更高的電量百分比。
+        */
+        val blocks: List<Float> = listOf(5.85f, 5.82f, 5.79f, 5.76f, 5.73f, 5.7f, 5.65f, 5.6f, 5.55f, 5.5f, 5.4f, 5.2f, 5.1f, 5.0f, 4.8f, 4.6f).map{ it - 0.3f }
         val mapping: List<Float> = listOf(100.0f, 95.0f, 90.0f, 85.0f, 80.0f, 70.0f, 60.0f, 50.0f, 40.0f, 32.0f, 21.0f, 13.0f, 10.0f, 7.0f, 3.0f, 0.0f)
         if (voltage >= blocks[0]) {
             return mapping[0].toInt()
