@@ -38,7 +38,7 @@ class CHSesameOpenSensorMechStatus(openSensorData: OpenSensorData) : CHSesamePro
         *    用 PPK 供电， 实测， OpenSensor 读到的电压值， 比 PPK 的设置值， 低 70mV 左右。
         *    根据 CR1632 电池的规格书上的放电曲线图修正后， CR1632 电量显示表格如下：
         * */
-        val blocks: List<Float> = listOf(5.820f, 5.810f, 5.755f, 5.735f, 5.665f, 5.620f, 5.585f, 5.556f, 5.550f, 5.530f, 5.450f, 5.400f, 5.320f, 5.280f, 5.225f, 5.150f)
+        val blocks: List<Float> = listOf(5.820f, 5.810f, 5.755f, 5.735f, 5.665f, 5.620f, 5.585f, 5.556f, 5.550f,  5.50f,  5.40f,  5.20f,  5.10f,   5.0f,   4.8f,   4.6f)
         val mapping: List<Float> = listOf(100.0f, 95.0f, 90.0f, 85.0f, 80.0f, 70.0f, 60.0f, 50.0f, 40.0f, 32.0f, 21.0f, 13.0f, 10.0f, 7.0f, 3.0f, 0.0f)
         if (voltage >= blocks[0]) {
             return mapping[0].toInt()
