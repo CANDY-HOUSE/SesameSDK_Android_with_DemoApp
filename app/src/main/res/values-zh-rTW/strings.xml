@@ -171,7 +171,7 @@
     <string name="no_scan_devices_hint3">3. 若要重置已註冊的設備，請用針戳長按重置按鈕直到LED燈熄滅</string>
     <string name="no_scan_devices_hint4">4. 有時候，重啟手機可以解決問題。</string>
 
-    <string name="pull_fresh_hint">↓下拉可刷新</string>
+    <string name="pull_fresh_hint">↓您可以下拉刷新</string>
     <string name="latest">(最新)</string>
 
     <string name="upload_keys_fail">現在網路狀態不太穩定，下拉刷新或登出可能導致芝麻設備清單消失。</string>

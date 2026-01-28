@@ -14,6 +14,7 @@ import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.ext.webview.util.SesameComposeWebViewContent
+import co.candyhouse.app.tabs.devices.hub3.setting.Hub3ScanSSIDDialogFragment
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.sesame.utils.L
 import co.utils.ContainerPaddingManager
@@ -72,7 +73,7 @@ class SesameComposeWebView : Fragment() {
                     }
                 },
                 onRequestWifiConfig = {
-                    safeNavigate(R.id.to_HUB3ScanSSIDListFG)
+                    showWifiScanDialog()
                 },
                 onRequestRefreshApp = {
                     mDeviceModel.refreshDevices()
@@ -80,7 +81,6 @@ class SesameComposeWebView : Fragment() {
                 deviceModel = mDeviceModel,
                 onJSBridgeCreated = { bridge ->
                     if (config.scene == "wifi-module") {
-                        wifiModuleJsBridge?.cleanup()
                         wifiModuleJsBridge = bridge
                     }
                 }
@@ -96,6 +96,13 @@ class SesameComposeWebView : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         ContainerPaddingManager.releaseClearPadding(this)
+    }
+
+    private fun showWifiScanDialog() {
+        if (childFragmentManager.findFragmentByTag(Hub3ScanSSIDDialogFragment.TAG) != null) {
+            return
+        }
+        Hub3ScanSSIDDialogFragment.newInstance().show(childFragmentManager, Hub3ScanSSIDDialogFragment.TAG)
     }
 
     override fun onDestroy() {

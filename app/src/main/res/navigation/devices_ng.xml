@@ -221,10 +221,6 @@
         android:name="co.candyhouse.app.tabs.devices.ssm2.setting.angle.SSM2NoHandLockFG"
         android:label="SSM2NoHandLockFG" />
     <fragment
-        android:id="@+id/HUB3ScanSSIDListFG"
-        android:name="co.candyhouse.app.tabs.devices.hub3.setting.Hub3ScanSSIDListFG"
-        android:label="HUB3ScanSSIDListFG" />
-    <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.ext.webview.SesameComposeWebView"
         android:label="webViewFragment">
@@ -234,9 +230,6 @@
         <action
             android:id="@+id/action_mainRoomSS5FG_to_SSM5SettingFG"
             app:destination="@id/SSM5SettingFG" />
-        <action
-            android:id="@+id/to_HUB3ScanSSIDListFG"
-            app:destination="@id/HUB3ScanSSIDListFG" />
     </fragment>
 
 </navigation>

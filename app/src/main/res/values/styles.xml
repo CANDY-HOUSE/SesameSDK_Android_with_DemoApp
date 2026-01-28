@@ -73,4 +73,15 @@
         <attr name="borderAlpha" format="float" />
         <attr name="finderOffset" format="dimension" />
     </declare-styleable>
+
+    <style name="Theme.App.WifiScanBottomSheet" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.35</item>
+        <item name="bottomSheetStyle">@style/Widget.App.WifiScanBottomSheet</item>
+    </style>
+
+    <style name="Widget.App.WifiScanBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="android:elevation">0dp</item>
+        <item name="backgroundTint">@android:color/white</item>
+    </style>
 </resources>

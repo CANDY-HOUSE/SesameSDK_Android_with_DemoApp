@@ -171,7 +171,7 @@
 
     <string name="qrcodeNotSupport">该二维码不支持</string>
     <string name="cameraError">相机错误</string>
-    <string name="pull_fresh_hint">↓下拉可刷新</string>
+    <string name="pull_fresh_hint">↓您可以下拉刷新</string>
     <string name="latest">(最新)</string>
     <string name="addFail">添加失败</string>
     <string name="upload_keys_fail">网络现在不太稳，下拉刷新或登出可能导致芝麻设备清单消失。</string>

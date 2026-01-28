@@ -27,7 +27,7 @@ object WebViewUrlLoader {
         getWebUrlByScene(scene, extInfo) { result ->
             result.fold(
                 onSuccess = { state ->
-                    val url = ((state as? CHResultState.CHResultStateNetworks)?.data ?: "") as String
+                    val url = ((state as? CHResultState.CHResultStateNetworks)?.data ?: "")
                     if (url.isNotEmpty()) {
                         onSuccess(url)
                     } else {

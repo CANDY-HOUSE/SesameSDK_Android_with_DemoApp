@@ -229,7 +229,7 @@ class Hub3JSBridge(
 
         scope.launch(Dispatchers.Main) {
             val jsonData = JSONObject().apply {
-                put("deviceUUID", device.deviceId.toString())
+                put("deviceUUID", device.deviceId.toString().uppercase())
                 put("percent", p.toString())
             }
 
