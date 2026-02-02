@@ -25,4 +25,5 @@ interface CHSesameBiometricBase : CHSesameConnector, CHRemoteNanoCapable, CHCapa
     fun clearEventHandlers()
     fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>?
     fun getSSM2SlotFullLiveData(): LiveData<Event<Boolean>>?
+    fun getSSM2SupportLiveDataLiveData(): LiveData<Event<Boolean>>?
 }

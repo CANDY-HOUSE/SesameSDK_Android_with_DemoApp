@@ -238,6 +238,7 @@
     <string name="hint_enter_card_id">请输入卡ID</string>
 
     <string name="sesame_full">设备已满</string>
+    <string name="sesame_unsupport">不支持该设备</string>
 
     <string name="reset">重置</string>
     <string name="receivedBle">收到蓝牙信号了</string>

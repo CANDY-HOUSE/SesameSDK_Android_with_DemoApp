@@ -238,6 +238,7 @@
     <string name="hint_enter_card_id">請輸入卡ID</string>
 
     <string name="sesame_full">設備已滿</string>
+    <string name="sesame_unsupport">不支援此裝置</string>
 
     <string name="reset">重設</string>
     <string name="receivedBle">收到藍芽訊號了</string>

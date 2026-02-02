@@ -383,6 +383,12 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                 toastMSG(getString(R.string.sesame_full))
             }
         }
+
+        device?.getSSM2SupportLiveDataLiveData()?.observeEvent(viewLifecycleOwner) { isSupport ->
+            if (!isSupport) {
+                toastMSG(getString(R.string.sesame_unsupport))
+            }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

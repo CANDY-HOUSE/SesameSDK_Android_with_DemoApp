@@ -12,7 +12,6 @@ import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
@@ -26,47 +25,47 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
         super.onViewCreated(view, savedInstanceState)
 
         bind.leaderboardList.apply {
-            val filteredDevices =
-                when ((mDeviceModel.ssmLockLiveData.value as CHSesameConnector).productModel) {
-                    CHProductModel.SSMOpenSensor, CHProductModel.SSMOpenSensor2 -> {
-                        val os3Lockers = listOf(
-                            CHProductModel.BiKeLock2,
-                            CHProductModel.SS5,
-                            CHProductModel.SS5PRO,
-                            CHProductModel.SS5US,
-                            CHProductModel.SesameBot2
-                        )
-                        val sesame2KeyDevices = mDeviceModel.myChDevices.value.filter { device ->
-                            (mDeviceViewModel.ssmLockLiveData.value as? CHSesameConnector)?.ssm2KeysMap?.keys?.contains(
-                                device.deviceId.toString()
-                            ) == true
-                        }
-                        val hasLockInSesame2Keys = sesame2KeyDevices.any { device ->
-                            device.productModel in os3Lockers
-                        }
-                        val hasHub3InSesame2Keys =
-                            sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 }
-                        mDeviceModel.myChDevices.value.filter { it ->
-                            val isAllowedProduct =
-                                (it.productModel == CHProductModel.Hub3) || ((it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.SesameBot1)
-                            when {
-                                !isAllowedProduct -> false
-                                hasLockInSesame2Keys && it.productModel == CHProductModel.Hub3 -> false
-                                hasHub3InSesame2Keys && it.productModel in os3Lockers -> false
-                                else -> true
-                            }
-                        }
+            val allLocks = listOf(
+                CHProductModel.SS2,
+                CHProductModel.SS4,
+                CHProductModel.BiKeLock,
+                CHProductModel.BiKeLock2,
+                CHProductModel.SS5,
+                CHProductModel.SS5PRO,
+                CHProductModel.SS5US,
+                CHProductModel.SesameBot1,
+                CHProductModel.SesameBot2,
+                CHProductModel.BLEConnector,
+                CHProductModel.SS6Pro,
+                CHProductModel.SSM_MIWA
+            )
+
+            val currentProductModel = (mDeviceModel.ssmLockLiveData.value as CHSesameConnector).productModel
+
+            val filteredDevices = when (currentProductModel) {
+                CHProductModel.SSMOpenSensor, CHProductModel.SSMOpenSensor2 -> {
+                    val sesame2KeyDevices = mDeviceModel.myChDevices.value.filter { device ->
+                        (mDeviceModel.ssmLockLiveData.value as? CHSesameConnector)?.ssm2KeysMap?.keys?.contains(
+                            device.deviceId.toString()
+                        ) == true
                     }
 
-                    CHProductModel.Hub3 -> mDeviceModel.myChDevices.value.filter { it.productModel == CHProductModel.SSMTouchPro || it.productModel == CHProductModel.SS5PRO || it.productModel == CHProductModel.SS5 || it.productModel == CHProductModel.SSMTouch2Pro }
-                    CHProductModel.Remote -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
-                    CHProductModel.RemoteNano -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
-                    CHProductModel.SSMFace,CHProductModel.SSMFace2 -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
-                    CHProductModel.SSMFacePro,CHProductModel.SSMFace2Pro -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
-                    CHProductModel.SSMFaceProAI,CHProductModel.SSMFace2ProAI -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
-                    CHProductModel.SSMFaceAI,CHProductModel.SSMFace2AI -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SS2 && it.productModel != CHProductModel.SS4 && it.productModel != CHProductModel.BiKeLock && it.productModel != CHProductModel.SesameBot1 }
-                    else -> mDeviceModel.myChDevices.value.filter { (it is CHSesameLock) && it.productModel != CHProductModel.SSMOpenSensor && it.productModel != CHProductModel.SesameBot1 && it.productModel != CHProductModel.SSMOpenSensor2 }
+                    val hasLockInSesame2Keys = sesame2KeyDevices.any { it.productModel in allLocks }
+                    val hasHub3InSesame2Keys = sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 }
+
+                    val allowedProducts = when {
+                        hasLockInSesame2Keys -> allLocks
+                        hasHub3InSesame2Keys -> listOf(CHProductModel.Hub3)
+                        else -> listOf(CHProductModel.Hub3) + allLocks
+                    }
+
+                    mDeviceModel.myChDevices.value.filter { allowedProducts.contains(it.productModel) }
                 }
+
+                else -> {
+                    mDeviceModel.myChDevices.value.filter { allLocks.contains(it.productModel) }
+                }
+            }
 
             adapter = object : GenericAdapter<CHDevices>(filteredDevices.filter {
                 !hasAddedOrIsGuestKey(it)
@@ -98,13 +97,13 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                                         }
                                     }
                                     it.onFailure {
-                                        L.d("SSMBiometricSelectLockerListFG","insert sesame error! ${title.text}")
+                                        L.d("SSMBiometricSelectLockerListFG", "insert sesame error! ${title.text}")
                                     }
                                 }
                             }
                         }
                     }
             }
-        } // end bind.leaderboardList.apply
+        }
     }
 }

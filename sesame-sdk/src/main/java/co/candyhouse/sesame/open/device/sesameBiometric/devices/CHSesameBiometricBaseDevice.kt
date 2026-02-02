@@ -15,8 +15,6 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHProductModel
@@ -34,8 +32,10 @@ import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CH
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.Event
 import co.candyhouse.sesame.utils.L
@@ -48,7 +48,8 @@ import co.candyhouse.sesame.utils.noHashtoUUID
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
 
-internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometricBase, CHCapabilitySupport, CHDeviceUtil, CHRemoteNanoCapable by CHRemoteNanoCapableImpl() {
+internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometricBase, CHCapabilitySupport, CHDeviceUtil,
+    CHRemoteNanoCapable by CHRemoteNanoCapableImpl() {
 
     private val tag = "CHSesameBiometricBaseDevice"
 
@@ -133,6 +134,10 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         return (ssm2KeysMap as? ObservableMutableMap)?.slotFullLiveData
     }
 
+    override fun getSSM2SupportLiveDataLiveData(): LiveData<Event<Boolean>>? {
+        return (ssm2KeysMap as? ObservableMutableMap)?.supportLiveData
+    }
+
     // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[stp][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
@@ -177,6 +182,11 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
             SesameItemCode.SSM3_ITEM_CODE_BATTERY_VOLTAGE.value -> {
                 reportBatteryData(receivePayload.payload.toHexString())
+            }
+
+            SesameItemCode.SSM3_ITEM_CODE_SESAME_UNSUPPORT.value -> {
+                handled = true
+                (ssm2KeysMap as? ObservableMutableMap)?.setSupport(false)
             }
         }
 
@@ -424,9 +434,15 @@ class ObservableMutableMap<K, V> : MutableMap<K, V> {
     val liveData: LiveData<Map<K, V>> = _liveData
     private val _slotFullLiveData = MutableLiveData<Event<Boolean>>()
     val slotFullLiveData: LiveData<Event<Boolean>> = _slotFullLiveData
+    private val _supportLiveData = MutableLiveData<Event<Boolean>>()
+    val supportLiveData: LiveData<Event<Boolean>> = _supportLiveData
 
     fun setSlotFull(isFull: Boolean) {
         _slotFullLiveData.postValue(Event(isFull))
+    }
+
+    fun setSupport(isSupport: Boolean) {
+        _supportLiveData.postValue(Event(isSupport))
     }
 
     override fun put(key: K, value: V): V? {

@@ -224,6 +224,7 @@
     <string name="hint_enter_card_id">カードIDを入力してください</string>
 
     <string name="sesame_full">デバイス満杯</string>
+    <string name="sesame_unsupport">このデバイスは対応していません</string>
 
     <string name="reset">Reset</string>
     <string name="receivedBle">Received Ble</string>
