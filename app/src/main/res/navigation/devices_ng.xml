@@ -204,6 +204,9 @@
         <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
+        <action
+            android:id="@+id/to_SesameKeyboardFingerprint"
+            app:destination="@id/SesameKeyboardFingerprint" />
     </fragment>
     <fragment
         android:id="@+id/SesameBot2SettingFG"

@@ -10,17 +10,18 @@ import co.candyhouse.sesame.ble.os3.BiometricDeviceType
 import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHSesame5Device
 import co.candyhouse.sesame.ble.os3.CHSesameBike2Device
+import co.candyhouse.sesame.ble.os3.CHSesameBike3Device
 import co.candyhouse.sesame.ble.os3.CHSesameBiometricDeviceImpl
 import co.candyhouse.sesame.ble.os3.CHSesameBot2Device
 import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
 import co.candyhouse.sesame.ble.os3.DeviceProfiles
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHMulticastDelegate
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import java.util.UUID
 
 enum class CHProductModel {
@@ -209,6 +210,12 @@ enum class CHProductModel {
         override fun deviceModel() = "sesame_face_2_pro_ai" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame Face 2 Pro AI"
         override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO_AI, DeviceProfiles.SESAME_FACE_PRO_AI)
+    },
+    BiKeLock3 {
+        override fun productType() = 33
+        override fun deviceModel() = "bike_3" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bike 3"
+        override fun deviceFactory() = CHSesameBike3Device()
     };
 
     abstract fun productType(): Int

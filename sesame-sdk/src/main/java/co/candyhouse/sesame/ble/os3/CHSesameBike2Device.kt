@@ -35,7 +35,7 @@ import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
 
 @SuppressLint("MissingPermission")
-internal class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil {
+internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil {
     /** 設備廣播 */
     override var advertisement: CHadv? = null
         set(value) {

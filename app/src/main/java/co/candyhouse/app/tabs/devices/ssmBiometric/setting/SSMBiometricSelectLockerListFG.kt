@@ -30,6 +30,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                 CHProductModel.SS4,
                 CHProductModel.BiKeLock,
                 CHProductModel.BiKeLock2,
+                CHProductModel.BiKeLock3,
                 CHProductModel.SS5,
                 CHProductModel.SS5PRO,
                 CHProductModel.SS5US,

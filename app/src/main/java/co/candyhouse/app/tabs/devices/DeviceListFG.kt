@@ -274,7 +274,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             }
 
             CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
-            CHProductModel.BiKeLock, CHProductModel.BiKeLock2 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
+            CHProductModel.BiKeLock, CHProductModel.BiKeLock2, CHProductModel.BiKeLock3 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
             CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro, CHProductModel.BLEConnector, CHProductModel.SSM_MIWA -> {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)

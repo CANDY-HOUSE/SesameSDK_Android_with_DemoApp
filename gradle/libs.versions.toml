@@ -1,6 +1,5 @@
 [versions]
 agp = "9.0.0"
-groovyXml = "3.0.25"
 compose = "2.2.10"
 ksp = "2.2.10-2.0.2"
 appcompat = "1.7.0"
@@ -60,7 +59,6 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
-groovy-xml = { module = "org.codehaus.groovy:groovy-xml", version.ref = "groovyXml" }
 indicatorseekbar = { module = "com.github.warkiz.widget:indicatorseekbar", version.ref = "indicatorseekbar" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

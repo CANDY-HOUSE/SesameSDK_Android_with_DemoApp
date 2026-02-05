@@ -18,7 +18,6 @@ import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.app.tabs.devices.ssm2.setting.remotenanoSecondSettingValue
 import co.candyhouse.sesame.ble.os3.BiometricCapability
 import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
