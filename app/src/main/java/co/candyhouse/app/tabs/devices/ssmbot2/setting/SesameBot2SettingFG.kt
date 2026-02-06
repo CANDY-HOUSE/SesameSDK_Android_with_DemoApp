@@ -1,9 +1,11 @@
 package co.candyhouse.app.tabs.devices.ssmbot2.setting
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
@@ -17,11 +19,9 @@ import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.alertview.fragments.toastMSG
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
     //检查类型再转换（来自firebase crash）
@@ -44,6 +44,18 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
 
     private val bot2ScriptCurIndexKey by lazy {
         bot2?.deviceId.toString() + "_ScriptIndex"
+    }
+
+    private var hideWheelJob: Job? = null
+
+    // 防抖隐藏函数（短延迟，不是倒计时超时）
+    private fun hideWheelWithDebounce(delayMs: Long = 300L) {
+        hideWheelJob?.cancel()
+        hideWheelJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(delayMs)
+            if (!isAdded) return@launch
+            bind.wheelview.visibility = View.GONE
+        }
     }
 
     override fun onResume() {
@@ -74,7 +86,6 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         getView()?.findViewById<View>(R.id.click_script_zone)?.setOnClickListener { findNavController().navigate(R.id.to_SesameClickScriptFG) }
         (mDeviceModel.ssmosLockDelegates[bot2!!]) = object : CHDeviceStatusDelegate {
             override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {
-                // L.d("[say]", "[BaseDeviceSettingFG.kt][onBleDeviceStatusChanged]")
                 onChange()
                 onUIDeviceStatus(status)
                 checkVersionTag(status, device)
@@ -90,7 +101,6 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
 
         bot2?.getScriptNameList {
             it.onSuccess {
-                L.d("hcia", "setting getNowScript:$it")
                 activity?.runOnUiThread {
                     val curIdx: Int = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
                     it.data.curIdx = curIdx.toUByte()
@@ -110,9 +120,11 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         loadWheel(bot2!!)
 
         updateBattery()
-    }//end view created
 
-    private fun updateBattery(){
+        bind.swiperefresh.addExcludedView(bind.wheelview)
+    }
+
+    private fun updateBattery() {
         showBatteryLevel(bind.battery, bot2)
     }
 
@@ -124,48 +136,28 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun loadWheel(bot2: CHSesameBot2) {
         bind.wheelview.setItems(listItem())
         bind.wheelview.setInitPosition(SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0))
         bind.wheelview.setListener { select ->
-            try {
-                bot2.selectScript(select.toUByte()) {
-                    SharedPreferencesUtils.preferences.edit().putInt(bot2ScriptCurIndexKey, select).apply()
-                }
-                bind.scriptIdTxt.text = select.toString()
-            } catch (e: NullPointerException) {
-                e.printStackTrace()
+            bot2.selectScript(select.toUByte()) {
+                SharedPreferencesUtils.preferences.edit().putInt(bot2ScriptCurIndexKey, select).apply()
             }
+            bind.scriptIdTxt.text = select.toString()
+
+            hideWheelWithDebounce(300L)
         }
     }
 
     private fun showWheel(isShow: Boolean) {
+        if (!isShow) hideWheelJob?.cancel()
+
         bind.wheelview.visibility = if (isShow) View.VISIBLE else View.GONE
-        bind.wheelview.setCurrentPosition(SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0))
-        runFiveThread(3000, isShow) {
-            if (bind.wheelview != null) {
-                bind.wheelview.post {
-                    bind.wheelview.visibility = View.GONE
-                }
-            }
+        if (isShow) {
+            bind.wheelview.setCurrentPosition(SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0))
         }
     }
-
-    private var job: Job? = null
-
-    private fun runFiveThread(time: Int, isShow: Boolean, call: () -> Unit) {
-        runBlocking {
-            job?.cancel()
-            if (isShow) {
-                job = GlobalScope.launch {
-                    delay(time.toLong()) // 5 秒延迟
-                    call.invoke()
-                }
-            }
-        }
-    }
-
-    // 开启一个协程
 
     private fun listItem(): List<String>? {
         return bot2?.scripts?.events?.map { String(it.name, Charsets.UTF_8) }

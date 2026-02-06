@@ -109,6 +109,9 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             }
         }
 
+        bind.swiperefresh.addExcludedView(bind.opslockWheelview)
+        bind.swiperefresh.addExcludedView(bind.wheelview)
+
     } //end view created
 
     override fun onResume() {

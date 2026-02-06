@@ -298,6 +298,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                     device.setTriggerDelayTime(opsLockSecond.toUByte()) {}
                 }
             }
+            bind.swiperefresh.addExcludedView(bind.triggerWheelview)
         }
         bind.cardsZone.setOnClickListener { safeNavigate(R.id.to_SesameKeyboardCards) }
         bind.fpZone.setOnClickListener { safeNavigate(R.id.to_SesameKeyboardFingerprint) }

@@ -54,7 +54,6 @@ import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.dfu.DfuServiceInitiator
-import kotlin.collections.mapOf
 
 abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSetting,
     BleStatusUpdate, DeviceStatusChange {

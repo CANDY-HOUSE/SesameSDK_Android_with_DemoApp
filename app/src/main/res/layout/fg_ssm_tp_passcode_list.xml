@@ -68,7 +68,7 @@
         android:text="@string/TouchEmptyPasscodeHint"
         android:textSize="18sp" />
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <co.utils.SmartSwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -84,6 +84,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </co.utils.SmartSwipeRefreshLayout>
 
 </RelativeLayout>

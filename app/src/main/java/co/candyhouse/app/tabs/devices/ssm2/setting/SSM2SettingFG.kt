@@ -48,6 +48,9 @@ class SSM2SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
 
         view.findViewById<View>(R.id.opsensor_zone)?.visibility = View.GONE
 
+        bind.swiperefresh.addExcludedView(bind.opslockWheelview)
+        bind.swiperefresh.addExcludedView(bind.wheelview)
+
     } //end view created
 
     override fun onUIDeviceStatus(status: CHDeviceStatus) {

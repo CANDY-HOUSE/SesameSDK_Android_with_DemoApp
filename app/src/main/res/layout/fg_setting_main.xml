@@ -53,7 +53,7 @@
 
     </RelativeLayout>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <co.utils.SmartSwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -667,6 +667,6 @@
             </LinearLayout>
 
         </ScrollView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </co.utils.SmartSwipeRefreshLayout>
 
 </LinearLayout>
