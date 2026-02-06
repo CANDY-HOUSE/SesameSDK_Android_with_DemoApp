@@ -14,7 +14,7 @@ class CHFaceEventHandler(private val delegate: CHFaceDelegate?) : CHEventHandler
 
         when (payload.cmdItCode) {
             SesameItemCode.SSM_OS3_FACE_CHANGE.value -> {
-                delegate.onFaceReceive(device, CHSesameTouchFace(payload.payload))
+                delegate.onFaceChanged(device, CHSesameTouchFace(payload.payload))
                 return true
             }
             SesameItemCode.SSM_OS3_FACE_NOTIFY.value -> {
