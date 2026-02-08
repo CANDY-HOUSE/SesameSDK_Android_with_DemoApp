@@ -284,7 +284,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SS5 -> "sesame5_30_5_3fdd17"
         CHProductModel.SS5PRO -> "sesame5pro_30_7_3fdd17"
         CHProductModel.SS5US -> "sesame5us_30_16_3fdd17"
-        CHProductModel.SS6Pro -> "sesame6pro_30_21_77250e"
+        CHProductModel.SS6Pro -> "sesame6pro_30_21_258a1d"
         CHProductModel.WM2 -> null
         CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
         CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
