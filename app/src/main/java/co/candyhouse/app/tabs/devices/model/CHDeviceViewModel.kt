@@ -45,7 +45,7 @@ import co.utils.GuestUploadFlag
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
 import co.utils.getHistoryTag
-import co.utils.isAutoConnect
+import co.utils.isLockDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -343,7 +343,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun backgroundAutoConnect(device: CHDevices) {
         viewModelScope.launch(IO) {
-            if (device.deviceStatus == CHDeviceStatus.ReceivedAdV && device.isAutoConnect()) {
+            if (device.deviceStatus == CHDeviceStatus.ReceivedAdV && device.isLockDevice()) {
                 L.d("backgroundAutoConnect", "自动连接设备ID=${device.deviceId}")
                 device.connect { }
             }

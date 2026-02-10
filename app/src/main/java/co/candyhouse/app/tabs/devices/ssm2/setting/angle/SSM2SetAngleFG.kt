@@ -9,27 +9,21 @@ import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesame2
 import co.candyhouse.sesame.open.device.CHSesame5
 import co.utils.UserUtils
 
 class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
 
+    private var useLidingDoorUi: Boolean = false
+
     override fun getViewBinder() = FgSetAngleBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mDeviceModel.ssmLockLiveData.value.apply {
-            (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.let {
-                updateLockView(it)
-                mDeviceModel.ssmosLockDelegates[it] = object : CHDeviceStatusDelegate {
-                    override fun onMechStatus(device: CHDevices) {
-                        updateLockView(it)
-                    }
-                }.bindLifecycle(viewLifecycleOwner)
-                bind.magnetZone.visibility = View.GONE
-            }
-            (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.let {
+            (this as? CHSesame2)?.let {
                 updateLockView(it)
                 mDeviceModel.ssmosLockDelegates[it] = object : CHDeviceStatusDelegate {
                     override fun onMechStatus(device: CHDevices) {
@@ -37,68 +31,117 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                     }
                 }.bindLifecycle(viewLifecycleOwner)
             }
-
+            (this as? CHSesame5)?.let {
+                updateLockView(it)
+                mDeviceModel.ssmosLockDelegates[it] = object : CHDeviceStatusDelegate {
+                    override fun onMechStatus(device: CHDevices) {
+                        updateLockView(it)
+                    }
+                }.bindLifecycle(viewLifecycleOwner)
+            }
             bind.ssmView.setOnClickListener {
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.toggle() {}
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {}
+                (this as? CHSesame2)?.toggle() {}
+                (this as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {}
+            }
+            bind.slidingDoorView.setOnClickListener {
+                (this as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {}
             }
             bind.setunlockZone.setOnClickListener {
-                if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
+                if ((this as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     return@setOnClickListener
                 }
 
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.let { device ->
+                (this as? CHSesame2)?.let { device ->
                     device.configureLockPosition(
                         device.mechSetting!!.lockPosition,
                         device.mechStatus!!.position
                     ) {
-                        bind.ssmView.setLock(device)
+                        setLockFromDevice(device)
                     }
                 }
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.let { device ->
+                (this as? CHSesame5)?.let { device ->
                     device.configureLockPosition(
                         device.mechSetting!!.lockPosition,
                         device.mechStatus!!.position
                     ) {
-                        bind.ssmView.setLock(device)
+                        setLockFromDevice(device, useLidingDoorUi)
                     }
                 }
             }
             bind.setlockZone.setOnClickListener {
-                if ((mDeviceModel.ssmLockLiveData.value as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
+                if ((this as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
                     return@setOnClickListener
                 }
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame2)?.let { device ->
+                (this as? CHSesame2)?.let { device ->
                     device.configureLockPosition(
                         device.mechStatus!!.position,
                         device.mechSetting!!.unlockPosition
                     ) {
-                        bind.ssmView.setLock(device)
+                        setLockFromDevice(device)
                     }
                 }
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.let { device ->
+                (this as? CHSesame5)?.let { device ->
                     device.configureLockPosition(
                         device.mechStatus!!.position,
                         device.mechSetting!!.unlockPosition
                     ) {
-                        bind.ssmView.setLock(device)
+                        setLockFromDevice(device, useLidingDoorUi)
                     }
                 }
             }
             bind.magnetZone.setOnClickListener {
-                (mDeviceModel.ssmLockLiveData.value as? CHSesame5)?.magnet {}
+                (this as? CHSesame5)?.magnet {}
+            }
+            bind.magnetZone.setOnLongClickListener {
+                val dev = this ?: return@setOnLongClickListener true
+
+                if (dev.productModel == CHProductModel.SS6Pro) {
+                    useLidingDoorUi = !useLidingDoorUi
+                    updateLockView(dev)
+                    true
+                } else {
+                    false
+                }
             }
         }
     }
 
     @SuppressLint("SetTextI18n")
     fun updateLockView(device: CHDevices) {
-        bind.angleTv.text = device.mechStatus?.position.toString() + "°"
+        val canToggle = device.productModel == CHProductModel.SS6Pro
+        val showLiding = canToggle && useLidingDoorUi
+
+        bind.angleTv.text = (device.mechStatus?.position ?: 0).toString() + "°"
+        bind.ssmView.visibility = if (showLiding) View.GONE else View.VISIBLE
+        bind.slidingDoorView.visibility = if (showLiding) View.VISIBLE else View.GONE
+        bind.magnetZone.visibility = if (device is CHSesame5) View.VISIBLE else View.GONE
+
+        setLockFromDevice(device, showLiding)
+    }
+
+    private fun setLockFromDevice(device: CHDevices, showLiding: Boolean = false) {
         when (device) {
-            is CHSesame2 -> bind.ssmView.setLock(device)
-            is CHSesame5 -> bind.ssmView.setLock(device)
+            is CHSesame2 -> {
+                bind.ssmView.setLock(device)
+            }
+
+            is CHSesame5 -> {
+                if (showLiding) {
+                    bind.slidingDoorView.setLock(
+                        pos = (device.mechStatus?.position ?: 0).toInt(),
+                        lockPos = (device.mechSetting?.lockPosition ?: 0).toInt(),
+                        unlockPos = (device.mechSetting?.unlockPosition ?: 0).toInt()
+                    )
+                } else {
+                    bind.ssmView.setLock(device)
+                }
+            }
         }
     }
 
+    override fun onDestroyView() {
+        useLidingDoorUi = false
+        super.onDestroyView()
+    }
 }
 

@@ -25,17 +25,29 @@ import co.candyhouse.sesame.utils.CHResultState
 import java.util.UUID
 
 enum class CHProductModel {
+    SS2 {
+        override fun productType() = 0 // 設備藍芽廣播
+        override fun deviceModel() = "sesame_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 3"
+        override fun deviceFactory() = CHSesame2Device()
+    },
     WM2 {
         override fun productType() = 1 // 設備藍芽廣播
         override fun deviceModel() = "wm_2"// <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "WiFi Module 2"
         override fun deviceFactory() = CHWifiModule2Device()
     },
-    SS2 {
-        override fun productType() = 0 // 設備藍芽廣播
-        override fun deviceModel() = "sesame_2" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "Sesame 3"
-        override fun deviceFactory() = CHSesame2Device()
+    SesameBot1 {
+        override fun productType() = 2 // 設備藍芽廣播
+        override fun deviceModel() = "ssmbot_1" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bot 1"
+        override fun deviceFactory() = CHSesameBotDevice()
+    },
+    BiKeLock {
+        override fun productType() = 3
+        override fun deviceModel() = "bike_1" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bike 1"
+        override fun deviceFactory() = CHSesameBikeDevice()
     },
     SS4 {
         override fun productType() = 4 // 設備藍芽廣播
@@ -43,32 +55,17 @@ enum class CHProductModel {
         override fun deviceModelName() = "Sesame 4"
         override fun deviceFactory() = CHSesame2Device()
     },
-
-    SesameBot1 {
-        override fun productType() = 2 // 設備藍芽廣播
-        override fun deviceModel() = "ssmbot_1" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "Sesame Bot 1"
-        override fun deviceFactory() = CHSesameBotDevice()
-    },
-
-    BiKeLock {
-        override fun productType() = 3
-        override fun deviceModel() = "bike_1" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "Sesame Bike 1"
-        override fun deviceFactory() = CHSesameBikeDevice()
-    },
-
-    BiKeLock2 {
-        override fun productType() = 6
-        override fun deviceModel() = "bike_2" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "Sesame Bike 2"
-        override fun deviceFactory() = CHSesameBike2Device()
-    },
     SS5 {
         override fun productType() = 5
         override fun deviceModel() = "sesame_5" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame 5"
         override fun deviceFactory() = CHSesame5Device()
+    },
+    BiKeLock2 {
+        override fun productType() = 6
+        override fun deviceModel() = "bike_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bike 2"
+        override fun deviceFactory() = CHSesameBike2Device()
     },
     SS5PRO {
         override fun productType() = 7
@@ -124,7 +121,6 @@ enum class CHProductModel {
         override fun deviceModel() = "sesame_5_us" // <- 絕對不要動 ios/server/android必須一致
         override fun deviceModelName() = "Sesame 5 US"
         override fun deviceFactory() = CHSesame5Device()
-        //  override fun deviceFactory() = CHSesame2Device()//  用 ss4 协议登入 ss5
     },
     SesameBot2 {
         override fun productType() = 17

@@ -18,7 +18,6 @@
 
     <RelativeLayout
         android:id="@+id/err_zone"
-
         android:layout_width="match_parent"
         android:layout_height="53dp"
         android:background="@color/dark_red">
@@ -31,7 +30,7 @@
             android:layout_marginStart="17dp"
             android:gravity="center_vertical"
             android:textColor="@color/white"
-            android:textSize="17dp"
+            android:textSize="17sp"
             tools:text="error" />
 
         <TextView
@@ -45,11 +44,8 @@
             android:lines="1"
             android:scaleType="center"
             android:textColor="@color/white"
-            android:textSize="17dp"
-            tools:text="action"
-
-            />
-
+            android:textSize="17sp"
+            tools:text="action" />
 
     </RelativeLayout>
 
@@ -77,22 +73,21 @@
                     android:background="@color/white" />
 
                 <RelativeLayout
-                    android:layout_marginTop="8dp"
-
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
+                    android:layout_marginTop="8dp"
                     android:background="@color/white">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="17dp"
+                        android:layout_marginStart="17dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:text="@string/device_model"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/device_model"
@@ -105,17 +100,16 @@
                         android:lines="1"
                         android:scaleType="center"
                         android:textColor="@color/text_hint"
-                        android:textSize="17dp"
-                        tools:text="sesame"
-
-                        />
+                        android:textSize="17sp"
+                        tools:text="sesame" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1px"
                         android:layout_alignParentBottom="true"
-                        android:layout_marginLeft="17dp"
+                        android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
+
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -133,22 +127,23 @@
                         android:gravity="center_vertical"
                         android:text="@string/change_sesame_angle"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:paddingRight="12dp"
+                        android:paddingEnd="12dp"
                         android:scaleType="center"
-                        android:src="@drawable/ic_arrow_gray" />
+                        android:src="@drawable/ic_arrow_gray"
+                        tools:ignore="RtlSymmetry" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1px"
                         android:layout_alignParentBottom="true"
-                        android:layout_marginLeft="17dp"
+                        android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
 
                 </RelativeLayout>
@@ -164,30 +159,30 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="17dp"
+                        android:layout_marginStart="17dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:text="History Tag"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/histag_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginRight="12dp"
+                        android:layout_marginEnd="12dp"
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1px"
                         android:layout_alignParentBottom="true"
-                        android:layout_marginLeft="17dp"
+                        android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
                 </RelativeLayout>
 
@@ -207,7 +202,7 @@
                         android:gravity="center_vertical"
                         android:text="@string/OpenSensor_on"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <LinearLayout
                         android:layout_width="200dp"
@@ -224,9 +219,9 @@
                             android:layout_height="wrap_content"
                             android:background="@color/white"
                             android:gravity="center_vertical"
-                            tools:text="1 s"
                             android:textColor="@color/text_hint"
-                            android:textSize="17dp" />
+                            android:textSize="17sp"
+                            tools:text="1 s" />
 
                         <TextView
                             android:id="@+id/ops_second_tv"
@@ -237,11 +232,9 @@
                             android:gravity="center_vertical"
                             android:text="@string/second"
                             android:textColor="@color/text_hint"
-                            android:textSize="17dp"
+                            android:textSize="17sp"
                             android:visibility="gone" />
                     </LinearLayout>
-
-
 
                     <View
                         android:layout_width="match_parent"
@@ -249,6 +242,7 @@
                         android:layout_alignParentBottom="true"
                         android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
+
                 </RelativeLayout>
 
                 <com.weigan.loopview.LoopView
@@ -257,20 +251,17 @@
                     android:layout_height="150dp"
                     android:focusable="true"
                     android:visibility="gone"
-
                     app:awv_initialPosition="0"
                     app:awv_textsize="13" />
 
                 <RelativeLayout
                     android:id="@+id/auto_lock_zone"
-
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
                     android:background="@color/white">
 
                     <TextView
                         android:id="@+id/autolock_title"
-
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
@@ -279,23 +270,22 @@
                         android:gravity="center_vertical"
                         android:text="@string/autolock"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/autolock_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="16dp"
-                        android:layout_toEndOf="@+id/autolock_title"
                         android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@+id/autolock_title"
                         android:background="@color/white"
                         android:gravity="center_vertical"
-                        tools:text="1 s"
                         android:textColor="@color/text_hint"
-                        android:textSize="17dp" />
+                        android:textSize="17sp"
+                        tools:text="1 s" />
 
                     <TextView
-
                         android:id="@+id/second_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -305,19 +295,19 @@
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:text="@string/second"
-
                         android:textColor="@color/text_hint"
-                        android:textSize="17dp"
+                        android:textSize="17sp"
                         android:visibility="gone" />
 
                     <Switch
-                        android:enabled="false"
                         android:id="@+id/autolockSwitch"
                         android:layout_width="wrap_content"
                         android:layout_height="25dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="12dp" />
+                        android:layout_marginEnd="12dp"
+                        android:enabled="false"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
                     <View
                         android:layout_width="match_parent"
@@ -325,6 +315,7 @@
                         android:layout_alignParentBottom="true"
                         android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
+
                 </RelativeLayout>
 
                 <com.weigan.loopview.LoopView
@@ -333,7 +324,6 @@
                     android:layout_height="150dp"
                     android:focusable="true"
                     android:visibility="gone"
-
                     app:awv_initialPosition="0"
                     app:awv_textsize="13" />
 
@@ -353,17 +343,18 @@
                         android:gravity="center_vertical"
                         android:text="@string/ssm_update"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <ImageView
                         android:id="@+id/alert_logo"
                         android:layout_width="26dp"
                         android:layout_height="26dp"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="8dp"
-                        android:visibility="gone"
+                        android:layout_marginStart="8dp"
                         android:layout_toEndOf="@+id/update"
-                        android:src="@drawable/ic_ap_alert" />
+                        android:src="@drawable/ic_ap_alert"
+                        android:visibility="gone" />
+
                     <TextView
                         android:id="@+id/device_version_txt"
                         android:layout_width="wrap_content"
@@ -374,7 +365,7 @@
                         android:background="@color/white"
                         android:gravity="center_vertical"
                         android:textColor="@color/text_hint"
-                        android:textSize="17dp"
+                        android:textSize="17sp"
                         tools:text="1.0.0-aabbcc" />
 
                     <View
@@ -383,6 +374,7 @@
                         android:layout_alignParentBottom="true"
                         android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
+
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -449,7 +441,7 @@
                         android:gravity="center_vertical"
                         android:text="UUID"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
+                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/device_uuid_txt"
@@ -463,6 +455,7 @@
                         android:scaleType="center"
                         android:singleLine="true"
                         android:textColor="@color/text_hint"
+                        tools:ignore="RtlSymmetry"
                         tools:text="111111-1234-4321-1234-1234567812345678" />
 
                     <View
@@ -473,8 +466,6 @@
                         android:background="@color/gray0" />
 
                 </RelativeLayout>
-
-
 
                 <RelativeLayout
                     android:id="@+id/drop_zone"
@@ -492,7 +483,7 @@
                         android:gravity="center_vertical"
                         android:text="@string/trash_key"
                         android:textColor="@color/red"
-                        android:textSize="17dp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
                 </RelativeLayout>
 
@@ -527,6 +518,7 @@
                         android:textSize="17sp"
                         android:textStyle="bold"
                         app:autoSizeTextType="uniform" />
+
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -570,17 +562,16 @@
                 </RelativeLayout>
 
                 <RelativeLayout
+                    android:id="@+id/widget_rl"
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
-                    android:id="@+id/widget_rl"
                     android:background="@color/white">
-
 
                     <LinearLayout
                         android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:orientation="vertical"
-                        android:layout_height="wrap_content">
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -591,19 +582,18 @@
                             android:gravity="center_vertical"
                             android:text="@string/sesame_widget"
                             android:textColor="@color/black"
-                            android:textSize="17dp" />
+                            android:textSize="17sp" />
+
                         <TextView
+                            android:id="@+id/tvSysNotifyWidget"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginStart="17dp"
-                            android:id="@+id/tvSysNotifyWidget"
                             android:gravity="center_vertical"
-
-
                             android:text="@string/android_notifica_permis_on"
                             android:textColor="@color/tv_color_red_gray"
-                            android:textSize="11dp" />
+                            android:textSize="11sp" />
                     </LinearLayout>
 
                     <Switch
@@ -612,7 +602,8 @@
                         android:layout_height="25dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="12dp" />
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
                     <View
                         android:layout_width="match_parent"
@@ -620,11 +611,11 @@
                         android:layout_alignParentBottom="true"
                         android:layout_marginStart="17dp"
                         android:background="@color/gray0" />
+
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/no_hand_zone"
-
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
                     android:background="@color/white">
@@ -638,24 +629,22 @@
                         android:gravity="center_vertical"
                         android:text="@string/auto_mode"
                         android:textColor="@color/black"
-                        android:textSize="17dp" />
-
+                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/auto_open_txt"
-
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="17dp"
                         android:background="@color/white"
-                        android:drawableEnd="@drawable/ic_arrow_gray"
                         android:gravity="center_vertical"
                         android:paddingEnd="12dp"
                         android:textColor="@color/text_hint"
-
-                        android:textSize="17sp" />
+                        android:textSize="17sp"
+                        app:drawableEndCompat="@drawable/ic_arrow_gray"
+                        tools:ignore="RtlSymmetry" />
 
                     <View
                         android:layout_width="match_parent"
@@ -665,8 +654,6 @@
                         android:background="@color/gray0" />
                 </RelativeLayout>
             </LinearLayout>
-
         </ScrollView>
     </co.utils.SmartSwipeRefreshLayout>
-
 </LinearLayout>

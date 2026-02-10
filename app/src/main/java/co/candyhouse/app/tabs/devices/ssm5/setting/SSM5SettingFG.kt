@@ -1,4 +1,3 @@
-
 package co.candyhouse.app.tabs.devices.ssm5.setting
 
 import android.annotation.SuppressLint
@@ -23,27 +22,20 @@ import co.candyhouse.sesame.utils.L
 import co.utils.safeNavigate
 
 class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
-    override fun getViewBinder()= FgSettingMainBinding.inflate(layoutInflater)
+    override fun getViewBinder() = FgSettingMainBinding.inflate(layoutInflater)
 
     @SuppressLint("SimpleDateFormat", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-
-
         val ss5 = mDeviceModel.ssmLockLiveData.value
-        if (ss5 is CHSesame5){
+        if (ss5 is CHSesame5) {
             val second = ss5.opsSetting?.opsLockSecond?.toInt() ?: 65535
-            
             bind.opslockStatus.text = opsFindSettinStringByValue(second)
             bind.opslockStatus.visibility = View.VISIBLE
-          
             bind.opsSecondTv.visibility = if ((second == 0) || (second == 65535)) View.GONE else View.VISIBLE
 
             var isWheelViewVisible = false
-            
             bind.opsensorZone.setOnClickListener {
                 if (isWheelViewVisible) {
-                    
                     bind.opslockWheelview.visibility = View.GONE
                     bind.swiperefresh.isEnabled = true
                 } else {
@@ -58,18 +50,18 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             onUIDeviceStatus(mDeviceModel.ssmLockLiveData.value!!.deviceStatus)
             bind.noHandZone.setOnClickListener { findNavController().navigate(R.id.action_to_NoHandLockFG) }
 
-            bind. wheelview.apply {
+            bind.wheelview.apply {
                 setItems(getSeconds())
                 setInitPosition(0)
                 setListener { selected ->
                     val autoLockSecond = secondSettingValue[selected]
                     ss5.autolock(autoLockSecond) { res ->
                         res.onSuccess {
-                            bind.       wheelview.post {
+                            bind.wheelview.post {
                                 bind.autolockStatus.text = findSettinStringByValue(autoLockSecond)
                                 bind.autolockStatus.visibility = if (autoLockSecond == 0) View.GONE else View.VISIBLE
                                 bind.secondTv.visibility = if (autoLockSecond == 0) View.GONE else View.VISIBLE
-                                bind.       wheelview.visibility = View.GONE
+                                bind.wheelview.visibility = View.GONE
                                 bind.swiperefresh.isEnabled = true
                             }
                         }
@@ -84,7 +76,7 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
                     val opsLockSecond = opsSecondSettingValue[selected]
                     ss5.opSensorControl(opsLockSecond) { res ->
                         res.onSuccess {
-                            if (isAdded&&!isDetached){
+                            if (isAdded && !isDetached) {
                                 bind.opslockWheelview.post {
                                     bind.opslockStatus.text = opsFindSettinStringByValue(opsLockSecond)
                                     bind.opsSecondTv.visibility = if ((opsLockSecond == 0) || (opsLockSecond == 65535)) View.GONE else View.VISIBLE
@@ -92,7 +84,6 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
                                     bind.swiperefresh.isEnabled = true
                                 }
                             }
-
                         }
                     }
                 }
@@ -103,16 +94,15 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             showBatteryLevel(bind.battery, ss5)
         }
         bind.autolockStatus.setOnClickListener {
-            L.d("ischecaksa","isChecked:"+bind.autolockSwitch.isChecked)
-            if (bind.autolockSwitch.isChecked){
-                bind.  wheelview.visibility = if (bind.  wheelview.visibility!=View.VISIBLE) View.VISIBLE else View.GONE
+            L.d("ischecaksa", "isChecked:" + bind.autolockSwitch.isChecked)
+            if (bind.autolockSwitch.isChecked) {
+                bind.wheelview.visibility = if (bind.wheelview.visibility != View.VISIBLE) View.VISIBLE else View.GONE
             }
         }
 
         bind.swiperefresh.addExcludedView(bind.opslockWheelview)
         bind.swiperefresh.addExcludedView(bind.wheelview)
-
-    } //end view created
+    }
 
     override fun onResume() {
         super.onResume()
@@ -122,33 +112,29 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
         if (status.value == CHDeviceLoginStatus.logined) {
             val ss5 = mDeviceModel.ssmLockLiveData.value
             if (ss5 is CHSesame5) {
-
                 bind.autolockSwitch.apply {
                     post {
                         bind.autolockSwitch.isEnabled = true
                         bind.autolockStatus.text = findSettinStringByValue(ss5.mechSetting!!.autoLockSecond.toInt())
-                        bind.autolockStatus.visibility = if ((ss5.mechSetting?.autoLockSecond?.toInt()
-                                ?: 0) == 0) View.GONE else View.VISIBLE
-                        bind.   secondTv.visibility = if ((ss5.mechSetting?.autoLockSecond?.toInt()
-                                ?: 0) == 0) View.GONE else View.VISIBLE
+                        bind.autolockStatus.visibility = if ((ss5.mechSetting?.autoLockSecond?.toInt() ?: 0) == 0) View.GONE else View.VISIBLE
+                        bind.secondTv.visibility = if ((ss5.mechSetting?.autoLockSecond?.toInt() ?: 0) == 0) View.GONE else View.VISIBLE
                         bind.autolockSwitch.isChecked = (ss5.mechSetting?.autoLockSecond?.toInt() ?: 0) != 0
                         setOnCheckedChangeListener { buttonView, isChecked ->
-                            bind.    wheelview.visibility = if (isChecked) View.VISIBLE else View.GONE
+                            bind.wheelview.visibility = if (isChecked) View.VISIBLE else View.GONE
                             bind.swiperefresh.isEnabled = !isChecked
                             if (!isChecked) {
                                 bind.autolockStatus.visibility = View.GONE
-                                bind.  secondTv.visibility = View.GONE
+                                bind.secondTv.visibility = View.GONE
                                 ss5.autolock(0) { res ->
-                                    bind.  wheelview.post {
+                                    bind.wheelview.post {
                                         res.onSuccess {
-                                            if (isAdded&&!isDetached){
+                                            if (isAdded && !isDetached) {
                                                 bind.wheelview.let {
                                                     it.setCurrentPosition(0)
                                                     it.setInitPosition(0)
                                                     it.setItems(getSeconds())
                                                 }
                                             }
-
                                         }
                                     }
                                 }
@@ -163,5 +149,4 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             bind.autolockSwitch.isEnabled = false
         }
     }
-
 }
