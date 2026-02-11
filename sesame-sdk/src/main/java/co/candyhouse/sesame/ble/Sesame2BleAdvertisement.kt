@@ -74,7 +74,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                 }
 
                 CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SSMOpenSensor, CHProductModel.SSMTouchPro, CHProductModel.SSMTouch2Pro, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.BiKeLock2, CHProductModel.BiKeLock3, CHProductModel.BLEConnector, CHProductModel.Hub3, CHProductModel.Remote, CHProductModel.RemoteNano, CHProductModel.SS5US, CHProductModel.SesameBot2, CHProductModel.SSMFace, CHProductModel.SSMFace2, CHProductModel.SSMFacePro,
-                CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceAI,  CHProductModel.SSMFace2AI, CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI, CHProductModel.SS6Pro, CHProductModel.SSMOpenSensor2, CHProductModel.SSM_MIWA -> return try {
+                CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceAI,  CHProductModel.SSMFace2AI, CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI, CHProductModel.SS6Pro, CHProductModel.SS6ProSLiDingDoor, CHProductModel.SSMOpenSensor2, CHProductModel.SSM_MIWA -> return try {
 //                    L.d("hcia", "[ss5] isRegistered:" + isRegistered)
 //                    L.d("hcia", "[ss5] advBytes:" + advBytes.toHexString())
 //                    L.d("hcia", "[ss5] deviceName:" + deviceName)

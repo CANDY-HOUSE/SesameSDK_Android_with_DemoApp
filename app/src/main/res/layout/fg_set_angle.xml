@@ -65,7 +65,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <co.candyhouse.app.tabs.devices.ssm2.setting.angle.LidingDoorView
+                <co.candyhouse.app.tabs.devices.ssm2.setting.angle.SlidingDoorView
                     android:id="@+id/slidingDoorView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

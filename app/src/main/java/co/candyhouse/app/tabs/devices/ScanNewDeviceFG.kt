@@ -44,21 +44,15 @@ import pub.devrel.easypermissions.EasyPermissions
 @SuppressLint("SetTextI18n")
 class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
 
+    private val tag = "ScanNewDeviceFG"
+
     private var mDeviceList = ArrayList<CHDevices>()
     override fun getViewBinder() = FgRgDeviceBinding.inflate(layoutInflater)
-
-    private var isDestory = false
-
-    override fun onDestroy() {
-        super.onDestroy()
-        isDestory = true
-    }
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getPermissions()
-        isDestory = false
         (context?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter.enable()
 
         bind.topBackImg.setOnClickListener { findNavController().navigateUp() }
@@ -81,37 +75,44 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                             data.getNickname()
                         itemView.setOnClickListener {
                             data.connect { }
-                            doRegisterDevice(data)
-                            data.delegate = object : CHDeviceStatusDelegate {
-                                override fun onBleDeviceStatusChanged(
-                                    device: CHDevices,
-                                    status: CHDeviceStatus,
-                                    shadowStatus: CHDeviceStatus?
-                                ) {
-                                    if (status == CHDeviceStatus.ReadyToRegister) {
-                                        doRegisterDevice(device)
-                                    }
-                                }
-                            }
+                            safeRegister(data)
                         }
                     }
                 }
             }
         }
         CHBleManager.delegate = object : CHBleManagerDelegate {
+            @SuppressLint("NotifyDataSetChanged")
             override fun didDiscoverUnRegisteredCHDevices(devices: List<CHDevices>) {
                 mDeviceList.clear()
                 mDeviceList.addAll(devices.filter { it.rssi != null })
                 try {
                     mDeviceList.sortBy { it.getDistance() }
                 } catch (e: IllegalArgumentException) {
-                    L.d("didDiscoverUnRegisteredCHDevices", "Sorting error: ${e.message}")
+                    L.d(tag, "Sorting error: ${e.message}")
                 }
-
                 mDeviceList.firstOrNull()?.connect { }
-                bind.leaderboardList.post((bind.leaderboardList.adapter as GenericAdapter<*>)::notifyDataSetChanged)
+                bind.leaderboardList.post {
+                    (bind.leaderboardList.adapter as GenericAdapter<*>).notifyDataSetChanged()
+                }
             }
         }
+    }
+
+    private fun safeRegister(device: CHDevices) {
+        device.delegate = object : CHDeviceStatusDelegate {
+            override fun onBleDeviceStatusChanged(
+                device: CHDevices,
+                status: CHDeviceStatus,
+                shadowStatus: CHDeviceStatus?
+            ) {
+                if (status == CHDeviceStatus.ReadyToRegister) {
+                    safeRegister(device)
+                }
+            }
+        }
+
+        doRegisterDevice(device)
     }
 
     private fun getPermissions() {
@@ -125,12 +126,6 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
             ) {
                 CHBleManager.enableScan {}
             } else {
-                L.d("hcia", "Build.VERSION.SDK_INT:" + Build.VERSION.SDK_INT)
-                L.d("hcia", "Build.VERSION_CODES.S:" + Build.VERSION_CODES.S)
-                L.d(
-                    "hcia",
-                    "(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S):" + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                )
                 EasyPermissions.requestPermissions(
                     this,
                     getString(R.string.launching_why_need_location_permission),
@@ -159,25 +154,20 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
 
             }
         }
-
     }
 
     private fun doRegisterDevice(device: CHDevices) {
-        if (!isAdded || isDetached) return // 检查 Fragment 是否已附加到 Activity
-
+        if (!isAdded || isDetached) return
         device.register {
             it.onSuccess {
+                device.delegate = null
                 if (isAdded && !isDetached) {
                     device.setHistoryTag(getHistoryTag()) {}
                     device.setLevel(0)
                     device.setIsJustRegister(true)
                     mDeviceViewModel.updateDevices()
                     CHAPIClientBiz.putKey(
-                        cheyKeyToUserKey(
-                            device.getKey(),
-                            device.getLevel(),
-                            device.getNickname()
-                        )
+                        cheyKeyToUserKey(device.getKey(), device.getLevel(), device.getNickname())
                     ) {}
                     activity?.runOnUiThread {
                         mDeviceViewModel.ssmLockLiveData.value = device
@@ -187,13 +177,10 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                     }
                 }
             }
-            it.onFailure {
-                if (it is ApiClientException) {
-                    if (it.statusCode == 0) {
-                        it.errorMessage?.let { message ->
-                            toastMSG(message)
-                        }
-                    }
+            it.onFailure { err ->
+                device.delegate = null
+                if (err is ApiClientException && err.statusCode == 0) {
+                    err.errorMessage?.let { message -> toastMSG(message) }
                 }
             }
         }
@@ -206,6 +193,7 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                     device.configureLockPosition(0, 90) {}
                     safeNavigate(R.id.action_to_SSM2SetAngleFG)
                 }
+
                 is CHSesame5 -> safeNavigate(R.id.action_to_SSM2SetAngleFG)
                 is CHHub3 -> {
                     val config = WebViewConfig(
@@ -217,6 +205,7 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                     )
                     safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
+
                 is CHWifiModule2 -> safeNavigate(R.id.to_WM2SettingFG)
                 is CHSesameBiometricDevice -> safeNavigate(actionId = R.id.to_SesameTouchProSettingFG)
             }

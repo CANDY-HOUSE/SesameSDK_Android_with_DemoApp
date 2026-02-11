@@ -15,8 +15,6 @@ import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.db.model.historyTagBLE
 import co.candyhouse.sesame.db.model.historyTagIOT
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
@@ -27,8 +25,10 @@ import co.candyhouse.sesame.open.device.CHSesame5OpsSettings
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
@@ -117,6 +117,17 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 mechSetting?.lockPosition = lockTarget
                 mechSetting?.unlockPosition = unlockTarget
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } else {
+                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
+            }
+        }
+    }
+
+    override fun sendAdvProductTypeCommand(data: ByteArray, result: CHResult<CHEmpty>) {
+        val cmd = SesameOS3Payload(SesameItemCode.SS3_ITEM_CODE_SET_ADV_PRODUCT_TYPE.value, data)
+        sendCommand(cmd, DeviceSegmentType.cipher) { res ->
+            if (res.cmdResultCode == SesameResultCode.success.value) {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             } else {
                 result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
