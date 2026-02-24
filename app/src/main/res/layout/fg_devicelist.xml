@@ -11,19 +11,10 @@
         android:layout_height="40dp">
 
         <TextView
-            android:id="@+id/ble_status_txt"
+            android:id="@+id/lockToggleTest"
             android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/iot_status_txt"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:layout_toEndOf="@+id/ble_status_txt"
-            android:gravity="center"
-            android:visibility="gone" />
+            android:layout_centerInParent="true" />
 
         <RelativeLayout
             android:id="@+id/right_icon"

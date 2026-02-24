@@ -1,7 +1,6 @@
 package co.candyhouse.app.tabs.devices
 
 import android.content.Context
-import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -15,6 +14,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.tabs.HomeFragment
+import co.candyhouse.app.tabs.devices.locktest.LockToggleTestBottomSheet
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -88,9 +88,18 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHDeviceManager.isRefresh.set(true)
             mDeviceViewModel.refreshDevices()
         }
+        bind.lockToggleTest.setOnLongClickListener {
+            showLockToggleTestDialog()
+            true
+        }
 
         setupSearchBehavior()
         setupSearchEditTextListener()
+    }
+
+    private fun showLockToggleTestDialog() {
+        if (childFragmentManager.findFragmentByTag(LockToggleTestBottomSheet.TAG) != null) return
+        LockToggleTestBottomSheet.newInstance().show(childFragmentManager, LockToggleTestBottomSheet.TAG)
     }
 
     private fun setupSearchBehavior() {
@@ -305,7 +314,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro, CHProductModel.SSMFace,
             CHProductModel.SSMFace2, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI, CHProductModel.SSMFaceAI,
-            CHProductModel.SSMFace2AI,CHProductModel.SSMOpenSensor2, CHProductModel.SSMTouch2Pro -> safeNavigate(
+            CHProductModel.SSMFace2AI, CHProductModel.SSMOpenSensor2, CHProductModel.SSMTouch2Pro -> safeNavigate(
                 R.id.to_SesameTouchProSettingFG
             )
         }
