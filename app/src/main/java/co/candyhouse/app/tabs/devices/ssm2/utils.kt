@@ -289,6 +289,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.WM2 -> null
         CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
         CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
+        CHProductModel.SesameBot3 -> ""
         CHProductModel.BiKeLock -> "sesamebike1_21_3_d7162a"
         CHProductModel.BiKeLock2 -> "sesamebike2_30_6_990e7f"
         CHProductModel.BiKeLock3 -> "sesamebike3_30_33_3e260b"
@@ -360,6 +361,7 @@ fun CHProductModel.modelName(): String {
         CHProductModel.RemoteNano -> CHDeviceManager.app.getString(R.string.CHRemoteNano)
         CHProductModel.SS5US -> CHDeviceManager.app.getString(R.string.Sesame5us)
         CHProductModel.SesameBot2 -> CHDeviceManager.app.getString(R.string.SesameBot2)
+        CHProductModel.SesameBot3 -> CHDeviceManager.app.getString(R.string.SesameBot3)
         CHProductModel.SSMFace -> CHDeviceManager.app.getString(R.string.SSMFace)
         CHProductModel.SSMFacePro -> CHDeviceManager.app.getString(R.string.SSMFacePro)
         CHProductModel.SSMFaceProAI -> CHDeviceManager.app.getString(R.string.SSMFaceProAI)

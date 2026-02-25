@@ -310,7 +310,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
             }
 
-            CHProductModel.SesameBot2 -> safeNavigate(R.id.to_SesameBot2SettingFG)
+            CHProductModel.SesameBot2, CHProductModel.SesameBot3 -> safeNavigate(R.id.to_SesameBot2SettingFG)
             CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro, CHProductModel.SSMFace,
             CHProductModel.SSMFace2, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI, CHProductModel.SSMFaceAI,
