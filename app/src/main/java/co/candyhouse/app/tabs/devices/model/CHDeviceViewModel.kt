@@ -145,10 +145,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     private fun receiveKeysFromServer(it: Result<CHResultState<Array<CHUserKey>>>) {
         it.onSuccess { result ->
-            if (result.data.isEmpty()) {
-                updateDevices()
-                return@onSuccess
-            }
             viewModelScope.launch {
                 CHDeviceWrapperManager.updateUserKeys(result.data.toList())
 

@@ -148,7 +148,7 @@ object CHAPIClientBiz {
     fun postSS2History(deviceID: String, hisHex: String, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.feedHistory(CHSSMHisUploadRequest(deviceID, hisHex)) }
 
-    fun postSS5History(deviceID: String, hisHex: String, onResponse: CHResult<Any>) =
+    fun postOS3History(deviceID: String, hisHex: String, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.feedHistory(CHSS5HisUploadRequest(deviceID, hisHex, "5")) }
 
     internal fun cmdSesame(cmd: SesameItemCode, ss2: CHDevices, historytag: ByteArray, onResponse: CHResult<CHEmpty>) =

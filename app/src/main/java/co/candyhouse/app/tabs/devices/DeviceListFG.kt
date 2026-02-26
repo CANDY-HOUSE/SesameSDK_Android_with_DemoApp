@@ -275,15 +275,28 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                         scene = "history",
                         params = mapOf(
                             "deviceUUID" to device.deviceId.toString().uppercase(),
-                            "where" to "device_history_old"
+                            "where" to "device_history_ss2_lock"
                         )
                     )
                     safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
             }
-
             CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
-            CHProductModel.BiKeLock, CHProductModel.BiKeLock2, CHProductModel.BiKeLock3 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
+            CHProductModel.BiKeLock, CHProductModel.BiKeLock3 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
+            CHProductModel.BiKeLock2 -> {
+                if (device.getLevel() == 2) {
+                    safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
+                } else {
+                    val config = WebViewConfig(
+                        scene = "history",
+                        params = mapOf(
+                            "deviceUUID" to device.deviceId.toString().uppercase(),
+                            "where" to "device_history_bike"
+                        )
+                    )
+                    safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
+                }
+            }
             CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro, CHProductModel.SS6ProSLiDingDoor, CHProductModel.BLEConnector, CHProductModel.SSM_MIWA -> {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)
@@ -292,13 +305,12 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                         scene = "history",
                         params = mapOf(
                             "deviceUUID" to device.deviceId.toString().uppercase(),
-                            "where" to "device_history_new"
+                            "where" to "device_history_ss5_lock"
                         )
                     )
                     safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
             }
-
             CHProductModel.Hub3 -> {
                 val config = WebViewConfig(
                     scene = "wifi-module",

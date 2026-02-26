@@ -261,13 +261,13 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             }
 
             is CHSesameBike2 -> {
-                device.unlock {
+                device.unlock(historytag = UserUtils.getUserIdWithByte()) {
                     it.onFailure {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
                                 if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
-                                    device.unlock {}
+                                    device.unlock(historytag = UserUtils.getUserIdWithByte()) {}
                                     return@launch
                                 }
                             }

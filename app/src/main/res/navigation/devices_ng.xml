@@ -233,6 +233,9 @@
         <action
             android:id="@+id/action_mainRoomSS5FG_to_SSM5SettingFG"
             app:destination="@id/SSM5SettingFG" />
+        <action
+            android:id="@+id/action_deviceListPG_to_sesameBikeSettingFG"
+            app:destination="@id/sesameBikeSettingFG" />
     </fragment>
 
 </navigation>

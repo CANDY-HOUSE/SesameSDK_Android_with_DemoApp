@@ -38,16 +38,11 @@ import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toReverseBytes
 import co.candyhouse.sesame.utils.toUInt32ByteArray
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.util.UUID
 import kotlin.math.abs
 
 @SuppressLint("MissingPermission")
 internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     override var hub3Mac: String? = null
-
-    private lateinit var HistoryTagWithUUID: ByteArray
 
     /** 其他功能: history  */
     var isHistory: Boolean = false
@@ -172,27 +167,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         }
     }
 
-    private fun uuidToByteArray(uuid: UUID): ByteArray {
-        val bb = ByteBuffer.wrap(ByteArray(16))
-        bb.putLong(uuid.mostSignificantBits)
-        bb.putLong(uuid.leastSignificantBits)
-        return bb.array()
-    }
-
-    private fun buildHistoryTagWithUUID(): ByteArray? {
-        // 将UUID转换为ByteArray
-        val uuidByteArray = deviceId?.let { uuidToByteArray(it) }
-        HistoryTagWithUUID = ByteArrayOutputStream().apply {
-            write(uuidByteArray)
-        }.toByteArray()
-        L.d("history", HistoryTagWithUUID.toHexString())
-        return HistoryTagWithUUID
-    }
-
     override fun unlock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (historytag == null) {
-            buildHistoryTagWithUUID()
-        }
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
@@ -211,9 +186,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     }
 
     override fun lock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (historytag == null) {
-            buildHistoryTagWithUUID()
-        }
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAPIClientBiz.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
@@ -308,7 +280,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 // 改为 uuid 格式的 hisTag， APP不再兼容旧固件的历史记录， 若有客诉历史记录问题， 请升级锁的固件。
                 if (isConnectNET && !isConnectedByWM2) {
-                    CHAPIClientBiz.postSS5History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
+                    CHAPIClientBiz.postOS3History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
                         // 成功上传历史记录到云端后， 通过蓝牙删除这条历史记录， SS5固件会在它的Flash里删除掉这条历史记录。
                         val recordId = hisPaylaod.sliceArray(0..3)
                         it.onSuccess {

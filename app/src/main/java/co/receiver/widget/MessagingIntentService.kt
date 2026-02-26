@@ -69,7 +69,7 @@ class MessagingIntentService : IntentService("MyService") {
             }
             is CHSesameBike2 -> {
                 if (!open) {
-                    device.unlock { }
+                    device.unlock(historytag = UserUtils.getUserIdWithByte()) { }
                     isPerforme = true
                 }
             }
@@ -107,7 +107,7 @@ class MessagingIntentService : IntentService("MyService") {
                                     (device as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) { }
                                     (device as? CHSesame2)?.toggle() { }
                                     (device as? CHSesameBike)?.unlock { }
-                                    (device as? CHSesameBike2)?.unlock { }
+                                    (device as? CHSesameBike2)?.unlock(historytag = UserUtils.getUserIdWithByte()) { }
                                     (device as? CHSesameBot)?.click { }
                                     (device as? CHSesameBot2)?.click { }
                                 }

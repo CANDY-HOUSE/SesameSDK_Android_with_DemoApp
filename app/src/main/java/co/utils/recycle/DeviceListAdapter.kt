@@ -298,7 +298,7 @@ class DeviceListAdapter(
         private fun handleBikeBotViewClick(device: CHDevices) {
             when (device) {
                 is CHSesameBike -> device.unlock { it.onSuccess { } }
-                is CHSesameBike2 -> device.unlock { it.onSuccess { } }
+                is CHSesameBike2 -> device.unlock(historytag = UserUtils.getUserIdWithByte()) { it.onSuccess { } }
                 is CHSesameBot -> device.click { it.onSuccess { } }
                 is CHSesameBot2 -> {
                     val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"

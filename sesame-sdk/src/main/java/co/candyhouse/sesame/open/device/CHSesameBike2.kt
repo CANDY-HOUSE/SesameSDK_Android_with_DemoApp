@@ -3,11 +3,11 @@ package co.candyhouse.sesame.open.device
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.bytesToShort
-import java.util.*
 
 interface CHSesameBike2 : CHSesameLock {
     var mechSetting: CHSesame5MechSettings?
-    fun unlock(tag: ByteArray? = null, result: CHResult<CHEmpty>)
+    fun unlock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
+    fun onHistoryReceived(historyData: ByteArray){}
 }
 
 class CHSesameBike2MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {

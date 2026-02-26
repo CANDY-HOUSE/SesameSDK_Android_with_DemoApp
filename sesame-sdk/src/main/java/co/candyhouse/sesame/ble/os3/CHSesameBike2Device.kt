@@ -6,14 +6,15 @@ import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
 import co.candyhouse.sesame.ble.SSM3PublishPayload
 import co.candyhouse.sesame.ble.SesameItemCode
+import co.candyhouse.sesame.ble.SesameResultCode
 import co.candyhouse.sesame.ble.isBleAvailable
 import co.candyhouse.sesame.ble.os3.base.CHSesameOS3
 import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.db.model.historyTagBLE
+import co.candyhouse.sesame.db.model.historyTagIOT
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
@@ -24,13 +25,16 @@ import co.candyhouse.sesame.open.device.CHSesameBike2MechStatus
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.isInternetAvailable
+import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
 
@@ -41,6 +45,19 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
         set(value) {
             field = value
             parceADV(value)
+            value?.let {
+                isHistory = it.adv_tag_b1
+            }
+        }
+
+    var isHistory: Boolean = false
+        set(value) {
+            if (deviceStatus.value == CHDeviceLoginStatus.logined) {
+                field = value
+                if (field) {
+                    readHistoryCommand()
+                }
+            }
         }
 
     override var mechSetting: CHSesame5MechSettings? = null
@@ -79,14 +96,13 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
     }
 
     /** 指令發送  */
-    override fun unlock(tag: ByteArray?, result: CHResult<CHEmpty>) {
+    override fun unlock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
         if (deviceStatus.value == CHDeviceLoginStatus.logined && isBleAvailable(result)) {
-            sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, byteArrayOf()), DeviceSegmentType.cipher) {
+            sendCommand(SesameOS3Payload(SesameItemCode.unlock.value, sesame2KeyData!!.historyTagBLE(historytag)), DeviceSegmentType.cipher) {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             }
         } else {
-            CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, byteArrayOf(), result)
-
+            CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
         }
     }
 
@@ -163,6 +179,33 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
         CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+    }
+
+    private fun readHistoryCommand() {
+        val isConnectNET = isInternetAvailable()
+        sendCommand(SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)), DeviceSegmentType.cipher) { res ->
+            L.d("CHSesameBike2Device", "[ResultCode]:" + res.cmdResultCode)
+            val hisPaylaod = res.payload
+            L.d("CHSesameBike2Device", "[hisPaylaod]:${this.deviceId.toString().uppercase()} ${hisPaylaod.toHexString()}")
+            onHistoryReceived(hisPaylaod)
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                if (isConnectNET && !isConnectedByWM2) {
+                    CHAPIClientBiz.postOS3History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
+                        // 成功上传历史记录到云端后， 通过蓝牙删除这条历史记录， 固件会在它的Flash里删除掉这条历史记录。
+                        val recordId = hisPaylaod.sliceArray(0..3)
+                        it.onSuccess {
+                            L.d("CHSesameBike2Device", "[+]SSM2_ITEM_CODE_HISTORY_DELETE: ${recordId.toBigLong().toInt()}")
+                            sendCommand(SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId), DeviceSegmentType.cipher) { res ->
+                                L.d("CHSesameBike2Device", "[-]SSM2_ITEM_CODE_HISTORY_DELETE: ${res.cmdResultCode}")
+                            }
+                        }
+                        it.onFailure { exception ->
+                            L.d("CHSesameBike2Device", "[history]postSS5History: $exception")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /** 指令接收 */
