@@ -2,8 +2,11 @@ package co.candyhouse.app.tabs.devices.locktest
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Looper
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +14,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -30,10 +34,12 @@ import co.utils.UserUtils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable.isActive
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.util.UUID
 
 /**
@@ -52,14 +58,24 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
 
     private var selected: CHDevices? = null
     private var intervalSec: Int = 1
-    private var lockCount = 0
-    private var unlockCount = 0
+    private var toggleCount = 0
+
     private var isRunning = false
     private var toggleJob: Job? = null
     private var lastStatus: CHDeviceStatus? = null
 
+    private val prefs by lazy {
+        requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
     companion object {
         const val TAG = "LockToggleTestDialog"
+
+        private const val PREFS_NAME = "lock_toggle_test_prefs"
+        private const val KEY_SELECTED_ID = "selected_id"
+        private const val KEY_TOGGLE_COUNT = "toggle_count"
+        private const val KEY_INTERVAL_PREFIX = "interval_"
+
         fun newInstance(): LockToggleTestBottomSheet = LockToggleTestBottomSheet()
     }
 
@@ -76,6 +92,7 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         adapter = LockAdapter(
             onSelect = ::onDeviceSelected,
             onPlus = ::onPlus,
@@ -85,7 +102,10 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
         binding.rvLocks.layoutManager = LinearLayoutManager(requireContext())
         binding.rvLocks.adapter = adapter
 
-        binding.btnClose.setOnClickListener { dismiss() }
+        binding.btnClose.setOnClickListener {
+            stopTest()
+            dismiss()
+        }
         binding.btnStart.setOnClickListener { startTest() }
         binding.btnStop.setOnClickListener { stopTest() }
         binding.btnReset.setOnClickListener { resetTest() }
@@ -93,8 +113,11 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
         val locks = getAllSesame5Locks()
         adapter.submitList(locks)
 
-        if (locks.isNotEmpty()) selected = locks.first()
+        restoreFromPrefs(locks)
+
         adapter.setSelected(selected)
+        selected?.let { intervalSec = adapter.getInterval(it) }
+
         refreshSubtitle()
         refreshStats()
         refreshButtonState()
@@ -106,7 +129,6 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
                 val d = dialogInterface as BottomSheetDialog
                 val sheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
                     ?: return@setOnShowListener
-
                 sheet.setBackgroundColor(Color.TRANSPARENT)
                 sheet.elevation = 0f
                 sheet.clipToOutline = false
@@ -123,9 +145,7 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
                 behavior.skipCollapsed = true
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
-                ViewCompat.setOnApplyWindowInsetsListener(sheet) { _, insets ->
-                    insets
-                }
+                ViewCompat.setOnApplyWindowInsetsListener(sheet) { _, insets -> insets }
                 ViewCompat.requestApplyInsets(sheet)
             }
         }
@@ -142,48 +162,59 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
     private fun onDeviceSelected(device: CHDevices) {
         if (isRunning) return
         selected = device
-        intervalSec = adapter.getInterval(device)  // 切换时同步该锁的间隔
+
+        intervalSec = adapter.getInterval(device)
         adapter.setSelected(device)
+
+        persistSelected(device.deviceId!!)
         refreshSubtitle()
     }
 
     private fun onPlus() {
         if (isRunning) return
-        intervalSec = adapter.getInterval(selected) + 1
+        val sel = selected ?: return
+        intervalSec = adapter.getInterval(sel) + 1
         adapter.setIntervalForSelected(intervalSec)
+        persistInterval(sel.deviceId!!, intervalSec)
         refreshSubtitle()
     }
 
     private fun onMinus() {
         if (isRunning) return
-        intervalSec = (adapter.getInterval(selected) - 1).coerceAtLeast(1)
+        val sel = selected ?: return
+        intervalSec = (adapter.getInterval(sel) - 1).coerceAtLeast(1)
         adapter.setIntervalForSelected(intervalSec)
+        persistInterval(sel.deviceId!!, intervalSec)
         refreshSubtitle()
     }
 
     @SuppressLint("SetTextI18n")
     private fun refreshSubtitle() {
         val name = selected?.let { (it as? CHSesame5)?.getNickname() } ?: "未选择"
-        binding.tvSubtitle.text = "$name, ${intervalSec}s toggle"
+        safeUi {
+            binding.tvSubtitle.text = "$name, ${intervalSec}s toggle"
+        }
     }
 
     @SuppressLint("SetTextI18n")
     private fun refreshStats() {
-        binding.tvStats.text = "开锁: $unlockCount 次  |  关锁: $lockCount 次"
+        safeUi {
+            binding.tvStats.text = "开关锁次数: $toggleCount 次"
+        }
     }
 
     private fun refreshButtonState() {
         val running = isRunning
+        safeUi {
+            binding.btnStart.isEnabled = !running
+            binding.btnStart.alpha = if (running) 0.5f else 1f
 
-        binding.btnStart.isEnabled = !running
-        binding.btnStart.alpha = if (running) 0.5f else 1f
+            binding.btnStop.isEnabled = running
+            binding.btnStop.alpha = if (running) 1f else 0.5f
 
-        binding.btnStop.isEnabled = running
-        binding.btnStop.alpha = if (running) 1f else 0.5f
-
-        binding.btnReset.isEnabled = !running
-        binding.btnReset.alpha = if (running) 0.5f else 1f
-
+            binding.btnReset.isEnabled = !running
+            binding.btnReset.alpha = if (running) 0.5f else 1f
+        }
         adapter.isRunning = isRunning
     }
 
@@ -201,6 +232,9 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
         isRunning = true
         refreshButtonState()
 
+        intervalSec = adapter.getInterval(device)
+        refreshSubtitle()
+
         lastStatus = device.deviceStatus
 
         device.delegate = object : CHDeviceStatusDelegate {
@@ -213,27 +247,24 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
                 if (status == lastStatus) return
                 lastStatus = status
 
-                when (status) {
-                    CHDeviceStatus.Locked -> {
-                        lockCount++
-                        refreshStats()
-                    }
-
-                    CHDeviceStatus.Unlocked -> {
-                        unlockCount++
-                        refreshStats()
-                    }
-
-                    else -> Unit
+                if (status == CHDeviceStatus.Locked || status == CHDeviceStatus.Unlocked) {
+                    toggleCount += 1
+                    persistToggleCount(toggleCount)
+                    safeUi { refreshStats() }
                 }
             }
         }
 
         toggleJob?.cancel()
+
         toggleJob = viewLifecycleOwner.lifecycleScope.launch {
+            val intervalMs = intervalSec * 1000L
+            var next = SystemClock.elapsedRealtime()
             while (isActive && isRunning) {
+                next += intervalMs
                 device.toggle(historytag = UserUtils.getUserIdWithByte()) {}
-                delay(intervalSec * 1000L)
+                val delayMs = next - SystemClock.elapsedRealtime()
+                if (delayMs > 0) delay(delayMs) else yield()
             }
         }
     }
@@ -244,6 +275,7 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         isRunning = false
+
         toggleJob?.cancel()
         toggleJob = null
 
@@ -255,22 +287,70 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
 
     private fun resetTest() {
         if (isRunning) return
-        intervalSec = 1
-        lockCount = 0
-        unlockCount = 0
 
         val locks = getAllSesame5Locks()
-        selected = locks.firstOrNull()
 
+        intervalSec = 1
+        toggleCount = 0
+        selected = locks.firstOrNull()
         adapter.resetAll()
         adapter.setSelected(selected)
+
+        prefs.edit {
+            remove(KEY_SELECTED_ID)
+            putInt(KEY_TOGGLE_COUNT, 0)
+
+            locks.forEach { d ->
+                remove(KEY_INTERVAL_PREFIX + d.deviceId.toString())
+            }
+        }
 
         refreshSubtitle()
         refreshStats()
         refreshButtonState()
     }
 
-    // ==================== Adapter ====================
+    private fun restoreFromPrefs(locks: List<CHDevices>) {
+        toggleCount = prefs.getInt(KEY_TOGGLE_COUNT, 0)
+
+        val selectedIdStr = prefs.getString(KEY_SELECTED_ID, null)
+        val restoredSelected = selectedIdStr?.let { idStr ->
+            locks.firstOrNull { it.deviceId.toString() == idStr }
+        }
+        selected = restoredSelected ?: locks.firstOrNull()
+
+        locks.forEach { d ->
+            val sec = prefs.getInt(KEY_INTERVAL_PREFIX + d.deviceId.toString(), 1)
+            adapter.setInterval(d.deviceId!!, sec)
+        }
+
+        selected?.let { intervalSec = adapter.getInterval(it) }
+    }
+
+    private fun persistSelected(id: UUID) {
+        prefs.edit { putString(KEY_SELECTED_ID, id.toString()) }
+    }
+
+    private fun persistInterval(id: UUID, sec: Int) {
+        prefs.edit { putInt(KEY_INTERVAL_PREFIX + id.toString(), sec) }
+    }
+
+    private fun persistToggleCount(count: Int) {
+        prefs.edit { putInt(KEY_TOGGLE_COUNT, count) }
+    }
+
+    private fun safeUi(block: () -> Unit) {
+        if (!isAdded || _binding == null) return
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main.immediate) {
+                if (!isAdded || _binding == null) return@launch
+                block()
+            }
+        }
+    }
+
     private class LockAdapter(
         val onSelect: (CHDevices) -> Unit,
         val onPlus: () -> Unit,
@@ -279,10 +359,12 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
 
         private var selectedId: UUID? = null
         private val intervalMap = mutableMapOf<UUID, Int>()
+
         var isRunning: Boolean = false
             @SuppressLint("NotifyDataSetChanged")
             set(value) {
-                field = value; notifyDataSetChanged()
+                field = value
+                notifyDataSetChanged()
             }
 
         @SuppressLint("NotifyDataSetChanged")
@@ -301,6 +383,10 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
                 val pos = currentList.indexOfFirst { it.deviceId == id }
                 if (pos >= 0) notifyItemChanged(pos)
             }
+        }
+
+        fun setInterval(id: UUID, sec: Int) {
+            intervalMap[id] = sec
         }
 
         @SuppressLint("NotifyDataSetChanged")
@@ -324,13 +410,16 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
             val interval = intervalMap[item.deviceId] ?: 1
 
             holder.tvName.text = (item as? CHSesame5)?.getNickname() ?: "Unknown"
+
             holder.rbSelected.setOnCheckedChangeListener(null)
             holder.rbSelected.isChecked = isSelected
+
             holder.itemRoot.isEnabled = !isRunning
             holder.rbSelected.isEnabled = !isRunning
             holder.itemRoot.isClickable = !isRunning
             holder.rbSelected.isClickable = !isRunning
             holder.itemRoot.alpha = if (isRunning) 0.6f else 1f
+
             holder.tvSec.text = if (isSelected) "${interval}s" else ""
 
             holder.itemRoot.setOnClickListener { if (!isRunning) onSelect(item) }
