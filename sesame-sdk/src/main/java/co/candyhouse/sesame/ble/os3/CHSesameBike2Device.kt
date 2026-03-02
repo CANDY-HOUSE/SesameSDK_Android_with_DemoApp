@@ -37,6 +37,7 @@ import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
+import kotlin.math.abs
 
 @SuppressLint("MissingPermission")
 internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDeviceUtil {
@@ -173,7 +174,15 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
             AesCmac(sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(mSesameToken)
         }
         cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
-        sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
+        sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { loginPayload ->
+            val systemTime = loginPayload.payload.sliceArray(0..3).toBigLong()
+            val currentTimestamp = System.currentTimeMillis() / 1000
+            val timeMinus = currentTimestamp.minus(systemTime)
+
+            if (abs(timeMinus) > 3) {
+                sendCommand(SesameOS3Payload(SesameItemCode.time.value, System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.cipher) {}
+            }
+        }
     }
 
     private fun reportBatteryData(payloadString: String) {
