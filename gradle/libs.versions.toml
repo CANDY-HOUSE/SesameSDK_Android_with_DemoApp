@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.0"
 compose = "2.2.10"
 ksp = "2.3.2"
 appcompat = "1.7.0"
