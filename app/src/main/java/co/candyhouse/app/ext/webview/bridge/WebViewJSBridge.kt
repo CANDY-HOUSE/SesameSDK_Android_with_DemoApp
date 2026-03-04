@@ -51,6 +51,17 @@ class WebViewJSBridge(
         const val requestDeviceFWUpgrade = "requestDeviceFWUpgrade"
     }
 
+    /**
+     * JS 准备好关闭的回调（异步任务完成后调用）
+     */
+    @JavascriptInterface
+    fun onJsReadyToClose() {
+        L.d(tag, "onJsReadyToClose called")
+        scope.launch(Dispatchers.Main) {
+            config.onRequestDestroySelf?.invoke()
+        }
+    }
+
     @JavascriptInterface
     fun postMessage(message: String) {
         L.d(tag, "postMessage called with: $message")
