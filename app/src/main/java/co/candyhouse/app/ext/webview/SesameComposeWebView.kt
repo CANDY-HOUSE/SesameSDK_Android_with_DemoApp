@@ -58,9 +58,7 @@ class SesameComposeWebView : Fragment() {
                                 when (notifyName) {
                                     "FriendChanged" -> {
                                         WebViewPoolManager.setPendingRefresh("contacts")
-                                        if (isAdded) {
-                                            findNavController().popBackStack()
-                                        }
+                                        findNavController().popBackStack()
                                     }
 
                                     "RefreshList" -> {
@@ -102,7 +100,7 @@ class SesameComposeWebView : Fragment() {
     }
 
     private fun showWifiScanDialog() {
-        if (!isAdded || childFragmentManager.findFragmentByTag(Hub3ScanSSIDDialogFragment.TAG) != null) {
+        if (childFragmentManager.findFragmentByTag(Hub3ScanSSIDDialogFragment.TAG) != null) {
             return
         }
         Hub3ScanSSIDDialogFragment.newInstance().show(childFragmentManager, Hub3ScanSSIDDialogFragment.TAG)
@@ -117,12 +115,8 @@ class SesameComposeWebView : Fragment() {
     }
 
     private fun exit() {
-        if (isAdded) {
-            if (!findNavController().popBackStack()) {
-                activity?.finish()
-            }
-        } else {
-            activity?.finish()
+        if (!findNavController().popBackStack()) {
+            requireActivity().finish()
         }
     }
 }

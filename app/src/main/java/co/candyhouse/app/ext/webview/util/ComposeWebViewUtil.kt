@@ -212,37 +212,16 @@ fun SesameComposeWebViewContent(
         pendingCameraIntent = null
     }
 
-    // 状态管理：确保 doRealFinish 只执行一次
-    var isClosing by remember { mutableStateOf(false) }
-    
-    val doRealFinish: () -> Unit = {
-        if (!isClosing) {
-            isClosing = true
-            onBackClick()
-        }
-    }
-
     val handleBack: () -> Unit = {
         val wv = webViewRef
-        if (wv != null && config.scene == "ir-remote") {
-            // 1. 通知 WebView 准备关闭
-            wv.evaluateJavascript("javascript:if(window.onPrepareClose){window.onPrepareClose();}else{console.log('onPrepareClose not found');}", null)
-            
-            // 2. 启动保底定时器
-            wv.postDelayed({
-                doRealFinish()
-            }, 400)
-        } else {
-            // 原有逻辑
-            if (config.scene == "wifi-module") {
-                if (wv?.url == webUrl || wv?.canGoBack() != true) {
-                    onBackClick()
-                } else {
-                    wv.goBack()
-                }
+        if (config.scene == "wifi-module") {
+            if (wv?.url == webUrl || wv?.canGoBack() != true) {
+                onBackClick()
             } else {
-                if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
+                wv.goBack()
             }
+        } else {
+            if (wv?.canGoBack() == true) wv.goBack() else onBackClick()
         }
     }
 
