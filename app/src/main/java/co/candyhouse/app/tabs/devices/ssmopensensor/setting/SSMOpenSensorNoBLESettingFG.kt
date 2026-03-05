@@ -17,12 +17,8 @@ class SesameOpenSensorNoBLESettingFG :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val device = mDeviceModel.ssmLockLiveData.value
 
-        bind.openSensorStatusZone.visibility = View.GONE
-        bind.openSensorLastUpdateTimeZone.visibility = View.GONE
-        bind.openSensorStatusZone.visibility = View.GONE
-        bind.openSensorLastUpdateTimeZone.visibility = View.GONE
+        val device = mDeviceModel.ssmLockLiveData.value
         if (device != null) {
             bind.pleaseResetOpenSensor.text =
                 getString(R.string.pleaseResetOpenSensor, device.getNickname())

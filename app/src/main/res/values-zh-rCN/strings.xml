@@ -208,8 +208,6 @@
     <string name="judge_the_sesame">水平校正</string>
     <string name="device_model">机种</string>
     <string name="battary">电池电量</string>
-    <string name="open_sensor_status">开关状态</string>
-    <string name="open_sensor_last_update_time">最后上报</string>
 
     <string name="android_notifica_permis_on">已获得 安卓的 通知权限</string>
     <string name="android_notifica_permis_off">未获得 安卓的 通知权限(按这里)</string>
@@ -255,5 +253,7 @@
     <string name="unlocked">没上锁</string>
     <string name="moved">被转到了</string>
     <string name="registering">注册中</string>
+
+    <string name="reset_update">请重置复位升级</string>
 
 </resources>

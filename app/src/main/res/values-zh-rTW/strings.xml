@@ -211,8 +211,6 @@
     <string name="device_model">機種</string>
     <string name="facepalm">管理掌靜脈</string>
     <string name="battary">電池電量</string>
-    <string name="open_sensor_status">開關狀態</string>
-    <string name="open_sensor_last_update_time">Update Time</string>
 
     <string name="android_notifica_permis_on">已獲得 安卓的 通知權限</string>
     <string name="android_notifica_permis_off">未獲得 安卓的 通知權限(按這裡)</string>
@@ -255,5 +253,7 @@
     <string name="unlocked">沒上鎖</string>
     <string name="moved">被轉到了</string>
     <string name="registering">註冊中</string>
+
+    <string name="reset_update">請重置復位升級</string>
 
 </resources>

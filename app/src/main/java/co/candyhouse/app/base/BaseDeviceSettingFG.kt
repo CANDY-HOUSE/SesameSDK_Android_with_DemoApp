@@ -128,6 +128,12 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                     }
                 }
             }
+        } else if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.RemoteNano) {
+            if (isAdded && !isDetached) {
+                device.userKey?.stateInfo?.currentFwVer?.let {
+                    versionSet(device, it)
+                }
+            }
         }
     }
 
@@ -136,17 +142,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         if (targetDevice.productModel != CHProductModel.Hub3) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
                 val zipname: String? = targetDevice.getFirmwareName()
-                L.d(
-                    "sf",
-                    targetDevice.productModel.deviceModelName() + "------" + zipname
-                )
                 zipname?.apply {
                     val tailTagag = str.split("-").last()
                     val cheddd = zipname.contains(tailTagag)
-                    view?.findViewById<TextView>(R.id.device_version_txt)?.text =
-                        str + (if (cheddd) getString(R.string.latest) else "")
-                    view?.findViewById<View>(R.id.alert_logo)?.visibility =
-                        if (cheddd) View.GONE else View.VISIBLE
+                    view?.findViewById<TextView>(R.id.device_version_txt)?.text = str + (if (cheddd) getString(R.string.latest) else "")
+                    view?.findViewById<View>(R.id.alert_logo)?.visibility = if (cheddd) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -240,29 +240,24 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         view?.findViewById<View>(R.id.dfu_zone)?.setOnClickListener {
             //对齐iOS统一弹出升级对话框风格
             if (targetDevice.productModel != CHProductModel.Hub3
-                && mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined
+                && (mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined
+                        && targetDevice.productModel != CHProductModel.SSMOpenSensor && targetDevice.productModel != CHProductModel.RemoteNano)
             ) {
-                    toastMSG(getString(R.string.toastBleNotReadyForDFU))
-                    return@setOnClickListener
+                toastMSG(getString(R.string.toastBleNotReadyForDFU))
+                return@setOnClickListener
             }
             AlertView(getString(R.string.ssm_update), "", AlertStyle.IOS).apply {
                 addAction(
                     AlertAction(
-                        "OK",
+                        if (mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.logined) "OK" else getString(R.string.reset_update),
                         AlertActionStyle.NEGATIVE
                     ) {
-                        L.d(
-                            "sf",
-                            "Hub3 update OTA: " + targetDevice.productModel.modelName()
-                        )
+                        L.d("sf", "Hub3 update OTA: " + targetDevice.productModel.modelName())
                         if (targetDevice.productModel == CHProductModel.Hub3) {
                             L.d("sf", "hub3模块升级固件……")
-                            mDeviceModel.ssmLockLiveData.value!!.updateFirmware { res ->
-                                res.onSuccess {
-                                    //(mDeviceModel.ssmLockLiveData.value!! as CHHub3).updateFirmware {}
-                                }
-                            }
+                            mDeviceModel.ssmLockLiveData.value!!.updateFirmware { }
                         } else {
+                            if (mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined) return@AlertAction
                             L.d("sf", "非hub3模块升级固件……")
                             targetDevice.updateFirmware { res ->
                                 L.d("hcia", "res:$res")
@@ -283,7 +278,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                             }
                         }
                     })
-
                 show(activity as AppCompatActivity)
             }
         }

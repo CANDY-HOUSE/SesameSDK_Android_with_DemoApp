@@ -205,8 +205,6 @@
     <string name="judge_the_sesame">Horizontal calibration</string>
     <string name="device_model">Model</string>
     <string name="battary">Battery level</string>
-    <string name="open_sensor_status">Status</string>
-    <string name="open_sensor_last_update_time">Update Time</string>
     <string name="android_notifica_permis_on">Android notification permissions granted</string>
     <string name="android_notifica_permis_off">Android notification permissions NOT granted(Tap here)</string>
 
@@ -250,5 +248,7 @@
     <string name="unlocked">Unlocked</string>
     <string name="moved">Moved</string>
     <string name="registering">Registering</string>
+
+    <string name="reset_update">Reset &amp; Upgrade</string>
 
 </resources>

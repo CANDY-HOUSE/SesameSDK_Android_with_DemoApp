@@ -196,8 +196,6 @@
     <string name="judge_the_sesame">水平の調整</string>
     <string name="device_model">機種</string>
     <string name="battary">電池残量</string>
-    <string name="open_sensor_status">スイッチの状態</string>
-    <string name="open_sensor_last_update_time">Update Time</string>
 
     <string name="android_notifica_permis_on">Androidの通知権限を取得済み</string>
     <string name="android_notifica_permis_off">Androidの通知権限がありません(ここをクリック)</string>
@@ -241,6 +239,8 @@
     <string name="unlocked">Unlocked</string>
     <string name="moved">Moved</string>
     <string name="registering">Registering</string>
+
+    <string name="reset_update">リセット＆更新</string>
 
 </resources>
 

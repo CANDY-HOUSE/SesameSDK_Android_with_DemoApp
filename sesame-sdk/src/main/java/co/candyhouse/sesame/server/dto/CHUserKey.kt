@@ -49,6 +49,8 @@ data class CHUserKey(
 data class StateInfo(
     val batteryPercentage: Int? = null,
     val CHSesame2Status: String? = null,
+    val currentFwVer: String? = null,
+    val latestFwVer: String? = null,
     val timestamp: Long? = null,
     val wm2State: Boolean? = null,
     val remoteList: List<IrRemote>? = null
