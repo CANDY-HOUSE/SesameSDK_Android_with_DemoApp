@@ -254,4 +254,8 @@
     <string name="moved">被轉到了</string>
     <string name="registering">註冊中</string>
 
+    <string name="reset_update">請重置復位升級</string>
+
+    <string name="ble_tx_power">BLE TX power</string>
+    <string name="dBm">dBm</string>
 </resources>
