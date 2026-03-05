@@ -240,8 +240,6 @@
     <string name="moved">Moved</string>
     <string name="registering">Registering</string>
 
-    <string name="reset_update">リセット＆更新</string>
-
     <string name="ble_tx_power">BLE TX power</string>
     <string name="dBm">dBm</string>
 </resources>
