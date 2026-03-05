@@ -238,29 +238,29 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             }
         }
         view?.findViewById<View>(R.id.dfu_zone)?.setOnClickListener {
-            //对齐iOS统一弹出升级对话框风格
-            if (targetDevice.productModel != CHProductModel.Hub3
-                && (mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined
-                        && targetDevice.productModel != CHProductModel.SSMOpenSensor && targetDevice.productModel != CHProductModel.RemoteNano)
-            ) {
-                toastMSG(getString(R.string.toastBleNotReadyForDFU))
-                return@setOnClickListener
+            val unlogined =
+                mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined
+
+            if (unlogined) {
+                when (targetDevice.productModel) {
+                    CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> return@setOnClickListener
+                    CHProductModel.Hub3 -> Unit
+                    else -> {
+                        toastMSG(getString(R.string.toastBleNotReadyForDFU))
+                        return@setOnClickListener
+                    }
+                }
             }
             AlertView(getString(R.string.ssm_update), "", AlertStyle.IOS).apply {
                 addAction(
-                    AlertAction(
-                        if (mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.logined) "OK" else getString(R.string.reset_update),
-                        AlertActionStyle.NEGATIVE
-                    ) {
+                    AlertAction("OK", AlertActionStyle.NEGATIVE) {
                         L.d("sf", "Hub3 update OTA: " + targetDevice.productModel.modelName())
                         if (targetDevice.productModel == CHProductModel.Hub3) {
                             L.d("sf", "hub3模块升级固件……")
                             mDeviceModel.ssmLockLiveData.value!!.updateFirmware { }
                         } else {
-                            if (mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined) return@AlertAction
                             L.d("sf", "非hub3模块升级固件……")
                             targetDevice.updateFirmware { res ->
-                                L.d("hcia", "res:$res")
                                 res.onSuccess {
                                     L.d("hcia", "updateFirmware:" + it.data.address)
                                     val firmwarePath = targetDevice.getFirmwarePath(requireContext())
@@ -277,7 +277,8 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                                 }
                             }
                         }
-                    })
+                    }
+                )
                 show(activity as AppCompatActivity)
             }
         }
