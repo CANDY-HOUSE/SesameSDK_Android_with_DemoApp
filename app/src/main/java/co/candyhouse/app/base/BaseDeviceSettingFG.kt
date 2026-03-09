@@ -2,9 +2,13 @@ package co.candyhouse.app.base
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.view.View
 import android.widget.RelativeLayout
@@ -44,6 +48,7 @@ import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
@@ -52,6 +57,9 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
+import com.warkiz.widget.IndicatorSeekBar
+import com.warkiz.widget.OnSeekChangeListener
+import com.warkiz.widget.SeekParams
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.dfu.DfuServiceInitiator
 
@@ -62,6 +70,64 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private var isViewDestroyed = false
 
     private val refreshCounter = mutableIntStateOf(0)
+
+    private fun setBleTxPower(txPwr: Byte, function: () -> Unit) {
+        val device = mDeviceModel.ssmLockLiveData.value!!
+        L.d("harry", "设置 BLE tx power 为： $txPwr ")
+        device.setBleTxPower(txPwr) { res ->
+        }
+    }
+
+    fun setBleTxPowerUI() {
+        val bleTxPower = mDeviceModel.ssmLockLiveData.value!!.bleTxPower?.toInt() ?: UNSET_BLE_TX_POWER_VALUE /* default 21 */
+        L.d("harry", "bleTxPower: $bleTxPower")
+        val bleTxPowerZone = view?.findViewById<View>(R.id.ble_tx_power_zone)
+        val bleTxPowerSeekbar = view?.findViewById<IndicatorSeekBar>(R.id.ble_tx_power_seekbar)
+        activity?.runOnUiThread {
+            if (bleTxPower == UNSET_BLE_TX_POWER_VALUE) {
+                bleTxPowerZone?.visibility = View.GONE
+            } else {
+                bleTxPowerZone?.visibility = View.VISIBLE
+                bleTxPowerSeekbar?.setProgress(bleTxPower.toFloat())
+                bleTxPowerSeekbar?.setIndicatorTextFormat("\${PROGRESS} " + getString(R.string.dBm))
+            }
+        }
+
+        val vibrator = context?.let { ctx ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION") ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+        }
+
+        var lastProgress = bleTxPower
+
+        bleTxPowerSeekbar?.onSeekChangeListener = object : OnSeekChangeListener {
+            override fun onSeeking(seekParams: SeekParams) {
+                vibrator?.let {
+                    val currentProgress = seekParams.progress
+                    if (currentProgress != lastProgress) {
+                        lastProgress = currentProgress
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            it.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            @Suppress("DEPRECATION") it.vibrate(3)
+                        }
+                    }
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
+                setBleTxPower(seekBar.progress.toByte()) {}
+            }
+        }
+
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -302,6 +368,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             view?.findViewById<View>(R.id.chenge_angle_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.auto_lock_zone)?.visibility = View.GONE
             view?.findViewById<View>(R.id.opsensor_zone)?.visibility = View.GONE
+            view?.findViewById<View>(R.id.ble_tx_power_zone)?.visibility = View.GONE
         }
         targetDevice.getNFC()
             ?.apply { view?.findViewById<TextView>(R.id.nfc_id_txt)?.text = this }
@@ -370,6 +437,8 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setOnRefreshListener {
             refreshTop()
         }
+
+
     }
 
     private fun refreshTop() {

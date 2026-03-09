@@ -489,6 +489,10 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
                 deviceStatus = CHDeviceStatus.ReadyToRegister
             }
         }
+        if (receivePayload.cmdItCode == SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value) {
+            bleTxPower = receivePayload.payload[0]
+            L.d("harry", "[ss5][power] bleTxPower:" + bleTxPower)
+        }
     }
 }
 

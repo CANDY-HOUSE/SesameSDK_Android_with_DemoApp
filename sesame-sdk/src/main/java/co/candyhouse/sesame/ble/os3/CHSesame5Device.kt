@@ -146,6 +146,12 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         }
     }
 
+    override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
+        }
+    }
+
     override fun magnet(result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.magnet.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
@@ -307,7 +313,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
 
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
         super.onGattSesamePublish(receivePayload)
-        L.d("onGattSesamePublish", "[ss5] " + receivePayload.cmdItCode + ", data: " + receivePayload.payload.toHexString())
+        L.d("onGattSesamePublish", "[ss5] " + receivePayload.cmdItCode + ", data: 0x" + receivePayload.payload.toHexString())
         if (receivePayload.cmdItCode == SesameItemCode.SSM3_ITEM_CODE_BATTERY_VOLTAGE.value) {
             reportBatteryData(receivePayload.payload.toHexString())
         }

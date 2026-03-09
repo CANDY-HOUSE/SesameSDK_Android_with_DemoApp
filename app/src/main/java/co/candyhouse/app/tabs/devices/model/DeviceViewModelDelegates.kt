@@ -180,6 +180,13 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                     }
                 }
             }
+            override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
+                notifyDelegates(device) {
+                    if (it is CHDeviceStatusDelegate) {
+                        it.onBleTxPowerReceive(device, txPower)
+                    }
+                }
+            }
         }
     }
 
@@ -248,6 +255,13 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
     override fun onMechStatus(device: CHDevices) {
         vm.viewModelScope.launch {
             (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onMechStatus(device)
+        }
+    }
+
+    override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
+        L.d("harry", "[onBleTxPowerReceive][txPower: $txPower]")
+        vm.viewModelScope.launch {
+            (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onBleTxPowerReceive(device, txPower)
         }
     }
 

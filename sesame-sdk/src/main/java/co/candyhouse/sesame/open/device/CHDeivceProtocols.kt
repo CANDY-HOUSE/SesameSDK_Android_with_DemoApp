@@ -241,6 +241,22 @@ enum class CHProductModel {
 //interface CHDeviceStatusAndKeysDelegate : CHDeviceStatusDelegate, CHWifiModule2Delegate {}
 interface CHDevices {
 
+    /*
+        ble tx power 根据BLE规范， 固件里可能的设置是-70~20dBm。
+        实际应用的默认 SS5类的锁是 -4dBm, 刷卡机类的设备是 0dBm。
+        APP 里该变量默认设置为21， 表示固件没有给这个设置的值。
+        若该设备的 bee tx power 是 21， 可以认为是旧固件。
+
+        以下内容来自固件， 供参考：
+        /// Inquiry TX power level (in dBm) HCI:7.3.62
+        #define INQ_TX_PWR_DBM_MIN    -70
+        #define INQ_TX_PWR_DBM_DFT    0
+        #define INQ_TX_PWR_DBM_MAX    +20
+    */
+    companion object {
+        const val UNSET_BLE_TX_POWER_VALUE = 21
+    }
+
     var mechStatus: CHSesameProtocolMechStatus?
     var deviceTimestamp: Long?
     var loginTimestamp: Long?
@@ -251,6 +267,10 @@ interface CHDevices {
     var deviceStatus: CHDeviceStatus
     var deviceShadowStatus: CHDeviceStatus?
     var rssi: Int?
+
+    // 为了解决门和墙密封较好的情况下， 蓝牙信号受影响， 门外的刷卡机与门内的锁经常断线的问题， 添加此参数。
+    // 让用户可以自己设置一个合适的蓝牙信号强度阈值， 以保持BLE长连接。
+    var bleTxPower: Byte?
 
     var deviceId: UUID?
     var isRegistered: Boolean
@@ -275,6 +295,7 @@ interface CHDevices {
     fun reset(result: CHResult<CHEmpty>)
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
     fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {}
+    fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {}
 
     fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
         if ((this as CHDeviceUtil).sesame2KeyData == null) {
@@ -367,6 +388,7 @@ interface CHSesameProtocolMechStatus {
 interface CHDeviceStatusDelegate {
     fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {}
     fun onMechStatus(device: CHDevices) {}
+    fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {}
 }
 
 enum class CHDeviceStatus(val value: CHDeviceLoginStatus) {

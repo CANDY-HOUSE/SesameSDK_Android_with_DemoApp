@@ -22,6 +22,7 @@ import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.device.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.open.device.CHWifiModule2
@@ -52,6 +53,18 @@ internal interface CHDeviceUtil {
     var deviceId: UUID? = null
     var isRegistered: Boolean = true
     var rssi: Int? = 0
+    var bleTxPower: Byte? = UNSET_BLE_TX_POWER_VALUE.toByte()
+        set(value) {
+            if (field != value) {
+                field = value
+
+                if (this is CHDevices) {
+                    val device: CHDevices = this
+                    delegate?.onBleTxPowerReceive(device, device.bleTxPower!!)
+                }
+            }
+        }
+
     var mBluetoothGatt: BluetoothGatt? = null //[gatt] 控制藍芽連線的全局物件
     var isNeedAuthFromServer: Boolean? = false
     var mechStatus: CHSesameProtocolMechStatus? = null
@@ -212,6 +225,10 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
         override var rssi: Int?
             get() = this@toCHDevices.rssi
             set(value) { this@toCHDevices.rssi = value }
+
+        override var bleTxPower: Byte?
+            get() = this@toCHDevices.bleTxPower
+            set(value) { this@toCHDevices.bleTxPower = value }
 
         override var deviceId: UUID?
             get() = this@toCHDevices.deviceId

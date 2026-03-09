@@ -102,6 +102,7 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
 
         bind.swiperefresh.addExcludedView(bind.opslockWheelview)
         bind.swiperefresh.addExcludedView(bind.wheelview)
+        setBleTxPowerUI()
     }
 
     override fun onResume() {
