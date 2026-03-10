@@ -326,6 +326,12 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         }
     }
 
+    override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
+        }
+    }
+
     /**
      * 连接到IoT服务
      */

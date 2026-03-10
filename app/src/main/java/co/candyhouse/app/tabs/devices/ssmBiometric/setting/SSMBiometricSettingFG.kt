@@ -105,6 +105,11 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             setRadarUI(device, payload)
         }
 
+        override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
+            super.onBleTxPowerReceive(device, txPower)
+            setBleTxPowerUI()
+        }
+
         override fun onSSM2KeysChanged(
             device: CHSesameConnector,
             ssm2keys: Map<String, ByteArray>

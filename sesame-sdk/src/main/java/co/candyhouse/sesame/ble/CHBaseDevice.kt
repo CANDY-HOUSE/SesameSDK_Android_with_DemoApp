@@ -57,11 +57,10 @@ internal interface CHDeviceUtil {
         set(value) {
             if (field != value) {
                 field = value
-
-                if (this is CHDevices) {
-                    val device: CHDevices = this
-                    delegate?.onBleTxPowerReceive(device, device.bleTxPower!!)
-                }
+            }
+            if (this is CHDevices) {
+                val device: CHDevices = this
+                delegate?.onBleTxPowerReceive(device, device.bleTxPower!!)
             }
         }
 
