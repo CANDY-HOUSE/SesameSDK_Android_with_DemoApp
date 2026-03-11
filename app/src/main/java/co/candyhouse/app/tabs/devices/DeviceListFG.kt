@@ -266,7 +266,6 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     private fun dispatchOnDeviceClick(device: CHDevices) {
         mDeviceViewModel.ssmLockLiveData.value = device
         when (device.productModel) {
-            CHProductModel.WM2 -> safeNavigate(R.id.to_WM2SettingFG)
             CHProductModel.SS2, CHProductModel.SS4 -> {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.action_deviceListPG_to_SSM2SettingFG)
@@ -281,22 +280,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                     safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
             }
-            CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
-            CHProductModel.BiKeLock, CHProductModel.BiKeLock3 -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
-            CHProductModel.BiKeLock2 -> {
-                if (device.getLevel() == 2) {
-                    safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
-                } else {
-                    val config = WebViewConfig(
-                        scene = "history",
-                        params = mapOf(
-                            "deviceUUID" to device.deviceId.toString().uppercase(),
-                            "where" to "device_history_bike"
-                        )
-                    )
-                    safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
-                }
-            }
+
             CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro, CHProductModel.SS6ProSLiDingDoor, CHProductModel.BLEConnector, CHProductModel.SSM_MIWA -> {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)
@@ -311,6 +295,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                     safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
                 }
             }
+
             CHProductModel.Hub3 -> {
                 val config = WebViewConfig(
                     scene = "wifi-module",
@@ -322,6 +307,24 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
             }
 
+            CHProductModel.BiKeLock2, CHProductModel.BiKeLock3 -> {
+                if (device.getLevel() == 2) {
+                    safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
+                } else {
+                    val config = WebViewConfig(
+                        scene = "history",
+                        params = mapOf(
+                            "deviceUUID" to device.deviceId.toString().uppercase(),
+                            "where" to "device_history_bike"
+                        )
+                    )
+                    safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
+                }
+            }
+
+            CHProductModel.WM2 -> safeNavigate(R.id.to_WM2SettingFG)
+            CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
+            CHProductModel.BiKeLock -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
             CHProductModel.SesameBot2, CHProductModel.SesameBot3 -> safeNavigate(R.id.to_SesameBot2SettingFG)
             CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
             CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro, CHProductModel.SSMFace,
