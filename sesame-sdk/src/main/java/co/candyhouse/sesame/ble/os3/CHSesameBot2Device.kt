@@ -216,6 +216,12 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
     }
 
+    override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
+        }
+    }
+
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
         CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}

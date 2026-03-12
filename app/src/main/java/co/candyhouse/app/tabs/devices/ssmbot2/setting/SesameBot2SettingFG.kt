@@ -122,6 +122,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         updateBattery()
 
         bind.swiperefresh.addExcludedView(bind.wheelview)
+        setBleTxPowerUI()
     }
 
     private fun updateBattery() {
