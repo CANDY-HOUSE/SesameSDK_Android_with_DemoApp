@@ -25,6 +25,8 @@ class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         } else {
             bind.fpZone.visibility = View.GONE
         }
+
+        setBleTxPowerUI()
     }
 
     override fun getViewBinder() = FgSsmBikeSettingBinding.inflate(layoutInflater)

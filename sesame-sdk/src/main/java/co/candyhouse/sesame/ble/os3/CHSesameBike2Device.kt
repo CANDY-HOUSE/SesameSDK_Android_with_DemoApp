@@ -107,6 +107,12 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
         }
     }
 
+    override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
+        }
+    }
+
     override fun register(result: CHResult<CHEmpty>) {
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
