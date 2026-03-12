@@ -317,6 +317,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         setupFaceZoneView()
         setupPalmZoneView()
         checkBiometricDeviceView()
+        setBleTxPowerUI()
 
         if (device.productModel === CHProductModel.SSMFace || device.productModel === CHProductModel.SSMFace2 || device.productModel === CHProductModel.SSMFacePro || device.productModel === CHProductModel.SSMFace2Pro
             || device.productModel === CHProductModel.SSMFaceProAI || device.productModel === CHProductModel.SSMFace2ProAI || device.productModel === CHProductModel.SSMFaceAI || device.productModel === CHProductModel.SSMFace2AI) {
