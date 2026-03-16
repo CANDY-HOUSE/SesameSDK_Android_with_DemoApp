@@ -306,10 +306,10 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SSMFace2 -> "sesameface1_30_19_57bc9f"
         CHProductModel.SSMFacePro -> "sesameface1pro_30_18_57bc9f"
         CHProductModel.SSMFace2Pro -> "sesameface1pro_30_18_57bc9f"
-        CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_57bc9f"
-        CHProductModel.SSMFace2ProAI -> "sesameface1proai_30_22_57bc9f"
         CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_57bc9f"
         CHProductModel.SSMFace2AI -> "sesameface1ai_30_23_57bc9f"
+        CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_f5b193"
+        CHProductModel.SSMFace2ProAI -> "sesameface1proai_30_22_f5b193"
         CHProductModel.SSM_MIWA -> "sesammiwa_10_29_85ca810"
         else -> null
     }
