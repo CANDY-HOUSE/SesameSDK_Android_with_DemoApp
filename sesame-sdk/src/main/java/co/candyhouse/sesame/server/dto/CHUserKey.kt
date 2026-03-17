@@ -53,5 +53,6 @@ data class StateInfo(
     val latestFwVer: String? = null,
     val timestamp: Long? = null,
     val wm2State: Boolean? = null,
-    val remoteList: List<IrRemote>? = null
+    val remoteList: List<IrRemote>? = null,
+    val scriptList: List<BotScriptItem>? = null
 )

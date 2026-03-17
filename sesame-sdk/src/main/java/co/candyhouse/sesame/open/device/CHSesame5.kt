@@ -1,7 +1,7 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.bytesToUShort
 
@@ -16,7 +16,7 @@ interface CHSesame5 : CHSesameLock {
     fun configureLockPosition(lockTarget: Short, unlockTarget: Short, result: CHResult<CHEmpty>)
     fun autolock(delay: Int, result: CHResult<Int>)
     fun opSensorControl(isEnable: Int, result: CHResult<Int>)
-    fun onHistoryReceived(historyData: ByteArray){}
+    fun onHistoryReceived(historyData: ByteArray) {}
     fun sendAdvProductTypeCommand(data: ByteArray, result: CHResult<CHEmpty>) {}
 }
 

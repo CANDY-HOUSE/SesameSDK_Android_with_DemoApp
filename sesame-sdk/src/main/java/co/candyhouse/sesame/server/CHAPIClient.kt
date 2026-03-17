@@ -1,6 +1,7 @@
 package co.candyhouse.sesame.server
 
 import co.candyhouse.sesame.BuildConfig
+import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
@@ -124,4 +125,8 @@ internal interface CHAPIClient {
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: Map<String, Any>
     ): Any
+
+    // 更新 bot script
+    @Operation(path = "/device/v1/bot/script", method = "POST")
+    fun updateBotScript(body: BotScriptRequest): Any
 }

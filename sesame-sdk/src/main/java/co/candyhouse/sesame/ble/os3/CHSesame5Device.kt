@@ -71,7 +71,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             }
         }
 
-
     /** 聯網處理 */
     var isConnectedByWM2: Boolean = false
     override fun goIOT() {
@@ -102,7 +101,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
 
             }
         }
-
     }
 
     /** 指令發送 */
@@ -207,8 +205,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                 result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
         }
-
-
     }
 
     override fun register(result: CHResult<CHEmpty>) {
@@ -240,7 +236,8 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                 val ecdhSecret = EccKey.ecdh(eccPublicKeyFromSS5)
                 val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
                 val deviceSecret = ecdhSecretPre16.toHexString()
-                val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
+                val candyDevice =
+                    CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
                 sesame2KeyData = candyDevice
                 val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
                 cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
@@ -263,12 +260,8 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
         sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth!!.sliceArray(0..3)), DeviceSegmentType.plain) { loginPayload ->
             val systemTime = loginPayload.payload.sliceArray(0..3).toBigLong()
-//            L.d("hcia", "[ss5][ts]:" + systemTime)//1670037181
             val currentTimestamp = System.currentTimeMillis() / 1000
             val timeMinus = currentTimestamp.minus(systemTime)
-
-//            L.d("hcia", "[ss5][login][timeMinus:$timeMinus]")
-
 
             if (abs(timeMinus) > 3) {
                 L.d("hcia", "[ss5][login][timeMinus:$timeMinus]!!")
@@ -291,7 +284,10 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
                         val recordId = hisPaylaod.sliceArray(0..3)
                         it.onSuccess {
                             L.d("hcia", "[+]SSM2_ITEM_CODE_HISTORY_DELETE: ${recordId.toBigLong().toInt()}")
-                            sendCommand(SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId), DeviceSegmentType.cipher) { res ->
+                            sendCommand(
+                                SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId),
+                                DeviceSegmentType.cipher
+                            ) { res ->
                                 L.d("hcia", "[-]SSM2_ITEM_CODE_HISTORY_DELETE: ${res.cmdResultCode}")
                             }
                         }
@@ -310,7 +306,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
     }
 
     /** 指令接收 */
-
     override fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
         super.onGattSesamePublish(receivePayload)
         L.d("onGattSesamePublish", "[ss5] " + receivePayload.cmdItCode + ", data: 0x" + receivePayload.payload.toHexString())
@@ -321,8 +316,6 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
             mechStatus = CHSesame5MechStatus(receivePayload.payload)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
             reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
-//            L.d("readHistoryCommand", "mechStatus " + "${deviceStatus}")
-//            readHistoryCommand()
         }
         if (receivePayload.cmdItCode == SesameItemCode.mechSetting.value) {
             mechSetting = CHSesame5MechSettings(receivePayload.payload)

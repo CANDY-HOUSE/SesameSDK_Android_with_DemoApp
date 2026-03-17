@@ -24,12 +24,10 @@ import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.open.device.OpenSensorData
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHCapabilitySupport
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.baseCapbale.CHEventHandler
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectCapableImpl
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectDelegate
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapable
 import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoCapableImpl
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
@@ -59,9 +57,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         set(value) {
             field = value
             parceADV(value)
-            value?.let {
-                // 保留广播通信相关处理
-            }
         }
 
     override var radarPayload: ByteArray = byteArrayOf(0x33, 0x10, 0x00, 0x00, 0x00)
@@ -75,10 +70,9 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private val eventHandlers = mutableListOf<CHEventHandler>()
 
     // 设备连接能力实现
-    private val deviceConnectCapability: CHDeviceConnectCapable
+    private val deviceConnectCapability = CHDeviceConnectCapableImpl()
 
     init {
-        deviceConnectCapability = CHDeviceConnectCapableImpl()
         deviceConnectCapability.setSupport(this)
     }
 
@@ -154,10 +148,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
         // 处理机械状态更新
         var handled = false
         when (receivePayload.cmdItCode) {
-//            SesameItemCode.REMOTE_NANO_ITEM_CODE_PUB_TRIGGER_DELAYTIME.value -> {
-//                handleTriggerDelayTime(receivePayload)
-//                handled = true
-//            }
             SesameItemCode.mechStatus.value -> {
                 handleMechStatus(receivePayload)
                 handled = true
@@ -204,16 +194,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private fun handleRadar(receivePayload: SSM3PublishPayload) {
         radarPayload = receivePayload.payload
         (delegate as? CHDeviceConnectDelegate)?.onRadarReceive(this, receivePayload.payload)
-    }
-
-    private fun handleTriggerDelayTime(receivePayload: SSM3PublishPayload) {
-        triggerDelaySetting = CHRemoteNanoTriggerSettings.fromData(receivePayload.payload)
-        L.d("hcia", "[stp][REMOTE_NANO_ITEM_CODE_PUB_TRIGGER_DELAYTIME]" + triggerDelaySetting!!.triggerDelaySecond.toString())
-        triggerDelaySetting?.let {
-            (delegate as? CHRemoteNanoDelegate)?.onTriggerDelaySecondReceived(
-                this, it
-            )
-        }
     }
 
     private fun handleMechStatus(receivePayload: SSM3PublishPayload) {

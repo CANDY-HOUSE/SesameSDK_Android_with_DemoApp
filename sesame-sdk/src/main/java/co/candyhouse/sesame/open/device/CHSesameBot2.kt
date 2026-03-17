@@ -1,7 +1,7 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.bytesToShort
 
 /**
@@ -12,6 +12,7 @@ enum class BotActionType(val value: UByte) {
     REVERSE(1u),
     STOP(2u),
     SLEEP(3u);
+
     companion object {
         fun fromValue(value: UByte): BotActionType? = values().find { it.value == value }
     }
@@ -21,8 +22,8 @@ enum class BotActionType(val value: UByte) {
  * 脚本动作，最多可以有20个
  */
 data class Bot2Action(
-        val action: BotActionType,
-        val time: UByte
+    val action: BotActionType,
+    val time: UByte
 )
 
 /**
@@ -36,10 +37,10 @@ fun Bot2Action.toByteArray(): ByteArray {
  * 脚本结构
  */
 data class CHSesamebot2Event(
-        var nameLength: UByte,
-        val name: ByteArray,
-        var actionLength: UByte? = null,
-        var actions: List<Bot2Action>? = null
+    var nameLength: UByte,
+    val name: ByteArray,
+    var actionLength: UByte? = null,
+    var actions: List<Bot2Action>? = null
 ) {
     companion object {
         fun fromByteArray(buf: ByteArray): CHSesamebot2Event? {
@@ -109,13 +110,13 @@ data class CHSesamebot2Status(
 }
 
 interface CHSesameBot2 : CHSesameLock {
-
     var scripts: CHSesamebot2Status
-    fun click(index: UByte? = null, result: CHResult<CHEmpty>)
+    fun click(index: UByte? = null, historytag: ByteArray? = null, result: CHResult<CHEmpty>)
     fun sendClickScript(index: UByte, script: ByteArray, result: CHResult<CHEmpty>)
     fun selectScript(index: UByte, result: CHResult<CHEmpty>)
     fun getCurrentScript(index: UByte?, result: CHResult<CHSesamebot2Event>)
     fun getScriptNameList(result: CHResult<CHSesamebot2Status>)
+    fun onHistoryReceived(historyData: ByteArray) {}
 }
 
 class CHSesameBot2MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
@@ -127,7 +128,3 @@ class CHSesameBot2MechStatus(override val data: ByteArray) : CHSesameProtocolMec
         return battery * 2f / 1000f
     }
 }
-
-
-
-

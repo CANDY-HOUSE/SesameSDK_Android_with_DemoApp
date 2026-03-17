@@ -14,8 +14,6 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDevices
@@ -27,8 +25,10 @@ import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
@@ -63,11 +63,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
         set(value) {
             field = value
             parceADV(value)
-            /** 保留廣播通訊 */
-            value?.let {
-                /** 保留廣播通訊 */
-//                isHistory = it.adv_tag_b1
-            }
         }
 
     override fun getHub3StatusFromIot(deviceUUID: String, result: CHResult<Byte>) {
@@ -142,7 +137,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                         e.printStackTrace()
                     }
                 }
-
             }
             it.onFailure { }
         }

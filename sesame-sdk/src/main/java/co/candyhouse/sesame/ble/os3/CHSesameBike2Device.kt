@@ -143,7 +143,8 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
                     mechStatus = CHSesameBike2MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..2))
                     deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
                     val ecdhSecretPre16 = EccKey.ecdh(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(3..66)).sliceArray(0..15)
-                    sesame2KeyData = CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
+                    sesame2KeyData =
+                        CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
                     cipher = SesameOS3BleCipher(
                         "customDeviceName",
                         AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)!!,
@@ -160,7 +161,8 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
                 mechSetting = CHSesame5MechSettings(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..12))
                 val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
                 val deviceSecret = ecdhSecretPre16.toHexString()
-                val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
+                val candyDevice =
+                    CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
                 sesame2KeyData = candyDevice
                 val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
                 cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
@@ -210,7 +212,10 @@ internal open class CHSesameBike2Device : CHSesameOS3(), CHSesameBike2, CHDevice
                         val recordId = hisPaylaod.sliceArray(0..3)
                         it.onSuccess {
                             L.d("CHSesameBike2Device", "[+]SSM2_ITEM_CODE_HISTORY_DELETE: ${recordId.toBigLong().toInt()}")
-                            sendCommand(SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId), DeviceSegmentType.cipher) { res ->
+                            sendCommand(
+                                SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId),
+                                DeviceSegmentType.cipher
+                            ) { res ->
                                 L.d("CHSesameBike2Device", "[-]SSM2_ITEM_CODE_HISTORY_DELETE: ${res.cmdResultCode}")
                             }
                         }

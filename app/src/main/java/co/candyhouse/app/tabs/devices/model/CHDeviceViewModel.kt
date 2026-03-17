@@ -15,21 +15,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
 import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3Delegate
+import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.server.dto.userKeyToCHKey
@@ -57,6 +63,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
+import java.util.Collections
 
 class BeanDevices(
     val list: List<CHDevices>,
@@ -76,6 +83,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private val delegateManager = DeviceViewModelDelegates(this)
     val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
     private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
+
+    private val botScriptInitInFlight = Collections.synchronizedSet(mutableSetOf<String>())
 
     // 搜索关键词
     val searchQuery = MutableStateFlow("")
@@ -155,6 +164,20 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         putString(deviceId, userKey.deviceName)
                         putInt("l$deviceId", userKey.keyLevel)
                         userKey.rank?.let { putInt("ra$deviceId", it) }
+                    }
+
+                    val scriptMetaMap = userKey.stateInfo.scriptList
+                        ?.mapNotNull { item ->
+                            val idx = item.actionIndex.toIntOrNull() ?: return@mapNotNull null
+                            idx to BotScriptStore.ScriptMeta(
+                                alias = item.alias,
+                                displayOrder = item.displayOrder
+                            )
+                        }?.toMap()
+                        ?: emptyMap()
+
+                    if (scriptMetaMap.isNotEmpty()) {
+                        BotScriptStore.merge(userKey.deviceUUID, scriptMetaMap)
                     }
                 }
                 val userks = result.data.mapNotNull { userKey ->
@@ -321,16 +344,31 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     backgroundAutoConnect(device)
 
                     // 监听器（设备状态变化时会触发）
-                    listerChDeviceStatus(device) {
-                        L.d("hcia", "刷新锁-ID=${device.deviceId}")
-                        updateNeeRefresh(it)
+                    listerChDeviceStatus(device) { changedDevice ->
+                        updateNeeRefresh(changedDevice)
+
+                        if (changedDevice is CHSesameBot2
+                            && (changedDevice.productModel == CHProductModel.SesameBot2 || changedDevice.productModel == CHProductModel.SesameBot3)
+                            && changedDevice.deviceStatus.value == CHDeviceLoginStatus.logined
+                        ) {
+                            L.d("CHDeviceViewModel", "发起SCRIPT_NAME_LIST")
+                            changedDevice.getScriptNameList { r ->
+                                r.onSuccess {
+                                    val initKey = getBotScriptInitKey(changedDevice)
+                                    val inited = SharedPreferencesUtils.preferences.getBoolean(initKey, false)
+                                    if (!inited) {
+                                        initBotScriptDefaults(changedDevice)
+                                    }
+                                    updateNeeRefresh(changedDevice)
+                                }
+                            }
+                        }
                     }
 
                     // 拿到数据直接刷新
                     updateNeeRefresh(device)
                 }
                 if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
-                    L.e("hcia", "下拉刷新，没有发现任何设备")
                     neeReflesh.postValue(BeanDevices(emptyList()))
                 }
             }
@@ -436,6 +474,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 neeReflesh.postValue(BeanDevices(emptyList()))
 
                 unregisterNotification(targetDevice)
+                clearBotScript(targetDevice)
 
                 viewModelScope.launch {
                     result.invoke(Result.success(CHResultState.CHResultStateNetworks(CHEmpty())))
@@ -461,6 +500,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         CHAPIClientBiz.removeKey(targetDevice.deviceId.toString()) {
             it.onSuccess {
                 unregisterNotification(targetDevice)
+                clearBotScript(targetDevice)
                 targetDevice.reset {
                     it.onSuccess {
                         refreshDevices()
@@ -487,6 +527,194 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 result.onSuccess {
                     L.d("sf", "result is $result")
                 }
+            }
+        }
+    }
+
+    fun initBotScriptDefaults(device: CHSesameBot2) {
+        val deviceId = device.deviceId.toString()
+        val initKey = getBotScriptInitKey(device)
+
+        if (botScriptInitInFlight.contains(deviceId)) {
+            return
+        }
+        botScriptInitInFlight.add(deviceId)
+
+        val events = device.scripts.events
+        if (events.isEmpty()) {
+            botScriptInitInFlight.remove(deviceId)
+            return
+        }
+
+        val deviceUUID = device.deviceId.toString()
+        val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"
+        val currentIndex = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
+
+        val remoteScriptMap = device.userKey?.stateInfo?.scriptList
+            ?.mapNotNull { item ->
+                val idx = item.actionIndex.toIntOrNull() ?: return@mapNotNull null
+                idx to item
+            }?.toMap()
+            ?: emptyMap()
+
+        val metaMap = events.mapIndexed { index, _ ->
+            val remote = remoteScriptMap[index]
+            val finalAlias = if (!remote?.alias.isNullOrBlank()) remote.alias else "🎬 $index"
+            val finalDisplayOrder = remote?.displayOrder ?: index
+
+            index to BotScriptStore.ScriptMeta(
+                alias = finalAlias,
+                displayOrder = finalDisplayOrder
+            )
+        }.toMap()
+
+        BotScriptStore.merge(deviceUUID, metaMap)
+
+        var pendingCount = 0
+        var finishedCount = 0
+        var allSuccess = true
+
+        events.forEachIndexed { index, _ ->
+            val remote = remoteScriptMap[index]
+            val needInitAlias = remote?.alias.isNullOrBlank()
+            val needInitDisplayOrder = remote?.displayOrder == null
+            val needInitIsDefault = remote?.isDefault == null
+
+            if (!needInitAlias && !needInitDisplayOrder && !needInitIsDefault) {
+                return@forEachIndexed
+            }
+
+            pendingCount++
+
+            val req = BotScriptRequest(
+                deviceUUID = deviceUUID.uppercase(),
+                actionIndex = index.toString(),
+                alias = if (needInitAlias) "🎬 $index" else null,
+                isDefault = if (needInitIsDefault) {
+                    if (index == currentIndex) 1 else 0
+                } else null,
+                actionData = null,
+                displayOrder = if (needInitDisplayOrder) index else null,
+                deleteAll = null
+            )
+
+            CHAPIClientBiz.updateBotScript(req) { result ->
+                result.onSuccess {
+                    finishedCount++
+                    if (finishedCount == pendingCount) {
+                        if (allSuccess) {
+                            SharedPreferencesUtils.preferences.edit {
+                                putBoolean(initKey, true)
+                            }
+                        }
+                        botScriptInitInFlight.remove(deviceId)
+                    }
+                }
+
+                result.onFailure {
+                    allSuccess = false
+                    finishedCount++
+                    L.e("CHDeviceViewModel", "initBotScriptDefaults failed index=$index", it)
+
+                    if (finishedCount == pendingCount) {
+                        botScriptInitInFlight.remove(deviceId)
+                    }
+                }
+            }
+        }
+
+        if (pendingCount == 0) {
+            SharedPreferencesUtils.preferences.edit {
+                putBoolean(initKey, true)
+            }
+            botScriptInitInFlight.remove(deviceId)
+        }
+    }
+
+    fun forceInitBotScriptDefaults(device: CHSesameBot2) {
+        val events = device.scripts.events
+        if (events.isEmpty()) return
+
+        val deviceUUID = device.deviceId.toString()
+        val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"
+        val currentIndex = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
+        val initKey = getBotScriptInitKey(device)
+
+        val metaMap = events.mapIndexed { index, _ ->
+            index to BotScriptStore.ScriptMeta(
+                alias = "🎬 $index",
+                displayOrder = index
+            )
+        }.toMap()
+
+        BotScriptStore.merge(deviceUUID, metaMap)
+
+        var pendingCount = 0
+        var successCount = 0
+
+        events.forEachIndexed { index, _ ->
+            pendingCount++
+
+            val req = BotScriptRequest(
+                deviceUUID = deviceUUID.uppercase(),
+                actionIndex = index.toString(),
+                alias = "🎬 $index",
+                isDefault = if (index == currentIndex) 1 else 0,
+                actionData = null,
+                displayOrder = index,
+                deleteAll = null
+            )
+
+            CHAPIClientBiz.updateBotScript(req) { result ->
+                result.onSuccess {
+                    successCount++
+                    if (successCount == pendingCount) {
+                        SharedPreferencesUtils.preferences.edit {
+                            putBoolean(initKey, true)
+                        }
+                    }
+                }
+                result.onFailure {
+                    L.e("CHDeviceViewModel", "forceInitBotScriptDefaults failed index=$index", it)
+                }
+            }
+        }
+
+        if (pendingCount == 0) {
+            SharedPreferencesUtils.preferences.edit {
+                putBoolean(initKey, true)
+            }
+        }
+    }
+
+    private fun getBotScriptInitKey(device: CHSesameBot2): String {
+        return "${device.deviceId}_BotScriptInited"
+    }
+
+    fun clearBotScript(device: CHDevices) {
+        if (device is CHSesameBot2 &&
+            (device.productModel == CHProductModel.SesameBot2 || device.productModel == CHProductModel.SesameBot3)
+        ) {
+            val req = BotScriptRequest(
+                deviceUUID = device.deviceId.toString().uppercase(),
+                deleteAll = true
+            )
+            CHAPIClientBiz.updateBotScript(req) { result ->
+                result.onSuccess {
+                    L.d("clearBotScript", "clear bot script cloud data success")
+                }
+                result.onFailure {
+                    L.e("clearBotScript", "clear bot script cloud data failed", it)
+                }
+            }
+
+            BotScriptStore.clear(device.deviceId.toString())
+
+            val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"
+            val botScriptInitKey = "${device.deviceId}_BotScriptInited"
+            SharedPreferencesUtils.preferences.edit {
+                remove(bot2ScriptCurIndexKey)
+                remove(botScriptInitKey)
             }
         }
     }

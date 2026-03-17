@@ -194,7 +194,7 @@
         tools:layout="@layout/fg_ssm_face_faces_list" />
     <fragment
         android:id="@+id/SesameClickScriptFG"
-        android:name="co.candyhouse.app.tabs.devices.ssmbike.setting.SesameClickScriptFG"
+        android:name="co.candyhouse.app.tabs.devices.ssmbot2.setting.SesameClickScriptFG"
         android:label="SesameClickScript"
         tools:layout="@layout/fg_ssm_tp_card_list" />
     <fragment
@@ -236,6 +236,9 @@
         <action
             android:id="@+id/action_deviceListPG_to_sesameBikeSettingFG"
             app:destination="@id/sesameBikeSettingFG" />
+        <action
+            android:id="@+id/to_SesameBot2SettingFG"
+            app:destination="@id/SesameBot2SettingFG" />
     </fragment>
 
 </navigation>

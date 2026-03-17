@@ -23,12 +23,15 @@ import co.candyhouse.app.tabs.devices.ssm2.setLevel
 import co.candyhouse.sesame.ble.os3.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManagerDelegate
+import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHHub3
+import co.candyhouse.sesame.open.device.CHProductModel
 import co.candyhouse.sesame.open.device.CHSesame2
 import co.candyhouse.sesame.open.device.CHSesame5
+import co.candyhouse.sesame.open.device.CHSesameBot2
 import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
@@ -208,6 +211,16 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
 
                 is CHWifiModule2 -> safeNavigate(R.id.to_WM2SettingFG)
                 is CHSesameBiometricDevice -> safeNavigate(actionId = R.id.to_SesameTouchProSettingFG)
+                is CHSesameBot2 if device.productModel in setOf(CHProductModel.SesameBot2, CHProductModel.SesameBot3) &&
+                        device.deviceStatus.value == CHDeviceLoginStatus.logined -> {
+                    mDeviceViewModel.clearBotScript(device)
+                    device.getScriptNameList { r ->
+                        r.onSuccess {
+                            mDeviceViewModel.forceInitBotScriptDefaults(device)
+                            mDeviceViewModel.refreshDevices()
+                        }
+                    }
+                }
             }
         }
     }

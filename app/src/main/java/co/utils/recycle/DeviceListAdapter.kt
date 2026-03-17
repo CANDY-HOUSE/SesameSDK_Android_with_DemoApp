@@ -1,11 +1,14 @@
 package co.utils.recycle
 
+import android.annotation.SuppressLint
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.SesameDevicesListLayoutBinding
+import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.devices.hub3.recycle.Hub3ItemView
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
@@ -33,8 +36,11 @@ import co.candyhouse.sesame.open.device.CHWifiModule2
 import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.device.OpenSensorData
 import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.BotScriptItem
+import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import kotlinx.coroutines.CoroutineScope
@@ -97,6 +103,9 @@ class DeviceListAdapter(
 
     inner class SesameViewHolder(val view: View) : RecyclerView.ViewHolder(view), Binder<CHDevices> {
         private val binding = SesameDevicesListLayoutBinding.bind(view)
+
+        private var bot2Adapter: Bot2ItemView? = null
+        private var bot2ItemTouchHelper: ItemTouchHelper? = null
 
         override fun bind(device: CHDevices, pos: Int) {
             bindDevice(device)
@@ -188,9 +197,30 @@ class DeviceListAdapter(
                 updateBleStatusVisibility(device)
 
                 if (device is CHSesameBot2 && (device.productModel == CHProductModel.SesameBot2 || device.productModel == CHProductModel.SesameBot3)) {
+                    val newList = getScriptList(device)
+
+                    if (bot2Adapter == null) {
+                        bot2Adapter = Bot2ItemView(
+                            newList.toMutableList(),
+                            callback = { bot2Item ->
+                                device.click(bot2Item.id.toUByte(), UserUtils.getUserIdWithByte()) {}
+                            },
+                            onOrderChanged = { changedList ->
+                                uploadBotScriptDisplayOrder(device, changedList)
+                            }
+                        )
+                    } else {
+                        bot2Adapter?.updateData(newList)
+                    }
+
                     setupExpandableView(device, 90) {
-                        Bot2ItemView(getScriptList(view, device)) { bot2Item ->
-                            device.click(bot2Item.id.toUByte()) { }
+                        bot2Adapter!!
+                    }
+
+                    if (bot2ItemTouchHelper == null) {
+                        bot2ItemTouchHelper = ItemTouchHelper(Bot2ItemTouchHelperCallback(bot2Adapter!!))
+                        binding.expandFLSubView.post {
+                            bot2ItemTouchHelper?.attachToRecyclerView(binding.expandFLSubView)
                         }
                     }
                 }
@@ -278,13 +308,21 @@ class DeviceListAdapter(
             }
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         private fun setupExpandableView(
             device: CHDevices,
             heightDp: Int,
             adapterProvider: () -> RecyclerView.Adapter<*>
         ) {
             binding.apply {
-                expandFLSubView.adapter = adapterProvider()
+                val adapter = adapterProvider()
+                if (expandFLSubView.adapter !== adapter) {
+                    expandFLSubView.adapter = adapter
+                }
+                expandFLSubView.setOnTouchListener { v, _ ->
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                    false
+                }
                 expandFL.visibility = View.VISIBLE
                 expandFL.layoutParams.height = (heightDp * expandFL.resources.displayMetrics.density).toInt()
                 dispatchExpanded(device)
@@ -303,7 +341,7 @@ class DeviceListAdapter(
                 is CHSesameBot2 -> {
                     val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"
                     val index = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
-                    device.click(index.toUByte()) {}
+                    device.click(index.toUByte(), UserUtils.getUserIdWithByte()) {}
                 }
             }
         }
@@ -339,11 +377,22 @@ class DeviceListAdapter(
             }
         }
 
-        private fun getScriptList(view: View, data: CHSesameBot2): MutableList<BotItem> {
+        private fun getScriptList(data: CHSesameBot2): MutableList<BotItem> {
+            val deviceUUID = data.deviceId.toString()
+
             return data.scripts.events.mapIndexed { index, event ->
-                val script = "${view.resources.getString(R.string.click_script)} ${String(event.name, Charsets.UTF_8)}"
-                BotItem(script, index)
-            }.toMutableList()
+                val fallback = String(event.name, Charsets.UTF_8)
+                val alias = BotScriptStore.getAlias(deviceUUID, index)
+                val displayName = alias ?: fallback
+                val order = BotScriptStore.getDisplayOrder(deviceUUID, index) ?: index
+
+                BotItem(
+                    name = displayName,
+                    id = index,
+                    displayOrder = order
+                )
+            }.sortedBy { it.displayOrder }
+                .toMutableList()
         }
 
         private fun dispatchExpanded(device: CHDevices) {
@@ -352,5 +401,74 @@ class DeviceListAdapter(
                 expandFLSubView.visibility = if (device.expanded) View.VISIBLE else View.GONE
             }
         }
+
+        private fun uploadBotScriptDisplayOrder(device: CHSesameBot2, list: List<BotItem>) {
+            val deviceUUID = device.deviceId.toString()
+
+            val metaMap = list.mapIndexed { order, item ->
+                item.id to BotScriptStore.ScriptMeta(
+                    alias = BotScriptStore.getAlias(deviceUUID, item.id),
+                    displayOrder = order
+                )
+            }.toMap()
+            BotScriptStore.merge(deviceUUID, metaMap)
+
+            val batchOrders = list.mapIndexed { order, item ->
+                BotScriptItem(
+                    actionIndex = item.id.toString(),
+                    displayOrder = order
+                )
+            }
+
+            val req = BotScriptRequest(
+                deviceUUID = deviceUUID.uppercase(),
+                batchDisplayOrders = batchOrders
+            )
+
+            CHAPIClientBiz.updateBotScript(req) { result ->
+                result.onSuccess {
+                    L.d("DeviceListAdapter", "batch updateBotScript success")
+                }
+                result.onFailure {
+                    L.e("DeviceListAdapter", "batch updateBotScript failed", it)
+                }
+            }
+        }
     }
+}
+
+class Bot2ItemTouchHelperCallback(
+    private val adapter: Bot2ItemView
+) : ItemTouchHelper.Callback() {
+
+    override fun isLongPressDragEnabled(): Boolean = true
+
+    override fun isItemViewSwipeEnabled(): Boolean = false
+
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+        return makeMovementFlags(dragFlags, 0)
+    }
+
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
+        val from = viewHolder.adapterPosition
+        val to = target.adapterPosition
+        if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false
+        adapter.onItemMove(from, to)
+        return true
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        adapter.onDragFinished()
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 }

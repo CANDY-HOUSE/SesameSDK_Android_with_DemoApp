@@ -6,6 +6,7 @@ import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.device.CHDevices
 import co.candyhouse.sesame.open.device.CHSesameLock
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
@@ -187,4 +188,7 @@ object CHAPIClientBiz {
     fun myDevicesRegisterSesame5Post(deviceId: String?, body: Any?, onResponse: CHResult<Any>) {
         makeApiCall(onResponse) { cHApiClient.myDevicesRegisterSesame5Post(deviceId, body) }
     }
+
+    fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
 }

@@ -277,13 +277,13 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             }
 
             is CHSesameBot2 -> {
-                device.click {
+                device.click(historytag = UserUtils.getUserIdWithByte()) {
                     it.onFailure {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
                                 if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
-                                    device.click {}
+                                    device.click(historytag = UserUtils.getUserIdWithByte()) {}
                                     return@launch
                                 }
                             }

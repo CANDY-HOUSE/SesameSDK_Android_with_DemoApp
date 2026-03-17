@@ -13,8 +13,8 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.db.model.historyTagBLE
+import co.candyhouse.sesame.db.model.historyTagIOT
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.device.CHDeviceStatus
 import co.candyhouse.sesame.open.device.CHSesame2MechStatus
@@ -27,15 +27,19 @@ import co.candyhouse.sesame.open.device.CHSesamebot2Status
 import co.candyhouse.sesame.open.device.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.isInternetAvailable
+import co.candyhouse.sesame.utils.toBigLong
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt32ByteArray
+import kotlin.math.abs
 
 @SuppressLint("MissingPermission")
 internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
@@ -44,25 +48,33 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
         set(value) {
             field = value
             parceADV(value)
+            value?.let {
+                isHistory = it.adv_tag_b1
+            }
         }
 
+    var isHistory: Boolean = false
+        set(value) {
+            if (deviceStatus.value == CHDeviceLoginStatus.logined) {
+                field = value
+                if (field) {
+                    readHistoryCommand()
+                }
+            }
+        }
 
     /** 聯網處理 */
     var isConnectedByWM2: Boolean = false
     var bot2Topic: String = ""
-    override var scripts: CHSesamebot2Status = run {
-        val events = mutableListOf<CHSesamebot2Event>()
-        for (i in 0..9) {
-            events.add(CHSesamebot2Event(nameLength = 1u, name = byteArrayOf((48 + i).toByte())))
-        }
-        CHSesamebot2Status(curIdx = 0u, eventLength = 10u, events = events)
-    }
+    override var scripts: CHSesamebot2Status =
+        CHSesamebot2Status(curIdx = 0u, eventLength = 0u, events = emptyList())
+    private val scriptNameListLock = Any()
+    private var scriptNameListInFlight = false
+    private val pendingScriptNameListResults = mutableListOf<CHResult<CHSesamebot2Status>>()
+
     override fun goIOT() {
-        // L.d("hcia", "[bot2]goIOT:")
         CHIotManager.subscribeSesame2Shadow(this) { result ->
             result.onSuccess { resource ->
-                // L.d("hcia", "[bot2][iot]")
-                // L.d("hcia", "\uD83E\uDD5D [bot2]ss5_shadow裡存的hub3列表:" + resource.data.state.reported.wm2s)
                 resource.data.state.reported.wm2s?.let { wm2s ->
                     bot2Topic = wm2s.keys.map { key ->
                         "wm2${key}cmd"
@@ -72,7 +84,7 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                 if (isConnectedByWM2) {
                     resource.data.state.reported.mechst?.let { mechShadow ->
                         L.d("harry", "[bot2][iot]mechShadow[${mechShadow.hexStringToByteArray().size}]: $mechShadow")
-                        if(mechShadow.hexStringToByteArray().size >= 7){
+                        if (mechShadow.hexStringToByteArray().size >= 7) {
                             // 新固件， mechStatus 统一成 SS5 格式 的 7个字节, IoT 返回 SS4 格式的 8 个字节
                             mechStatus = CHSesame5MechStatus(CHSesame2MechStatus(mechShadow.hexStringToByteArray()).ss5Adapter())
                         } else if (mechShadow.hexStringToByteArray().size == 3) {
@@ -81,7 +93,6 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                         }
                     }
                     deviceShadowStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-
                 } else {
                     deviceShadowStatus = null
                 }
@@ -90,41 +101,45 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
     }
 
     /** 指令發送  */
-    override fun click(index: UByte?, result: CHResult<CHEmpty>) {
+    override fun click(index: UByte?, historytag: ByteArray?, result: CHResult<CHEmpty>) {
         L.d("hcia", "[bot2]click[index:$index]")
         var itemCode = SesameItemCode.click
         if (index != null) {
-            itemCode = SesameItemCode.values().find { it.value == (SesameItemCode.BOT2_ITEM_CODE_RUN_SCRIPT_0.value + index).toUByte() } ?: SesameItemCode.click
+            itemCode = SesameItemCode.values().find { it.value == (SesameItemCode.BOT2_ITEM_CODE_RUN_SCRIPT_0.value + index).toUByte() }
+                ?: SesameItemCode.click
         }
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
-            CHAPIClientBiz.cmdSesame(itemCode, this, byteArrayOf(), result)
+            CHAPIClientBiz.cmdSesame(itemCode, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         if (!isBleAvailable(result)) {
-            CHAPIClientBiz.cmdSesame(itemCode, this, byteArrayOf(), result)
+            CHAPIClientBiz.cmdSesame(itemCode, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
-        sendCommand(SesameOS3Payload(itemCode.value, byteArrayOf()), DeviceSegmentType.cipher) {
+        sendCommand(SesameOS3Payload(itemCode.value, sesame2KeyData!!.historyTagBLE(historytag)), DeviceSegmentType.cipher) {
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
     }
 
     override fun sendClickScript(index: UByte, script: ByteArray, result: CHResult<CHEmpty>) {
-         L.d("hcia", "[bot2]combinedData:" + index.toString() + script.toList())
+        L.d("hcia", "[bot2]combinedData:" + index.toString() + script.toList())
         if (!isBleAvailable(result)) return
-        var sendData = if (index != null) byteArrayOf(index.toByte()) + script  else script
+        var sendData = if (index != null) byteArrayOf(index.toByte()) + script else script
         sendCommand(SesameOS3Payload(SesameItemCode.BOT2_ITEM_CODE_EDIT_SCRIPT.value, sendData), DeviceSegmentType.cipher) {
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
         }
     }
 
     override fun selectScript(index: UByte, result: CHResult<CHEmpty>) {
-        // L.d("hcia", "[send]selectScript:" + index)
-        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+        if (!isBleAvailable(result)) return
+        L.d("selectScript", "[bot2]select[index:$index]")
+        sendCommand(SesameOS3Payload(SesameItemCode.SCRIPT_SELECT.value, byteArrayOf(index.toByte())), DeviceSegmentType.cipher) {
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+        }
     }
 
     override fun getCurrentScript(index: UByte?, result: CHResult<CHSesamebot2Event>) {
-        L.d("hcia", "[send]getNowScript", )
+        L.d("hcia", "[send]getNowScript")
         if (!isBleAvailable(result)) return
         var idx = if (index != null) byteArrayOf(index.toByte()) else byteArrayOf()
         L.d("hcia", idx.toString())
@@ -132,9 +147,11 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             L.d("hcia", "result" + res.payload.toList())
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 val resp = CHSesamebot2Event.fromByteArray(res.payload)
-                if (resp != null) result.invoke(Result.success(CHResultState.CHResultStateBLE(resp))) else result.invoke(Result.failure(
+                if (resp != null) result.invoke(Result.success(CHResultState.CHResultStateBLE(resp))) else result.invoke(
+                    Result.failure(
                         NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())
-                ))
+                    )
+                )
             } else {
                 result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
@@ -142,8 +159,47 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
     }
 
     override fun getScriptNameList(result: CHResult<CHSesamebot2Status>) {
-        L.d("hcia", "[send]getScriptNameList")
-        result.invoke(Result.success(CHResultState.CHResultStateBLE(scripts)))
+        L.d("getScriptNameList", "[send]getScriptNameList")
+        if (!isBleAvailable(result)) {
+            result.invoke(Result.failure(NSError("ble_unavailable", "SCRIPT_NAME_LIST", -2)))
+            return
+        }
+        synchronized(scriptNameListLock) {
+            pendingScriptNameListResults.add(result)
+            if (scriptNameListInFlight) {
+                L.d("getScriptNameList", "getScriptNameList merged (inFlight)")
+                return
+            }
+            scriptNameListInFlight = true
+        }
+        sendCommand(SesameOS3Payload(SesameItemCode.SCRIPT_NAME_LIST.value, byteArrayOf()), DeviceSegmentType.cipher) { res ->
+            val callbacks: List<CHResult<CHSesamebot2Status>> = synchronized(scriptNameListLock) {
+                scriptNameListInFlight = false
+                val copy = pendingScriptNameListResults.toList()
+                pendingScriptNameListResults.clear()
+                copy
+            }
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                val payload = res.payload
+                L.d("getScriptNameList", "SCRIPT_NAME_LIST payload=${payload.toHexString()}")
+
+                val status = CHSesamebot2Status.fromByteArray(payload)
+                if (status != null) {
+                    scripts = status
+                    callbacks.forEach { cb ->
+                        cb.invoke(Result.success(CHResultState.CHResultStateBLE(status)))
+                    }
+                } else {
+                    callbacks.forEach { cb ->
+                        cb.invoke(Result.failure(NSError("parse_failed", "SCRIPT_NAME_LIST", -1)))
+                    }
+                }
+            } else {
+                callbacks.forEach { cb ->
+                    cb.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
+                }
+            }
+        }
     }
 
     override fun register(result: CHResult<CHEmpty>) {
@@ -176,7 +232,8 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                     mechStatus = CHSesameBot2MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..2))
                     deviceStatus = if (mechStatus?.isInLockRange == true) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
                     val ecdhSecretPre16 = EccKey.ecdh(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(3..66)).sliceArray(0..15)
-                    sesame2KeyData = CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
+                    sesame2KeyData =
+                        CHDevice(deviceId.toString(), productModel.deviceModel(), null, "0000", ecdhSecretPre16.toHexString(), serverSecret)
                     cipher = SesameOS3BleCipher(
                         "customDeviceName",
                         AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)!!,
@@ -190,10 +247,10 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
                 // 新固件统一成 SS5 一样的格式
                 // TODO： 重构代码，把 bike2 和 bot2 合并为 CHSesame5Device
                 mechStatus = CHSesame5MechStatus(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(0..6))
-                // mechSetting = CHSesame5MechSettings(IRRes.payload.toHexString().hexStringToByteArray().sliceArray(7..12))
                 val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
                 val deviceSecret = ecdhSecretPre16.toHexString()
-                val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
+                val candyDevice =
+                    CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecret, serverSecret)
                 sesame2KeyData = candyDevice
                 val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
                 cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
@@ -213,7 +270,48 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             AesCmac(sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(mSesameToken)
         }
         cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
-        sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { /** 根據設備狀態特殊處理 */ }
+        sendCommand(
+            SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)),
+            DeviceSegmentType.plain
+        ) { loginPayload ->
+            val systemTime = loginPayload.payload.sliceArray(0..3).toBigLong()
+            val currentTimestamp = System.currentTimeMillis() / 1000
+            val timeMinus = currentTimestamp.minus(systemTime)
+
+            if (abs(timeMinus) > 3) {
+                sendCommand(SesameOS3Payload(SesameItemCode.time.value, System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.cipher) {}
+            }
+        }
+    }
+
+    private fun readHistoryCommand() {
+        val isConnectNET = isInternetAvailable()
+        sendCommand(SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)), DeviceSegmentType.cipher) { res ->
+            L.d("readHistoryCommand", "[ResultCode]:" + res.cmdResultCode)
+            val hisPaylaod = res.payload
+            L.d("readHistoryCommand", "[hisPaylaod]:${this.deviceId.toString().uppercase()} ${hisPaylaod.toHexString()}")
+            onHistoryReceived(hisPaylaod)
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                if (isConnectNET && !isConnectedByWM2) {
+                    CHAPIClientBiz.postOS3History(deviceId.toString().uppercase(), hisPaylaod.toHexString()) {
+                        // 成功上传历史记录到云端后， 通过蓝牙删除这条历史记录， 固件会在它的Flash里删除掉这条历史记录。
+                        val recordId = hisPaylaod.sliceArray(0..3)
+                        it.onSuccess {
+                            L.d("readHistoryCommand", "[+]SSM2_ITEM_CODE_HISTORY_DELETE: ${recordId.toBigLong().toInt()}")
+                            sendCommand(
+                                SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId),
+                                DeviceSegmentType.cipher
+                            ) { res ->
+                                L.d("readHistoryCommand", "[-]SSM2_ITEM_CODE_HISTORY_DELETE: ${res.cmdResultCode}")
+                            }
+                        }
+                        it.onFailure { exception ->
+                            L.d("readHistoryCommand", "[history]postSS5History: $exception")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {

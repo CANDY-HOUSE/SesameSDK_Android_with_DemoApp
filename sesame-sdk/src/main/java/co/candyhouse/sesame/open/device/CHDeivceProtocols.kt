@@ -238,9 +238,7 @@ enum class CHProductModel {
     }
 }
 
-//interface CHDeviceStatusAndKeysDelegate : CHDeviceStatusDelegate, CHWifiModule2Delegate {}
 interface CHDevices {
-
     /*
         ble tx power 根据BLE规范， 固件里可能的设置是-70~20dBm。
         实际应用的默认 SS5类的锁是 -4dBm, 刷卡机类的设备是 0dBm。
@@ -260,10 +258,8 @@ interface CHDevices {
     var mechStatus: CHSesameProtocolMechStatus?
     var deviceTimestamp: Long?
     var loginTimestamp: Long?
-
     var delegate: CHDeviceStatusDelegate?
     val multicastDelegate: CHMulticastDelegate<CHWifiModule2Delegate>
-
     var deviceStatus: CHDeviceStatus
     var deviceShadowStatus: CHDeviceStatus?
     var rssi: Int?
@@ -271,32 +267,23 @@ interface CHDevices {
     // 为了解决门和墙密封较好的情况下， 蓝牙信号受影响， 门外的刷卡机与门内的锁经常断线的问题， 添加此参数。
     // 让用户可以自己设置一个合适的蓝牙信号强度阈值， 以保持BLE长连接。
     var bleTxPower: Byte?
-
     var deviceId: UUID?
     var isRegistered: Boolean
     var productModel: CHProductModel
 
     fun connect(result: CHResult<CHEmpty>)
-
     fun disconnect(result: CHResult<CHEmpty>)
-//    fun disconnect(result: CHResult<CHEmpty>) {
-//        (this as CHDeviceUtil).mDisconnect(result)
-//    }
-
-    //    fun getKey(): CHDevice
     fun getKey(): CHDevice {
         return (this as CHDeviceUtil).sesame2KeyData!!.copy(historyTag = null)
     }
 
     fun dropKey(result: CHResult<CHEmpty>)
-
     fun getVersionTag(result: CHResult<String>)
     fun register(result: CHResult<CHEmpty>)
     fun reset(result: CHResult<CHEmpty>)
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
     fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {}
     fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {}
-
     fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
         if ((this as CHDeviceUtil).sesame2KeyData == null) {
             result.invoke(Result.failure(CHError.BleUnauth.value))
@@ -311,14 +298,13 @@ interface CHDevices {
     fun getHistoryTag(): ByteArray? {
         return (this as CHDeviceUtil).sesame2KeyData?.historyTag
     }
-
 }
 
 interface CHSesameConnector : CHDevices {
     var ssm2KeysMap: MutableMap<String, ByteArray>
     fun insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>)
     fun removeSesame(tag: String, result: CHResult<CHEmpty>)
-    fun setRadarSensitivity(payload: ByteArray, result: CHResult<CHEmpty>){}
+    fun setRadarSensitivity(payload: ByteArray, result: CHResult<CHEmpty>) {}
 }
 
 interface CHSesameLock : CHDevices {
@@ -332,7 +318,6 @@ interface CHSesameLock : CHDevices {
 }
 
 interface CHSesameProtocolMechStatus {
-
     val position: Short
         get() = 0
     val target: Short?
@@ -363,7 +348,8 @@ interface CHSesameProtocolMechStatus {
         *    5、 多次测量后，根据实测值，修正电量显示对应的List。
         * */
         val blocks: List<Float> = listOf(5.85f, 5.82f, 5.79f, 5.76f, 5.73f, 5.70f, 5.65f, 5.60f, 5.55f, 5.50f, 5.40f, 5.20f, 5.10f, 5.0f, 4.8f, 4.6f)
-        val mapping: List<Float> = listOf(100.0f, 95.0f, 90.0f, 85.0f, 80.0f, 70.0f, 60.0f, 50.0f, 40.0f, 32.0f, 21.0f, 13.0f, 10.0f, 7.0f, 3.0f, 0.0f)
+        val mapping: List<Float> =
+            listOf(100.0f, 95.0f, 90.0f, 85.0f, 80.0f, 70.0f, 60.0f, 50.0f, 40.0f, 32.0f, 21.0f, 13.0f, 10.0f, 7.0f, 3.0f, 0.0f)
         if (voltage >= blocks[0]) {
             return mapping[0].toInt()
         }
@@ -382,7 +368,6 @@ interface CHSesameProtocolMechStatus {
         }
         return 0
     }
-
 }
 
 interface CHDeviceStatusDelegate {
@@ -418,4 +403,3 @@ enum class CHDeviceLoginStatus {
 }
 
 class NSError(message: String, var domain: String, var code: Int) : Error(message)
-
