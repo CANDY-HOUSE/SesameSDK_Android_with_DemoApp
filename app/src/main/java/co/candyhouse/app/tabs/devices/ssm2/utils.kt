@@ -288,7 +288,7 @@ fun CHDevices.getFirmwareName(): String? {
         CHProductModel.SS6ProSLiDingDoor -> "sesame6pro_30_21_66dee7"
         CHProductModel.WM2 -> null
         CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
-        CHProductModel.SesameBot2 -> "sesamebot2_30_17_990e7f"
+        CHProductModel.SesameBot2 -> "sesamebot2_30_17_b33894"
         CHProductModel.SesameBot3 -> ""
         CHProductModel.BiKeLock -> "sesamebike1_21_3_d7162a"
         CHProductModel.BiKeLock2 -> "sesamebike2_30_6_ec3c5c"
