@@ -380,19 +380,50 @@ class DeviceListAdapter(
         private fun getScriptList(data: CHSesameBot2): MutableList<BotItem> {
             val deviceUUID = data.deviceId.toString()
 
-            return data.scripts.events.mapIndexed { index, event ->
-                val fallback = String(event.name, Charsets.UTF_8)
-                val alias = BotScriptStore.getAlias(deviceUUID, index)
-                val displayName = alias ?: fallback
+            if (data.scripts.events.isNotEmpty()) {
+                return data.scripts.events.mapIndexed { index, event ->
+                    val fallback = String(event.name, Charsets.UTF_8)
+                    val alias = BotScriptStore.getAlias(deviceUUID, index)
+                    val displayName = alias ?: fallback
+                    val order = BotScriptStore.getDisplayOrder(deviceUUID, index) ?: index
+
+                    BotItem(
+                        name = displayName,
+                        id = index,
+                        displayOrder = order
+                    )
+                }.sortedBy { it.displayOrder }
+                    .toMutableList()
+            }
+
+            val remoteScriptList = data.userKey?.stateInfo?.scriptList.orEmpty()
+            if (remoteScriptList.isNotEmpty()) {
+                return remoteScriptList.mapNotNull { item ->
+                    val index = item.actionIndex.toIntOrNull() ?: return@mapNotNull null
+                    val displayName = item.alias ?: "🎬 $index"
+                    val order = item.displayOrder ?: index
+
+                    BotItem(
+                        name = displayName,
+                        id = index,
+                        displayOrder = order
+                    )
+                }.sortedBy { it.displayOrder }
+                    .toMutableList()
+            }
+
+            val localFallback = (0..9).mapNotNull { index ->
+                val alias = BotScriptStore.getAlias(deviceUUID, index) ?: return@mapNotNull null
                 val order = BotScriptStore.getDisplayOrder(deviceUUID, index) ?: index
 
                 BotItem(
-                    name = displayName,
+                    name = alias,
                     id = index,
                     displayOrder = order
                 )
-            }.sortedBy { it.displayOrder }
-                .toMutableList()
+            }
+
+            return localFallback.sortedBy { it.displayOrder }.toMutableList()
         }
 
         private fun dispatchExpanded(device: CHDevices) {
