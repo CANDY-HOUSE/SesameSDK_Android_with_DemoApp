@@ -179,7 +179,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     fun showBatteryLevel(view: TextView, device: CHDevices?) {
-        val batteryLevel = device?.mechStatus?.getBatteryPrecentage() ?: device?.userKey?.stateInfo?.batteryPercentage
+        val batteryLevel = device?.batteryPercentage ?: device?.userKey?.stateInfo?.batteryPercentage
         view.post {
             view.text = batteryLevel?.let { "$it%" } ?: ""
         }

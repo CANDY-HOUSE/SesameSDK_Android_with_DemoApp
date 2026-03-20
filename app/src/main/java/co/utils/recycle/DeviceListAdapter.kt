@@ -262,7 +262,7 @@ class DeviceListAdapter(
         }
 
         private fun updateBatteryStatus(device: CHDevices) {
-            val batteryLevel = device.mechStatus?.getBatteryPrecentage() ?: device.userKey?.stateInfo?.batteryPercentage
+            val batteryLevel = device.batteryPercentage ?: device.userKey?.stateInfo?.batteryPercentage
             setBatteryStatus(batteryLevel)
         }
 

@@ -135,7 +135,11 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     // 同一笔电池电压数据， 刷卡机只报告一次， 可能 给 Hub3， 也可能给 手机 APP
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[stp][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {
+            it.onSuccess { resp ->
+                batteryPercentage = ((resp.data as? Map<*, *>)?.get("batteryPercentage") as? Number)?.toInt()
+            }
+        }
     }
 
     /**
@@ -199,7 +203,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private fun handleMechStatus(receivePayload: SSM3PublishPayload) {
         mechStatus = CHSesameTouchProMechStatus(receivePayload.payload)
         reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
-        L.d("hcia", "getBatteryPrecentage: ${mechStatus?.getBatteryPrecentage()}  getBatteryVoltage: ${mechStatus?.getBatteryVoltage()}")
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -345,7 +348,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     private fun processOpensensorData(data: ByteArray) {
         try {
             mechStatus = CHSesameOpenSensorMechStatus(OpenSensorData.fromByteArray(data))
-            L.d(tag, "OpenSensor $productModel = ${mechStatus?.getBatteryPrecentage()}")
+            L.d(tag, "OpenSensor $productModel")
         } catch (e: Exception) {
             L.e(tag, "Failed to parse unified data: ${e.message}")
         }

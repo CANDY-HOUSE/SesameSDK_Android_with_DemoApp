@@ -322,7 +322,11 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
 
     private fun reportBatteryData(payloadString: String) {
         L.d("harry", "[ss5][reportBatteryData]:" + isInternetAvailable() + ", " + !isConnectedByWM2 + ", payload: " + payloadString)
-        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {}
+        CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {
+            it.onSuccess { resp ->
+                batteryPercentage = ((resp.data as? Map<*, *>)?.get("batteryPercentage") as? Number)?.toInt()
+            }
+        }
     }
 
     /** 指令接收 */

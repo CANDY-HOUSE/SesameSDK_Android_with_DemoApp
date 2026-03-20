@@ -1,7 +1,7 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.toReverseBytes
@@ -27,7 +27,6 @@ class CHSesame2MechSettings(data: ByteArray) {
 
 class CHSesame2MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
 
-    private val battery = bytesToShort(data[0], data[1])
     override val position: Short = (bytesToShort(data[4], data[5]).toInt() * 360 / 1024).toShort()
     override val target: Short? = if((bytesToShort(data[2], data[3]).toInt() == -32768) ) null else (bytesToShort(data[2], data[3]).toInt() * 360 / 1024).toShort()
     internal val retCode = data[6].toInt()
@@ -37,11 +36,6 @@ class CHSesame2MechStatus(override val data: ByteArray) : CHSesameProtocolMechSt
     override var isInUnlockRange: Boolean = flags and 4 > 0
     override var isBatteryCritical: Boolean = flags and 32 > 0
     override var isStop: Boolean? = null
-
-    override fun getBatteryVoltage(): Float {
-//        L.d("hcia", "[ss4][vol]" + battery * 7.2f / 1023)
-        return battery * 7.2f / 1023
-    }
 
     fun ss5Adapter(): ByteArray {
         val bat = (bytesToShort(data[0], data[1]).toInt() * 3600 / 1023).toShort()

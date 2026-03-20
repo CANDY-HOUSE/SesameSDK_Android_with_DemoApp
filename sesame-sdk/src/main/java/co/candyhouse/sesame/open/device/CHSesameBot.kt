@@ -1,8 +1,7 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHEmpty
-import co.candyhouse.sesame.utils.bytesToShort
+import co.candyhouse.sesame.utils.CHResult
 
 interface CHSesameBot : CHSesameLock {
     var mechSetting: CHSesameBotMechSettings?
@@ -19,16 +18,10 @@ data class CHSesameBotMechSettings(var userPrefDir: Byte, var lockSec: Byte, var
 }
 
 class CHSesameBotMechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
-    private val battery = bytesToShort(data[0], data[1])
     internal val motorStatus = data[4]
     private val flags = data[7].toInt()
     override var isInLockRange: Boolean = flags and 2 > 0
     override var isInUnlockRange: Boolean = flags and 4 > 0
     override var isBatteryCritical: Boolean = flags and 32 > 0
     override var isStop: Boolean? = (flags and 1 == 0)
-
-    override fun getBatteryVoltage(): Float {
-        return battery * 7.2f / 1023
-    }
-
 }

@@ -53,6 +53,13 @@ internal interface CHDeviceUtil {
     var deviceId: UUID? = null
     var isRegistered: Boolean = true
     var rssi: Int? = 0
+    var batteryPercentage: Int? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                delegate?.onMechStatus(this as CHDevices)
+            }
+        }
     var bleTxPower: Byte? = UNSET_BLE_TX_POWER_VALUE.toByte()
         set(value) {
             if (field != value) {
@@ -240,6 +247,10 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
         override var productModel: CHProductModel
             get() = this@toCHDevices.productModel
             set(value) { this@toCHDevices.productModel = value }
+
+        override var batteryPercentage: Int?
+            get() = this@toCHDevices.batteryPercentage
+            set(value) { this@toCHDevices.batteryPercentage = value }
 
         override fun connect(result: CHResult<CHEmpty>) {
             // 实现 connect 方法

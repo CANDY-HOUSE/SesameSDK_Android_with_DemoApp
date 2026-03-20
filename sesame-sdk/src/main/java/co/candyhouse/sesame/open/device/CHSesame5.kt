@@ -21,7 +21,6 @@ interface CHSesame5 : CHSesameLock {
 }
 
 class CHSesame5MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
-    private val battery = bytesToShort(data[0], data[1])
     override val position: Short = bytesToShort(data[4], data[5])
     override val target: Short? = if ((bytesToShort(data[2], data[3]).toInt() == -32768)) null else bytesToShort(data[2], data[3])
     private val flags = data[6].toInt()
@@ -29,9 +28,6 @@ class CHSesame5MechStatus(override val data: ByteArray) : CHSesameProtocolMechSt
     override var isCritical: Boolean? = flags and 8 > 0
     override var isStop: Boolean? = flags and 16 > 0
     override var isBatteryCritical: Boolean = flags and 32 > 0
-    override fun getBatteryVoltage(): Float {
-        return battery * 2f / 1000f
-    }
 }
 
 class CHSesame5MechSettings(data: ByteArray) {

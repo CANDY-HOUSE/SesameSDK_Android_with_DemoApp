@@ -1,7 +1,7 @@
 package co.candyhouse.sesame.open.device
 
-import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
 
 interface CHWifiModule2Delegate : CHDeviceStatusDelegate {
     fun onAPSettingChanged(device: CHWifiModule2, settings: CHWifiModule2MechSettings) {}
@@ -22,10 +22,6 @@ class CHWifiModule2NetWorkStatus(
 ) : CHSesameProtocolMechStatus {
     override val data: ByteArray
         get() = TODO("Not yet implemented")
-
-    override fun getBatteryVoltage(): Float {
-        TODO("Not yet implemented")
-    }
 }
 
 interface CHWifiModule2 : CHDevices {
