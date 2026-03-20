@@ -207,7 +207,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private fun versionSet(targetDevice: CHDevices, str: String) {
         if (targetDevice.productModel != CHProductModel.Hub3) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
-                val zipname: String? = targetDevice.getFirmwareName()
+                val zipname: String? = targetDevice.getFirmwareName(requireContext())
                 zipname?.apply {
                     val tailTagag = str.split("-").last()
                     val cheddd = zipname.contains(tailTagag)

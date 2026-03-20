@@ -264,11 +264,10 @@ fun CHDevices.getNickname(): String {
     try {
         val deviceIdString = this.deviceId?.toString() ?: return productModel.modelName()
         return SharedPreferencesUtils.preferences.getString(deviceIdString, productModel.modelName()) ?: productModel.modelName()
-    }catch (e:NullPointerException){
+    } catch (e: NullPointerException) {
         e.printStackTrace()
     }
-   return ""
-
+    return ""
 }
 
 fun CHDevices.getDistance(): Int {
@@ -276,55 +275,63 @@ fun CHDevices.getDistance(): Int {
     return (10.0.pow(((0 - rssiValue - 62.0) / 20.0)) * 100).toInt()
 }
 
-fun CHDevices.getFirmwareName(): String? {
-    L.d("firmware", "productModel:$productModel")
-    return when (productModel) {
-        CHProductModel.SS2 -> "sesame_221_0_8c080c"
-        CHProductModel.SS4 -> "sesame_421_4_50ce5b"
-        CHProductModel.SS5 -> "sesame5_30_5_3fdd17"
-        CHProductModel.SS5PRO -> "sesame5pro_30_7_3fdd17"
-        CHProductModel.SS5US -> "sesame5us_30_16_3fdd17"
-        CHProductModel.SS6Pro -> "sesame6pro_30_21_66dee7"
-        CHProductModel.SS6ProSLiDingDoor -> "sesame6pro_30_21_66dee7"
+fun CHDevices.getFirmwareName(context: Context): String? {
+    val filePrefix = when (productModel) {
+        CHProductModel.SS2 -> "sesame_2"
+        CHProductModel.SS4 -> "sesame_4"
+        CHProductModel.SS5 -> "sesame5_"
+        CHProductModel.SS5PRO -> "sesame5pro_"
+        CHProductModel.SS5US -> "sesame5us_"
+        CHProductModel.SS6Pro, CHProductModel.SS6ProSLiDingDoor -> "sesame6pro_"
+        CHProductModel.SSM_MIWA -> "sesammiwa_"
+        CHProductModel.SesameBot1 -> "sesamebot1"
+        CHProductModel.SesameBot2, CHProductModel.SesameBot3 -> "sesamebot2"
+        CHProductModel.BiKeLock -> "sesamebike1"
+        CHProductModel.BiKeLock2 -> "sesamebike2"
+        CHProductModel.BiKeLock3 -> "sesamebike3"
+        CHProductModel.SSMOpenSensor -> "opensensor1"
+        CHProductModel.SSMOpenSensor2 -> "opensensor2"
+        CHProductModel.BLEConnector -> "bleconnector_"
+        CHProductModel.Remote -> "remote_"
+        CHProductModel.RemoteNano -> "remoten_"
+        CHProductModel.SSMTouch, CHProductModel.SSMTouch2 -> "sesametouch1_"
+        CHProductModel.SSMTouchPro, CHProductModel.SSMTouch2Pro -> "sesametouch1pro"
+        CHProductModel.SSMFace, CHProductModel.SSMFace2 -> "sesameface1_"
+        CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro -> "sesameface1pro_"
+        CHProductModel.SSMFaceAI, CHProductModel.SSMFace2AI -> "sesameface1ai_"
+        CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI -> "sesameface1proai_"
         CHProductModel.WM2 -> null
-        CHProductModel.SesameBot1 -> "sesamebot1_21_2_369eb9"
-        CHProductModel.SesameBot2 -> "sesamebot2_30_17_b33894"
-        CHProductModel.SesameBot3 -> "sesamebot2_30_17_b33894"
-        CHProductModel.BiKeLock -> "sesamebike1_21_3_d7162a"
-        CHProductModel.BiKeLock2 -> "sesamebike2_30_6_ec3c5c"
-        CHProductModel.BiKeLock3 -> "sesamebike3_30_33_d1648e"
-        CHProductModel.SSMOpenSensor -> "opensensor1_30_8_4a5b8d"
-        CHProductModel.SSMOpenSensor2 -> "opensensor2_30_24_4a5b8d"
-        CHProductModel.BLEConnector -> "bleconnector_30_11_b5940a"
-        CHProductModel.Remote -> "remote_30_14_4a5b8d"
-        CHProductModel.RemoteNano -> "remoten_30_15_4a5b8d"
-        CHProductModel.SSMTouch -> "sesametouch1_30_10_57bc9f"
-        CHProductModel.SSMTouch2 -> "sesametouch1_30_10_57bc9f"
-        CHProductModel.SSMTouchPro -> "sesametouch1pro_30_9_57bc9f"
-        CHProductModel.SSMTouch2Pro -> "sesametouch1pro_30_9_57bc9f"
-        CHProductModel.SSMFace -> "sesameface1_30_19_f5b193"
-        CHProductModel.SSMFace2 -> "sesameface1_30_19_f5b193"
-        CHProductModel.SSMFacePro -> "sesameface1pro_30_18_f5b193"
-        CHProductModel.SSMFace2Pro -> "sesameface1pro_30_18_f5b193"
-        CHProductModel.SSMFaceAI -> "sesameface1ai_30_23_f5b193"
-        CHProductModel.SSMFace2AI -> "sesameface1ai_30_23_f5b193"
-        CHProductModel.SSMFaceProAI -> "sesameface1proai_30_22_f5b193"
-        CHProductModel.SSMFace2ProAI -> "sesameface1proai_30_22_f5b193"
-        CHProductModel.SSM_MIWA -> "sesammiwa_10_29_85ca810"
-        else -> null
+        CHProductModel.Hub3 -> "hub3_"
+    } ?: return null
+
+    return try {
+        context.assets.list("firmware")
+            ?.firstOrNull { fileName ->
+                fileName.endsWith(".zip", ignoreCase = true) &&
+                        fileName.startsWith(filePrefix, ignoreCase = true)
+            }
+            ?.substringBeforeLast(".")
+            ?.also { matchedName ->
+                L.d("firmware", "productModel:$productModel, prefix:$filePrefix, matched:$matchedName")
+            }
+            ?: run {
+                L.d("firmware", "Missing firmware file for prefix:$filePrefix")
+                null
+            }
+    } catch (e: Exception) {
+        L.e("firmware", "Failed to find firmware for prefix:$filePrefix", e)
+        null
     }
 }
 
 fun CHDevices.getFirmwarePath(context: Context): String? {
-    val fileName = getFirmwareName() ?: return null
+    val fileName = getFirmwareName(context) ?: return null
     val cacheDir = File(context.cacheDir, "firmware")
     if (!cacheDir.exists()) {
         cacheDir.mkdirs()
     }
-
     val cacheFile = File(cacheDir, "$fileName.zip")
 
-    // 如果缓存文件不存在，从assets复制
     if (!cacheFile.exists()) {
         try {
             context.assets.open("firmware/$fileName.zip").use { input ->
@@ -337,7 +344,6 @@ fun CHDevices.getFirmwarePath(context: Context): String? {
             return null
         }
     }
-
     return cacheFile.absolutePath
 }
 
