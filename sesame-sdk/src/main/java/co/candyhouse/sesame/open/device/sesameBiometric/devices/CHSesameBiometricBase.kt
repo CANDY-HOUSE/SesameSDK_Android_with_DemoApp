@@ -13,8 +13,6 @@ interface CHSesameBiometricBase : CHSesameConnector, CHRemoteNanoCapable, CHCapa
     var triggerDelaySetting: CHRemoteNanoTriggerSettings?
     override var ssm2KeysMap: MutableMap<String, ByteArray>
 
-    var radarPayload: ByteArray
-
     // 设备管理能力
     fun login(token: String?)
     fun goIOT()

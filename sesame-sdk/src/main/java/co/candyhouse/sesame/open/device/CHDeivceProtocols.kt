@@ -266,7 +266,7 @@ interface CHDevices {
 
     // 为了解决门和墙密封较好的情况下， 蓝牙信号受影响， 门外的刷卡机与门内的锁经常断线的问题， 添加此参数。
     // 让用户可以自己设置一个合适的蓝牙信号强度阈值， 以保持BLE长连接。
-    var bleTxPower: Byte?
+    var bleTxPower: Byte
     var deviceId: UUID?
     var isRegistered: Boolean
     var productModel: CHProductModel

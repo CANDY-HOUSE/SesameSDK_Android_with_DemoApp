@@ -316,8 +316,7 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
 
     override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
-        }
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) {}
     }
 
     private fun reportBatteryData(payloadString: String) {
@@ -347,6 +346,9 @@ internal class CHSesameBot2Device : CHSesameOS3(), CHSesameBot2, CHDeviceUtil {
             }
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
             reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
+        }
+        if (receivePayload.cmdItCode == SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value) {
+            bleTxPower = receivePayload.payload[0]
         }
     }
 }

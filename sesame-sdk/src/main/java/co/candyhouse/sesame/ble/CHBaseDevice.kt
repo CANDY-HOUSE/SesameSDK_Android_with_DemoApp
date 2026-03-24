@@ -60,14 +60,14 @@ internal interface CHDeviceUtil {
                 delegate?.onMechStatus(this as CHDevices)
             }
         }
-    var bleTxPower: Byte? = UNSET_BLE_TX_POWER_VALUE.toByte()
+    var bleTxPower: Byte = UNSET_BLE_TX_POWER_VALUE.toByte()
         set(value) {
             if (field != value) {
                 field = value
             }
             if (this is CHDevices) {
                 val device: CHDevices = this
-                delegate?.onBleTxPowerReceive(device, device.bleTxPower!!)
+                delegate?.onBleTxPowerReceive(device, device.bleTxPower)
             }
         }
 
@@ -232,7 +232,7 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
             get() = this@toCHDevices.rssi
             set(value) { this@toCHDevices.rssi = value }
 
-        override var bleTxPower: Byte?
+        override var bleTxPower: Byte
             get() = this@toCHDevices.bleTxPower
             set(value) { this@toCHDevices.bleTxPower = value }
 

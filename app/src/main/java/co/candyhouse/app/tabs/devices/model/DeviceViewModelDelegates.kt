@@ -238,9 +238,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
             "[onBleDeviceStatusChanged][device: $device][status: $status][shadowStatus: $shadowStatus]"
         )
 
-        /* viewModelScope.launch {
-             (ssmosLockDelegates[device] as? CHWifiModule2Delegate)?.onBleDeviceStatusChanged(device, status, shadowStatus)
-         }*/
         vm.viewModelScope.launch {
             (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onBleDeviceStatusChanged(
                 device,
@@ -259,7 +256,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
     }
 
     override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
-        L.d("harry", "[onBleTxPowerReceive][txPower: $txPower]")
         vm.viewModelScope.launch {
             (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onBleTxPowerReceive(device, txPower)
         }

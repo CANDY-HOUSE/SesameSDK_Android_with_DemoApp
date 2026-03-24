@@ -692,6 +692,8 @@
                     android:id="@+id/ble_tx_power_zone"
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
+                    android:layout_marginTop="500dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@color/white"
                     android:visibility="gone">
 
@@ -732,13 +734,6 @@
                             app:isb_track_progress_size="4dp" />
 
                     </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="17dp"
-                        android:background="@color/gray0" />
 
                 </RelativeLayout>
             </LinearLayout>

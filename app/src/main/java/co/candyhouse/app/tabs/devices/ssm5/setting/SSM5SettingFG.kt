@@ -91,7 +91,6 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
             bind.chengeAngleZone.setOnClickListener {
                 safeNavigate(R.id.action_SSM2SettingFG_to_SSM2SetAngleFG)
             }
-            showBatteryLevel(bind.battery, ss5)
         }
         bind.autolockStatus.setOnClickListener {
             L.d("ischecaksa", "isChecked:" + bind.autolockSwitch.isChecked)
@@ -102,7 +101,6 @@ class SSM5SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
 
         bind.swiperefresh.addExcludedView(bind.opslockWheelview)
         bind.swiperefresh.addExcludedView(bind.wheelview)
-        setBleTxPowerUI()
     }
 
     override fun onResume() {

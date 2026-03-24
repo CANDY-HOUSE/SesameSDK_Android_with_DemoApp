@@ -59,8 +59,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
             parceADV(value)
         }
 
-    override var radarPayload: ByteArray = byteArrayOf(0x33, 0x10, 0x00, 0x00, 0x00)
-
     override var triggerDelaySetting: CHRemoteNanoTriggerSettings? = null
 
     // 是否通过WM2连接
@@ -182,6 +180,11 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
                 handled = true
                 (ssm2KeysMap as? ObservableMutableMap)?.setSupport(false)
             }
+
+            SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value -> {
+                handled = true
+                bleTxPower = receivePayload.payload[0]
+            }
         }
 
         // 分发事件到各处理器
@@ -196,7 +199,6 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
     }
 
     private fun handleRadar(receivePayload: SSM3PublishPayload) {
-        radarPayload = receivePayload.payload
         (delegate as? CHDeviceConnectDelegate)?.onRadarReceive(this, receivePayload.payload)
     }
 
@@ -311,8 +313,7 @@ internal open class CHSesameBiometricBaseDevice : CHSesameOS3(), CHSesameBiometr
 
     override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
-        }
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) {}
     }
 
     /**

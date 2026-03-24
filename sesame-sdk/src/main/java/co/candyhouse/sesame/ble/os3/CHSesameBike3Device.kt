@@ -30,7 +30,6 @@ internal class CHSesameBike3Device :
 
     override var triggerDelaySetting: CHRemoteNanoTriggerSettings? = null
     override var ssm2KeysMap: MutableMap<String, ByteArray> = mutableMapOf()
-    override var radarPayload: ByteArray = byteArrayOf()
 
     override fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>? = null
     override fun getSSM2SlotFullLiveData(): LiveData<Event<Boolean>>? = null

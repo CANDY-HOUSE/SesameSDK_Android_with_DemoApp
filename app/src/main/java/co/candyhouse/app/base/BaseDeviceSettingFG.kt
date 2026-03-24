@@ -68,71 +68,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
     private var isToNotification = false
     private var isViewDestroyed = false
-
     private val refreshCounter = mutableIntStateOf(0)
-
-    private fun setBleTxPower(txPwr: Byte, function: () -> Unit) {
-        val device = mDeviceModel.ssmLockLiveData.value!!
-        L.d("harry", "设置 BLE tx power 为： $txPwr ")
-        device.setBleTxPower(txPwr) { res ->
-        }
-    }
-
-    fun setBleTxPowerUI() {
-        val bleTxPower = mDeviceModel.ssmLockLiveData.value!!.bleTxPower?.toInt() ?: UNSET_BLE_TX_POWER_VALUE /* default 21 */
-        L.d("harry", "bleTxPower: $bleTxPower")
-        val bleTxPowerZone = view?.findViewById<View>(R.id.ble_tx_power_zone)
-        val bleTxPowerSeekbar = view?.findViewById<IndicatorSeekBar>(R.id.ble_tx_power_seekbar)
-        activity?.runOnUiThread {
-            if (bleTxPower == UNSET_BLE_TX_POWER_VALUE) {
-                bleTxPowerZone?.visibility = View.GONE
-            } else {
-                bleTxPowerZone?.visibility = View.VISIBLE
-                bleTxPowerSeekbar?.setProgress(bleTxPower.toFloat())
-                bleTxPowerSeekbar?.setIndicatorTextFormat("\${PROGRESS} " + getString(R.string.dBm))
-            }
-        }
-
-        val vibrator = context?.let { ctx ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                vibratorManager.defaultVibrator
-            } else {
-                @Suppress("DEPRECATION") ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            }
-        }
-
-        var lastProgress = bleTxPower
-
-        bleTxPowerSeekbar?.onSeekChangeListener = object : OnSeekChangeListener {
-            override fun onSeeking(seekParams: SeekParams) {
-                vibrator?.let {
-                    val currentProgress = seekParams.progress
-                    if (currentProgress != lastProgress) {
-                        lastProgress = currentProgress
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            it.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
-                        } else {
-                            @Suppress("DEPRECATION") it.vibrate(3)
-                        }
-                    }
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
-
-            override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
-                setBleTxPower(seekBar.progress.toByte()) {}
-            }
-        }
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        isViewDestroyed = true
-    }
 
     override fun onResume() {
         super.onResume()
@@ -158,15 +94,76 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                     checkVersionTag(status, device)
                 }
 
+                override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
+                    L.d("BLE tx power", "onBleTxPowerReceive...$txPower")
+                    showBleTxPowerUI(device, txPower)
+                }
+
                 @SuppressLint("SetTextI18n")
                 override fun onMechStatus(device: CHDevices) {
-                    view?.findViewById<TextView>(R.id.battery)?.let {
-                        showBatteryLevel(it, device)
-                    }
+                    setBatteryResult(device)
                 }
             }.bindLifecycle(viewLifecycleOwner)
 
         checkTvSysNotifyWidget(isOnResume = true)
+    }
+
+    private fun showBleTxPowerUI(targetDevice: CHDevices, txByte: Byte) {
+        val ctx = context ?: return
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+        L.d("BLE tx power", "bleTxPower: $txByte")
+
+        val bleTxPowerZone = view?.findViewById<View>(R.id.ble_tx_power_zone)
+        val bleTxPowerSeekbar = view?.findViewById<IndicatorSeekBar>(R.id.ble_tx_power_seekbar)
+        activity?.runOnUiThread {
+            if (txByte.toInt() == UNSET_BLE_TX_POWER_VALUE) {
+                bleTxPowerZone?.visibility = View.GONE
+                return@runOnUiThread
+            } else {
+                if (!isAdded) return@runOnUiThread
+
+                bleTxPowerSeekbar?.setIndicatorTextFormat("\${PROGRESS} " + getString(R.string.dBm))
+                bleTxPowerSeekbar?.setProgress(txByte.toFloat())
+
+                var lastProgress = txByte.toInt()
+                bleTxPowerSeekbar?.onSeekChangeListener = object : OnSeekChangeListener {
+
+                    override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
+
+                    override fun onSeeking(seekParams: SeekParams) {
+                        val currentProgress = seekParams.progress
+                        if (currentProgress != lastProgress) {
+                            lastProgress = currentProgress
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
+                            } else {
+                                @Suppress("DEPRECATION")
+                                vibrator.vibrate(3)
+                            }
+                        }
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
+                        val txPwr = seekBar.progress.toByte()
+                        L.d("BLE tx power", "设置 BLE tx power 为： $txPwr ")
+                        targetDevice.setBleTxPower(txPwr) {}
+                    }
+                }
+
+                bleTxPowerZone?.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        isViewDestroyed = true
     }
 
     @SuppressLint("StringFormatMatches")
@@ -178,10 +175,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         }
     }
 
-    fun showBatteryLevel(view: TextView, device: CHDevices?) {
-        val batteryLevel = device?.batteryPercentage ?: device?.userKey?.stateInfo?.batteryPercentage
-        view.post {
-            view.text = batteryLevel?.let { "$it%" } ?: ""
+    fun setBatteryResult(device: CHDevices) {
+        val batteryText = view?.findViewById<TextView>(R.id.battery)
+        val batteryLevel = device.batteryPercentage ?: device.userKey?.stateInfo?.batteryPercentage
+        batteryText?.post {
+            batteryText.text = batteryLevel?.let { "$it%" } ?: ""
         }
     }
 
@@ -235,6 +233,8 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
         val targetDevice = mDeviceModel.ssmLockLiveData.value!!
         handleUI(targetDevice)
+        setBatteryResult(targetDevice)
+        showBleTxPowerUI(targetDevice, targetDevice.bleTxPower)
         setupListeners(targetDevice)
     }
 
@@ -349,7 +349,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             }
         }
 
-        view?.findViewById<View>(R.id.battery_zone)?.setOnClickListener{
+        view?.findViewById<View>(R.id.battery_zone)?.setOnClickListener {
             val config = WebViewConfig(
                 scene = "battery-trend",
                 params = mapOf(
@@ -437,8 +437,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         view?.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setOnRefreshListener {
             refreshTop()
         }
-
-
     }
 
     private fun refreshTop() {

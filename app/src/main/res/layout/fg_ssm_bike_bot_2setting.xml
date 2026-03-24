@@ -398,6 +398,53 @@
                 </RelativeLayout>
 
                 <RelativeLayout
+                    android:id="@+id/ble_tx_power_zone"
+                    android:layout_width="match_parent"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="500dp"
+                    android:background="@color/white"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/ble_tx_power_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/white"
+                        android:gravity="center_vertical"
+                        android:text="@string/ble_tx_power"
+                        android:textColor="@color/black"
+                        android:textSize="17sp" />
+
+                    <LinearLayout
+                        android:layout_width="270dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="6dp"
+                        android:gravity="end|center"
+                        android:orientation="horizontal">
+
+                        <com.warkiz.widget.IndicatorSeekBar
+                            android:id="@+id/ble_tx_power_seekbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            app:isb_indicator_color="@color/colorPrimary"
+                            app:isb_indicator_text_size="28sp"
+                            app:isb_max="20"
+                            app:isb_min="-4"
+                            app:isb_thumb_color="@color/colorPrimary"
+                            app:isb_thumb_size="27dp"
+                            app:isb_track_background_size="4dp"
+                            app:isb_track_progress_color="@color/colorPrimary"
+                            app:isb_track_progress_size="4dp" />
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/nfc_zone"
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
@@ -487,61 +534,6 @@
                         android:layout_marginLeft="16dp"
                         android:background="@color/gray0" />
                 </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/ble_tx_power_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:background="@color/white"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/ble_tx_power_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="17dp"
-                        android:background="@color/white"
-                        android:gravity="center_vertical"
-                        android:text="@string/ble_tx_power"
-                        android:textColor="@color/black"
-                        android:textSize="17sp" />
-
-                    <LinearLayout
-                        android:layout_width="270dp"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="6dp"
-                        android:gravity="end|center"
-                        android:orientation="horizontal">
-
-                        <com.warkiz.widget.IndicatorSeekBar
-                            android:id="@+id/ble_tx_power_seekbar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="10dp"
-                            app:isb_min="-4"
-                            app:isb_max="20"
-                            app:isb_indicator_color="@color/colorPrimary"
-                            app:isb_indicator_text_size="28sp"
-                            app:isb_thumb_color="@color/colorPrimary"
-                            app:isb_thumb_size="27dp"
-                            app:isb_track_background_size="4dp"
-                            app:isb_track_progress_color="@color/colorPrimary"
-                            app:isb_track_progress_size="4dp" />
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1px"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="17dp"
-                        android:background="@color/gray0" />
-
-                </RelativeLayout>
-
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

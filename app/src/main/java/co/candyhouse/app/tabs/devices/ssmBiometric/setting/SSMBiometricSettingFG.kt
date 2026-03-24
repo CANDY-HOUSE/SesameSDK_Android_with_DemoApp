@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSesameTouchproSettingBinding
-import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -61,6 +60,10 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         270 to 16
     )
 
+    private var radarLastProgress = -1
+    private var isRadarUserTracking = false
+    private var radarInitialized = false
+
     private var deviceDelegate: CHDeviceStatusDelegate? = null
 
     override fun getViewBinder() = FgSesameTouchproSettingBinding.inflate(layoutInflater)
@@ -97,17 +100,8 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
             L.d("onSSM2KeysChanged", "onBleDeviceStatusChanged" + "---")
         }
 
-        override fun onMechStatus(device: CHDevices) {
-            setBattery(view, device)
-        }
-
         override fun onRadarReceive(device: CHSesameConnector, payload: ByteArray) {
-            setRadarUI(device, payload)
-        }
-
-        override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
-            super.onBleTxPowerReceive(device, txPower)
-            setBleTxPowerUI()
+            setRadarUI(payload)
         }
 
         override fun onSSM2KeysChanged(
@@ -137,61 +131,82 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         }
     }
 
-    private fun setRadarUI(device: CHSesameConnector, payload: ByteArray) {
-        L.d(tag, "setRadarUI..." + payload[0] + " " + payload[1])
+    private fun initRadarSeekBar(device: CHSesameConnector) {
+        if (radarInitialized) return
+        radarInitialized = true
+
+        val ctx = context ?: return
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager =
+                ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+
+        bind.root.post {
+            bind.radarSeekbar.setMin(30f)
+            bind.radarSeekbar.setMax(270f)
+            bind.radarSeekbar.setIndicatorTextFormat(getString(R.string.distance) + " \${PROGRESS}cm")
+
+            bind.radarSeekbar.onSeekChangeListener = object : OnSeekChangeListener {
+
+                override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {
+                    isRadarUserTracking = true
+                }
+
+                override fun onSeeking(seekParams: SeekParams) {
+                    val currentProgress = seekParams.progress
+                    if (currentProgress != radarLastProgress) {
+                        radarLastProgress = currentProgress
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibrator.vibrate(
+                                VibrationEffect.createOneShot(
+                                    3,
+                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                )
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            vibrator.vibrate(3)
+                        }
+                    }
+                }
+
+                override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
+                    isRadarUserTracking = false
+
+                    val distance = seekBar.progress
+                    val firmwareValue = calculateFirmwareValueFromDistance(distance)
+                    L.d(tag, "设置雷达灵敏度距离: ${distance}cm, 固件值: $firmwareValue")
+
+                    setRadarSensitivity(device, firmwareValue)
+                }
+            }
+
+            bind.raderSensZone.visibility = View.VISIBLE
+        }
+    }
+
+    private fun setRadarUI(payload: ByteArray) {
+        if (payload.size < 2) {
+            L.e(tag, "setRadarUI payload 长度不足: ${payload.size}")
+            return
+        }
 
         val sensitivityValue = payload[1].toInt() and 0xFF
         val distance = calculateDistanceFromFirmwareValue(sensitivityValue)
 
         L.d(tag, "设备返回的雷达灵敏度值：$sensitivityValue, 对应标准距离：${distance}cm")
 
-        bind.radarSeekbar.setMin(30f)
-        bind.radarSeekbar.setMax(270f)
-        bind.radarSeekbar.setProgress(distance.toFloat())
-        bind.radarSeekbar.setIndicatorTextFormat(getString(R.string.distance) + " \${PROGRESS}cm")
+        bind.root.post {
+            if (!isAdded) return@post
 
-        val vibrator = context?.let { ctx ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                vibratorManager.defaultVibrator
-            } else {
-                @Suppress("DEPRECATION")
-                ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            }
-        }
-
-        var lastProgress = -1
-
-        bind.radarSeekbar.onSeekChangeListener = object : OnSeekChangeListener {
-            override fun onSeeking(seekParams: SeekParams) {
-                vibrator?.let {
-                    val currentProgress = seekParams.progress
-                    if (currentProgress != lastProgress) {
-                        lastProgress = currentProgress
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            it.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
-                        } else {
-                            @Suppress("DEPRECATION")
-                            it.vibrate(3)
-                        }
-                    }
-                }
+            if (!isRadarUserTracking) {
+                bind.radarSeekbar.setProgress(distance.toFloat())
             }
 
-            override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
-
-            override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
-                val distance1 = seekBar.progress
-                val sensitivityValue2 = calculateFirmwareValueFromDistance(distance1)
-
-                L.d(tag, "设置雷达灵敏度距离: ${distance1}cm, 固件值: $sensitivityValue2")
-
-                setRadarSensitivity(device, sensitivityValue2)
-            }
-        }
-
-        activity?.runOnUiThread {
             bind.raderSensZone.visibility = View.VISIBLE
         }
     }
@@ -317,18 +332,12 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         setupFaceZoneView()
         setupPalmZoneView()
         checkBiometricDeviceView()
-        setBleTxPowerUI()
 
         if (device.productModel === CHProductModel.SSMFace || device.productModel === CHProductModel.SSMFace2 || device.productModel === CHProductModel.SSMFacePro || device.productModel === CHProductModel.SSMFace2Pro
             || device.productModel === CHProductModel.SSMFaceProAI || device.productModel === CHProductModel.SSMFace2ProAI || device.productModel === CHProductModel.SSMFaceAI || device.productModel === CHProductModel.SSMFace2AI) {
             bind.facePalm.visibility = View.VISIBLE
-            if (device.deviceStatus == CHDeviceStatus.Unlocked) {
-                // 只有Face刷卡机才显示雷达灵敏度
-                setRadarUI(
-                    (mDeviceModel.ssmLockLiveData.value as CHSesameConnector),
-                    device.radarPayload
-                )
-            }
+            // 只有Face系列才显示雷达灵敏度设置
+            initRadarSeekBar(device)
         } else {
             bind.raderSensZoneRl.visibility = View.GONE
             bind.radarDistanceSet.visibility = View.GONE
@@ -341,8 +350,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         bind.addLockerZone.setOnClickListener {
             navigateNext(mDeviceList, R.id.to_SesameKeyboardSelectLockerListFG)
         }
-
-        setBattery(view, device)
     }
 
     private fun initRecyclerView() {
@@ -409,13 +416,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
 
         bind.devicesEmptyLogo.visibility = if (mDeviceList.isEmpty()) View.VISIBLE else View.GONE
         bind.tvAddSsmLogo.visibility = if (mDeviceList.isEmpty()) View.GONE else View.VISIBLE
-    }
-
-    private fun setBattery(view: View?, device: CHDevices) {
-        val batteryLevel = device.batteryPercentage ?: device.userKey?.stateInfo?.batteryPercentage
-        view?.findViewById<TextView>(R.id.battery)?.post {
-            view.findViewById<TextView>(R.id.battery)?.text = batteryLevel?.let { "$it%" } ?: ""
-        }
     }
 
     private fun checkBiometricDeviceView() {

@@ -4,18 +4,16 @@ import android.os.Bundle
 import android.view.View
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
-import co.candyhouse.app.databinding.FgSsmBikeSettingBinding
+import co.candyhouse.app.databinding.FgSsmBikeBot2settingBinding
 import co.candyhouse.sesame.open.device.CHProductModel
 import co.utils.safeNavigate
 
-class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
+class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bind.clickScriptZone.visibility = View.GONE
 
         usePressText()
-
-        showBatteryLevel(bind.battery, mDeviceModel.ssmLockLiveData.value)
 
         if (mDeviceModel.ssmLockLiveData.value!!.productModel == CHProductModel.BiKeLock3) {
             bind.fpZone.visibility = View.VISIBLE
@@ -25,9 +23,7 @@ class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         } else {
             bind.fpZone.visibility = View.GONE
         }
-
-        setBleTxPowerUI()
     }
 
-    override fun getViewBinder() = FgSsmBikeSettingBinding.inflate(layoutInflater)
+    override fun getViewBinder() = FgSsmBikeBot2settingBinding.inflate(layoutInflater)
 }

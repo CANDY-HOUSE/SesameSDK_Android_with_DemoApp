@@ -25,6 +25,5 @@ class SesameOpenSensorNoBLESettingFG :
             bind.trashDeviceKeyTxt.text =
                 getString(R.string.trash_device_key, device.getNickname())
         }
-        showBatteryLevel(bind.battery, device)
     }
 }

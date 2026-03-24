@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
-import co.candyhouse.app.databinding.FgSsmBikeSettingBinding
+import co.candyhouse.app.databinding.FgSsmBikeBot2settingBinding
 import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
@@ -27,7 +27,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
+class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
     private val tag = "SesameBot2SettingFG"
 
     //检查类型再转换（来自firebase crash）
@@ -77,8 +77,6 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
             }
 
             override fun onMechStatus(device: CHDevices) {
-                updateBattery()
-
                 if (device.deviceStatus.value == CHDeviceLoginStatus.logined && isAdded) {
                     refreshScriptNameListFromDevice()
                 }
@@ -86,7 +84,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
         }.bindLifecycle(viewLifecycleOwner)
     }
 
-    override fun getViewBinder() = FgSsmBikeSettingBinding.inflate(layoutInflater)
+    override fun getViewBinder() = FgSsmBikeBot2settingBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (bot2 == null) {
@@ -104,14 +102,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeSettingBinding>() {
 
         renderWheelFromCache()
 
-        updateBattery()
-
         bind.swiperefresh.addExcludedView(bind.wheelview)
-        setBleTxPowerUI()
-    }
-
-    private fun updateBattery() {
-        showBatteryLevel(bind.battery, bot2)
     }
 
     @SuppressLint("ClickableViewAccessibility")

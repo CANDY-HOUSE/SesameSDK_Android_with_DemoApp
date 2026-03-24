@@ -254,6 +254,6 @@
     <string name="moved">被轉到了</string>
     <string name="registering">註冊中</string>
 
-    <string name="ble_tx_power">BLE TX power</string>
+    <string name="ble_tx_power">BLE 發射功率</string>
     <string name="dBm">dBm</string>
 </resources>

@@ -146,8 +146,7 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
 
     override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
-        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) { res ->
-        }
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) {}
     }
 
     override fun magnet(result: CHResult<CHEmpty>) {
@@ -327,6 +326,9 @@ internal class CHSesame5Device : CHSesameOS3(), CHSesame5, CHDeviceUtil {
         if (receivePayload.cmdItCode == SesameItemCode.OPS_CONTROL.value) {
             opsSetting = CHSesame5OpsSettings(receivePayload.payload)
             L.d("switch", "[ss5][opsSecond]:" + opsSetting!!.opsLockSecond)
+        }
+        if (receivePayload.cmdItCode == SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value) {
+            bleTxPower = receivePayload.payload[0]
         }
     }
 }
