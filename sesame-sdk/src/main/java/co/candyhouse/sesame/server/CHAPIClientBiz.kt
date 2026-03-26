@@ -161,7 +161,7 @@ object CHAPIClientBiz {
 
             cHApiClient.ss2CommandToWM2Post(
                 ss2.deviceId.toString().uppercase(),
-                CHSS2WebCMDReq(cmd.value.toByte(), historytag.base64Encode(), keyCheck.toHexString())
+                CHSS2WebCMDReq(cmd.value, historytag.base64Encode(), keyCheck.toHexString())
             )
             CHEmpty()
         }
