@@ -15,7 +15,8 @@ import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.*
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
 
 object CHServiceManager {
 

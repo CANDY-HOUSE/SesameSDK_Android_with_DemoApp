@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.ssm5UIParser
-import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

@@ -2,7 +2,7 @@ package co.candyhouse.sesame.ble
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanResult
-import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.base64decodeHex
 import co.candyhouse.sesame.utils.noHashtoUUID

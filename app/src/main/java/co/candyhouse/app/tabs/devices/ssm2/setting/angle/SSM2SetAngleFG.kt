@@ -8,12 +8,12 @@ import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSetAngleBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesame2
-import co.candyhouse.sesame.open.device.CHSesame5
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.CHSesame2
+import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 

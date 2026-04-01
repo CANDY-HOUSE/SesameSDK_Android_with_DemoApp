@@ -18,7 +18,7 @@ import android.os.ParcelUuid
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.os2.CHError
-import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState

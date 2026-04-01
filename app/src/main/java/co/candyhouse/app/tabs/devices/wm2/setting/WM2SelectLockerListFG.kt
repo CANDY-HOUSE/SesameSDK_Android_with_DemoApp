@@ -9,7 +9,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgWm2SelectLockerListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.devices.*
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.recycle.GenericAdapter
 

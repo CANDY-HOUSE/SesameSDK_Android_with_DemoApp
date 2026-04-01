@@ -9,10 +9,10 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpSelectLockerListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
+import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHSesameConnector
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.recycle.GenericAdapter

@@ -8,8 +8,8 @@ import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.server.dto.Sesame2Shadow
 import co.candyhouse.sesame.server.dto.Sesame5ShadowDocuments
 import co.candyhouse.sesame.server.dto.WM2Shadow
@@ -30,7 +30,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import java.util.Locale
 import java.util.Locale.getDefault
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean

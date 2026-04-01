@@ -22,17 +22,15 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpPasscodeListBinding
-import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.CHWifiModule2Delegate
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode.CHPassCodeCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.passcode.CHPassCodeDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.passcode.CHPassCodeCapable
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.passcode.CHPassCodeDelegate
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
-import co.candyhouse.sesame.server.dto.CHKeyBoardPassCodeNameRequest
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -451,7 +449,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
      */
     private fun createPassCodeDelegate(): CHPassCodeDelegate {
         return object : CHPassCodeDelegate {
-            override fun onKeyBoardReceiveStart(device: CHSesameConnector) {
+            override fun onKeyBoardReceiveStart(device: CHDevices) {
                 runOnUiThread {
                     mKbSecretList.clear()
                     bind.swiperefresh.isRefreshing = true
@@ -459,7 +457,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             }
 
             override fun onKeyBoardReceive(
-                device: CHSesameConnector, ID: String, hexName: String, type: Byte
+                device: CHDevices, ID: String, hexName: String, type: Byte
             ) {
                 // 直接显示从BLE得到的密码。收完数据后，批量获取密码名称
                 runOnUiThread {
@@ -474,7 +472,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
                 }
             }
 
-            override fun onKeyBoardReceiveEnd(device: CHSesameConnector) {
+            override fun onKeyBoardReceiveEnd(device: CHDevices) {
                 runOnUiThread {
                     bind.swiperefresh.isRefreshing = false
                     updatePassCodeCountDisplay()
@@ -484,7 +482,7 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
             }
 
             override fun onKeyBoardChanged(
-                device: CHSesameConnector, ID: String, hexName: String, type: Byte
+                device: CHDevices, ID: String, hexName: String, type: Byte
             ) {
                 val newPassCode = if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
                     KeyboardPassCode(ID, getString(R.string.default_passcode_name), type, hexName.noHashtoUUID().toString())
@@ -498,11 +496,11 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
                 }
             }
 
-            override fun onKeyBoardModeChange(device: CHSesameConnector, mode: Byte) {
+            override fun onKeyBoardModeChange(device: CHDevices, mode: Byte) {
                 updateModeUI(mode)
             }
 
-            override fun onKeyBoardDelete(device: CHSesameConnector, ID: String) {
+            override fun onKeyBoardDelete(device: CHDevices, ID: String) {
                 val passCode = mKbSecretList.find { it.id.lowercase() == ID.lowercase() }
                 if (passCode != null) {
                     runOnUiThread {
@@ -734,11 +732,11 @@ class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWif
     /**
      * 获取生物识别基类
      */
-    private fun getBiometricBase(): CHSesameBiometricBase? {
-        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+    private fun getBiometricBase(): CHSesameBiometricDevice? {
+        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice
     }
 
     private fun getDeviceUUID(): String {
-        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase).deviceId.toString().uppercase()
+        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricDevice).deviceId.toString().uppercase()
     }
 }

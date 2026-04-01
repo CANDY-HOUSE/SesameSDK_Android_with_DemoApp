@@ -13,22 +13,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
-import co.candyhouse.app.databinding.FgSesameTouchproSettingBinding
+import co.candyhouse.app.databinding.FgConnectorSettingBinding
 import co.candyhouse.app.tabs.devices.model.LockDeviceStatus
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setting.remotenanoSecondSettingValue
-import co.candyhouse.sesame.ble.os3.BiometricCapability
-import co.candyhouse.sesame.ble.os3.CHRemoteNanoTriggerSettings
-import co.candyhouse.sesame.ble.os3.hasBiometricCapability
-import co.candyhouse.sesame.open.device.CHDeviceStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.connect.CHDeviceConnectDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
+import co.candyhouse.sesame.open.devices.BiometricCapability
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHSesameConnector
+import co.candyhouse.sesame.open.devices.hasBiometricCapability
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.connect.CHDeviceConnectDelegate
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.remoteNano.CHRemoteNanoCapable
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
+import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.CHRemoteNanoTriggerSettings
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.observeEvent
 import co.utils.alertview.AlertView
@@ -42,7 +43,7 @@ import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
 
-class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding>() {
+class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
     private val tag = "SSMBiometricSettingFG"
 
     var mDeviceList = ArrayList<LockDeviceStatus>()
@@ -66,7 +67,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
 
     private var deviceDelegate: CHDeviceStatusDelegate? = null
 
-    override fun getViewBinder() = FgSesameTouchproSettingBinding.inflate(layoutInflater)
+    override fun getViewBinder() = FgConnectorSettingBinding.inflate(layoutInflater)
 
     override fun onResume() {
         super.onResume()
@@ -74,13 +75,13 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun registerDeviceDelegate() {
-        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
-            ?: return
+        val biometricDevice = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice ?: return
+        val remoteNanoDevice = biometricDevice as? CHRemoteNanoCapable ?: return
 
         deviceDelegate = createDeviceDelegate()
         deviceDelegate?.bindLifecycle(viewLifecycleOwner)
-        mDeviceModel.ssmosLockDelegates[device] = deviceDelegate as Any
-        device.registerEventDelegate(device, deviceDelegate as CHRemoteNanoDelegate)
+        mDeviceModel.ssmosLockDelegates[biometricDevice] = deviceDelegate as Any
+        remoteNanoDevice.registerEventDelegate(biometricDevice, deviceDelegate as CHRemoteNanoDelegate)
     }
 
     private fun createDeviceDelegate() = object : CHDeviceStatusDelegate,
@@ -269,15 +270,15 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     @SuppressLint("SimpleDateFormat", "DefaultLocale")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
-            ?: return
+        val biometricDevice = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice ?: return
+        val remoteNanoDevice = biometricDevice as? CHRemoteNanoCapable ?: return
 
-        device.connect { }
+        biometricDevice.connect { }
 
         bind.recy.isNestedScrollingEnabled = false
         initRecyclerView()
         observeSSM2Keys()
-        if (device.productModel == CHProductModel.RemoteNano) {
+        if (biometricDevice.productModel == CHProductModel.RemoteNano) {
             bind.triggertimeZone.apply {
                 visibility = View.VISIBLE
                 setOnClickListener {
@@ -305,7 +306,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                     0.0,
                     context.getString(R.string.second2)
                 )
-                device.triggerDelaySetting?.triggerDelaySecond?.let {
+                biometricDevice.triggerDelaySetting?.triggerDelaySecond?.let {
                     setCurrentPosition(it.toInt())
                     bind.triggerStatus.text = String.format(
                         "%.1f %s",
@@ -315,7 +316,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                 }
                 setListener { selected ->
                     val opsLockSecond = remotenanoSecondSettingValue[selected]
-                    device.setTriggerDelayTime(opsLockSecond.toUByte()) {}
+                    remoteNanoDevice.setTriggerDelayTime(opsLockSecond.toUByte()) {}
                 }
             }
             bind.swiperefresh.addExcludedView(bind.triggerWheelview)
@@ -333,18 +334,18 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
         setupPalmZoneView()
         checkBiometricDeviceView()
 
-        if (device.productModel === CHProductModel.SSMFace || device.productModel === CHProductModel.SSMFace2 || device.productModel === CHProductModel.SSMFacePro || device.productModel === CHProductModel.SSMFace2Pro
-            || device.productModel === CHProductModel.SSMFaceProAI || device.productModel === CHProductModel.SSMFace2ProAI || device.productModel === CHProductModel.SSMFaceAI || device.productModel === CHProductModel.SSMFace2AI) {
+        if (biometricDevice.productModel === CHProductModel.SSMFace || biometricDevice.productModel === CHProductModel.SSMFace2 || biometricDevice.productModel === CHProductModel.SSMFacePro || biometricDevice.productModel === CHProductModel.SSMFace2Pro
+            || biometricDevice.productModel === CHProductModel.SSMFaceProAI || biometricDevice.productModel === CHProductModel.SSMFace2ProAI || biometricDevice.productModel === CHProductModel.SSMFaceAI || biometricDevice.productModel === CHProductModel.SSMFace2AI) {
             bind.facePalm.visibility = View.VISIBLE
             // 只有Face系列才显示雷达灵敏度设置
-            initRadarSeekBar(device)
+            initRadarSeekBar(biometricDevice)
         } else {
             bind.raderSensZoneRl.visibility = View.GONE
             bind.radarDistanceSet.visibility = View.GONE
             bind.facePalm.visibility = View.GONE
         }
 
-        val name = device.getNickname()
+        val name = biometricDevice.getNickname()
         bind.addSsmHintByTouchTxt.text = getString(R.string.add_ssm_hint_by_touch, name)
         bind.trashDeviceKeyTxt.text = getString(R.string.trash_device_key, name)
         bind.addLockerZone.setOnClickListener {
@@ -369,7 +370,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
                             itemView.setOnClickListener {
                                 AlertView(title.text.toString(), "", AlertStyle.IOS).apply {
                                     addAction(AlertAction(getString(R.string.ssm_delete), AlertActionStyle.NEGATIVE) { _ ->
-                                        (mDeviceModel.ssmLockLiveData.value!! as CHSesameBiometricBase)
+                                        (mDeviceModel.ssmLockLiveData.value!! as CHSesameBiometricDevice)
                                             .removeSesame(data.id) {}
                                     })
                                     show(activity as AppCompatActivity)
@@ -383,7 +384,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun observeSSM2Keys() {
-        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice
 
         device?.getSSM2KeysLiveData()?.observe(viewLifecycleOwner) { keys ->
             L.d("ssm2KeysMap", "getSSM2KeysLiveData size is ${keys.size}")
@@ -505,13 +506,19 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgSesameTouchproSettingBinding
     }
 
     private fun unregisterDeviceDelegate() {
-        val device = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
-        device?.let {
+        val biometricDevice = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice
+        val remoteNanoDevice = biometricDevice as? CHRemoteNanoCapable
+
+        biometricDevice?.let {
             mDeviceModel.ssmosLockDelegates.remove(it)
+        }
+
+        if (remoteNanoDevice != null) {
             (deviceDelegate as? CHRemoteNanoDelegate)?.let { delegate ->
-                it.unregisterEventDelegate(delegate)
+                remoteNanoDevice.unregisterEventDelegate(delegate)
             }
         }
+
         deviceDelegate = null
     }
 

@@ -1,6 +1,6 @@
 package co.candyhouse.app.ext
 
-import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.server.dto.CHUserKey
 
 /**

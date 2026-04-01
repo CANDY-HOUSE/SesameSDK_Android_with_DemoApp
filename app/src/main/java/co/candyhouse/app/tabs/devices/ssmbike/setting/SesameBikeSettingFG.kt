@@ -5,7 +5,7 @@ import android.view.View
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmBikeBot2settingBinding
-import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.utils.safeNavigate
 
 class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {

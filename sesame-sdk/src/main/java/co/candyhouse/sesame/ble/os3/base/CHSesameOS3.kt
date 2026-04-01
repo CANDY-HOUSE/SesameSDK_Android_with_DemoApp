@@ -26,10 +26,10 @@ import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.device.CHDeviceStatus
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.base.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.utils.BleBaseType

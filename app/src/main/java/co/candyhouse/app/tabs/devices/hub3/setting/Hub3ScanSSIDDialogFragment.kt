@@ -18,9 +18,9 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgWm2ScanListBinding
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
-import co.candyhouse.sesame.open.device.CHHub3
-import co.candyhouse.sesame.open.device.CHHub3Delegate
-import co.candyhouse.sesame.open.device.CHWifiModule2
+import co.candyhouse.sesame.open.devices.CHHub3
+import co.candyhouse.sesame.open.devices.CHHub3Delegate
+import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.utils.L
 import co.utils.alerts.ext.inputTextAlert
 import co.utils.recycle.GenericAdapter

@@ -6,15 +6,15 @@ import android.view.View
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
-import co.candyhouse.app.databinding.FgSettingMainBinding
+import co.candyhouse.app.databinding.FgLockSettingBinding
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
-import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatus
-import co.candyhouse.sesame.open.device.CHSesame2
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.CHSesame2
 import co.utils.safeNavigate
 
-class SSM2SettingFG : BaseDeviceSettingFG<FgSettingMainBinding>() {
-    override fun getViewBinder() = FgSettingMainBinding.inflate(layoutInflater)
+class SSM2SettingFG : BaseDeviceSettingFG<FgLockSettingBinding>() {
+    override fun getViewBinder() = FgLockSettingBinding.inflate(layoutInflater)
 
     @SuppressLint("SimpleDateFormat", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

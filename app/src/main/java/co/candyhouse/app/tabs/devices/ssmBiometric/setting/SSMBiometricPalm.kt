@@ -1,6 +1,5 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
-import android.R.attr.data
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -11,15 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmFacePalmListBinding
-import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.ble.os3.CHSesameTouchFace
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.palm.CHPalmCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.palm.CHPalmDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHPalmNameRequest
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.palm.CHPalmCapable
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.palm.CHPalmDelegate
+import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.CHSesameTouchFace
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
@@ -32,13 +29,9 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.hexStringToByteArray
-import co.utils.isUUIDv4
-import co.utils.noHashtoUUID
 import co.utils.recycle.GenericAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
-import kotlin.onFailure
 
 /**
  * 掌纹管理界面
@@ -89,7 +82,7 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
      * 设置操作示意图
      */
     private fun setFaceTips() {
-        val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase
+        val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricDevice
         when (device.productModel) {
             CHProductModel.SSMFace,CHProductModel.SSMFace2 -> bind.palmIvTips.setImageResource(R.drawable.palm_tips)
             else -> bind.palmIvTips.setImageResource(R.drawable.palmpro_tips)
@@ -199,12 +192,12 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
      */
     private fun createPalmDelegate(): CHPalmDelegate {
         return object : CHPalmDelegate {
-            override fun onPalmModeChanged(device: CHSesameConnector, mode: Byte) {
+            override fun onPalmModeChanged(device: CHDevices, mode: Byte) {
                 L.d(tag, "[onPalmModeChanged]ID:$mode")
                 updateModeState(mode)
             }
 
-            override fun onPalmReceive(device: CHSesameConnector, palm: CHSesameTouchFace) {
+            override fun onPalmReceive(device: CHDevices, palm: CHSesameTouchFace) {
                 L.d(tag, "[onPalmReceive] type: ${palm.type}; idLength: ${palm.idLength}; ID:${palm.id}; nameLength: ${palm.nameLength}; nameUUID:${palm.nameUUID}")
 //                getPalmName(palm, getDeviceUUID())
                 runOnUiThread {
@@ -212,7 +205,7 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
                 }
             }
 
-            override fun onPalmChanged(device: CHSesameConnector, palm: CHSesameTouchFace) {
+            override fun onPalmChanged(device: CHDevices, palm: CHSesameTouchFace) {
                 L.d(tag, "[onPalmChange] type: ${palm.type}; idLength: ${palm.idLength}; ID:${palm.id}; nameLength: ${palm.nameLength}; nameUUID:${palm.nameUUID}")
                 runOnUiThread {
                     updatePalmList(palm)
@@ -220,12 +213,12 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
                 }
             }
 
-            override fun onPalmReceiveStart(device: CHSesameConnector) {
+            override fun onPalmReceiveStart(device: CHDevices) {
                 // do nothing
                 L.d(tag, "[onPalmReceiveStart]")
             }
 
-            override fun onPalmReceiveEnd(device: CHSesameConnector) {
+            override fun onPalmReceiveEnd(device: CHDevices) {
                 // do nothing
                 L.d(tag, "[onPalmReceiveEnd]")
                 runOnUiThread {
@@ -234,7 +227,7 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
                 }
             }
 
-            override fun onPalmDeleted(device: CHSesameConnector, palmID: Byte, isSuccess: Boolean) {
+            override fun onPalmDeleted(device: CHDevices, palmID: Byte, isSuccess: Boolean) {
                 if (isSuccess) {
                     val palm = mPalmList.find { it.id.toInt(16) == palmID.toInt() }
                     if (palm != null) {
@@ -518,12 +511,12 @@ class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
     /**
      * 获取生物识别基类
      */
-    private fun getBiometricBase(): CHSesameBiometricBase? {
-        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+    private fun getBiometricBase(): CHSesameBiometricDevice? {
+        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice
     }
 
     private fun getDeviceUUID(): String {
-        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase).deviceId.toString().uppercase()
+        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricDevice).deviceId.toString().uppercase()
     }
 
 }

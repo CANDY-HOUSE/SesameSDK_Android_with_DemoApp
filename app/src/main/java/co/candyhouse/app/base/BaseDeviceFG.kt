@@ -9,7 +9,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.ext.DfuProgressHandler
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
-import co.candyhouse.sesame.open.device.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.utils.applyBottomInsets
 import com.google.android.material.snackbar.Snackbar
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper

@@ -15,13 +15,17 @@ import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.*
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.devices.*
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHSesameLock
+import co.candyhouse.sesame.open.devices.base.NSError
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import java.util.*
-import java.util.Locale
 import java.util.Locale.getDefault
 import kotlin.experimental.and
 

@@ -8,8 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHSesameLock
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 
 private fun NavController.hasAction(actionId: Int): Boolean {

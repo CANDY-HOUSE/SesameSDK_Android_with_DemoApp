@@ -18,9 +18,9 @@ import co.candyhouse.app.tabs.devices.locktest.LockToggleTestBottomSheet
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHHub3
-import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.CHHub3
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.utils.L
 import co.utils.recycle.DeviceListAdapter
@@ -346,7 +346,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.SSMOpenSensor2, CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2,
             CHProductModel.SSMTouchPro, CHProductModel.SSMTouch2Pro, CHProductModel.SSMFace, CHProductModel.SSMFace2,
             CHProductModel.SSMFaceAI, CHProductModel.SSMFace2AI, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro,
-            CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI -> safeNavigate(R.id.to_SesameTouchProSettingFG)
+            CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI -> safeNavigate(R.id.to_SesameConnectorSettingFG)
         }
     }
 

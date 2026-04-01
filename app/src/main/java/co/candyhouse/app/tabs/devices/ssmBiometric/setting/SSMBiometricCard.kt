@@ -25,10 +25,10 @@ import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.card.CHCardDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.card.CHCardCapable
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.card.CHCardDelegate
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
@@ -445,7 +445,7 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
      */
     private fun createCardDelegate(): CHCardDelegate {
         return object : CHCardDelegate {
-            override fun onCardReceiveStart(device: CHSesameConnector) {
+            override fun onCardReceiveStart(device: CHDevices) {
                 runOnUiThread {
                     mCardList.clear()
                     bind.swiperefresh.isRefreshing = true
@@ -453,7 +453,7 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
             }
 
             override fun onCardReceive(
-                device: CHSesameConnector,
+                device: CHDevices,
                 cardID: String,
                 hexName: String,
                 type: Byte
@@ -471,7 +471,7 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
                 }
             }
 
-            override fun onCardReceiveEnd(device: CHSesameConnector) {
+            override fun onCardReceiveEnd(device: CHDevices) {
                 runOnUiThread {
                     bind.swiperefresh.isRefreshing = false
                     isUpload = true
@@ -481,7 +481,7 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
             }
 
             override fun onCardChanged(
-                device: CHSesameConnector,
+                device: CHDevices,
                 cardID: String,
                 hexName: String,
                 type: Byte
@@ -499,11 +499,11 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
                 }
             }
 
-            override fun onCardModeChanged(device: CHSesameConnector, mode: Byte) {
+            override fun onCardModeChanged(device: CHDevices, mode: Byte) {
                 updateModeUI(mode)
             }
 
-            override fun onCardDelete(device: CHSesameConnector, cardID: String) {
+            override fun onCardDelete(device: CHDevices, cardID: String) {
                 L.d("hcia", "onCardDelete : $cardID")
                 val card = mCardList.find { it.id.uppercase() == cardID.uppercase() }
                 if (card != null) {
@@ -751,8 +751,8 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
     /**
      * 获取生物识别基类
      */
-    private fun getBiometricBase(): CHSesameBiometricBase? {
-        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+    private fun getBiometricBase(): CHSesameBiometricDevice? {
+        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice
     }
 
     private fun postCardListToServer(cardList: ArrayList<SuiCard>) {
@@ -797,6 +797,6 @@ class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
     }
 
     private fun getDeviceUUID(): String {
-        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase).deviceId.toString().uppercase()
+        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricDevice).deviceId.toString().uppercase()
     }
 }

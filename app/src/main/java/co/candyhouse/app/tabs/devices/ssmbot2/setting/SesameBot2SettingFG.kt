@@ -12,11 +12,11 @@ import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmBikeBot2settingBinding
 import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
-import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatusDelegate
-import co.candyhouse.sesame.open.device.CHDevices
-import co.candyhouse.sesame.open.device.CHSesameBot2
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.utils.L

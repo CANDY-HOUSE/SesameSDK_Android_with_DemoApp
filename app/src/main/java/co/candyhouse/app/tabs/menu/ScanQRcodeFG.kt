@@ -25,7 +25,7 @@ import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.sesame.BaseFG
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.device.CHProductModel
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L

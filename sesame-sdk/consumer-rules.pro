@@ -56,8 +56,8 @@
 }
 
 -keep class co.candyhouse.sesame.ble.CHBaseDevice { *; }
--keep class co.candyhouse.sesame.open.device.CHDeviceStatus { *; }
--keep interface co.candyhouse.sesame.open.device.CHDevices { *; }
+-keep class co.candyhouse.sesame.open.devices.base.CHDeviceStatus { *; }
+-keep interface co.candyhouse.sesame.open.devices.base.CHDevices { *; }
 -keep class co.candyhouse.sesame.** { *; }
 
 # AWS相关

@@ -26,7 +26,7 @@ import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.device.CHSesameLock
+import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.utils.GuestUploadFlag

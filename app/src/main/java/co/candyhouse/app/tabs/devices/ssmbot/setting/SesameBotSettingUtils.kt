@@ -1,7 +1,7 @@
 package co.candyhouse.app.tabs.devices.ssmbot.setting
 
 import co.candyhouse.app.R
-import co.candyhouse.sesame.open.device.CHSesameBotMechSettings
+import co.candyhouse.sesame.open.devices.CHSesameBotMechSettings
 
 fun botMode(setting: CHSesameBotMechSettings): SesameBotMode {
     return if (setting.clickLockSec.toInt() == 20) {

@@ -5,7 +5,9 @@ import android.view.View
 import androidx.lifecycle.Lifecycle
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmBotSettingBinding
-import co.candyhouse.sesame.open.device.*
+import co.candyhouse.sesame.open.devices.*
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 
 class SesameBotSettingFG : BaseDeviceSettingFG<FgSsmBotSettingBinding>() {
     override fun getViewBinder()= FgSsmBotSettingBinding.inflate(layoutInflater)

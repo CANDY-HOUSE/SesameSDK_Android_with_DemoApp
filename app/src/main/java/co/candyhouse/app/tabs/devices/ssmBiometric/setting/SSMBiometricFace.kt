@@ -1,6 +1,5 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
-import android.R.attr.data
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -11,19 +10,16 @@ import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmFaceFacesListBinding
-import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.ble.os3.CHSesameTouchFace
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.face.CHFaceCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.face.CHFaceDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHFaceNameRequest
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.face.CHFaceCapable
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.face.CHFaceDelegate
+import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.CHSesameTouchFace
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
-import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest.Companion.palm
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -33,12 +29,9 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.hexStringToByteArray
-import co.utils.isUUIDv4
-import co.utils.noHashtoUUID
 import co.utils.recycle.GenericAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * 人脸管理界面
@@ -88,7 +81,7 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
      * 设置操作示意图
      */
     private fun setFaceTips() {
-        val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase
+        val device = mDeviceModel.ssmLockLiveData.value as CHSesameBiometricDevice
         when (device.productModel) {
             CHProductModel.SSMFace,CHProductModel.SSMFace2 -> bind.faceIvTips.setImageResource(R.drawable.face_tips)
             else -> bind.faceIvTips.setImageResource(R.drawable.facepro_tips)
@@ -195,12 +188,12 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
      */
     private fun createFaceDelegate(): CHFaceDelegate {
         return object : CHFaceDelegate {
-            override fun onFaceModeChanged(device: CHSesameConnector, mode: Byte) {
+            override fun onFaceModeChanged(device: CHDevices, mode: Byte) {
                 updateModeUI(mode)
             }
 
             override fun onFaceReceive(
-                device: CHSesameConnector, face: CHSesameTouchFace
+                device: CHDevices, face: CHSesameTouchFace
             ) {
                 L.d(tag, "[onFaceReceive] type: ${face.type}; idLength: ${face.idLength}; ID:${face.id}; nameLength: ${face.nameLength}; nameUUID:${face.nameUUID}")
                 runOnUiThread {
@@ -208,25 +201,25 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
                 }
             }
 
-            override fun onFaceChanged(device: CHSesameConnector, face: CHSesameTouchFace) {
+            override fun onFaceChanged(device: CHDevices, face: CHSesameTouchFace) {
                 runOnUiThread {
                     updateFaceList(face)
                     addFaceToServer(face)
                 }
             }
 
-            override fun onFaceReceiveStart(device: CHSesameConnector) {
+            override fun onFaceReceiveStart(device: CHDevices) {
                 // do nothing
             }
 
-            override fun onFaceReceiveEnd(device: CHSesameConnector) {
+            override fun onFaceReceiveEnd(device: CHDevices) {
                 runOnUiThread {
                     updateFaceCountDisplay()
                     postListToServer(mFaceList)
                 }
             }
 
-            override fun onFaceDeleted(device: CHSesameConnector, faceID: Byte, isSuccess: Boolean) {
+            override fun onFaceDeleted(device: CHDevices, faceID: Byte, isSuccess: Boolean) {
                 if (isSuccess) {
                     val face = mFaceList.find { it.id.toInt(16) == faceID.toInt() }
                     if (face != null) {
@@ -508,12 +501,12 @@ class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
     /**
      * 获取生物识别基类
      */
-    private fun getBiometricBase(): CHSesameBiometricBase? {
-        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
+    private fun getBiometricBase(): CHSesameBiometricDevice? {
+        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice
     }
 
     private fun getDeviceUUID(): String {
-        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase).deviceId.toString().uppercase()
+        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricDevice).deviceId.toString().uppercase()
     }
 
 }

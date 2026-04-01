@@ -11,8 +11,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.app.ext.BotScriptStore
-import co.candyhouse.sesame.open.device.Bot2Action
-import co.candyhouse.sesame.open.device.CHSesameBot2
+import co.candyhouse.sesame.open.devices.Bot2Action
+import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.utils.L

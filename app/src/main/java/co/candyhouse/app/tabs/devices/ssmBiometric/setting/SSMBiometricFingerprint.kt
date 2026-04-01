@@ -10,15 +10,13 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSsmTpFpListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.sesame.open.device.CHSesameConnector
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.fingerPrint.CHFingerPrintCapable
-import co.candyhouse.sesame.open.device.sesameBiometric.capability.fingerPrint.CHFingerPrintDelegate
-import co.candyhouse.sesame.open.device.sesameBiometric.devices.CHSesameBiometricBase
-import co.candyhouse.sesame.server.dto.CHFingerPrintNameRequest
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.CHCapabilityHost
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.fingerPrint.CHFingerPrintCapable
+import co.candyhouse.sesame.open.devices.sesameBiometric.capability.fingerPrint.CHFingerPrintDelegate
 import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
-import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest.Companion.face
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.alerts.ext.inputTextAlert
@@ -67,7 +65,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
     private fun initializeUI() {
         bind.swiperefresh.isEnabled = false
         bind.gifView.initView(R.drawable.gif_finger)
-        getBiometricBase()?.let {
+        mDeviceModel.ssmLockLiveData.value?.let {
             val name = it.productModel.modelName()
             bind.emptyView.text = getString(R.string.TouchEmptyFingerHint, name, name)
         }
@@ -123,8 +121,8 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
         fingerprintDelegate = createFingerPrintDelegate()
 
         getFingerPrintCapable()?.let { fingerPrintCapable ->
-            getBiometricBase()?.let { biometricBase ->
-                fingerPrintCapable.registerEventDelegate(biometricBase, fingerprintDelegate)
+            getCapabilityHost()?.let { capabilityHost ->
+                fingerPrintCapable.registerEventDelegate(capabilityHost, fingerprintDelegate)
             }
         }
     }
@@ -178,7 +176,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
      */
     private fun createFingerPrintDelegate(): CHFingerPrintDelegate {
         return object : CHFingerPrintDelegate {
-            override fun onFingerPrintReceiveStart(device: CHSesameConnector) {
+            override fun onFingerPrintReceiveStart(device: CHDevices) {
                 runOnUiThread {
                     mFingers.clear()
                     bind.swiperefresh.isRefreshing = true
@@ -186,7 +184,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
             }
 
             override fun onFingerPrintReceive(
-                device: CHSesameConnector,
+                device: CHDevices,
                 ID: String,
                 hexName: String,
                 type: Byte
@@ -204,7 +202,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
                 }
             }
 
-            override fun onFingerPrintReceiveEnd(device: CHSesameConnector) {
+            override fun onFingerPrintReceiveEnd(device: CHDevices) {
                 runOnUiThread {
                     bind.swiperefresh.isRefreshing = false
                     updateFingerPrintList()
@@ -214,7 +212,7 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
             }
 
             override fun onFingerPrintChanged(
-                device: CHSesameConnector,
+                device: CHDevices,
                 ID: String,
                 hexName: String,
                 type: Byte
@@ -231,11 +229,11 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
                 }
             }
 
-            override fun onFingerModeChange(device: CHSesameConnector, mode: Byte) {
+            override fun onFingerModeChange(device: CHDevices, mode: Byte) {
                 updateModeUI(mode)
             }
 
-            override fun onFingerDelete(device: CHSesameConnector, ID: String) {
+            override fun onFingerDelete(device: CHDevices, ID: String) {
                 L.d("hcia", "onFingerDelete : $ID")
                 val fingerprint = mFingers.find { it.id.toInt(16) == ID.toInt(16) }
                 if (fingerprint != null) {
@@ -485,9 +483,15 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
 
             // 取消注册代理
             if (::fingerprintDelegate.isInitialized) {
-                getBiometricBase()?.let { fingerPrintCapable.unregisterEventDelegate(it, fingerprintDelegate) }
+                getCapabilityHost()?.let { capabilityHost ->
+                    fingerPrintCapable.unregisterEventDelegate(capabilityHost, fingerprintDelegate)
+                }
             }
         }
+    }
+
+    private fun getCapabilityHost(): CHCapabilityHost? {
+        return mDeviceModel.ssmLockLiveData.value as? CHCapabilityHost
     }
 
     /**
@@ -497,15 +501,8 @@ class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
         return mDeviceModel.ssmLockLiveData.value as? CHFingerPrintCapable
     }
 
-    /**
-     * 获取生物识别基类
-     */
-    private fun getBiometricBase(): CHSesameBiometricBase? {
-        return mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricBase
-    }
-
     private fun getDeviceUUID(): String {
-        return (mDeviceModel.ssmLockLiveData.value as CHSesameBiometricBase).deviceId.toString().uppercase()
+        return (mDeviceModel.ssmLockLiveData.value as CHDevices).deviceId.toString().uppercase()
     }
 
 }

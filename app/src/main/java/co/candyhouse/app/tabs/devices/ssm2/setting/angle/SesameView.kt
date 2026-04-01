@@ -12,8 +12,8 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import co.candyhouse.app.R
-import co.candyhouse.sesame.open.device.CHSesame2
-import co.candyhouse.sesame.open.device.CHSesame5
+import co.candyhouse.sesame.open.devices.CHSesame2
+import co.candyhouse.sesame.open.devices.CHSesame5
 import kotlin.math.cos
 import kotlin.math.sin
 

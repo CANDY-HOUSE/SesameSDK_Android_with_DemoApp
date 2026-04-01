@@ -36,14 +36,14 @@ import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.CHScanStatus
-import co.candyhouse.sesame.open.device.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.device.CHDeviceStatus
-import co.candyhouse.sesame.open.device.CHProductModel
-import co.candyhouse.sesame.open.device.CHSesame2MechStatus
-import co.candyhouse.sesame.open.device.CHSesameBot
-import co.candyhouse.sesame.open.device.CHSesameBotMechSettings
-import co.candyhouse.sesame.open.device.CHSesameBotMechStatus
-import co.candyhouse.sesame.open.device.NSError
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.CHSesame2MechStatus
+import co.candyhouse.sesame.open.devices.CHSesameBot
+import co.candyhouse.sesame.open.devices.CHSesameBotMechSettings
+import co.candyhouse.sesame.open.devices.CHSesameBotMechStatus
+import co.candyhouse.sesame.open.devices.base.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.utils.CHEmpty
@@ -63,7 +63,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import java.util.Locale
 import java.util.Locale.getDefault
 import java.util.UUID
 

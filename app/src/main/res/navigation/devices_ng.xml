@@ -38,7 +38,7 @@
             android:id="@+id/to_SesameOpenSensorSettingFG"
             app:destination="@id/SesameOpenSensorSettingFG" />
         <action
-            android:id="@+id/to_SesameTouchProSettingFG"
+            android:id="@+id/to_SesameConnectorSettingFG"
             app:destination="@id/SesameKeyboardSettingFG" />
         <action
             android:id="@+id/to_Sesame5SettingFG"
@@ -54,7 +54,7 @@
         android:id="@+id/SSM5SettingFG"
         android:name="co.candyhouse.app.tabs.devices.ssm5.setting.SSM5SettingFG"
         android:label="SSM5SettingFG"
-        tools:layout="@layout/fg_setting_main">
+        tools:layout="@layout/fg_lock_setting">
         <action
             android:id="@+id/action_DeviceMember_to_webViewFragment"
             app:destination="@id/webViewFragment" />
@@ -70,7 +70,7 @@
         android:id="@+id/SesameKeyboardSettingFG"
         android:name="co.candyhouse.app.tabs.devices.ssmBiometric.setting.SSMBiometricSettingFG"
         android:label="SesameKeyboardSettingFG"
-        tools:layout="@layout/fg_sesame_touchpro_setting">
+        tools:layout="@layout/fg_connector_setting">
         <action
             android:id="@+id/to_SesameKeyboardSelectLockerListFG"
             app:destination="@id/SesameKeyboardSelectLockerListFG" />
