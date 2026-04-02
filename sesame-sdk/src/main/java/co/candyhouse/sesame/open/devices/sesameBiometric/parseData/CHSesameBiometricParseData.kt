@@ -7,12 +7,6 @@ import com.google.gson.Gson
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-/**
- * 
- *
- * @author frey on 2026/4/1
- */
-
 class CHSesameTouchCard(data: ByteArray) {
     val cardType = data[0]
     val idLength = data[1]

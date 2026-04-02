@@ -22,7 +22,6 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.NSError
-import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.CHAutoInitCapabilityImpl
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.CHEventHandler
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.card.CHCardCapable
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.card.CHCardCapableImpl
@@ -98,17 +97,6 @@ internal class CHSesameBiometricDeviceImpl(
 
     init {
         deviceConnectCapability.setSupport(this)
-
-        listOf(
-            this as CHCardCapable,
-            this as CHPassCodeCapable,
-            this as CHFingerPrintCapable,
-            this as CHPalmCapable,
-            this as CHFaceCapable,
-            this as CHRemoteNanoCapable
-        ).forEach {
-            (it as? CHAutoInitCapabilityImpl)?.setupSupport(this)
-        }
     }
 
     companion object {

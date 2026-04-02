@@ -22,10 +22,8 @@ dependencyResolutionManagement {
         maven { url "https://maven.aliyun.com/repository/public" }
         maven { url "https://jcenter.bintray.com/" }
         maven { url "https://jitpack.io" }
-
     }
 }
-
 
 include ':app'
 include ':sesame-sdk'

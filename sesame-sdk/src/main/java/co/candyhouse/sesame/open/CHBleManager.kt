@@ -27,9 +27,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-
 
 enum class CHBleStatus {
     opened, closed,
@@ -51,7 +50,8 @@ interface CHBleStatusDelegate {
     fun didScanChange(ss: CHScanStatus) {}
 }
 
-@SuppressLint("MissingPermission") object CHBleManager {
+@SuppressLint("MissingPermission")
+object CHBleManager {
     internal lateinit var appContext: Context
 
     init {
@@ -63,13 +63,13 @@ interface CHBleStatusDelegate {
         }
     }
 
-
     operator fun invoke(appContext: Context) {
-        CHBleManager.appContext = appContext //        L.d("hcia", "設定好！！ appContext:" + appContext)
+        CHBleManager.appContext = appContext
         try {
             bluetoothManager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             bluetoothAdapter = bluetoothManager.adapter
-        } catch (e: Exception) {// 為了google 自動審查虛擬機器報錯
+        } catch (e: Exception) {
+            // 為了google 自動審查虛擬機器報錯
             L.d("hcia", "no support ble")
             return
         }
@@ -80,7 +80,7 @@ interface CHBleStatusDelegate {
                     val action = intent.action
                     if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                         when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
-                            BluetoothAdapter.STATE_OFF -> { //                            L.d("hcia", "🖲 藍牙 STATE_OFF:" + BluetoothAdapter.STATE_OFF)
+                            BluetoothAdapter.STATE_OFF -> {
                                 disConnectAll {}
                                 connectR.clear()
                                 mScanning = CHScanStatus.BleClose
@@ -88,69 +88,51 @@ interface CHBleStatusDelegate {
                                 if (bluetoothAdapter.isEnabled) {
                                     bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
                                 }
-
                             }
+
                             BluetoothAdapter.STATE_ON -> {
-                                mScanning = CHScanStatus.Disable //                            L.d("hcia", "🖲 藍牙 STATE_ON:" + BluetoothAdapter.STATE_ON)
+                                mScanning =
+                                    CHScanStatus.Disable
                                 enableScan {}
                             }
                         }
                     }
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
         }, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
-
-
-    } //end invoke
+    }
 
     var statusDelegate: CHBleStatusDelegate? = null
     var delegate: CHBleManagerDelegate? = null
-
     lateinit var bluetoothManager: BluetoothManager
-
     lateinit var bluetoothAdapter: BluetoothAdapter
     internal val connectR: MutableList<String> = ArrayList()
     internal var chDeviceMap: MutableMap<String?, CHDevices> = ConcurrentHashMap()
 
     var mScanning: CHScanStatus = CHScanStatus.BleClose
         set(value) {
-            field = value //            L.d("hcia", "🌏 藍芽狀態  " + field + " -> " + value)
+            field = value
             statusDelegate?.didScanChange(value)
         }
     private val bleScanner = object : ScanCallback() {
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
-            if (errorCode == SCAN_FAILED_ALREADY_STARTED) { //                L.d("hcia", "已經打開過了:" + errorCode)
+            if (errorCode == SCAN_FAILED_ALREADY_STARTED) {
             } else {
                 L.d("hcia", "掃描錯誤 onScanFailed  errorCode:" + errorCode)
                 mScanning = CHScanStatus.Error
-                /// Unable to register scanner, max client reached:32
-//                BluetoothAdapter.getDefaultAdapter().disable()
             }
         }
 
         override fun onScanResult(callbackType: Int, scanResult: ScanResult) {
-
-//            if (BuildConfig.DEBUG) {
-////                if (scanResult.rssi > -45) {
-////                    L.d("hcia", "scanResult:" + scanResult.rssi + " " + scanResult.device)
-////                    return
-////                }
-//                val test1 = "F5:4C:9E:33:C8:37"
-//                if (scanResult.device?.address != test1) {
-//                    return
-//                }
-//            }
-
-            if (mScanning == CHScanStatus.BleClose) { //                L.d("hcia", "關掉了怎麼還有廣播 scanResult:" + scanResult?.rssi + " " + scanResult?.device)
+            if (mScanning == CHScanStatus.BleClose) {
                 return
             }
             try {
                 CHadv(scanResult).apply {
-//                  L.d("hcia", "this.productModel:" + this.productModel)
                     this.productModel?.let {
                         chDeviceMap.getOrPut(this.deviceID.toString()) { it.deviceFactory() }.let { device ->
                             device.productModel = this.productModel!!
@@ -169,9 +151,8 @@ interface CHBleStatusDelegate {
         return connectR.size
     }
 
-    fun disableScan(result: CHResult<CHEmpty>) { //        L.d("hcia", "sdk 解除掃描:" + bluetoothAdapter)
-
-        if (::bluetoothManager.isInitialized)return
+    fun disableScan(result: CHResult<CHEmpty>) {
+        if (::bluetoothManager.isInitialized) return
         if (bluetoothAdapter.isEnabled) {
             bluetoothAdapter.bluetoothLeScanner.stopScan(bleScanner)
             mScanning = CHScanStatus.Disable
@@ -179,7 +160,6 @@ interface CHBleStatusDelegate {
             mScanning = CHScanStatus.BleClose
         }
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-
     }
 
     fun enableScan(openble: Boolean = false, result: CHResult<CHEmpty>) {
@@ -238,12 +218,11 @@ interface CHBleStatusDelegate {
     }
 
 
-
     fun disConnectAll(result: CHResult<CHEmpty>) {
         chDeviceMap.forEach {
             try {
                 it.value.disconnect { }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
 

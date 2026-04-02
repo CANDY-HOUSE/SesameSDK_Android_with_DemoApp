@@ -84,7 +84,7 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
             CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
         ) { apiResult ->
             apiResult.exceptionOrNull()?.let { e ->
-                L.Companion.d("os3lock", "[register][server] failed: ${e.message}")
+                L.d("os3lock", "[register][server] failed: ${e.message}")
             }
 
             sendCommand(
@@ -171,7 +171,7 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
     }
 
     protected fun reportBatteryData(payloadString: String) {
-        L.Companion.d("os3lock", "[reportBatteryData] ${isInternetAvailable()}, ${!isConnectedByWM2}, payload: $payloadString")
+        L.d("os3lock", "[reportBatteryData] ${isInternetAvailable()}, ${!isConnectedByWM2}, payload: $payloadString")
         CHAPIClientBiz.postBatteryData(deviceId.toString().uppercase(), payloadString) {
             it.onSuccess { resp ->
                 batteryPercentage = ((resp.data as? Map<*, *>)?.get("batteryPercentage") as? Number)?.toInt()
@@ -205,11 +205,11 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
                                 ),
                                 DeviceSegmentType.cipher
                             ) { deleteRes ->
-                                L.Companion.d("os3lock", "[history][delete]: ${deleteRes.cmdResultCode}")
+                                L.d("os3lock", "[history][delete]: ${deleteRes.cmdResultCode}")
                             }
                         }
                         postResult.onFailure { exception ->
-                            L.Companion.d("os3lock", "[history] post failed: $exception")
+                            L.d("os3lock", "[history] post failed: $exception")
                         }
                     }
                 }

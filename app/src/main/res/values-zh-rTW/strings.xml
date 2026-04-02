@@ -147,13 +147,6 @@
     <string name="drop_hint">刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請用針戳復位鍵LED燈熄滅</string>
     <string name="drop_hint_press">刪除 %1$s 不會重置 %1$s。\n若要重置 %1$s，請按住復位鍵LED燈熄滅</string>
 
-    <string name="historyLOCK">上鎖</string>
-    <string name="historyUNLOCK">解鎖</string>
-    <string name="historyMANUAL_LOCKED">手轉上鎖</string>
-    <string name="historyMANUAL_UNLOCKED">手轉解鎖</string>
-    <string name="historyAUTOLOCK_UPDATED">自動上鎖設置被更新</string>
-    <string name="historyAUTOLOCK">自動上鎖</string>
-
     <string name="WigetOpenAll">全部上鎖</string>
     <string name="WigetCloseAll">全部解鎖</string>
 

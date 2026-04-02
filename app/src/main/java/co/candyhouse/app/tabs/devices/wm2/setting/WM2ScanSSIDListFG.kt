@@ -80,7 +80,6 @@ class WM2ScanSSIDListFG : BaseDeviceFG<FgWm2ScanListBinding>(), CHWifiModule2Del
                                             it.onSuccess {
                                                 view.post {
 
-//                                                var defaultPWK = if (BuildConfig.DEBUG) "jt232kvuds0ny" else null
                                                     val defaultPWK = if (BuildConfig.DEBUG) "55667788" else null
                                                     context?.inputTextAlert(getString(R.string.wm2_pwk_hint), wifi_rssi.ssid, defaultPWK) {
                                                         confirmButtonWithText("OK") { alert, name ->

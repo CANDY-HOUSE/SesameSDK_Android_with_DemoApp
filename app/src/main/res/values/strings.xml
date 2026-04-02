@@ -142,13 +142,6 @@
     <string name="drop_hint">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button with a pin until the LED light turns off.</string>
     <string name="drop_hint_press">Deleting the %1$s won\'t reset the %1$s. To reset the %1$s, please press reset button the LED light turns off.</string>
 
-    <string name="historyLOCK">is locked</string>
-    <string name="historyUNLOCK">is unlocked</string>
-    <string name="historyMANUAL_LOCKED"> "is manually locked</string>
-    <string name="historyMANUAL_UNLOCKED">is manually unlocked</string>
-    <string name="historyAUTOLOCK_UPDATED">\'s Autolock setting is updated</string>
-    <string name="historyAUTOLOCK">Autolock</string>
-
     <string name="WigetOpenAll">Lock All</string>
     <string name="WigetCloseAll">Unlock All</string>
 

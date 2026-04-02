@@ -13,11 +13,10 @@ import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.sesame.utils.L
-import co.utils.NotificationUtils
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
+import co.utils.NotificationUtils
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import org.json.JSONArray
 
 class SesameFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -126,26 +125,6 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
             System.currentTimeMillis().toInt(),
             notificationBuilder.build()
         )
-    }
-
-    private fun JSONArray.toByteArray(): ByteArray {
-        val byteArr = ByteArray(length())
-        for (i in 0 until length()) {
-            byteArr[i] = (get(i) as Int and 0xFF).toByte()
-        }
-        return byteArr
-    }
-
-    private fun String?.tohisEventi18(ctx: Context): String? {
-        return when (this) {
-            "LOCK" -> ctx.getString(R.string.historyLOCK)
-            "UNLOCK" -> ctx.getString(R.string.historyUNLOCK)
-            "AUTOLOCK" -> ctx.getString(R.string.historyAUTOLOCK)
-            "AUTOLOCK_UPDATED" -> ctx.getString(R.string.historyAUTOLOCK_UPDATED)
-            "MANUAL_LOCKED" -> ctx.getString(R.string.historyMANUAL_LOCKED)
-            "MANUAL_UNLOCKED" -> ctx.getString(R.string.historyMANUAL_UNLOCKED)
-            else -> this
-        }
     }
 
 }

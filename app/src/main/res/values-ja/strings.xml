@@ -138,13 +138,6 @@
     <string name="drop_hint">%1$sを削除しても%1$sは初期化またリセットされません。%1$sを初期化またリセットするには、細い棒でリセットボタンをLED点灯が消えるまで長押ししてください。</string>
     <string name="drop_hint_press">%1$sを削除しても%1sを削除してもsは初期化またリセットされません。%1$sを初期化またリセットするには、リセットボタンをLED点灯が消えるまで長押ししてください</string>
 
-    <string name="historyLOCK">が施錠されました</string>
-    <string name="historyUNLOCK">が解錠されました</string>
-    <string name="historyMANUAL_LOCKED">が手動で施錠されました</string>
-    <string name="historyMANUAL_UNLOCKED">が手動で解錠されました</string>
-    <string name="historyAUTOLOCK_UPDATED">のオートロックの設定が変更されました</string>
-    <string name="historyAUTOLOCK">がオートロックしました</string>
-
     <string name="WigetOpenAll">Lock All</string>
     <string name="WigetCloseAll">Unlock All</string>
 
