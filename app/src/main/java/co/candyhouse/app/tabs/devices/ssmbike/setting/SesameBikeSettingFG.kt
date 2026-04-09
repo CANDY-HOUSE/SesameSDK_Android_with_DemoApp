@@ -11,7 +11,7 @@ import co.utils.safeNavigate
 class SesameBikeSettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bind.clickScriptZone.visibility = View.GONE
+        bind.clickScriptArea.visibility = View.GONE
 
         usePressText()
 

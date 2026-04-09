@@ -115,7 +115,7 @@
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/click_script_zone"
+                    android:id="@+id/click_script_area"
                     android:layout_width="match_parent"
                     android:layout_height="53dp"
                     android:background="@color/white">
@@ -131,18 +131,29 @@
                         android:textColor="@color/black"
                         android:textSize="17sp" />
 
-                    <TextView
-                        android:id="@+id/script_id_txt"
-                        android:layout_width="100dp"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
-                        android:layout_marginEnd="1dp"
                         android:gravity="center"
-                        android:paddingEnd="17dp"
-                        android:textColor="@color/text_hint"
-                        android:textSize="18sp"
-                        tools:ignore="RtlSymmetry"
-                        tools:text="Script: 0" />
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/script_expand_arrow"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:rotation="0"
+                            android:src="@drawable/svg_arrow_down" />
+
+                        <TextView
+                            android:id="@+id/script_id_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_hint"
+                            android:textSize="18sp"
+                            tools:ignore="RtlSymmetry"
+                            tools:text="Script: 0" />
+                    </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
@@ -157,7 +168,7 @@
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:paddingHorizontal="12dp"
+                        android:paddingHorizontal="16dp"
                         android:scaleType="center"
                         android:src="@drawable/ic_arrow_gray" />
 

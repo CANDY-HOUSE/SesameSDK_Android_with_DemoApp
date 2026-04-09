@@ -12,11 +12,11 @@ import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmBikeBot2settingBinding
 import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.utils.L
@@ -61,6 +61,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
             delay(delayMs)
             if (!isAdded) return@launch
             bind.wheelview.visibility = View.GONE
+            updateScriptArrow(false)
         }
     }
 
@@ -91,14 +92,15 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
             return
         }
         super.onViewCreated(view, savedInstanceState)
-        getView()?.findViewById<View>(R.id.click_script_zone)?.setOnClickListener { findNavController().navigate(R.id.to_SesameClickScriptFG) }
+        getView()?.findViewById<View>(R.id.ic_arrow_gray)?.setOnClickListener { findNavController().navigate(R.id.to_SesameClickScriptFG) }
         bind.llview.setOnClickListener {
             showWheel(false)
         }
         usePressText()
-        bind.scriptIdTxt.setOnClickListener {
+        bind.clickScriptArea.setOnClickListener {
             showWheel(!bind.wheelview.isVisible)
         }
+        showWheel(false)
 
         renderWheelFromCache()
 
@@ -149,6 +151,7 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
     private fun showWheel(isShow: Boolean) {
         if (!isShow) hideWheelJob?.cancel()
         bind.wheelview.visibility = if (isShow) View.VISIBLE else View.GONE
+        updateScriptArrow(isShow)
         if (isShow) {
             val curIdx = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
             val sortedItems = getSortedScriptItems()
@@ -218,4 +221,9 @@ class SesameBot2SettingFG : BaseDeviceSettingFG<FgSsmBikeBot2settingBinding>() {
         val displayName: String,
         val displayOrder: Int
     )
+
+    private fun updateScriptArrow(isExpanded: Boolean) {
+        bind.scriptExpandArrow.rotation = if (isExpanded) 90f else 0f
+    }
+
 }
