@@ -42,6 +42,7 @@ import co.utils.safeNavigate
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
+import kotlin.math.roundToInt
 
 class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
     private val tag = "SSMBiometricSettingFG"
@@ -60,6 +61,13 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         200 to 17,
         270 to 16
     )
+
+    private companion object {
+        const val RADAR_MIN_DISTANCE = 0
+        const val RADAR_MAX_DISTANCE = 270
+        const val RADAR_FIRMWARE_OFF = 512
+        const val RADAR_FIRMWARE_AT_30CM = 116
+    }
 
     private var radarLastProgress = -1
     private var isRadarUserTracking = false
@@ -108,7 +116,8 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         override fun onSSM2KeysChanged(
             device: CHSesameConnector,
             ssm2keys: Map<String, ByteArray>
-        ) {}
+        ) {
+        }
 
         @SuppressLint("DefaultLocale")
         override fun onTriggerDelaySecondReceived(
@@ -147,7 +156,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         }
 
         bind.root.post {
-            bind.radarSeekbar.setMin(30f)
+            bind.radarSeekbar.setMin(0f)
             bind.radarSeekbar.setMax(270f)
             bind.radarSeekbar.setIndicatorTextFormat(getString(R.string.distance) + " \${PROGRESS}cm")
 
@@ -191,12 +200,15 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
     }
 
     private fun setRadarUI(payload: ByteArray) {
-        if (payload.size < 2) {
+        if (payload.size < 5) {
             L.e(tag, "setRadarUI payload 长度不足: ${payload.size}")
             return
         }
 
-        val sensitivityValue = payload[1].toInt() and 0xFF
+        val sensitivityValue = (payload[1].toInt() and 0xFF) or
+                ((payload[2].toInt() and 0xFF) shl 8) or
+                ((payload[3].toInt() and 0xFF) shl 16) or
+                ((payload[4].toInt() and 0xFF) shl 24)
         val distance = calculateDistanceFromFirmwareValue(sensitivityValue)
 
         L.d(tag, "设备返回的雷达灵敏度值：$sensitivityValue, 对应标准距离：${distance}cm")
@@ -214,16 +226,24 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
 
     // 根据固件值计算距离（使用线性插值）
     private fun calculateDistanceFromFirmwareValue(firmwareValue: Int): Int {
-        if (firmwareValue >= 116) return 30
-        if (firmwareValue <= 16) return 270
+        if (firmwareValue >= RADAR_FIRMWARE_OFF) return 0
 
-        // 找到相邻的两个点进行插值
+        val clampedFirmwareValue = firmwareValue.coerceIn(16, RADAR_FIRMWARE_OFF)
+
+        // 处理 0~30cm 区间：0cm -> 512, 30cm -> 116
+        if (clampedFirmwareValue >= RADAR_FIRMWARE_AT_30CM) {
+            val ratio = (RADAR_FIRMWARE_OFF - clampedFirmwareValue).toFloat() /
+                    (RADAR_FIRMWARE_OFF - RADAR_FIRMWARE_AT_30CM)
+            return (ratio * 30f).roundToInt().coerceIn(0, 30)
+        }
+
+        // 处理 30~270cm 区间：按查找表分段线性插值
         for (i in 0 until DISTANCE_TO_FIRMWARE_TABLE.size - 1) {
             val (dist1, fw1) = DISTANCE_TO_FIRMWARE_TABLE[i]
             val (dist2, fw2) = DISTANCE_TO_FIRMWARE_TABLE[i + 1]
 
-            if (firmwareValue in fw2..fw1) {
-                val ratio = (firmwareValue - fw2).toFloat() / (fw1 - fw2)
+            if (clampedFirmwareValue in fw2..fw1) {
+                val ratio = (clampedFirmwareValue - fw2).toFloat() / (fw1 - fw2)
                 return (dist2 + ratio * (dist1 - dist2)).toInt()
             }
         }
@@ -232,27 +252,40 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
     }
 
     // 根据距离计算固件值（使用线性插值）
-    private fun calculateFirmwareValueFromDistance(distance: Int): Byte {
-        if (distance <= 30) return 116
-        if (distance >= 270) return 16
+    private fun calculateFirmwareValueFromDistance(distance: Int): Int {
+        val clampedDistance = distance.coerceIn(RADAR_MIN_DISTANCE, RADAR_MAX_DISTANCE)
 
-        // 找到相邻的两个点进行插值
+        // 处理 0~30cm 区间：0cm -> 512, 30cm -> 116
+        if (clampedDistance <= 30) {
+            val ratio = clampedDistance.toFloat() / 30f
+            val firmwareValue = RADAR_FIRMWARE_OFF +
+                    ratio * (RADAR_FIRMWARE_AT_30CM - RADAR_FIRMWARE_OFF)
+            return firmwareValue.roundToInt()
+        }
+
+        if (clampedDistance >= 270) return 16
+
+        // 处理 30~270cm 区间：按查找表分段线性插值
         for (i in 0 until DISTANCE_TO_FIRMWARE_TABLE.size - 1) {
             val (dist1, fw1) = DISTANCE_TO_FIRMWARE_TABLE[i]
             val (dist2, fw2) = DISTANCE_TO_FIRMWARE_TABLE[i + 1]
 
-            if (distance in dist1..dist2) {
-                val ratio = (distance - dist1).toFloat() / (dist2 - dist1)
+            if (clampedDistance in dist1..dist2) {
+                val ratio = (clampedDistance - dist1).toFloat() / (dist2 - dist1)
                 val firmwareValue = fw1 + ratio * (fw2 - fw1)
-                return firmwareValue.toInt().toByte()
+                return firmwareValue.toInt()
             }
         }
 
-        return 116
+        return RADAR_FIRMWARE_AT_30CM
     }
 
-    private fun setRadarSensitivity(device: CHSesameConnector, sensitivityValue: Byte) {
-        val payload = byteArrayOf(0x33, sensitivityValue, 0, 0, 0)
+    private fun setRadarSensitivity(device: CHSesameConnector, sensitivityValue: Int) {
+        val b0 = (sensitivityValue and 0xFF).toByte()
+        val b1 = ((sensitivityValue shr 8) and 0xFF).toByte()
+        val b2 = ((sensitivityValue shr 16) and 0xFF).toByte()
+        val b3 = ((sensitivityValue shr 24) and 0xFF).toByte()
+        val payload = byteArrayOf(0x33, b0, b1, b2, b3)
 
         device.setRadarSensitivity(payload) { res ->
             res.onSuccess {
@@ -334,8 +367,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         setupPalmZoneView()
         checkBiometricDeviceView()
 
-        if (biometricDevice.productModel === CHProductModel.SSMFace || biometricDevice.productModel === CHProductModel.SSMFace2 || biometricDevice.productModel === CHProductModel.SSMFacePro || biometricDevice.productModel === CHProductModel.SSMFace2Pro
-            || biometricDevice.productModel === CHProductModel.SSMFaceProAI || biometricDevice.productModel === CHProductModel.SSMFace2ProAI || biometricDevice.productModel === CHProductModel.SSMFaceAI || biometricDevice.productModel === CHProductModel.SSMFace2AI) {
+        if (biometricDevice.hasBiometricCapability(BiometricCapability.FACE)) {
             bind.facePalm.visibility = View.VISIBLE
             // 只有Face系列才显示雷达灵敏度设置
             initRadarSeekBar(biometricDevice)
