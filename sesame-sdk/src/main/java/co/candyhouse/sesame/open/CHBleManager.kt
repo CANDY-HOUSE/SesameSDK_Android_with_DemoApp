@@ -91,8 +91,7 @@ object CHBleManager {
                             }
 
                             BluetoothAdapter.STATE_ON -> {
-                                mScanning =
-                                    CHScanStatus.Disable
+                                mScanning = CHScanStatus.Disable
                                 enableScan {}
                             }
                         }

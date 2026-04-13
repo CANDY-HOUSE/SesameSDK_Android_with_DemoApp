@@ -195,7 +195,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
                 }
             }
 
-            bind.raderSensZone.visibility = View.VISIBLE
+            bind.raderSensZone.visibility = View.GONE
         }
     }
 
