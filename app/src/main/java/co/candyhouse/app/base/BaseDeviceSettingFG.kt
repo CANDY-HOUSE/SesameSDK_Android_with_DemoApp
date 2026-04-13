@@ -25,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.DfuCenter
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.util.EmbeddedWebViewContent
@@ -61,7 +62,6 @@ import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.dfu.DfuServiceInitiator
 
 abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSetting,
     BleStatusUpdate, DeviceStatusChange {
@@ -69,6 +69,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private var isToNotification = false
     private var isViewDestroyed = false
     private val refreshCounter = mutableIntStateOf(0)
+    private var pageDeviceKey: String? = null
 
     override fun onResume() {
         super.onResume()
@@ -232,6 +233,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         }
 
         val targetDevice = mDeviceModel.ssmLockLiveData.value!!
+        pageDeviceKey = targetDevice.deviceId.toString()
         handleUI(targetDevice)
         setBatteryResult(targetDevice)
         showBleTxPowerUI(targetDevice, targetDevice.bleTxPower)
@@ -310,7 +312,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             if (unlogined) {
                 when (targetDevice.productModel) {
                     CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> return@setOnClickListener
-                    CHProductModel.Hub3 -> Unit
                     else -> {
                         toastMSG(getString(R.string.toastBleNotReadyForDFU))
                         return@setOnClickListener
@@ -320,25 +321,30 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             AlertView(getString(R.string.ssm_update), "", AlertStyle.IOS).apply {
                 addAction(
                     AlertAction("OK", AlertActionStyle.NEGATIVE) {
-                        L.d("sf", "Hub3 update OTA: " + targetDevice.productModel.modelName())
-                        if (targetDevice.productModel == CHProductModel.Hub3) {
-                            L.d("sf", "hub3模块升级固件……")
-                            mDeviceModel.ssmLockLiveData.value!!.updateFirmware { }
-                        } else {
-                            L.d("sf", "非hub3模块升级固件……")
-                            targetDevice.updateFirmware { res ->
-                                res.onSuccess {
-                                    L.d("hcia", "updateFirmware:" + it.data.address)
-                                    val firmwarePath = targetDevice.getFirmwarePath(requireContext())
-                                    if (firmwarePath != null) {
-                                        val starter = DfuServiceInitiator(it.data.address)
-                                        starter.setZip(firmwarePath)
-                                        starter.setPacketsReceiptNotificationsEnabled(true)
-                                        starter.setPrepareDataObjectDelay(400)
-                                        starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
-                                        starter.setDisableNotification(false)
-                                        starter.setForeground(false)
-                                        starter.start(requireActivity(), DfuService::class.java)
+                        targetDevice.updateFirmware { res ->
+                            res.onSuccess {
+                                val dfuAddress = it.data.address
+                                L.d("DFU", "updateFirmware:$dfuAddress")
+
+                                val firmwarePath = targetDevice.getFirmwarePath(requireContext()) ?: return@onSuccess
+                                val pageDeviceKey = getPageDeviceKey() ?: return@onSuccess
+
+                                when (
+                                    DfuCenter.startDfu(
+                                        context = requireContext(),
+                                        deviceKey = pageDeviceKey,
+                                        deviceAddress = dfuAddress,
+                                        firmwarePath = firmwarePath,
+                                        delegate = this@BaseDeviceSettingFG,
+                                        serviceClass = DfuService::class.java
+                                    )
+                                ) {
+                                    is DfuCenter.StartResult.Started -> {}
+
+                                    is DfuCenter.StartResult.AlreadyRunningSameDevice -> {}
+
+                                    is DfuCenter.StartResult.Busy -> {
+                                        toastMSG(getString(R.string.dfu_busy))
                                     }
                                 }
                             }
@@ -359,6 +365,10 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             )
             safeNavigate(R.id.action_DeviceMember_to_webViewFragment, config.toBundle())
         }
+    }
+
+    override fun providePageDeviceKey(): String? {
+        return pageDeviceKey
     }
 
     @SuppressLint("NotifyDataSetChanged")

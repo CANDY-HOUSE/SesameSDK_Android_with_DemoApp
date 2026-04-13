@@ -249,4 +249,5 @@
 
     <string name="ble_tx_power">BLE 发射功率</string>
     <string name="dBm">dBm</string>
+    <string name="dfu_busy">已有设备正在升级</string>
 </resources>
