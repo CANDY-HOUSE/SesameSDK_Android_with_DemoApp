@@ -249,5 +249,5 @@
 
     <string name="ble_tx_power">BLE 發射功率</string>
     <string name="dBm">dBm</string>
-    <string name="dfu_busy">已有裝置正在升級</string>
+    <string name="dfu_busy">其他CANDY HOUSE產品正在進行升級, 請稍候。</string>
 </resources>

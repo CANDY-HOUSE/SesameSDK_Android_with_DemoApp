@@ -235,7 +235,7 @@
 
     <string name="ble_tx_power">BLE送信出力</string>
     <string name="dBm">dBm</string>
-    <string name="dfu_busy">他のデバイスを更新中です</string>
+    <string name="dfu_busy">他のCANDY HOUSE製品を更新中、お待ち下さいませ。</string>
 </resources>
 
 

@@ -244,5 +244,5 @@
 
     <string name="ble_tx_power">BLE TX power</string>
     <string name="dBm">dBm</string>
-    <string name="dfu_busy">Another device is updating</string>
+    <string name="dfu_busy">Updating another CANDY HOUSE product. Please wait...</string>
 </resources>
