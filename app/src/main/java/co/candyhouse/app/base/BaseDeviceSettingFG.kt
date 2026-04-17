@@ -206,12 +206,13 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private fun versionSet(targetDevice: CHDevices, str: String) {
         if (targetDevice.productModel != CHProductModel.Hub3) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
-                val zipname: String? = targetDevice.getFirmwareName(requireContext())
-                zipname?.apply {
-                    val tailTagag = str.split("-").last()
-                    val cheddd = zipname.contains(tailTagag)
-                    view?.findViewById<TextView>(R.id.device_version_txt)?.text = str + (if (cheddd) getString(R.string.latest) else "")
-                    view?.findViewById<View>(R.id.alert_logo)?.visibility = if (cheddd) View.GONE else View.VISIBLE
+                val ctx = context ?: return@post
+                val zipName: String? = targetDevice.getFirmwareName(ctx)
+                zipName?.apply {
+                    val tailTag = str.split("-").last()
+                    val tempFlag = zipName.contains(tailTag)
+                    view?.findViewById<TextView>(R.id.device_version_txt)?.text = str + (if (tempFlag) getString(R.string.latest) else "")
+                    view?.findViewById<View>(R.id.alert_logo)?.visibility = if (tempFlag) View.GONE else View.VISIBLE
                 }
             }
         }
