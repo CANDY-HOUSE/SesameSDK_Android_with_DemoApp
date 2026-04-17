@@ -54,12 +54,12 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                     }
 
                     val hasLockInSesame2Keys = sesame2KeyDevices.any { it.productModel in allLocks }
-                    val hasHub3InSesame2Keys = sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 }
+                    val hasHub3InSesame2Keys = sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 || it.productModel == CHProductModel.Hub3_LTE }
 
                     val allowedProducts = when {
                         hasLockInSesame2Keys -> allLocks
-                        hasHub3InSesame2Keys -> listOf(CHProductModel.Hub3)
-                        else -> listOf(CHProductModel.Hub3) + allLocks
+                        hasHub3InSesame2Keys -> listOf(CHProductModel.Hub3, CHProductModel.Hub3_LTE)
+                        else -> listOf(CHProductModel.Hub3, CHProductModel.Hub3_LTE) + allLocks
                     }
 
                     mDeviceModel.myChDevices.value.filter { allowedProducts.contains(it.productModel) }

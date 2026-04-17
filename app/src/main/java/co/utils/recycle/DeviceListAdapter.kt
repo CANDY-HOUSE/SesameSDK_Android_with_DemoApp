@@ -142,6 +142,13 @@ class DeviceListAdapter(
                 updateWifiStatus(device)
 
                 setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage)
+                if (device.productModel == CHProductModel.Hub3_LTE) {
+                    ssmLockView.visibility = View.VISIBLE
+                    ssmLockView.setLockImage(device)
+                    ssmLockView.setOnClickListener {
+                        device.toggle(historytag = UserUtils.getUserIdWithByte()) { }
+                    }
+                }
 
                 setupExpandableView(device, 35) {
                     val irRemoteList = device.userKey?.stateInfo?.remoteList ?: emptyList()

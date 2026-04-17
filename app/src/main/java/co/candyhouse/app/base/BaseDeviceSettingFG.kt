@@ -204,7 +204,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
     @SuppressLint("SetTextI18n")
     private fun versionSet(targetDevice: CHDevices, str: String) {
-        if (targetDevice.productModel != CHProductModel.Hub3) {
+        if (targetDevice.productModel != CHProductModel.Hub3 && targetDevice.productModel != CHProductModel.Hub3_LTE) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
                 val ctx = context ?: return@post
                 val zipName: String? = targetDevice.getFirmwareName(ctx)

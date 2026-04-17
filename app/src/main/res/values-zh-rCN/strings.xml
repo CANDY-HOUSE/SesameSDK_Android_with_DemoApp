@@ -94,6 +94,7 @@
     <string name="SSMTouch">Sesame Touch</string>
     <string name="BLEConnector">BLE Connector</string>
     <string name="Hub3">智联中心3</string>
+    <string name="Hub3_lte">智联中心3 LTE</string>
     <string name="CHRemote">蓝芽遥控器</string>
     <string name="CHRemoteNano">蓝芽遥控器 nano</string>
     <string name="SSMFacePro">Sesame Face Pro</string>

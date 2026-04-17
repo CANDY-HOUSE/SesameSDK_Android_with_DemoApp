@@ -129,4 +129,10 @@ internal interface CHAPIClient {
     // 更新 bot script
     @Operation(path = "/device/v1/bot/script", method = "POST")
     fun updateBotScript(body: BotScriptRequest): Any
+
+    @Operation(path = "/device/v1/wifi_module/{device_id}/switch", method = "POST")
+    fun updateHub3Switch(
+        @Parameter(name = "device_id", location = "path") deviceId: String,
+        body: Map<String, String>
+    ): Any
 }

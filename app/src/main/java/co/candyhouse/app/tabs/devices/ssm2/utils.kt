@@ -12,6 +12,7 @@ import android.text.style.StyleSpan
 import androidx.core.graphics.toColorInt
 import co.candyhouse.app.R
 import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
@@ -150,7 +151,9 @@ fun ssm5UIParser(device: CHDevices): Int {
     if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.SSMOpenSensor2) {
         return R.drawable.icon_opensensor
     }
-
+    if (device.productModel == CHProductModel.Hub3_LTE) {
+        return R.drawable.icon_lock
+    }
     return when (device.deviceStatus) {
         CHDeviceStatus.DfuMode -> R.drawable.icon_nosignal
         CHDeviceStatus.NoBleSignal -> R.drawable.icon_nosignal
@@ -302,6 +305,7 @@ fun CHDevices.getFirmwareName(context: Context): String? {
         CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI -> "sesameface1proai_"
         CHProductModel.WM2 -> null
         CHProductModel.Hub3 -> "hub3_"
+        CHProductModel.Hub3_LTE -> "hub3lte_"
     } ?: return null
 
     return try {
@@ -382,6 +386,7 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFace2 -> CHDeviceManager.app.getString(R.string.SSMFace2)
         CHProductModel.SSMFace2Pro -> CHDeviceManager.app.getString(R.string.SSMFace2Pro)
         CHProductModel.SSM_MIWA -> CHDeviceManager.app.getString(R.string.SSM_MIWA)
+        CHProductModel.Hub3_LTE -> CHDeviceManager.app.getString(R.string.Hub3_lte)
     }
 }
 

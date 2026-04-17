@@ -1,6 +1,7 @@
 package co.candyhouse.sesame.server
 
 import android.content.Context
+import android.util.Base64
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.devices.base.CHDevices
@@ -35,6 +36,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * API Gateway 业务
@@ -191,4 +194,41 @@ object CHAPIClientBiz {
 
     fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
+
+    fun updateHub3Switch(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
+        makeApiCall(onResponse) {
+            val sendMap: MutableMap<String, String> = mutableMapOf()
+            val timestamp = (System.currentTimeMillis() / 1000).toInt()
+            val buffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+            buffer.putInt(timestamp)
+            val msg = buffer.array().sliceArray(1..3) // 取第1-3字节
+
+            val sign = AesCmac((hub3 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(),16)
+                .computeMac(msg)!!.sliceArray(0..3)
+
+            val cmd: Int = SesameItemCode.HUB3_OS3_RELAY_SWITCH.value.toInt()
+            val hub3DeviceId = hub3.deviceId?.toString()?.uppercase() ?: ""
+            val deviceIdBytes = hub3DeviceId.toByteArray(Charsets.UTF_8)
+            val open = 0x01 // 保留字节，目前固定为0x01，代表开关操作
+            val op = open.toByte() // 保留字节，目前固定为0x01，代表开关操作
+
+            val payloadBytes = ByteArray(sign.size + 1 + deviceIdBytes.size + 2)
+            var offset = 0
+            System.arraycopy(sign, 0, payloadBytes, offset, sign.size)
+            offset += sign.size
+            payloadBytes[offset++] = cmd.toByte()
+            System.arraycopy(deviceIdBytes, 0, payloadBytes, offset, deviceIdBytes.size)
+            offset += deviceIdBytes.size
+            payloadBytes[offset] = op
+            val payload = Base64.encodeToString(payloadBytes, Base64.NO_WRAP)
+            val hub3DeviceIdLastSegment = hub3DeviceId.substringAfterLast('-')
+
+            sendMap["action"] = "biz3OperateIoT"
+            sendMap["op"] = "cmd"
+            sendMap["payload"] = payload
+            sendMap["topic"] = "wm2${hub3DeviceIdLastSegment.uppercase()}cmd"
+
+            cHApiClient.updateHub3Switch(hub3DeviceId, sendMap)
+            CHEmpty()
+        }
 }

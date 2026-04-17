@@ -37,7 +37,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
     override var productModel: CHProductModel? = CHProductModel.getByValue(advBytes.copyOfRange(0, 1).toBigLong().toInt())
 
     override var isRegistered: Boolean =
-            if (productModel == CHProductModel.Hub3) {
+            if (productModel == CHProductModel.Hub3 || productModel == CHProductModel.Hub3_LTE) {
                 (advBytes[1] and 1) > 0 // 1:registered 0:unregistered， Hub3 在Matter的二合一广播里，压缩去掉了机型的保留字。所以这里要用第二个字节advBytes[1]。
             } else {
                 (advBytes[2] and 1) > 0
@@ -55,7 +55,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                     null
                 }
 
-                CHProductModel.Hub3 -> return try {
+                CHProductModel.Hub3, CHProductModel.Hub3_LTE -> return try {
 //                    L.d("hub3", "advBytes:" + advBytes.toHexString())
                     val hub3ID = ("00000000055afd810d00" + advBytes.copyOfRange(2, 8).toHexString()).noHashtoUUID()
 //                    L.d("hub3", "uuid:" + hub3ID)

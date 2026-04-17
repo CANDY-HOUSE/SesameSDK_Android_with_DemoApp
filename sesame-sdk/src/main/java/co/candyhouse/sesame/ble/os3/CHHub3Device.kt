@@ -14,6 +14,8 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
+import co.candyhouse.sesame.db.model.historyTagBLE
+import co.candyhouse.sesame.db.model.historyTagIOT
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
@@ -325,6 +327,10 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     override fun <T> isBleAvailable(result: CHResult<T>): Boolean {
         return (this as CHDevices).isBleAvailable(result)
+    }
+
+    override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
+        CHAPIClientBiz.updateHub3Switch(historytag, this, result)
     }
 
 }

@@ -90,6 +90,7 @@
     <string name="SSMTouch">セサミタッチ</string>
     <string name="BLEConnector">BLE Connector</string>
     <string name="Hub3">ハブ3</string>
+    <string name="Hub3_lte">ハブ3 LTE</string>
     <string name="CHRemote">リモート</string>
     <string name="CHRemoteNano">リモート nano</string>
     <string name="SSMFacePro">セサミフェイス Pro</string>

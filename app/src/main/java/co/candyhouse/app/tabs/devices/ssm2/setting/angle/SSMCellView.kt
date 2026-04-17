@@ -16,12 +16,14 @@ import androidx.core.graphics.drawable.toBitmap
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.ssm2.ssm5UIParser
 import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.utils.LockDeviceState
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.utils.L
 import kotlin.math.cos
 import kotlin.math.sin
@@ -90,6 +92,12 @@ class SSMCellView @JvmOverloads constructor(
     }
 
     private fun lockState(sesame: CHDevices) {
+
+        if (sesame.productModel == CHProductModel.Hub3_LTE) {
+            invalidate()
+            return
+        }
+
         val isBleConnect = sesame.deviceStatus.value == CHDeviceLoginStatus.logined
         val isWifiConnect = sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.logined
         if (!isBleConnect && !isWifiConnect) {
