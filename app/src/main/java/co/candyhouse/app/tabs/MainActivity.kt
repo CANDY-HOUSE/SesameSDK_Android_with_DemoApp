@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
@@ -26,13 +27,13 @@ import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.CHSesameBike
 import co.candyhouse.sesame.open.devices.CHSesameBike2
 import co.candyhouse.sesame.open.devices.CHSesameBot
 import co.candyhouse.sesame.open.devices.CHSesameBot2
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
@@ -418,12 +419,27 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         val url = pendingOpenWebViewUrl ?: return
 
         try {
-            val config = WebViewConfig(
-                url = url,
-                params = mapOf(
-                    "where" to CHDeviceManager.NOTIFICATION_FLAG
-                )
-            )
+            val config: WebViewConfig =
+                if (url.contains("device-setting/battery-trend")) {
+                    val uri = url.toUri()
+                    val deviceUUID = uri.getQueryParameter("deviceUUID").orEmpty()
+                    val deviceName = uri.getQueryParameter("deviceName").orEmpty()
+
+                    WebViewConfig(
+                        scene = "battery-trend",
+                        params = mapOf(
+                            "deviceUUID" to deviceUUID,
+                            "deviceName" to deviceName
+                        )
+                    )
+                } else {
+                    WebViewConfig(
+                        url = url,
+                        params = mapOf(
+                            "where" to CHDeviceManager.NOTIFICATION_FLAG
+                        )
+                    )
+                }
             navController.navigate(R.id.webViewFragment, config.toBundle())
             pendingOpenWebViewUrl = null
         } catch (_: Exception) {
