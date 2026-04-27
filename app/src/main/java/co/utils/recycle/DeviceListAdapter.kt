@@ -43,6 +43,7 @@ import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
+import co.utils.hasFirmwareUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -133,6 +134,7 @@ class DeviceListAdapter(
                 ssmLockView.visibility = View.GONE
                 ssmBikeBotView.visibility = View.GONE
                 openSensorStatus.visibility = View.GONE
+                ivUpgradeAvailable.visibility = View.GONE
             }
         }
 
@@ -142,6 +144,9 @@ class DeviceListAdapter(
                 updateWifiStatus(device)
 
                 setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage)
+
+                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
+
                 if (device.productModel == CHProductModel.Hub3_LTE) {
                     ssmLockView.visibility = View.VISIBLE
                     ssmLockView.setLockImage(device)
@@ -174,6 +179,8 @@ class DeviceListAdapter(
 
                 updateBatteryStatus(device)
 
+                ivUpgradeAvailable.isVisible = (device as? CHSesame5)?.hasFirmwareUpdate == true
+
                 ssmLockView.visibility = View.VISIBLE
                 ssmLockView.setLockImage(device)
                 ssmLockView.setOnClickListener {
@@ -200,6 +207,8 @@ class DeviceListAdapter(
                 updateConnectionStatus(device)
 
                 updateBatteryStatus(device)
+
+                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
 
                 updateBleStatusVisibility(device)
 

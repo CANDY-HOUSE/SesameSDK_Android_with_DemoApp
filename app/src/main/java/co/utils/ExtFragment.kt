@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.userKey
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
@@ -77,5 +78,12 @@ fun Fragment.restoreContainerTopPadding() {
 fun Fragment.applyBottomInsets() {
     applyInsetsPadding(requireView(), bottom = true)
 }
+
+val CHDevices.hasFirmwareUpdate: Boolean
+    get() {
+        val current = userKey?.stateInfo?.currentFwVer
+        val latest = userKey?.stateInfo?.latestFwVer
+        return current != null && latest != null && current != latest
+    }
 
 fun CHDevices.isLockDevice(): Boolean = this is CHSesameLock

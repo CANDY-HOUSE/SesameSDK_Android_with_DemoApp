@@ -68,6 +68,17 @@
             android:paddingBottom="1dp"
             android:textSize="9dp" />
 
+        <ImageView
+            android:id="@+id/ivUpgradeAvailable"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@+id/battery_percent"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_ap_alert"
+            android:visibility="gone" />
+
     </RelativeLayout>
 
     <LinearLayout
