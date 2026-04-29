@@ -1,7 +1,9 @@
 package co.candyhouse.app.tabs
 
 import android.Manifest
+import android.app.AppOpsManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -9,6 +11,7 @@ import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
+import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -186,6 +189,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             e.printStackTrace()
         } catch (e: SecurityException) {
             e.printStackTrace()
+            hasUsageStatsPermission(this)
         }
     }
 
@@ -327,6 +331,20 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                     "IllegalStateException when disabling foreground dispatch: ${e.message}"
                 )
             }
+        }
+    }
+
+    private fun hasUsageStatsPermission(context: Context) {
+        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            context.packageName
+        )
+
+        if (mode != AppOpsManager.MODE_ALLOWED) {
+            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            startActivityForResult(intent, 306)
         }
     }
 

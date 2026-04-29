@@ -130,7 +130,6 @@ internal interface CHAPIClient {
     @Operation(path = "/device/v1/bot/script", method = "POST")
     fun updateBotScript(body: BotScriptRequest): Any
 
-    // 更新 Hub3_LTE 继电器开关状态
     @Operation(path = "/device/v1/wifi_module/{device_id}/switch", method = "POST")
     fun updateHub3Switch(
         @Parameter(name = "device_id", location = "path") deviceId: String,
