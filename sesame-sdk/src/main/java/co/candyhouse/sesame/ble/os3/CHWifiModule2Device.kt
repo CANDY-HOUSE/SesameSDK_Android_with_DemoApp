@@ -2,31 +2,60 @@ package co.candyhouse.sesame.ble.os3
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
 import android.os.Build
-import co.candyhouse.sesame.ble.*
+import co.candyhouse.sesame.ble.CHDeviceUtil
+import co.candyhouse.sesame.ble.CHadv
+import co.candyhouse.sesame.ble.DeviceSegmentType
+import co.candyhouse.sesame.ble.SSM2OpCode
+import co.candyhouse.sesame.ble.SSM3PublishPayload
+import co.candyhouse.sesame.ble.SSM3ResponsePayload
+import co.candyhouse.sesame.ble.SesameNotifypayload
+import co.candyhouse.sesame.ble.SesameResultCode
 import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.ble.os3.base.CHSesameOS3
 import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.*
+import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.open.devices.*
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.devices.CHWifiModule2
+import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
+import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
+import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.open.devices.base.NSError
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.*
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.utils.EccKey
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
-import java.util.*
+import co.candyhouse.sesame.utils.base64Encode
+import co.candyhouse.sesame.utils.base64decodeHex
+import co.candyhouse.sesame.utils.bytesToShort
+import co.candyhouse.sesame.utils.divideArray
+import co.candyhouse.sesame.utils.hexStringToByteArray
+import co.candyhouse.sesame.utils.noHashtoUUID
+import co.candyhouse.sesame.utils.toHexString
+import java.util.Locale
 import java.util.Locale.getDefault
+import java.util.UUID
 import kotlin.experimental.and
 
 @SuppressLint("MissingPermission") internal class CHWifiModule2Device : CHSesameOS3(), CHWifiModule2, CHDeviceUtil {
@@ -393,14 +422,14 @@ import kotlin.experimental.and
 
 
     override fun getVersionTag(result: CHResult<String>) {
-
         if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
             return
         }
         sendCommand(SesameOS3Payload(WM2ActionCode.VERSION_TAG.value, byteArrayOf())) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
-                val gitTag = String(res.payload)
-                result.invoke(Result.success(CHResultState.CHResultStateBLE(gitTag)))
+                val versionTag = String(res.payload)
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(versionTag)))
+                CHAPIClientBiz.updateDeviceFirmwareVersion(deviceId.toString().uppercase(), versionTag) {}
             }
         }
 

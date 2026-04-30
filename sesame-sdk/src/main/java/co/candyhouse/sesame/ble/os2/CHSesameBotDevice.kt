@@ -33,23 +33,23 @@ import co.candyhouse.sesame.db.model.hisTagC
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManager.appContext
 import co.candyhouse.sesame.open.CHBleManager.bluetoothAdapter
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.open.CHScanStatus
-import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
-import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.CHSesame2MechStatus
 import co.candyhouse.sesame.open.devices.CHSesameBot
 import co.candyhouse.sesame.open.devices.CHSesameBotMechSettings
 import co.candyhouse.sesame.open.devices.CHSesameBotMechStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
-import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReqSig1
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
@@ -487,9 +487,9 @@ import java.util.UUID
         if (!isBleAvailable(result)) return
 
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.versionTag, byteArrayOf())) { res ->
-            val gitTag = res.payload.sliceArray(4..15)
-//            CHIotManager.updateSS2ShadowVertion(this, String(gitTag))
-            result.invoke(Result.success(CHResultState.CHResultStateBLE(String(gitTag))))
+            val versionTag = String(res.payload.sliceArray(4..15))
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(versionTag)))
+            CHAPIClientBiz.updateDeviceFirmwareVersion(deviceId.toString().uppercase(), versionTag) {}
         }
     }
 

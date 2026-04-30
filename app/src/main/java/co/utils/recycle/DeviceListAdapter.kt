@@ -117,7 +117,7 @@ class DeviceListAdapter(
         }
 
         private fun bindDevice(device: CHDevices) {
-            resetViews()
+            resetViews(device)
 
             binding.nickName.text = device.getNickname()
 
@@ -129,7 +129,7 @@ class DeviceListAdapter(
             }
         }
 
-        private fun resetViews() {
+        private fun resetViews(device: CHDevices) {
             binding.apply {
                 bleStatus.visibility = View.GONE
                 expandFL.visibility = View.GONE
@@ -137,7 +137,7 @@ class DeviceListAdapter(
                 ssmLockView.visibility = View.GONE
                 ssmBikeBotView.visibility = View.GONE
                 openSensorStatus.visibility = View.GONE
-                ivUpgradeAvailable.visibility = View.GONE
+                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
             }
         }
 
@@ -147,8 +147,6 @@ class DeviceListAdapter(
                 updateWifiStatus(device)
 
                 setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage)
-
-                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
 
                 if (device.productModel == CHProductModel.Hub3_LTE) {
                     ssmLockView.visibility = View.VISIBLE
@@ -182,8 +180,6 @@ class DeviceListAdapter(
 
                 updateBatteryStatus(device)
 
-                ivUpgradeAvailable.isVisible = (device as? CHSesame5)?.hasFirmwareUpdate == true
-
                 ssmLockView.visibility = View.VISIBLE
                 ssmLockView.setLockImage(device)
                 ssmLockView.setOnClickListener {
@@ -211,8 +207,6 @@ class DeviceListAdapter(
                 updateConnectionStatus(device)
 
                 updateBatteryStatus(device)
-
-                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
 
                 updateBleStatusVisibility(device)
 
