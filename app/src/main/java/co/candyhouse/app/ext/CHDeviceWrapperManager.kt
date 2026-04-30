@@ -39,21 +39,6 @@ object CHDeviceWrapperManager {
         }
     }
 
-    // 更新当前设备固件的版本号
-    fun updateCurrentFwVer(deviceId: String?, currentFwVer: String) {
-        val id = deviceId?.lowercase() ?: return
-        val wrapper = deviceWrappers[id] ?: return
-        val oldUserKey = wrapper.userKey ?: return
-
-        val newUserKey = oldUserKey.copy(
-            stateInfo = oldUserKey.stateInfo.copy(
-                currentFwVer = currentFwVer
-            )
-        )
-
-        wrapper.userKey = newUserKey
-    }
-
     // 获取包装对象
     fun getWrapper(deviceId: String): CHDeviceWrapper? {
         return deviceWrappers[deviceId.lowercase()]

@@ -18,12 +18,11 @@ import co.candyhouse.app.tabs.devices.locktest.LockToggleTestBottomSheet
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.observeEvent
 import co.utils.recycle.DeviceListAdapter
 import co.utils.recycle.GenericAdapter
 import co.utils.recycle.SimpleItemTouchHelperCallback
@@ -194,7 +193,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             }
         }
         // 刷新列表
-        mDeviceViewModel.neeReflesh.observeEvent(viewLifecycleOwner) { beanDevices ->
+        mDeviceViewModel.neeReflesh.observe(viewLifecycleOwner) { beanDevices ->
             CHDeviceManager.isRefresh.set(false)
             bind.swiperefresh.isRefreshing = false
 
