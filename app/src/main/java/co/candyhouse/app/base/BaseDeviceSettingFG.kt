@@ -25,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.DfuCenter
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.ext.webview.data.WebViewConfig
@@ -213,6 +214,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                     val tempFlag = zipName.contains(tailTag)
                     view?.findViewById<TextView>(R.id.device_version_txt)?.text = str + (if (tempFlag) getString(R.string.latest) else "")
                     view?.findViewById<View>(R.id.alert_logo)?.visibility = if (tempFlag) View.GONE else View.VISIBLE
+                    // 如果是最新版，则更新设备列表对应item
+                    if (tempFlag) {
+                        CHDeviceWrapperManager.updateCurrentFwVer(targetDevice.deviceId?.toString(), str)
+                        mDeviceViewModel.updateNeeRefresh(targetDevice)
+                    }
                 }
             }
         }
