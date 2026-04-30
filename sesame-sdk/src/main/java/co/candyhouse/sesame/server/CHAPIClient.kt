@@ -3,6 +3,7 @@ package co.candyhouse.sesame.server
 import co.candyhouse.sesame.BuildConfig
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
+import co.candyhouse.sesame.server.dto.CHDeviceInfo
 import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
@@ -114,6 +115,10 @@ internal interface CHAPIClient {
         @Parameter(name = "device_id", location = "path") deviceID: String,
         body: CHBatteryDataReq
     ): Any
+
+    // 更新Sesame设备信息
+    @Operation(path = "/device/infor", method = "POST")
+    fun postCHDeviceInfo(body: CHDeviceInfo): Any
 
     // 移除用户 Token
     @Operation(path = "/device/v1/token", method = "DELETE")

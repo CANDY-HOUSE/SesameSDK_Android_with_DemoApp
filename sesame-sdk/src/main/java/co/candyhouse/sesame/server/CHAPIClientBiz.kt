@@ -9,6 +9,7 @@ import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
+import co.candyhouse.sesame.server.dto.CHDeviceInfo
 import co.candyhouse.sesame.server.dto.CHFcmTokenUpload
 import co.candyhouse.sesame.server.dto.CHRemoveSignKeyRequest
 import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
@@ -192,6 +193,10 @@ object CHAPIClientBiz {
         makeApiCall(onResponse) { cHApiClient.myDevicesRegisterSesame5Post(deviceId, body) }
     }
 
+    fun postCHDeviceInfo(body: CHDeviceInfo, onResponse: CHResult<Any>) {
+        makeApiCall(onResponse) { cHApiClient.postCHDeviceInfo(body) }
+    }
+
     fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
 
@@ -203,7 +208,7 @@ object CHAPIClientBiz {
             buffer.putInt(timestamp)
             val msg = buffer.array().sliceArray(1..3) // 取第1-3字节
 
-            val sign = AesCmac((hub3 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(),16)
+            val sign = AesCmac((hub3 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16)
                 .computeMac(msg)!!.sliceArray(0..3)
 
             val cmd: Int = SesameItemCode.HUB3_OS3_RELAY_SWITCH.value.toInt()

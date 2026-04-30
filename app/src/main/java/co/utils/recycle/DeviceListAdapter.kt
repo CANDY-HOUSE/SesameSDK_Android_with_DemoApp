@@ -1,6 +1,7 @@
 package co.utils.recycle
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -38,11 +39,13 @@ import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.OpenSensorDat
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptItem
 import co.candyhouse.sesame.server.dto.BotScriptRequest
+import co.candyhouse.sesame.server.dto.CHDeviceInfo
 import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
+import co.utils.getLastKnownLocation
 import co.utils.hasFirmwareUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -192,6 +195,7 @@ class DeviceListAdapter(
 
                         is CHSesame2 -> device.toggle() { it.onSuccess { } }
                     }
+                    uploadCHDeviceInfo(ssmLockView.context, device)
                 }
 
                 updateBleStatusVisibility(device)
@@ -249,6 +253,7 @@ class DeviceListAdapter(
                     ssmBikeBotView.setOnClickListener {
                         CHDeviceManager.vibrateDevice(view)
                         handleBikeBotViewClick(device)
+                        uploadCHDeviceInfo(ssmBikeBotView.context, device)
                     }
                 }
             }
@@ -478,6 +483,21 @@ class DeviceListAdapter(
                 }
                 result.onFailure {
                     L.e("DeviceListAdapter", "batch updateBotScript failed", it)
+                }
+            }
+        }
+
+        private fun uploadCHDeviceInfo(context: Context, device: CHDevices) {
+            getLastKnownLocation(context) { result ->
+                result.onSuccess {
+                    CHAPIClientBiz.postCHDeviceInfo(
+                        CHDeviceInfo(
+                            device.deviceId.toString().uppercase(),
+                            device.productModel.productType().toString(),
+                            it.data?.longitude.toString(),
+                            it.data?.latitude.toString()
+                        )
+                    ) {}
                 }
             }
         }
