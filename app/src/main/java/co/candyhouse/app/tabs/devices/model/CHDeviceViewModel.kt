@@ -5,10 +5,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -25,15 +27,15 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
 import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.open.devices.CHHub3Delegate
+import co.candyhouse.sesame.open.devices.CHSesameBot2
+import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.base.CHProductModel
-import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
-import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHUserKey
@@ -42,6 +44,7 @@ import co.candyhouse.sesame.server.dto.userKeyToCHKey
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.utils.Event
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.isInternetAvailable
@@ -56,7 +59,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -77,7 +79,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     private var syncJob: Job? = null
     val myChDevices = MutableStateFlow(ArrayList<CHDevices>())
-    var neeReflesh = MutableLiveData<BeanDevices>()
+    private val _neeReflesh = MutableLiveData<Event<BeanDevices>>()
+    val neeReflesh: LiveData<Event<BeanDevices>> = _neeReflesh
     val ssmLockLiveData = MutableLiveData<CHDevices>()
     val ssmDeviceLiveDataForMatter = MutableLiveData<CHDevices>()
     private val delegateManager = DeviceViewModelDelegates(this)
@@ -219,7 +222,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private fun refreshDevicesAsGuest() {
         CHDeviceManager.getCandyDevices { result ->
             result.onFailure {
-                neeReflesh.postValue(BeanDevices(emptyList()))
+                _neeReflesh.postValue(Event(BeanDevices(emptyList())))
             }
 
             result.onSuccess { state ->
@@ -289,7 +292,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 updateDevices(it.data)
             }
             it.onFailure {
-                neeReflesh.postValue(BeanDevices(emptyList()))
+                _neeReflesh.postValue(Event(BeanDevices(emptyList())))
             }
         }
     }
@@ -320,9 +323,18 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         ssmosLockDelegates[chDevices] = sharedDelegate
     }
 
-    private fun updateNeeRefresh(device: CHDevices) {
-        MainScope().launch {
-            neeReflesh.value = BeanDevices(myChDevices.value, device.deviceId.toString())
+    fun updateNeeRefresh(device: CHDevices) {
+        val deviceId = device.deviceId?.toString() ?: return
+        val event = Event(
+            BeanDevices(
+                list = myChDevices.value,
+                deviceId = deviceId
+            )
+        )
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            _neeReflesh.value = event
+        } else {
+            _neeReflesh.postValue(event)
         }
     }
 
@@ -369,7 +381,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     updateNeeRefresh(device)
                 }
                 if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
-                    neeReflesh.postValue(BeanDevices(emptyList()))
+                    _neeReflesh.postValue(Event(BeanDevices(emptyList())))
                 }
             }
         }
@@ -386,7 +398,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun handleAppGoToForeground() {
         viewModelScope.launch(Dispatchers.Main) {
-            neeReflesh.postValue(BeanDevices(emptyList()))
+            _neeReflesh.postValue(Event(BeanDevices(emptyList())))
         }
     }
 
@@ -471,7 +483,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             it.onSuccess {
                 myChDevices.value =
                     myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
-                neeReflesh.postValue(BeanDevices(emptyList()))
+                _neeReflesh.postValue(Event(BeanDevices(emptyList())))
 
                 unregisterNotification(targetDevice)
                 clearBotScript(targetDevice)

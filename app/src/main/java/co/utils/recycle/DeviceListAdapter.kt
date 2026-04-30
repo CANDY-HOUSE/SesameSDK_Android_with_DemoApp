@@ -3,6 +3,7 @@ package co.utils.recycle
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -212,7 +213,7 @@ class DeviceListAdapter(
 
                 updateBatteryStatus(device)
 
-                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
+                handleIvUpgradeAvailable(device, ivUpgradeAvailable)
 
                 updateBleStatusVisibility(device)
 
@@ -364,6 +365,14 @@ class DeviceListAdapter(
                     val index = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
                     device.click(index.toUByte(), UserUtils.getUserIdWithByte()) {}
                 }
+            }
+        }
+
+        private fun handleIvUpgradeAvailable(device: CHDevices, ivUpgradeAvailable: ImageView) {
+            if (device.productModel == CHProductModel.SesameBot1 || device.productModel == CHProductModel.BiKeLock) {
+                ivUpgradeAvailable.isVisible = false
+            } else {
+                ivUpgradeAvailable.isVisible = device.hasFirmwareUpdate
             }
         }
 
