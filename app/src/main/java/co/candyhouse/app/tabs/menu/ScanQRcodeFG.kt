@@ -228,8 +228,8 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         return this == CHProductModel.SS5 || this == CHProductModel.BiKeLock2 || this == CHProductModel.BiKeLock3 || this == CHProductModel.SSMTouchPro || this == CHProductModel.SSMTouch2Pro ||
                 this == CHProductModel.SSMTouch || this == CHProductModel.SSMTouch2 || this == CHProductModel.SS5PRO || this == CHProductModel.BLEConnector ||
                 this == CHProductModel.Remote || this == CHProductModel.RemoteNano || this == CHProductModel.SS5US || this == CHProductModel.SesameBot2 || this == CHProductModel.SesameBot3 ||
-                this == CHProductModel.SSMFacePro || this == CHProductModel.SSMFace2Pro || this == CHProductModel.SSMFaceProAI || this == CHProductModel.SSMFace2ProAI || this == CHProductModel.SSMFaceAI || this == CHProductModel.SSMFace2AI || this == CHProductModel.SS6Pro ||
-                this == CHProductModel.SS6ProSLiDingDoor || this == CHProductModel.Hub3 || this == CHProductModel.SSMFace || this == CHProductModel.SSMFace2 || this == CHProductModel.SSMOpenSensor2 || this == CHProductModel.SSMOpenSensor ||
+                this == CHProductModel.SSMFacePro || this == CHProductModel.SSMFace2Pro || this == CHProductModel.SSMFaceProAI || this == CHProductModel.SSMFace2ProAI || this == CHProductModel.SSMFaceAI || this == CHProductModel.SSMFace2AI || this == CHProductModel.SS6 ||
+                this == CHProductModel.SS6Pro ||this == CHProductModel.SS6ProSLiDingDoor || this == CHProductModel.Hub3 || this == CHProductModel.SSMFace || this == CHProductModel.SSMFace2 || this == CHProductModel.SSMOpenSensor2 || this == CHProductModel.SSMOpenSensor ||
                 this == CHProductModel.SSM_MIWA || this == CHProductModel.Hub3_LTE
     }
 

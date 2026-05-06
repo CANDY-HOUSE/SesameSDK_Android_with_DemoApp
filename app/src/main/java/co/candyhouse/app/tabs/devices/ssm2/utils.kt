@@ -285,6 +285,7 @@ fun CHDevices.getFirmwareName(context: Context): String? {
         CHProductModel.SS5 -> "sesame5_"
         CHProductModel.SS5PRO -> "sesame5pro_"
         CHProductModel.SS5US -> "sesame5us_"
+        CHProductModel.SS6 -> "sesame6_"
         CHProductModel.SS6Pro, CHProductModel.SS6ProSLiDingDoor -> "sesame6pro_"
         CHProductModel.SSM_MIWA -> "sesammiwa_"
         CHProductModel.SesameBot1 -> "sesamebot1"
@@ -378,6 +379,7 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFace2ProAI -> CHDeviceManager.app.getString(R.string.SSMFace2ProAI)
         CHProductModel.SSMFaceAI -> CHDeviceManager.app.getString(R.string.SSMFaceAI)
         CHProductModel.SSMFace2AI -> CHDeviceManager.app.getString(R.string.SSMFace2AI)
+        CHProductModel.SS6 -> CHDeviceManager.app.getString(R.string.Sesame6)
         CHProductModel.SS6Pro -> CHDeviceManager.app.getString(R.string.Sesame6Pro)
         CHProductModel.SS6ProSLiDingDoor -> CHDeviceManager.app.getString(R.string.Sesame6ProSLiDingDoor)
         CHProductModel.SSMOpenSensor2 -> CHDeviceManager.app.getString(R.string.SesameOpenSensor2)

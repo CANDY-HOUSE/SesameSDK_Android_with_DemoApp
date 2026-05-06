@@ -282,7 +282,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
 
-            CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6Pro,
+            CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SS5US, CHProductModel.SS6, CHProductModel.SS6Pro,
             CHProductModel.SS6ProSLiDingDoor, CHProductModel.BLEConnector, CHProductModel.SSM_MIWA -> {
                 if (device.getLevel() == 2) {
                     safeNavigate(R.id.to_Sesame5SettingFG)

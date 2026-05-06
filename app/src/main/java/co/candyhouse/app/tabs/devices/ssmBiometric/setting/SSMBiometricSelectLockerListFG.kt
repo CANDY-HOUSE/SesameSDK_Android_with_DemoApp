@@ -38,6 +38,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                 CHProductModel.SesameBot2,
                 CHProductModel.SesameBot3,
                 CHProductModel.BLEConnector,
+                CHProductModel.SS6,
                 CHProductModel.SS6Pro,
                 CHProductModel.SS6ProSLiDingDoor,
                 CHProductModel.SSM_MIWA
