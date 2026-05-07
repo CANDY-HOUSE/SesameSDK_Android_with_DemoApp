@@ -298,6 +298,7 @@ import java.util.UUID
 //            L.d("hcia", "mechStatus!!.retCode:" + mechStatus!!.retCode + " target:" + mechStatus!!.target)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else if (mechStatus!!.isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
 //            L.d("hcia", "ssm Status:" + deviceStatus.toString())
+            reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 

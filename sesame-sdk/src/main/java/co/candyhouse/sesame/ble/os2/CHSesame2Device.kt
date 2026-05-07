@@ -548,6 +548,7 @@ internal enum class CHError(val value: NSError) {
                 readHistoryCommand {}
             }
             deviceStatus = if (!mechSetting!!.isConfigured) CHDeviceStatus.NoSettings else if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else if ((mechStatus as CHSesame2MechStatus)!!.isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
+            reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 

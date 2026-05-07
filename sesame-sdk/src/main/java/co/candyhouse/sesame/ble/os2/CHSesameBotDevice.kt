@@ -344,7 +344,7 @@ import java.util.UUID
             }
             mechStatus = tmp
             deviceStatus = if ((mechStatus as CHSesameBotMechStatus).isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-
+            reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 
