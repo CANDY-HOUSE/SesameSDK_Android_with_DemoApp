@@ -14,14 +14,11 @@ import co.candyhouse.sesame.ble.os3.base.SesameOS3BleCipher
 import co.candyhouse.sesame.ble.os3.base.SesameOS3Payload
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.db.model.historyTagBLE
-import co.candyhouse.sesame.db.model.historyTagIOT
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
-import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.NSError
@@ -67,46 +64,27 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             parceADV(value)
         }
 
-    override fun getHub3StatusFromIot(deviceUUID: String, result: CHResult<Byte>) {
+    private val gson by lazy { Gson() }
+
+    override fun getHub3StatusFromIot(deviceUUID: String) {
         CHAPIClientBiz.getHub3StatusFromIot(deviceUUID) { it ->
-            it.onFailure { }
-            it.onSuccess {
-                val jsonResponse = Gson().toJson(it.data)
-                val jsonObject = JSONObject(jsonResponse)
-
-                val eventType = jsonObject.optString("eventType") // 从json中取出 event type
-                val isConnectIOT = (eventType == "connected") // 判断是否连接到IOT
-                isConnectIOT.apply {
-                    mechStatus = CHWifiModule2NetWorkStatus(
-                        isConnectIOT,
-                        isConnectIOT,
-                        isConnectIOT,
-                        false,
-                        false,
-                        false,
-                        isConnectIOT == true,
-                    )
+            it.onSuccess { success ->
+                val eventType = runCatching {
+                    JSONObject(gson.toJson(success.data)).optString("eventType")
+                }.getOrElse { throwable ->
+                    L.e("getHub3StatusFromIot", "parse error: ${throwable.message}")
+                    ""
                 }
-
-                // 从json中取出wifi_ssid和wifi_password
-                val wifiSSID = jsonObject.optString("wifi_ssid")
-                val wifiPassword = jsonObject.optString("wifi_password")
-                mechSetting?.wifiSSID = wifiSSID
-                mechSetting?.wifiPassWord = wifiPassword
-                (delegate as? CHWifiModule2Delegate)?.onAPSettingChanged(this, mechSetting!!)
-
-                val ssks = jsonObject.optString("ssks")
-                val ssmSum = ssks?.length?.div(38) ?: 0
-                val ssm5KeysMapFromIOT: MutableMap<String, String> = mutableMapOf()
-                for (i in 0 until ssmSum) {
-                    val ssmID = (ssks?.substring(i * 38, i * 38 + 36))?.lowercase()
-                    ssm5KeysMapFromIOT[ssmID.toString()] = "$i"
-                }
-                if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
-                    ssm2KeysMap.clear()
-                    ssm2KeysMap.putAll(ssm5KeysMapFromIOT)
-                    (delegate as? CHHub3Delegate)?.onSSM2KeysChanged(this, ssm2KeysMap)
-                }
+                val isConnectIOT = eventType == "connected"
+                mechStatus = CHWifiModule2NetWorkStatus(
+                    isAPWork = isConnectIOT,
+                    isNetWork = isConnectIOT,
+                    isIOTWork = isConnectIOT,
+                    isAPConnecting = false,
+                    isConnectingNet = false,
+                    isConnectingIOT = false,
+                    isAPCheck = isConnectIOT
+                )
             }
         }
     }
@@ -114,7 +92,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     /** 聯網處理  override fun goIOT() {} */
     override fun goIOT() {
         L.d("hcia", "[hub3]goIOT:")
-        getHub3StatusFromIot(deviceId.toString()) { }
+        getHub3StatusFromIot(deviceId.toString())
         CHIotManager.subscribeHub3(this) { it ->
             it.onSuccess {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -126,13 +104,13 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                         L.d("hcia", "🥝 [hub3]hub3是否連線到IoT:" + isConnectIOT)
                         isConnectIOT?.apply {
                             mechStatus = CHWifiModule2NetWorkStatus(
-                                isConnectIOT,
-                                isConnectIOT,
-                                isConnectIOT,
-                                false,
-                                false,
-                                false,
-                                isConnectIOT == true,
+                                isAPWork = isConnectIOT,
+                                isNetWork = isConnectIOT,
+                                isIOTWork = isConnectIOT,
+                                isAPConnecting = false,
+                                isConnectingNet = false,
+                                isConnectingIOT = false,
+                                isAPCheck = isConnectIOT
                             )
                         }
                     } catch (e: Exception) {
@@ -234,14 +212,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             }
         }
-    }
-
-    override fun connectWifi(result: CHResult<CHEmpty>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>) {
-        TODO("Not yet implemented")
     }
 
     override fun setWifiSSID(ssid: String, result: CHResult<CHEmpty>) {

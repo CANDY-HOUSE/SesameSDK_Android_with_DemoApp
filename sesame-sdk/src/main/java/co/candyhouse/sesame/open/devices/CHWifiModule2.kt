@@ -33,7 +33,7 @@ interface CHWifiModule2 : CHDevices {
     fun scanWifiSSID(result: CHResult<CHEmpty>)
     fun setWifiSSID(ssid: String, result: CHResult<CHEmpty>)
     fun setWifiPassword(password: String, result: CHResult<CHEmpty>)
-    fun connectWifi(result: CHResult<CHEmpty>)
-    fun insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>)
+    fun connectWifi(result: CHResult<CHEmpty>) {}
+    fun insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>) {}
     fun removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>)
 }
