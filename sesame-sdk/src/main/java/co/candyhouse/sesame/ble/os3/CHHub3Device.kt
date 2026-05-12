@@ -16,6 +16,7 @@ import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
+import co.candyhouse.sesame.open.devices.CHHub3NetWorkType
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
@@ -285,6 +286,13 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 val ssidRssi = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
                 val ssidStr = String(receivePayload.payload.drop(2).toByteArray())
                 (delegate as? CHWifiModule2Delegate)?.onScanWifiSID(this, ssidStr, ssidRssi)
+            }
+
+            SesameItemCode.HUB3_ITEM_CODE_NETWORK_TYPE.value -> {
+                val netWorkType = CHHub3NetWorkType()
+                netWorkType.isWifiConnected = receivePayload.payload[0].toInt() == 1
+                netWorkType.isLTEConnected = receivePayload.payload[1].toInt() == 1
+                (delegate as? CHHub3Delegate)?.onNetworkType(this, netWorkType)
             }
 
             else -> {

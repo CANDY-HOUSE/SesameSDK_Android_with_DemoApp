@@ -11,6 +11,7 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
+import co.candyhouse.sesame.open.devices.CHHub3NetWorkType
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
@@ -49,6 +50,7 @@ class Hub3JSBridge(
     private var pendingMechStatus: CHWifiModule2NetWorkStatus? = null
     private var connectJob: Job? = null
     private var isConnecting = false
+    private var pendingNetworkType: CHHub3NetWorkType? = null
 
     /**
      * 处理蓝牙连接请求
@@ -141,6 +143,15 @@ class Hub3JSBridge(
     }
 
     /**
+     * 处理网络类型监控请求
+     */
+    fun handleRequestNetworkType(json: JSONObject) {
+        val callbackName = json.optString("callbackName")
+        statusCallbacks[WebViewJSBridge.requestNetworkType] = callbackName
+        pendingNetworkType?.let { sendNetworkTypeToH5(it) }
+    }
+
+    /**
      * 清理连接
      */
     fun cleanup() {
@@ -158,6 +169,7 @@ class Hub3JSBridge(
         currentDeviceUUID = null
         pendingMechStatus = null
         pendingApSetting = null
+        pendingNetworkType = null
     }
 
     override fun onBleDeviceStatusChanged(
@@ -321,6 +333,30 @@ class Hub3JSBridge(
                     L.e(tag, "disconnect Failure = ${error.message}")
                 }
             }
+        }
+    }
+
+    override fun onNetworkType(device: CHWifiModule2, netWorkType: CHHub3NetWorkType) {
+        L.d("------>","onNetworkType: isWifiConnected=${netWorkType.isWifiConnected}  isLTEConnected=${netWorkType.isLTEConnected}")
+        pendingNetworkType = netWorkType
+        sendNetworkTypeToH5(netWorkType)
+    }
+
+    private fun sendNetworkTypeToH5(netWorkType: CHHub3NetWorkType) {
+        scope.launch(Dispatchers.Main) {
+            val jsonData = JSONObject().apply {
+                put("op", "onNetworkType")
+                put("isWifiConnected", netWorkType.isWifiConnected)
+                put("isLTEConnected", netWorkType.isLTEConnected)
+            }
+            val callbackName = statusCallbacks[WebViewJSBridge.requestNetworkType]
+            L.d("------>","callbackName:$callbackName  jsonData:$jsonData")
+            val jsCode = """
+                if(window.$callbackName) {
+                    window.$callbackName($jsonData);
+                }
+            """.trimIndent()
+            webView?.evaluateJavascript(jsCode, null)
         }
     }
 }

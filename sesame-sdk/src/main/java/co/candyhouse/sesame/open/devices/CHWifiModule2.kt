@@ -11,6 +11,7 @@ interface CHWifiModule2Delegate : CHDeviceStatusDelegate {
     fun onSSM2KeysChanged(device: CHWifiModule2, ssm2keys: Map<String, String>) {}
     fun onOTAProgress(device: CHWifiModule2, percent: Byte) {}
     fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {}
+    fun onNetworkType(device: CHWifiModule2, netWorkType: CHHub3NetWorkType) {}
 }
 
 class CHWifiModule2MechSettings(var wifiSSID: String?, var wifiPassWord: String?)
@@ -36,4 +37,9 @@ interface CHWifiModule2 : CHDevices {
     fun connectWifi(result: CHResult<CHEmpty>) {}
     fun insertSesames(sesame: CHDevices, result: CHResult<CHEmpty>) {}
     fun removeSesame(sesameKeyTag: String, result: CHResult<CHEmpty>)
+}
+
+class CHHub3NetWorkType {
+    var isWifiConnected = false
+    var isLTEConnected = false
 }

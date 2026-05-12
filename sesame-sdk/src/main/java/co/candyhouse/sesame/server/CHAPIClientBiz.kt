@@ -25,6 +25,7 @@ import co.candyhouse.sesame.utils.AppIdentifyIdUtil
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.TokenManager
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64Encode
@@ -211,7 +212,7 @@ object CHAPIClientBiz {
             val sign = AesCmac((hub3 as CHDeviceUtil).sesame2KeyData!!.secretKey.hexStringToByteArray(), 16)
                 .computeMac(msg)!!.sliceArray(0..3)
 
-            val cmd: Int = SesameItemCode.HUB3_OS3_RELAY_SWITCH.value.toInt()
+            val cmd: Int = SesameItemCode.HUB3_ITEM_CODE_RELAY_SWITCH.value.toInt()
             val hub3DeviceId = hub3.deviceId?.toString()?.uppercase() ?: ""
             val deviceIdBytes = hub3DeviceId.toByteArray(Charsets.UTF_8)
             val open = 0x01 // 保留字节，目前固定为0x01，代表开关操作
