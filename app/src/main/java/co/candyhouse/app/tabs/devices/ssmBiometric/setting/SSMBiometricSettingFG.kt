@@ -1,12 +1,7 @@
 package co.candyhouse.app.tabs.devices.ssmBiometric.setting
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +34,7 @@ import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
+import co.utils.vibrateDevice
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -145,16 +141,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         if (radarInitialized) return
         radarInitialized = true
 
-        val ctx = context ?: return
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager =
-                ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-
         bind.root.post {
             bind.radarSeekbar.setMin(0f)
             bind.radarSeekbar.setMax(270f)
@@ -170,17 +156,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
                     val currentProgress = seekParams.progress
                     if (currentProgress != radarLastProgress) {
                         radarLastProgress = currentProgress
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            vibrator.vibrate(
-                                VibrationEffect.createOneShot(
-                                    3,
-                                    VibrationEffect.DEFAULT_AMPLITUDE
-                                )
-                            )
-                        } else {
-                            @Suppress("DEPRECATION")
-                            vibrator.vibrate(3)
-                        }
+                        context?.vibrateDevice(3)
                     }
                 }
 

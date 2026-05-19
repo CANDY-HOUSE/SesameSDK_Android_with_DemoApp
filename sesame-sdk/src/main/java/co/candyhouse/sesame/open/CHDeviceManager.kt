@@ -2,10 +2,6 @@ package co.candyhouse.sesame.open
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.view.View
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
@@ -41,23 +37,6 @@ object CHDeviceManager {
         CHIotManager
     }
 
-    fun vibrateDevice(view: View?) {
-        view?.context?.let { vibrateDevice(it) }
-    }
-
-    private fun vibrateDevice(context: Context) {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(
-                    VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
-                )
-            } else {
-                vibrator.vibrate(100)
-            }
-        }
-    }
-
     private fun isValidUUID(uuid: String): Boolean {
         return try {
             UUID.fromString(uuid)
@@ -73,17 +52,17 @@ object CHDeviceManager {
         val productModel = CHProductModel.getByModel(deviceModel) ?: return null
         val normalizedUUID = deviceUUID.lowercase(Locale.getDefault())
 
-        return CHBleManager.chDeviceMap.getOrPut(normalizedUUID) {
+        val device = CHBleManager.chDeviceMap.getOrPut(normalizedUUID) {
             productModel.deviceFactory()
-        }.apply {
-            (this as CHDeviceUtil)
-            this.productModel = productModel
-            this.sesame2KeyData = if (this.sesame2KeyData == null) {
-                this@toDeviceOrNull
-            } else {
-                this@toDeviceOrNull.copy(historyTag = this.sesame2KeyData?.historyTag)
-            }
         }
+        val deviceUtil = device as? CHDeviceUtil ?: return null
+        device.productModel = productModel
+        deviceUtil.sesame2KeyData = if (deviceUtil.sesame2KeyData == null) {
+            this@toDeviceOrNull
+        } else {
+            this@toDeviceOrNull.copy(historyTag = deviceUtil.sesame2KeyData?.historyTag)
+        }
+        return device
     }
 
     fun getCandyDevices(result: CHResult<List<CHDevices>>) {

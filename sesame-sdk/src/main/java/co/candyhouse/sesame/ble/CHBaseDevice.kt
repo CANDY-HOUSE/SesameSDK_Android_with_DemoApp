@@ -112,8 +112,7 @@ internal interface CHDeviceUtil {
                 field = value
                 sesame2KeyData?.let {
                     deviceId = UUID.fromString(it.deviceUUID)!!
-                    isNeedAuthFromServer = it.secretKey.contains("000000") //                    L.d("hcia", "isSubIOT:" + isSubIOT)
-                    (this as CHDeviceUtil).goIOT()
+                    isNeedAuthFromServer = it.secretKey.contains("000000")
                 }
             }
         }

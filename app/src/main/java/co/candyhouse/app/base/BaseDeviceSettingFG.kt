@@ -2,13 +2,9 @@ package co.candyhouse.app.base
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.provider.Settings
 import android.view.View
 import android.widget.RelativeLayout
@@ -59,6 +55,7 @@ import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
+import co.utils.vibrateDevice
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -111,14 +108,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     private fun showBleTxPowerUI(targetDevice: CHDevices, txByte: Byte) {
-        val ctx = context ?: return
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = ctx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            ctx.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
         L.d("BLE tx power", "bleTxPower: $txByte")
 
         val bleTxPowerZone = view?.findViewById<View>(R.id.ble_tx_power_zone)
@@ -142,12 +131,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                         val currentProgress = seekParams.progress
                         if (currentProgress != lastProgress) {
                             lastProgress = currentProgress
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                vibrator.vibrate(VibrationEffect.createOneShot(3, VibrationEffect.DEFAULT_AMPLITUDE))
-                            } else {
-                                @Suppress("DEPRECATION")
-                                vibrator.vibrate(3)
-                            }
+                            context?.vibrateDevice(3)
                         }
                     }
 

@@ -7,15 +7,15 @@ import android.view.View
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgSetAngleBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
-import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.open.devices.CHSesame2
+import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
-import co.candyhouse.sesame.open.devices.CHSesame2
-import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
+import co.utils.vibrateDevice
 
 class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
 
@@ -112,7 +112,7 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
 
                         longPressRunnable = Runnable {
                             didTrigger5s = true
-                            CHDeviceManager.vibrateDevice(view)
+                            view.context.vibrateDevice(100)
                             val (targetUiSliding, advType) = when (dev.productModel) {
                                 CHProductModel.SS6ProSLiDingDoor -> false to 21.toByte()
                                 CHProductModel.SS6Pro -> true to 32.toByte()

@@ -1,6 +1,11 @@
 package co.utils
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -87,3 +92,20 @@ val CHDevices.hasFirmwareUpdate: Boolean
     }
 
 fun CHDevices.isLockDevice(): Boolean = this is CHSesameLock
+
+@Suppress("DEPRECATION")
+fun Context.vibrateDevice(milliseconds: Long) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    } else {
+        getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    if (!vibrator.hasVibrator()) return
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
+    } else {
+        vibrator.vibrate(milliseconds)
+    }
+}

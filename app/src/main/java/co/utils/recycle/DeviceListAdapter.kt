@@ -18,7 +18,6 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
 import co.candyhouse.app.tabs.devices.ssm2.setRank
-import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
@@ -47,6 +46,7 @@ import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.getLastKnownLocation
 import co.utils.hasFirmwareUpdate
+import co.utils.vibrateDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -183,7 +183,7 @@ class DeviceListAdapter(
                 ssmLockView.visibility = View.VISIBLE
                 ssmLockView.setLockImage(device)
                 ssmLockView.setOnClickListener {
-                    CHDeviceManager.vibrateDevice(view)
+                    view.context.vibrateDevice(100)
                     when (device) {
                         is CHSesame5 -> device.toggle(historytag = UserUtils.getUserIdWithByte()) {
                             it.onSuccess { }
@@ -245,7 +245,7 @@ class DeviceListAdapter(
                     ssmBikeBotView.visibility = View.VISIBLE
                     ssmBikeBotView.setLockImage(device)
                     ssmBikeBotView.setOnClickListener {
-                        CHDeviceManager.vibrateDevice(view)
+                        view.context.vibrateDevice(100)
                         handleBikeBotViewClick(device)
                         uploadCHDeviceInfo(ssmBikeBotView.context, device)
                     }
