@@ -34,7 +34,7 @@ import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
-import co.utils.vibrateDevice
+import co.utils.vibrateCompat
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -156,7 +156,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
                     val currentProgress = seekParams.progress
                     if (currentProgress != radarLastProgress) {
                         radarLastProgress = currentProgress
-                        context?.vibrateDevice(3)
+                        vibrator?.vibrateCompat(3L)
                     }
                 }
 

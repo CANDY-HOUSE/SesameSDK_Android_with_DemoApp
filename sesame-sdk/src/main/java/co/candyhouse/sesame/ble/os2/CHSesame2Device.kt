@@ -469,6 +469,7 @@ internal enum class CHError(val value: NSError) {
                             )
 
                             sesame2KeyData = candyDevice
+                            goIOT()
                             CHDB.CHSS2Model.insert(candyDevice) {}
                         }
                     },

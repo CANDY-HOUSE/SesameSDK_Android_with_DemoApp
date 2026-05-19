@@ -93,19 +93,28 @@ val CHDevices.hasFirmwareUpdate: Boolean
 
 fun CHDevices.isLockDevice(): Boolean = this is CHSesameLock
 
-@Suppress("DEPRECATION")
-fun Context.vibrateDevice(milliseconds: Long) {
+fun Context.getVibratorCompat(): Vibrator? {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        getSystemService(VibratorManager::class.java)?.defaultVibrator
     } else {
-        getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        @Suppress("DEPRECATION")
+        getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
     }
 
-    if (!vibrator.hasVibrator()) return
+    return vibrator?.takeIf { it.hasVibrator() }
+}
+
+@Suppress("DEPRECATION")
+fun Vibrator.vibrateCompat(milliseconds: Long) {
+    if (milliseconds <= 0L) return
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
+        vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
     } else {
-        vibrator.vibrate(milliseconds)
+        vibrate(milliseconds)
     }
+}
+
+fun Context.vibrateDevice(milliseconds: Long) {
+    getVibratorCompat()?.vibrateCompat(milliseconds)
 }

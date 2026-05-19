@@ -301,11 +301,10 @@ import kotlin.experimental.and
 
                 cipher = SesameOS3BleCipher("customDeviceName", ecdhSecret_pre16, mSesameToken!!) //                L.d("hcia", "設定好加密Wm2BleCipher:")
 
+                goIOT()
                 CHDB.CHSS2Model.insert(candyDevice) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                 }
-
-
             } else {
                 result.invoke(Result.failure(CHError.BleInvalidAction.value))
             }

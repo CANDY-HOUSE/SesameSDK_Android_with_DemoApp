@@ -95,6 +95,7 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
                 DeviceSegmentType.plain
             ) { registerRes ->
                 handleRegisterResponse(registerRes, serverSecret, result)
+                goIOT()
             }
         }
     }

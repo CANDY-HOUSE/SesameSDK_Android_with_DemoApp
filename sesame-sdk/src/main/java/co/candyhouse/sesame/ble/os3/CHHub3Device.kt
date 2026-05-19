@@ -166,6 +166,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                 val sessionAuth = AesCmac(ecdhSecretPre16, 16).computeMac(mSesameToken)
                 cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
                 ssm2KeysMap.clear()
+                goIOT()
                 CHDB.CHSS2Model.insert(candyDevice) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                 }

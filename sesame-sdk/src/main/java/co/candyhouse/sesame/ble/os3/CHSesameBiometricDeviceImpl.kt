@@ -321,6 +321,7 @@ internal class CHSesameBiometricDeviceImpl(
                     ("00" + mSesameToken.toHexString()).hexStringToByteArray()
                 )
                 ssm2KeysMap.clear()
+                goIOT()
                 CHDB.CHSS2Model.insert(candyDevice) {
                     result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
                 }

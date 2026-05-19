@@ -423,6 +423,7 @@ import java.util.UUID
                             )
                             sesame2KeyData = candyDevice
 
+                            goIOT()
                             CHDB.CHSS2Model.insert(candyDevice) {
                                 resultRegister.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 

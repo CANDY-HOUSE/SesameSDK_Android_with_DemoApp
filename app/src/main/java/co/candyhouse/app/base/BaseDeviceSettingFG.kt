@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Vibrator
 import android.provider.Settings
 import android.view.View
 import android.widget.RelativeLayout
@@ -54,8 +55,9 @@ import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
+import co.utils.getVibratorCompat
 import co.utils.safeNavigate
-import co.utils.vibrateDevice
+import co.utils.vibrateCompat
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
@@ -68,6 +70,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     private var isViewDestroyed = false
     private val refreshCounter = mutableIntStateOf(0)
     private var pageDeviceKey: String? = null
+    protected var vibrator: Vibrator? = null
 
     override fun onResume() {
         super.onResume()
@@ -131,7 +134,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                         val currentProgress = seekParams.progress
                         if (currentProgress != lastProgress) {
                             lastProgress = currentProgress
-                            context?.vibrateDevice(3)
+                            vibrator?.vibrateCompat(3L)
                         }
                     }
 
@@ -145,6 +148,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 bleTxPowerZone?.visibility = View.VISIBLE
             }
         }
+    }
+
+    override fun onDestroyView() {
+        vibrator = null
+        super.onDestroyView()
     }
 
     override fun onDestroy() {
@@ -210,6 +218,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        vibrator = requireContext().applicationContext.getVibratorCompat()
         isViewDestroyed = false
 
         mDeviceModel.ssmLockLiveData.observe(viewLifecycleOwner) { ss2 ->
