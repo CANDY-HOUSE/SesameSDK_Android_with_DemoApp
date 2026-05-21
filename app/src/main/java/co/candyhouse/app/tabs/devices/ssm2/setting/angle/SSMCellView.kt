@@ -95,7 +95,7 @@ class SSMCellView @JvmOverloads constructor(
 
         val isBleConnect = sesame.deviceStatus.value == CHDeviceLoginStatus.logined
         val isWifiConnect = sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.logined
-        if (!isBleConnect && !isWifiConnect || sesame.productModel == CHProductModel.Hub3_LTE) {
+        if (!isBleConnect && !isWifiConnect) {
             setBallColor(isConnect = false, isLock = false)
             invalidate()
             return
@@ -150,6 +150,12 @@ class SSMCellView @JvmOverloads constructor(
                 }
             }
         }
+
+        if (sesame.productModel == CHProductModel.Hub3_LTE) {
+            dotPaint.color = ContextCompat.getColor(context, R.color.clear)
+            invalidate()
+        }
+
     }
 
     fun setLockImage(ssm: CHDevices) {

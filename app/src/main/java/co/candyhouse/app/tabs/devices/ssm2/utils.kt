@@ -151,9 +151,6 @@ fun ssm5UIParser(device: CHDevices): Int {
     if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.SSMOpenSensor2) {
         return R.drawable.icon_opensensor
     }
-    if (device.productModel == CHProductModel.Hub3_LTE) {
-        return R.drawable.icon_lock
-    }
     return when (device.deviceStatus) {
         CHDeviceStatus.DfuMode -> R.drawable.icon_nosignal
         CHDeviceStatus.NoBleSignal -> R.drawable.icon_nosignal

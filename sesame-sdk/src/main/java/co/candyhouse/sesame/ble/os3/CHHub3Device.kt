@@ -68,24 +68,32 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     private val gson by lazy { Gson() }
 
     override fun getHub3StatusFromIot(deviceUUID: String) {
-        CHAPIClientBiz.getHub3StatusFromIot(deviceUUID) { it ->
-            it.onSuccess { success ->
-                val eventType = runCatching {
-                    JSONObject(gson.toJson(success.data)).optString("eventType")
-                }.getOrElse { throwable ->
-                    L.e("getHub3StatusFromIot", "parse error: ${throwable.message}")
-                    ""
+        CHAPIClientBiz.getHub3StatusFromIot(deviceUUID) { result ->
+            result.onSuccess { success ->
+                runCatching {
+                    val json = JSONObject(gson.toJson(success.data))
+                    val eventType = json.optString("eventType")
+                    val isConnectIOT = eventType == "connected"
+                    mechStatus = CHWifiModule2NetWorkStatus(
+                        isAPWork = isConnectIOT,
+                        isNetWork = isConnectIOT,
+                        isIOTWork = isConnectIOT,
+                        isAPConnecting = false,
+                        isConnectingNet = false,
+                        isConnectingIOT = false,
+                        isAPCheck = isConnectIOT
+                    )
+                    if (json.has("relay_status")) {
+                        val isRelayOn = json.optInt("relay_status") == 1
+                        deviceStatus = if (isRelayOn) CHDeviceStatus.Unlocked else CHDeviceStatus.Locked
+                        (this as? CHDevices)?.let { delegate?.onMechStatus(it) }
+                    }
+                }.onFailure { e ->
+                    L.e("getHub3StatusFromIot", "parse error: ${e.message}")
                 }
-                val isConnectIOT = eventType == "connected"
-                mechStatus = CHWifiModule2NetWorkStatus(
-                    isAPWork = isConnectIOT,
-                    isNetWork = isConnectIOT,
-                    isIOTWork = isConnectIOT,
-                    isAPConnecting = false,
-                    isConnectingNet = false,
-                    isConnectingIOT = false,
-                    isAPCheck = isConnectIOT
-                )
+            }
+            result.onFailure { e ->
+                L.e("getHub3StatusFromIot", "API failed: ${e.message}")
             }
         }
     }
@@ -94,6 +102,11 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     override fun goIOT() {
         L.d("hcia", "[hub3]goIOT:")
         getHub3StatusFromIot(deviceId.toString())
+        subscribeHub3mechStatus()
+        subscribeRelayStatus()
+    }
+
+    private fun subscribeHub3mechStatus() {
         CHIotManager.subscribeHub3(this) { it ->
             it.onSuccess {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -122,6 +135,31 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             it.onFailure { }
         }
     }
+
+    private fun subscribeRelayStatus() {
+        val topic = "up/iot/device/${deviceId.toString().uppercase()}/cmd"
+        CHIotManager.subscribeTopic(topic) { result ->
+            result.onSuccess { data ->
+                runCatching {
+                    val json = JSONObject(String(data.data, Charsets.UTF_8))
+                    val op = json.optInt("op")
+
+                    // 匹配设备端上报的 op
+                    if (op == SesameItemCode.HUB3_ITEM_CODE_RELAY_SWITCH.value.toInt()) {
+                        val payload = json.optJSONObject("payload")
+                        val status = payload?.optInt("status")
+                        deviceStatus = if (status == 1) CHDeviceStatus.Unlocked else CHDeviceStatus.Locked
+                        (this as? CHDevices)?.let { delegate?.onMechStatus(it) }
+                    }
+                }.onFailure { e ->
+                    L.e("CHHub3Device", "Failed to parse relay data: ${e.message}")
+                }
+            }.onFailure { error ->
+                L.e("CHHub3Device", "Failed to subscribe relay topic: ${error.message}")
+            }
+        }
+    }
+
 
     /** 指令發送 */
     override fun login(token: String?) {
