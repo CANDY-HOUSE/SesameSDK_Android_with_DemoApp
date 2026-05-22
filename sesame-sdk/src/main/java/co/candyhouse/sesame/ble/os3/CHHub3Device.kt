@@ -48,6 +48,7 @@ import kotlin.experimental.and
 @Suppress("DEPRECATION")
 @SuppressLint("MissingPermission")
 internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
+    @Volatile private var relayStatus: Boolean = false
     override var mechSetting: CHWifiModule2MechSettings? = CHWifiModule2MechSettings(null, null)
         set(value) {
             if (field != value) {
@@ -74,6 +75,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                     val json = JSONObject(gson.toJson(success.data))
                     val eventType = json.optString("eventType")
                     val isConnectIOT = eventType == "connected"
+                    json.optInt("relay_status", -1).takeIf { it != -1 }?.let { relayStatus = it == 1 }
                     mechStatus = CHWifiModule2NetWorkStatus(
                         isAPWork = isConnectIOT,
                         isNetWork = isConnectIOT,
@@ -83,11 +85,6 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                         isConnectingIOT = false,
                         isAPCheck = isConnectIOT
                     )
-                    if (json.has("relay_status")) {
-                        val isRelayOn = json.optInt("relay_status") == 1
-                        deviceStatus = if (isRelayOn) CHDeviceStatus.Unlocked else CHDeviceStatus.Locked
-                        (this as? CHDevices)?.let { delegate?.onMechStatus(it) }
-                    }
                 }.onFailure { e ->
                     L.e("getHub3StatusFromIot", "parse error: ${e.message}")
                 }
@@ -147,9 +144,10 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                     // 匹配设备端上报的 op
                     if (op == SesameItemCode.HUB3_ITEM_CODE_RELAY_SWITCH.value.toInt()) {
                         val payload = json.optJSONObject("payload")
-                        val status = payload?.optInt("status")
-                        deviceStatus = if (status == 1) CHDeviceStatus.Unlocked else CHDeviceStatus.Locked
-                        (this as? CHDevices)?.let { delegate?.onMechStatus(it) }
+                        payload?.optInt("status", -1)?.takeIf { it != -1 }?.let {
+                            relayStatus = it == 1
+                            (this as? CHDevices)?.let { dev -> delegate?.onMechStatus(dev) }
+                        }
                     }
                 }.onFailure { e ->
                     L.e("CHHub3Device", "Failed to parse relay data: ${e.message}")
@@ -348,6 +346,10 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
         CHAPIClientBiz.updateHub3Switch(historytag, this, result)
+    }
+
+    override fun getRelayStatus(): Boolean {
+        return relayStatus
     }
 
 }

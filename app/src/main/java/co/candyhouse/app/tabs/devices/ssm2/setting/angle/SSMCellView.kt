@@ -93,6 +93,13 @@ class SSMCellView @JvmOverloads constructor(
 
     private fun lockState(sesame: CHDevices) {
 
+        if (sesame.productModel == CHProductModel.Hub3_LTE) {
+            dotPaint.alpha = 0
+            invalidate()
+            return
+        }
+        dotPaint.alpha = 255
+
         val isBleConnect = sesame.deviceStatus.value == CHDeviceLoginStatus.logined
         val isWifiConnect = sesame.deviceShadowStatus?.value == CHDeviceLoginStatus.logined
         if (!isBleConnect && !isWifiConnect) {
@@ -149,11 +156,6 @@ class SSMCellView @JvmOverloads constructor(
 
                 }
             }
-        }
-
-        if (sesame.productModel == CHProductModel.Hub3_LTE) {
-            dotPaint.color = ContextCompat.getColor(context, R.color.clear)
-            invalidate()
         }
 
     }

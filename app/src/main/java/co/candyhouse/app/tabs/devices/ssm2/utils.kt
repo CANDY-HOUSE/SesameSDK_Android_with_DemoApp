@@ -18,6 +18,7 @@ import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.CHSesameBot
 import co.candyhouse.sesame.open.devices.CHSesameBot2
+import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
@@ -150,6 +151,13 @@ fun ssm5UIParser(device: CHDevices): Int {
     }
     if (device.productModel == CHProductModel.SSMOpenSensor || device.productModel == CHProductModel.SSMOpenSensor2) {
         return R.drawable.icon_opensensor
+    }
+    if (device is CHHub3) {
+        return when {
+            (device.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork != true -> R.drawable.icon_nosignal
+            device.getRelayStatus() -> R.drawable.icon_unlock
+            else -> R.drawable.icon_lock
+        }
     }
     return when (device.deviceStatus) {
         CHDeviceStatus.DfuMode -> R.drawable.icon_nosignal
