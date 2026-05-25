@@ -110,6 +110,7 @@ class DeviceListAdapter(
 
         private var bot2Adapter: Bot2ItemView? = null
         private var bot2ItemTouchHelper: ItemTouchHelper? = null
+        private var bot2AttachHelperRunnable: Runnable? = null
 
         override fun bind(device: CHDevices, pos: Int) {
             bindDevice(device)
@@ -130,6 +131,10 @@ class DeviceListAdapter(
         }
 
         private fun resetViews(device: CHDevices) {
+            bot2AttachHelperRunnable?.let { binding.expandFLSubView.removeCallbacks(it) }
+            bot2ItemTouchHelper?.attachToRecyclerView(null)
+            bot2Adapter?.callback = null
+            bot2Adapter?.onOrderChanged = null
             binding.apply {
                 bleStatus.visibility = View.GONE
                 expandFL.visibility = View.GONE
@@ -214,17 +219,15 @@ class DeviceListAdapter(
                     val newList = getScriptList(device)
 
                     if (bot2Adapter == null) {
-                        bot2Adapter = Bot2ItemView(
-                            newList.toMutableList(),
-                            callback = { bot2Item ->
-                                device.click(bot2Item.id.toUByte(), UserUtils.getUserIdWithByte()) {}
-                            },
-                            onOrderChanged = { changedList ->
-                                uploadBotScriptDisplayOrder(device, changedList)
-                            }
-                        )
+                        bot2Adapter = Bot2ItemView(newList.toMutableList())
                     } else {
                         bot2Adapter?.updateData(newList)
+                    }
+                    bot2Adapter?.callback = { bot2Item ->
+                        device.click(bot2Item.id.toUByte(), UserUtils.getUserIdWithByte()) {}
+                    }
+                    bot2Adapter?.onOrderChanged = { changedList ->
+                        uploadBotScriptDisplayOrder(device, changedList)
                     }
 
                     setupExpandableView(device, 90) {
@@ -233,10 +236,13 @@ class DeviceListAdapter(
 
                     if (bot2ItemTouchHelper == null) {
                         bot2ItemTouchHelper = ItemTouchHelper(Bot2ItemTouchHelperCallback(bot2Adapter!!))
-                        binding.expandFLSubView.post {
-                            bot2ItemTouchHelper?.attachToRecyclerView(binding.expandFLSubView)
-                        }
                     }
+                    bot2AttachHelperRunnable?.let { binding.expandFLSubView.removeCallbacks(it) }
+                    val attachHelperRunnable = Runnable {
+                        bot2ItemTouchHelper?.attachToRecyclerView(binding.expandFLSubView)
+                    }
+                    bot2AttachHelperRunnable = attachHelperRunnable
+                    binding.expandFLSubView.post(attachHelperRunnable)
                 }
 
                 if (device is CHSesameBiometricDevice) {

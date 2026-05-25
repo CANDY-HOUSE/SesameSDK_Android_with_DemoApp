@@ -13,8 +13,8 @@ import java.util.Collections
 data class BotItem(val name: String, val id: Int, var displayOrder: Int = Int.MAX_VALUE)
 class Bot2ItemView(
     private val list: MutableList<BotItem>,
-    val callback: (bot2: BotItem) -> Unit,
-    val onOrderChanged: ((list: List<BotItem>) -> Unit)? = null
+    var callback: ((bot2: BotItem) -> Unit)? = null,
+    var onOrderChanged: ((list: List<BotItem>) -> Unit)? = null
 ) : RecyclerView.Adapter<Bot2ItemView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -26,7 +26,7 @@ class Bot2ItemView(
         val item = list[position]
         holder.tvName.text = item.name
         holder.itemView.setOnClickListener {
-            callback(item)
+            callback?.invoke(item)
         }
     }
 
