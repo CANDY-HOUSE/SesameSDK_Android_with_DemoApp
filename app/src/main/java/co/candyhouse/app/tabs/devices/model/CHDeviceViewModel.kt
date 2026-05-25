@@ -26,6 +26,7 @@ import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
+import co.candyhouse.app.tabs.devices.ssm2.setRank
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHSesameBot2
@@ -37,6 +38,7 @@ import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
@@ -60,17 +62,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.util.Collections
 
-class BeanDevices(
-    val list: List<CHDevices>,
-    val deviceId: String? = null
-)
+class BeanDevices(val deviceId: String? = null)
 
 data class LockDeviceStatus(var id: String, var model: Byte, var status: Byte)
 
@@ -86,32 +83,19 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private val delegateManager = DeviceViewModelDelegates(this)
     val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
     private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
-
     private val botScriptInitInFlight = Collections.synchronizedSet(mutableSetOf<String>())
+
+    @Volatile
+    private var isApplyingFullDeviceList = false
 
     // 搜索关键词
     val searchQuery = MutableStateFlow("")
-
-    // 过滤后的设备列表
-    val filteredDevices = combine(myChDevices, searchQuery) { devices, query ->
-        if (query.isEmpty()) {
-            devices
-        } else {
-            devices.filter { device ->
-                // 根据名称和UUID过滤（忽略大小写）
-                device.getNickname().contains(query, ignoreCase = true) || device.deviceId?.toString()?.contains(query, ignoreCase = true) == true
-            }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = myChDevices.value
-    )
 
     // 更新搜索关键词
     fun updateSearchQuery(query: String) {
         L.e("DeviceListFG", "updateSearchQuery $query")
         searchQuery.value = query
+        notifyFullDeviceListChanged()
     }
 
     fun saveKeysToServer() {
@@ -158,9 +142,9 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private fun receiveKeysFromServer(it: Result<CHResultState<Array<CHUserKey>>>) {
         it.onSuccess { result ->
             viewModelScope.launch {
-                CHDeviceWrapperManager.updateUserKeys(result.data.toList())
-
-                result.data.forEach { userKey ->
+                val serverUserKeys = result.data.toList()
+                CHDeviceWrapperManager.updateUserKeys(serverUserKeys)
+                serverUserKeys.forEach { userKey ->
                     val deviceId = userKey.deviceUUID.lowercase()
 
                     SharedPreferencesUtils.preferences.edit {
@@ -183,7 +167,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         BotScriptStore.merge(userKey.deviceUUID, scriptMetaMap)
                     }
                 }
-                val userks = result.data.mapNotNull { userKey ->
+                val devicesKeys = serverUserKeys.mapNotNull { userKey ->
                     try {
                         userKeyToCHKey(userKey, getHistoryTag())
                     } catch (e: IllegalArgumentException) {
@@ -191,7 +175,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         null
                     }
                 }
-                CHDeviceManager.receiveCHDeviceKeys(userks) { response ->
+                CHDeviceManager.receiveCHDeviceKeys(devicesKeys) { response ->
                     response.onSuccess { deviceResponse ->
                         deviceResponse.data.forEach { device ->
                             CHDeviceWrapperManager.updateDevice(device)
@@ -222,7 +206,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private fun refreshDevicesAsGuest() {
         CHDeviceManager.getCandyDevices { result ->
             result.onFailure {
-                _neeReflesh.postValue(Event(BeanDevices(emptyList())))
+                _neeReflesh.postValue(Event(BeanDevices()))
             }
 
             result.onSuccess { state ->
@@ -292,7 +276,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 updateDevices(it.data)
             }
             it.onFailure {
-                _neeReflesh.postValue(Event(BeanDevices(emptyList())))
+                _neeReflesh.postValue(Event(BeanDevices()))
             }
         }
     }
@@ -323,21 +307,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         ssmosLockDelegates[chDevices] = sharedDelegate
     }
 
-    fun updateNeeRefresh(device: CHDevices) {
-        val deviceId = device.deviceId?.toString() ?: return
-        val event = Event(
-            BeanDevices(
-                list = myChDevices.value,
-                deviceId = deviceId
-            )
-        )
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            _neeReflesh.value = event
-        } else {
-            _neeReflesh.postValue(event)
-        }
-    }
-
     private fun updateDevices(list: List<CHDevices>) {
         viewModelScope.launch {
             val updatedDevices = ArrayList(list).apply {
@@ -349,41 +318,42 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 )
             }
             synchronized(this@CHDeviceViewModel) {
-                myChDevices.value = updatedDevices
-                myChDevices.value.forEach { device ->
-                    device.delegate = delegateManager
-                    // 锁、bike、bot自动连接蓝牙
-                    backgroundAutoConnect(device)
+                isApplyingFullDeviceList = true
+                try {
+                    updatedDevices.forEach { device ->
+                        device.delegate = delegateManager
+                        // 锁、bike、bot自动连接蓝牙
+                        backgroundAutoConnect(device)
 
-                    // 监听器（设备状态变化时会触发）
-                    listerChDeviceStatus(device) { changedDevice ->
-                        updateNeeRefresh(changedDevice)
+                        // 监听器（设备状态变化时会触发）
+                        listerChDeviceStatus(device) { changedDevice ->
+                            updateNeeRefresh(changedDevice)
 
-                        if (changedDevice is CHSesameBot2
-                            && (changedDevice.productModel == CHProductModel.SesameBot2 || changedDevice.productModel == CHProductModel.SesameBot3)
-                            && changedDevice.deviceStatus.value == CHDeviceLoginStatus.logined
-                        ) {
-                            L.d("CHDeviceViewModel", "发起SCRIPT_NAME_LIST")
-                            changedDevice.getScriptNameList { r ->
-                                r.onSuccess {
-                                    val initKey = getBotScriptInitKey(changedDevice)
-                                    val inited = SharedPreferencesUtils.preferences.getBoolean(initKey, false)
-                                    if (!inited) {
-                                        initBotScriptDefaults(changedDevice)
+                            if (changedDevice is CHSesameBot2
+                                && (changedDevice.productModel == CHProductModel.SesameBot2 || changedDevice.productModel == CHProductModel.SesameBot3)
+                                && changedDevice.deviceStatus.value == CHDeviceLoginStatus.logined
+                            ) {
+                                L.d("CHDeviceViewModel", "发起SCRIPT_NAME_LIST")
+                                changedDevice.getScriptNameList { r ->
+                                    r.onSuccess {
+                                        val initKey = getBotScriptInitKey(changedDevice)
+                                        val inited = SharedPreferencesUtils.preferences.getBoolean(initKey, false)
+                                        if (!inited) {
+                                            initBotScriptDefaults(changedDevice)
+                                        }
+                                        updateNeeRefresh(changedDevice)
                                     }
-                                    updateNeeRefresh(changedDevice)
                                 }
                             }
                         }
                     }
-
-                    // 拿到数据直接刷新
-                    updateNeeRefresh(device)
-                }
-                if (myChDevices.value.isEmpty() && CHDeviceManager.isRefresh.get()) {
-                    _neeReflesh.postValue(Event(BeanDevices(emptyList())))
+                    myChDevices.value = updatedDevices
+                } finally {
+                    isApplyingFullDeviceList = false
                 }
             }
+            notifyFullDeviceListChanged()
+            CHIotManagerPublic.subscribeDevicesIfConnected(updatedDevices)
         }
     }
 
@@ -398,8 +368,104 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun handleAppGoToForeground() {
         viewModelScope.launch(Dispatchers.Main) {
-            _neeReflesh.postValue(Event(BeanDevices(emptyList())))
+            _neeReflesh.postValue(Event(BeanDevices()))
         }
+    }
+
+    fun updateNeeRefresh(device: CHDevices) {
+        val deviceId = device.deviceId?.toString() ?: return
+
+        if (isApplyingFullDeviceList) return
+
+        val event = Event(BeanDevices(deviceId = deviceId))
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            _neeReflesh.value = event
+        } else {
+            _neeReflesh.postValue(event)
+        }
+    }
+
+    private fun notifyFullDeviceListChanged() {
+        val event = Event(BeanDevices())
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            _neeReflesh.value = event
+        } else {
+            _neeReflesh.postValue(event)
+        }
+    }
+
+    suspend fun applyDeviceOrderFromUI(visibleOrderedDevices: List<CHDevices>): ArrayList<CHDevices> {
+        val currentAllDevicesSnapshot = ArrayList(myChDevices.value)
+        val visibleOrderedSnapshot = ArrayList(visibleOrderedDevices)
+
+        val newAllDevices = withContext(IO) {
+            val currentIds = currentAllDevicesSnapshot.map { device ->
+                device.deviceId?.toString()
+            }
+
+            val visibleIds = visibleOrderedSnapshot.map { device ->
+                device.deviceId?.toString()
+            }
+
+            val hasInvalidVisibleId = visibleIds.any { it == null }
+            val hasInvalidCurrentId = currentIds.any { it == null }
+
+            val visibleNonNullIds = visibleIds.filterNotNull()
+            val currentNonNullIds = currentIds.filterNotNull()
+
+            val hasDuplicateVisibleId = visibleNonNullIds.size != visibleNonNullIds.toSet().size
+            val hasDuplicateCurrentId = currentNonNullIds.size != currentNonNullIds.toSet().size
+
+            val currentIdSet = currentNonNullIds.toSet()
+            val hasUnknownVisibleId = visibleNonNullIds.any { it !in currentIdSet }
+
+            val shouldFallback = hasInvalidVisibleId ||
+                    hasInvalidCurrentId ||
+                    hasDuplicateVisibleId ||
+                    hasDuplicateCurrentId ||
+                    hasUnknownVisibleId
+
+            val rebuiltDevices = if (shouldFallback) {
+                return@withContext ArrayList(currentAllDevicesSnapshot)
+            } else {
+                val isAllDevicesVisible =
+                    visibleOrderedSnapshot.size == currentAllDevicesSnapshot.size
+
+                if (isAllDevicesVisible) {
+                    ArrayList(visibleOrderedSnapshot)
+                } else {
+                    val visibleIdSet = visibleNonNullIds.toSet()
+                    val queue = ArrayDeque(visibleOrderedSnapshot)
+
+                    ArrayList(
+                        currentAllDevicesSnapshot.map { oldDevice ->
+                            val id = oldDevice.deviceId?.toString()
+
+                            if (id != null && id in visibleIdSet && queue.isNotEmpty()) {
+                                queue.removeFirst()
+                            } else {
+                                oldDevice
+                            }
+                        }
+                    )
+                }
+            }
+
+            rebuiltDevices.forEachIndexed { index, device ->
+                device.setRank(-index)
+            }
+
+            rebuiltDevices
+        }
+
+        withContext(Dispatchers.Main) {
+            myChDevices.value = newAllDevices
+            notifyFullDeviceListChanged()
+        }
+
+        return newAllDevices
     }
 
     @SuppressLint("ServiceCast", "ImplicitSamInstance")
@@ -483,7 +549,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             it.onSuccess {
                 myChDevices.value =
                     myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
-                _neeReflesh.postValue(Event(BeanDevices(emptyList())))
+                _neeReflesh.postValue(Event(BeanDevices()))
 
                 unregisterNotification(targetDevice)
                 clearBotScript(targetDevice)

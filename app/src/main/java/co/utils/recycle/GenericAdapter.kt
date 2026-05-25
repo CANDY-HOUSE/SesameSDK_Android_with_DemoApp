@@ -29,6 +29,10 @@ abstract class GenericAdapter<T>(private var listItems: MutableList<T> = mutable
         }
     }
 
+    fun getCurrentItems(): List<T> {
+        return listItems.toList()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return getViewHolder(view, viewType)

@@ -5,11 +5,10 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.ext.webview.data.WebViewConfig
@@ -80,6 +79,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         bind.appBarLayout.setExpanded(false, false)
         bind.leaderboardList.setEmptyView(bind.emptyView)
         bind.leaderboardList.adapter = adapter
+        (bind.leaderboardList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
     }
 
     override fun setupListeners() {
@@ -180,53 +180,52 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         mDeviceViewModel.updateSearchQuery(query)
     }
 
-    override fun <T : View> observeViewModelData(view: T) {
-        // 初次加载列表
-        lifecycleScope.launch {
-            mDeviceViewModel.myChDevices.collect {
-                view.post {
-                    checkAdapterPost {
-                        CHDeviceManager.isRefresh.set(false)
-                        bind.swiperefresh.isRefreshing = false
-                        adapter.updateList(mDeviceViewModel.myChDevices.value)
-                    }
+    private fun currentDisplayList(): ArrayList<CHDevices> {
+        val query = mDeviceViewModel.searchQuery.value
+
+        return if (query.isEmpty()) {
+            ArrayList(mDeviceViewModel.myChDevices.value)
+        } else {
+            L.d(tag, "刷新搜索结果页面... $query")
+            ArrayList(
+                mDeviceViewModel.myChDevices.value.filter { device ->
+                    device.getNickname().contains(query, ignoreCase = true) ||
+                            device.deviceId?.toString()?.contains(query, ignoreCase = true) == true
                 }
-            }
+            )
         }
-        // 刷新列表
-        mDeviceViewModel.neeReflesh.observeEvent(viewLifecycleOwner) { beanDevices ->
+    }
+
+    private fun renderCurrentDeviceList(refreshDeviceId: String? = null) {
+        val displayList = currentDisplayList()
+
+        checkAdapterPost {
             CHDeviceManager.isRefresh.set(false)
             bind.swiperefresh.isRefreshing = false
 
-            val displayList = if (mDeviceViewModel.searchQuery.value.isEmpty()) {
-                mDeviceViewModel.myChDevices.value
+            if (refreshDeviceId == null) {
+                adapter.updateList(displayList)
+                return@checkAdapterPost
+            }
+
+            val position = displayList.indexOfFirst {
+                it.deviceId?.toString().equals(refreshDeviceId, ignoreCase = true)
+            }
+
+            if (position >= 0) {
+                adapter.updateList(displayList, position)
             } else {
-                // 重新过滤，确保获取最新状态
-                val query = mDeviceViewModel.searchQuery.value
-                L.d(tag, "刷新搜索结果页面... $query")
-                ArrayList(mDeviceViewModel.myChDevices.value.filter { device ->
-                    device.getNickname().contains(query, ignoreCase = true) ||
-                            device.deviceId?.toString()?.contains(query, ignoreCase = true) == true
-                })
+                adapter.updateList(displayList)
             }
-
-            // 根据 deviceId 计算位置
-            val actualPosition = beanDevices.deviceId?.let { id ->
-                displayList.indexOfFirst { it.deviceId.toString() == id }
-            } ?: -1
-
-            L.d(tag, "actualPosition=$actualPosition")
-
-            adapter.updateList(displayList, actualPosition)
         }
-        // 监听过滤后的列表
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mDeviceViewModel.filteredDevices.collect { devices ->
-                    L.d(tag, "监听过滤后的列表数目  ${devices.size}")
-                    adapter.updateList(ArrayList(devices))
-                }
-            }
+    }
+
+
+    override fun <T : View> observeViewModelData(view: T) {
+        renderCurrentDeviceList()
+
+        mDeviceViewModel.neeReflesh.observeEvent(viewLifecycleOwner) { beanDevices ->
+            renderCurrentDeviceList(beanDevices.deviceId)
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
@@ -17,7 +18,6 @@ import co.candyhouse.app.tabs.devices.ssm2.createOpensensorStateText
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.app.tabs.devices.ssm2.setRank
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
@@ -39,6 +39,7 @@ import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptItem
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHDeviceInfo
+import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
@@ -47,9 +48,12 @@ import co.utils.UserUtils
 import co.utils.getLastKnownLocation
 import co.utils.hasFirmwareUpdate
 import co.utils.vibrateDevice
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class DeviceListAdapter(
     private val mDeviceViewModel: CHDeviceViewModel,
@@ -63,20 +67,44 @@ class DeviceListAdapter(
         if (isUploading) return
         isUploading = true
 
-        CoroutineScope(Dispatchers.IO).launch {
+        mDeviceViewModel.viewModelScope.launch {
             try {
-                mDeviceViewModel.myChDevices.value.forEachIndexed { index, chDevices ->
-                    chDevices.setRank(-index)
+                val visibleOrderedDevices = getCurrentItems()
+                val newAllOrderedDevices = mDeviceViewModel.applyDeviceOrderFromUI(visibleOrderedDevices)
+
+                val uploadKeys = withContext(Dispatchers.IO) {
+                    newAllOrderedDevices.map {
+                        cheyKeyToUserKey(
+                            it.getKey(),
+                            it.getLevel(),
+                            it.getNickname(),
+                            it.getRank()
+                        )
+                    }
                 }
-                CHAPIClientBiz.upLoadKeys(mDeviceViewModel.myChDevices.value.map {
-                    cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname(), it.getRank())
-                }) { isUploading = false }
-            } catch (e: Exception) {
+
+                uploadKeysAwait(uploadKeys)
+            } catch (_: Exception) {
+            } finally {
                 isUploading = false
-                e.printStackTrace()
             }
         }
     }
+
+    private suspend fun uploadKeysAwait(keys: List<CHUserKey>) =
+        suspendCancellableCoroutine { continuation ->
+            try {
+                CHAPIClientBiz.upLoadKeys(keys) {
+                    if (continuation.isActive) {
+                        continuation.resume(Unit)
+                    }
+                }
+            } catch (e: Exception) {
+                if (continuation.isActive) {
+                    continuation.resumeWithException(e)
+                }
+            }
+        }
 
     override fun getLayoutId(position: Int, obj: CHDevices): Int {
         return R.layout.sesame_devices_list_layout

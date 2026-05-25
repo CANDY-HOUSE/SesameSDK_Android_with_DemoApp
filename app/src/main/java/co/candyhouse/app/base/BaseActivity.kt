@@ -28,6 +28,7 @@ import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.L
 import co.receiver.widget.SesameForegroundService
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
@@ -174,6 +175,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                     AWSStatus.setSubUUID(null)
                     SharedPreferencesUtils.nickname = null
                     SharedPreferencesUtils.userId = null
+                    CHIotManagerPublic.clearIotSubscriptionCache()
                 }
                 else -> {
                     AWSStatus.setAWSLoginStatus(false)

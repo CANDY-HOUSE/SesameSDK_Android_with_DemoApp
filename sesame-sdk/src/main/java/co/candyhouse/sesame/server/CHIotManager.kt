@@ -6,13 +6,13 @@ import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.CHResultState
-import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.server.dto.Sesame2Shadow
 import co.candyhouse.sesame.server.dto.Sesame5ShadowDocuments
 import co.candyhouse.sesame.server.dto.WM2Shadow
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.getClientRegion
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
@@ -26,10 +26,13 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.util.Collections
 import java.util.Locale.getDefault
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -48,8 +51,12 @@ internal object CHIotManager {
         endpoint = CUSTOMER_SPECIFIC_ENDPOINT
     }
 
+    @Volatile
     private var iotStatus = AWSIotMqttClientStatus.ConnectionLost
+    private val iotScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var connectionJob: Job? = null
+    private var subscribeDevicesJob: Job? = null
+    private val subscribedIotDeviceIds = Collections.synchronizedSet(mutableSetOf<String>())
 
     init {
         L.d(tag, "CHIotManager init:")
@@ -67,8 +74,56 @@ internal object CHIotManager {
         connectionJob?.cancel()
 
         // 在IO线程执行连接
-        connectionJob = CoroutineScope(Dispatchers.IO).launch {
+        connectionJob = iotScope.launch {
             connectIoT()
+        }
+    }
+
+    fun clearIotSubscriptionCache() {
+        L.d(tag, "🥝 clearIotSubscriptionCache")
+        subscribeDevicesJob?.cancel()
+        subscribeDevicesJob = null
+        subscribedIotDeviceIds.clear()
+    }
+
+    fun subscribeDevicesIfConnected(devices: List<CHDevices>) {
+        if (iotStatus != AWSIotMqttClientStatus.Connected) {
+            L.d(tag, "🥝 subscribeDevicesIfConnected skip, iotStatus=$iotStatus")
+            return
+        }
+
+        subscribeDevicesJob?.cancel()
+        subscribeDevicesJob = iotScope.launch {
+            devices.forEach { device ->
+                if (!isActive) return@launch
+                subscribeDeviceIfNeeded(device)
+            }
+        }
+    }
+
+    private fun subscribeDeviceIfNeeded(device: CHDevices) {
+        if (iotStatus != AWSIotMqttClientStatus.Connected) return
+
+        val deviceUtil = device as? CHDeviceUtil
+        if (deviceUtil == null) {
+            L.d(tag, "🥝 skip iot subscribe, device is not CHDeviceUtil: ${device.deviceId}")
+            return
+        }
+
+        val deviceId = device.deviceId?.toString()?.lowercase() ?: return
+
+        val shouldSubscribe = subscribedIotDeviceIds.add(deviceId)
+        if (!shouldSubscribe) {
+            L.d(tag, "🥝 skip duplicated iot subscribe: $deviceId")
+            return
+        }
+
+        try {
+            L.d(tag, "🥝 goIOT subscribe: $deviceId")
+            deviceUtil.goIOT()
+        } catch (e: Exception) {
+            subscribedIotDeviceIds.remove(deviceId)
+            L.e(tag, "🥝 goIOT subscribe failed: $deviceId", e)
         }
     }
 
@@ -83,13 +138,17 @@ internal object CHIotManager {
                 val resumed = AtomicBoolean(false)
 
                 mqttManager.connect(createCredentialsProvider()) { status, error ->
+                    val oldStatus = iotStatus
                     iotStatus = status
-                    L.d(tag, "🥝 IoT连接状态: $status")
+                    L.d(tag, "🥝 IoT连接状态: $status oldStatus=$oldStatus")
 
                     when (status) {
                         AWSIotMqttClientStatus.Connected -> {
+                            if (oldStatus != AWSIotMqttClientStatus.Connected) {
+                                clearIotSubscriptionCache()
+                            }
                             // 连接成功，更新设备状态
-                            CoroutineScope(Dispatchers.IO).launch {
+                            iotScope.launch {
                                 updateDevicesOnConnect()
                             }
                             if (resumed.compareAndSet(false, true) && continuation.isActive) continuation.resume(Unit)
@@ -97,15 +156,16 @@ internal object CHIotManager {
 
                         AWSIotMqttClientStatus.Reconnecting -> {
                             // 重连中，重置设备状态
-                            CoroutineScope(Dispatchers.IO).launch {
+                            iotScope.launch {
                                 resetDevicesOnReconnecting()
                             }
                         }
 
                         AWSIotMqttClientStatus.ConnectionLost -> {
                             L.d(tag, "🥝 連線狀態 ConnectionLost!!!!!!! IOT:$status")
+                            clearIotSubscriptionCache()
                             // 连接丢失，延迟重试
-                            CoroutineScope(Dispatchers.IO).launch {
+                            iotScope.launch {
                                 delay(3000)
                                 connectIoT() // 重新连接
                             }
@@ -133,9 +193,7 @@ internal object CHIotManager {
     private suspend fun updateDevicesOnConnect() = withContext(Dispatchers.IO) {
         CHDeviceManager.getCandyDevices { result ->
             result.onSuccess { response ->
-                response.data.forEach { device ->
-                    (device as? CHDeviceUtil)?.goIOT()
-                }
+                subscribeDevicesIfConnected(response.data)
             }
         }
     }

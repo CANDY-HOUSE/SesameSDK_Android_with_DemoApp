@@ -9,16 +9,17 @@ import android.text.style.AlignmentSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import co.candyhouse.app.R
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3
-import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
-import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.CHSesameBot
 import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
@@ -257,11 +258,13 @@ fun CHDevices.getNFC(): String? {
 }
 
 fun CHDevices.setRank(level: Int) {
-    SharedPreferencesUtils.preferences.edit().putInt("ra" + this.deviceId.toString(), level).apply()
+    val id = this.deviceId?.toString() ?: return
+    SharedPreferencesUtils.preferences.edit { putInt("ra$id", level) }
 }
 
 fun CHDevices.getRank(): Int {
-    return SharedPreferencesUtils.preferences.getInt("ra" + this.deviceId.toString(), 0)
+    val id = this.deviceId?.toString() ?: return 0
+    return SharedPreferencesUtils.preferences.getInt("ra$id", 0)
 }
 
 fun CHDevices.setNickname(name: String) {
