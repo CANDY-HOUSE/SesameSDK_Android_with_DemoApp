@@ -56,3 +56,12 @@ data class StateInfo(
     val remoteList: List<IrRemote>? = null,
     val scriptList: List<BotScriptItem>? = null
 )
+
+@Suppress("SENSELESS_COMPARISON")
+fun CHUserKey.ensureSafeStateInfo(): CHUserKey {
+    return if (this.stateInfo == null) {
+        this.copy(stateInfo = StateInfo())
+    } else {
+        this
+    }
+}

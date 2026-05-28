@@ -42,6 +42,7 @@ import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
+import co.candyhouse.sesame.server.dto.ensureSafeStateInfo
 import co.candyhouse.sesame.server.dto.userKeyToCHKey
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
@@ -143,6 +144,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         it.onSuccess { result ->
             viewModelScope.launch {
                 val serverUserKeys = result.data.toList()
+                    .map { it.ensureSafeStateInfo() }
                 CHDeviceWrapperManager.updateUserKeys(serverUserKeys)
                 serverUserKeys.forEach { userKey ->
                     val deviceId = userKey.deviceUUID.lowercase()
@@ -154,14 +156,14 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                     }
 
                     val scriptMetaMap = userKey.stateInfo.scriptList
-                        ?.mapNotNull { item ->
+                        .orEmpty()
+                        .mapNotNull { item ->
                             val idx = item.actionIndex.toIntOrNull() ?: return@mapNotNull null
                             idx to BotScriptStore.ScriptMeta(
                                 alias = item.alias,
                                 displayOrder = item.displayOrder
                             )
-                        }?.toMap()
-                        ?: emptyMap()
+                        }.toMap()
 
                     if (scriptMetaMap.isNotEmpty()) {
                         BotScriptStore.merge(userKey.deviceUUID, scriptMetaMap)
