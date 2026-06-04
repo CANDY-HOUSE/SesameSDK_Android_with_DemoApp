@@ -1,72 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<co.utils.SmartSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swiperefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <ScrollView
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/white">
+
+        <include
+            layout="@layout/back_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/err_zone"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:background="@color/dark_red">
+
+        <TextView
+            android:id="@+id/err_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="17dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            tools:text="error" />
+
+        <TextView
+            android:id="@+id/err_msg"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:gravity="end|center"
+            android:lines="1"
+            android:scaleType="center"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            tools:text="action" />
+
+    </RelativeLayout>
+
+    <co.utils.SmartSwipeRefreshLayout
+        android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/llview"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/gray0"
-            android:orientation="vertical"
-            android:paddingBottom="40dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@color/white">
-
-                <include
-                    layout="@layout/back_sub"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp" />
-
-            </RelativeLayout>
+            android:layout_height="match_parent">
 
             <LinearLayout
+                android:id="@+id/llview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:id="@+id/err_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:background="@color/dark_red">
-
-                    <TextView
-                        android:id="@+id/err_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="17dp"
-                        android:gravity="center_vertical"
-                        android:textColor="@color/white"
-                        android:textSize="17sp"
-                        tools:text="error" />
-
-                    <TextView
-                        android:id="@+id/err_msg"
-                        android:layout_width="200dp"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="12dp"
-                        android:gravity="end|center"
-                        android:lines="1"
-                        android:scaleType="center"
-                        android:textColor="@color/white"
-                        android:textSize="17sp"
-                        tools:text="action" />
-
-                </RelativeLayout>
+                android:background="@color/gray0"
+                android:orientation="vertical"
+                android:paddingBottom="40dp">
 
                 <androidx.compose.ui.platform.ComposeView
                     android:id="@+id/device_setting_web_view"
@@ -546,6 +546,6 @@
                         android:background="@color/gray0" />
                 </RelativeLayout>
             </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-</co.utils.SmartSwipeRefreshLayout>
+        </ScrollView>
+    </co.utils.SmartSwipeRefreshLayout>
+</LinearLayout>
