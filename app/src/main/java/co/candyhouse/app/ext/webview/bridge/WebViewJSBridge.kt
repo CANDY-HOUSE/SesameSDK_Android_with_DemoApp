@@ -49,7 +49,6 @@ class WebViewJSBridge(
         const val requestConfigureInternet = "requestConfigureInternet"
         const val requestMonitorInternet = "requestMonitorInternet"
         const val requestDeviceFWUpgrade = "requestDeviceFWUpgrade"
-        const val requestNetworkType = "requestNetworkType"
     }
 
     @JavascriptInterface
@@ -125,10 +124,6 @@ class WebViewJSBridge(
                     scope.launch(Dispatchers.Main) {
                         config.onRequestNotificationSettings?.invoke()
                     }
-                }
-
-                requestNetworkType -> {
-                    hub3Bridge?.handleRequestNetworkType(json)
                 }
 
                 else -> {

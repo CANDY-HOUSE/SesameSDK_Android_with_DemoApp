@@ -7,7 +7,6 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
-import co.candyhouse.sesame.open.devices.CHHub3NetWorkType
 import co.candyhouse.sesame.open.devices.base.CHSesameConnector
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
@@ -188,14 +187,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                     }
                 }
             }
-
-            override fun onNetworkType(device: CHWifiModule2, netWorkType: CHHub3NetWorkType) {
-                notifyDelegates(device) {
-                    if (it is CHWifiModule2Delegate) {
-                        it.onNetworkType(device, netWorkType)
-                    }
-                }
-            }
         }
     }
 
@@ -224,14 +215,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                 device,
                 percent
             )
-        }
-    }
-
-    override fun onNetworkType(device: CHWifiModule2, netWorkType: CHHub3NetWorkType) {
-        notifyDelegates(device) {
-            if (it is CHWifiModule2Delegate) {
-                it.onNetworkType(device, netWorkType)
-            }
         }
     }
 
