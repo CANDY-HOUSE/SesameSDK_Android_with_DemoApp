@@ -33,7 +33,8 @@ class WebViewJSBridge(
         val onRequestDestroySelf: (() -> Unit)? = null,
         val onRequestRefreshApp: (() -> Unit)? = null,
         val onRequestWifiConfig: (() -> Unit)? = null,
-        val onEnablePullRefresh: ((Boolean) -> Unit)? = null
+        val onEnablePullRefresh: ((Boolean) -> Unit)? = null,
+        val onRequestUpdateDeviceFWVersion: ((deviceId: String, currentFwVer: String) -> Unit)? = null
     )
 
     companion object {
@@ -49,6 +50,7 @@ class WebViewJSBridge(
         const val requestConfigureInternet = "requestConfigureInternet"
         const val requestMonitorInternet = "requestMonitorInternet"
         const val requestDeviceFWUpgrade = "requestDeviceFWUpgrade"
+        const val requestUpdateDeviceFWVersion = "requestUpdateDeviceFWVersion"
     }
 
     @JavascriptInterface
@@ -77,6 +79,10 @@ class WebViewJSBridge(
 
                 requestDeviceFWUpgrade -> {
                     hub3Bridge?.handleRequestDeviceFWUpgrade(json)
+                }
+
+                requestUpdateDeviceFWVersion -> {
+                    handleRequestUpdateDeviceFWVersion(json)
                 }
 
                 requestRefreshApp -> {
@@ -154,6 +160,17 @@ class WebViewJSBridge(
             }
 
             sendResponseDataToH5(callbackName, responseData)
+        }
+    }
+
+    private fun handleRequestUpdateDeviceFWVersion(json: JSONObject) {
+        val deviceId = json.optString("deviceUUID")
+        val currentFwVer = json.optString("currentFwVer")
+
+        if (deviceId.isBlank() || currentFwVer.isBlank()) return
+
+        scope.launch(Dispatchers.Main) {
+            config.onRequestUpdateDeviceFWVersion?.invoke(deviceId, currentFwVer)
         }
     }
 

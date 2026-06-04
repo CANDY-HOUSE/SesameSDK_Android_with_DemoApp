@@ -376,6 +376,11 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun updateNeeRefresh(device: CHDevices) {
         val deviceId = device.deviceId?.toString() ?: return
+        updateNeeRefresh(deviceId)
+    }
+
+    fun updateNeeRefresh(deviceId: String) {
+        if (deviceId.isBlank()) return
 
         if (isApplyingFullDeviceList) return
 

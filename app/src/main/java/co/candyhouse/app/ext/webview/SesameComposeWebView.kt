@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
@@ -85,6 +86,11 @@ class SesameComposeWebView : Fragment() {
                     if (config.scene == "wifi-module") {
                         wifiModuleJsBridge = bridge
                     }
+                },
+                onRequestUpdateDeviceFWVersion = { deviceId, currentFwVer ->
+                    L.d(logTag, "H5 requestUpdateDeviceFWVersion, deviceId=$deviceId, currentFwVer=$currentFwVer")
+                    CHDeviceWrapperManager.updateCurrentFwVer(deviceId, currentFwVer)
+                    mDeviceModel.updateNeeRefresh(deviceId)
                 }
             )
         }

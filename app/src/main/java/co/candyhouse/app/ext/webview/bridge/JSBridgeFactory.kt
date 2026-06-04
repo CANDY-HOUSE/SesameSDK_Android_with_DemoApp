@@ -43,7 +43,8 @@ object JSBridgeFactory {
         onRequestDestroySelf: (() -> Unit)? = null,
         onRequestRefreshApp: (() -> Unit)? = null,
         onRequestWifiConfig: (() -> Unit)? = null,
-        onEnablePullRefresh: ((Boolean) -> Unit)? = null
+        onEnablePullRefresh: ((Boolean) -> Unit)? = null,
+        onRequestUpdateDeviceFWVersion: ((deviceId: String, currentFwVer: String) -> Unit)? = null
     ): WebViewJSBridge? {
         if (!needsJSBridge(scene)) {
             return null
@@ -56,7 +57,8 @@ object JSBridgeFactory {
             onRequestDestroySelf = onRequestDestroySelf,
             onRequestRefreshApp = onRequestRefreshApp,
             onRequestWifiConfig = onRequestWifiConfig,
-            onEnablePullRefresh = onEnablePullRefresh
+            onEnablePullRefresh = onEnablePullRefresh,
+            onRequestUpdateDeviceFWVersion = onRequestUpdateDeviceFWVersion
         )
 
         val jsBridge = WebViewJSBridge(webView, scope, config)
