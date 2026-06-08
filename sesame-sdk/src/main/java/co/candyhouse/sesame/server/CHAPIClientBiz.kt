@@ -201,7 +201,7 @@ object CHAPIClientBiz {
     fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
 
-    fun updateHub3Switch(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
+    fun updateRelay(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
         makeApiCall(onResponse) {
             val sendMap: MutableMap<String, String> = mutableMapOf()
             val timestamp = (System.currentTimeMillis() / 1000).toInt()
@@ -234,7 +234,7 @@ object CHAPIClientBiz {
             sendMap["payload"] = payload
             sendMap["topic"] = "wm2${hub3DeviceIdLastSegment.uppercase()}cmd"
 
-            cHApiClient.updateHub3Switch(hub3DeviceId, sendMap)
+            cHApiClient.updateRelay(hub3DeviceId, sendMap)
             CHEmpty()
         }
 }

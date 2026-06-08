@@ -309,6 +309,18 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         ssmosLockDelegates[chDevices] = sharedDelegate
     }
 
+    /**
+     * 恢复设备列表的状态监听代理（sharedDelegate）。
+     * 当某个页面（如 webview 的 Hub3JSBridge）临时把自己注册为 ssmosLockDelegates[device] 后，
+     * 退出时应调用此方法把代理恢复成列表用的 sharedDelegate，而不是直接 remove，
+     * 否则列表收到 isRelayOn / mechStatus 变化时无法刷新界面。
+     */
+    fun restoreListStatusDelegate(device: CHDevices) {
+        ssmosLockDelegates.remove(device)
+        deviceStatusCallbacks[device]?.let { ssmosLockDelegates[device] = sharedDelegate }
+    }
+
+
     private fun updateDevices(list: List<CHDevices>) {
         viewModelScope.launch {
             val updatedDevices = ArrayList(list).apply {

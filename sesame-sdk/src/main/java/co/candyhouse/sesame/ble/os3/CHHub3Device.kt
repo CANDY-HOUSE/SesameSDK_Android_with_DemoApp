@@ -47,7 +47,13 @@ import kotlin.experimental.and
 @Suppress("DEPRECATION")
 @SuppressLint("MissingPermission")
 internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
-    @Volatile private var relayStatus: Boolean = false
+    @Volatile override var isRelayOn: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                (this as? CHDevices)?.let { delegate?.onMechStatus(it) }
+            }
+        }
     override var mechSetting: CHWifiModule2MechSettings? = CHWifiModule2MechSettings(null, null)
         set(value) {
             if (field != value) {
@@ -74,7 +80,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                     val json = JSONObject(gson.toJson(success.data))
                     val eventType = json.optString("eventType")
                     val isConnectIOT = eventType == "connected"
-                    json.optInt("relay_status", -1).takeIf { it != -1 }?.let { relayStatus = it == 1 }
+                    json.optInt("relay_status", -1).takeIf { it != -1 }?.let { isRelayOn = it == 1 }
                     mechStatus = CHWifiModule2NetWorkStatus(
                         isAPWork = isConnectIOT,
                         isNetWork = isConnectIOT,
@@ -144,8 +150,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
                     if (op == SesameItemCode.HUB3_ITEM_CODE_RELAY_SWITCH.value.toInt()) {
                         val payload = json.optJSONObject("payload")
                         payload?.optInt("status", -1)?.takeIf { it != -1 }?.let {
-                            relayStatus = it == 1
-                            (this as? CHDevices)?.let { dev -> delegate?.onMechStatus(dev) }
+                            isRelayOn = it == 1
                         }
                     }
                 }.onFailure { e ->
@@ -337,11 +342,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        CHAPIClientBiz.updateHub3Switch(historytag, this, result)
-    }
-
-    override fun getRelayStatus(): Boolean {
-        return relayStatus
+        CHAPIClientBiz.updateRelay(historytag, this, result)
     }
 
 }

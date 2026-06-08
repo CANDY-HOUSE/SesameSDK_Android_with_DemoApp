@@ -156,7 +156,7 @@ fun ssm5UIParser(device: CHDevices): Int {
     if (device is CHHub3) {
         return when {
             (device.mechStatus as? CHWifiModule2NetWorkStatus)?.isIOTWork != true -> R.drawable.icon_nosignal
-            device.getRelayStatus() -> R.drawable.icon_unlock
+            device.isRelayOn -> R.drawable.icon_unlock
             else -> R.drawable.icon_lock
         }
     }

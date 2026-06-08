@@ -148,7 +148,7 @@ class Hub3JSBridge(
         connectJob = null
         isConnecting = false
         registeredDeviceForDelegateMap?.let { dev ->
-            deviceModel?.ssmosLockDelegates?.remove(dev)
+            deviceModel?.restoreListStatusDelegate(dev)
         }
         registeredDeviceForDelegateMap = null
         currentDeviceUUID?.let { uuid ->

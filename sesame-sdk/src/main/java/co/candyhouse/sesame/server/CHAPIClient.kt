@@ -137,7 +137,7 @@ internal interface CHAPIClient {
 
     // 更新 Hub3_LTE 继电器开关状态
     @Operation(path = "/device/v1/wifi_module/{device_id}/switch", method = "POST")
-    fun updateHub3Switch(
+    fun updateRelay(
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: Map<String, String>
     ): Any
