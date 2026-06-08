@@ -224,7 +224,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
     override fun <T : View> observeViewModelData(view: T) {
         renderCurrentDeviceList()
 
-        mDeviceViewModel.neeReflesh.observeEvent(viewLifecycleOwner) { beanDevices ->
+        mDeviceViewModel.neeRefresh.observeEvent(viewLifecycleOwner) { beanDevices ->
             renderCurrentDeviceList(beanDevices.deviceId)
         }
     }

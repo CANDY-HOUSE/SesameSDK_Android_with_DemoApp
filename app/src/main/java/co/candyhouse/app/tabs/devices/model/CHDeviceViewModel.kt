@@ -77,8 +77,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     private var syncJob: Job? = null
     val myChDevices = MutableStateFlow(ArrayList<CHDevices>())
-    private val _neeReflesh = MutableLiveData<Event<BeanDevices>>()
-    val neeReflesh: LiveData<Event<BeanDevices>> = _neeReflesh
+    private val _neeRefresh = MutableLiveData<Event<BeanDevices>>()
+    val neeRefresh: LiveData<Event<BeanDevices>> = _neeRefresh
     val ssmLockLiveData = MutableLiveData<CHDevices>()
     val ssmDeviceLiveDataForMatter = MutableLiveData<CHDevices>()
     private val delegateManager = DeviceViewModelDelegates(this)
@@ -208,7 +208,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private fun refreshDevicesAsGuest() {
         CHDeviceManager.getCandyDevices { result ->
             result.onFailure {
-                _neeReflesh.postValue(Event(BeanDevices()))
+                _neeRefresh.postValue(Event(BeanDevices()))
             }
 
             result.onSuccess { state ->
@@ -278,7 +278,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 updateDevices(it.data)
             }
             it.onFailure {
-                _neeReflesh.postValue(Event(BeanDevices()))
+                _neeRefresh.postValue(Event(BeanDevices()))
             }
         }
     }
@@ -370,7 +370,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     fun handleAppGoToForeground() {
         viewModelScope.launch(Dispatchers.Main) {
-            _neeReflesh.postValue(Event(BeanDevices()))
+            _neeRefresh.postValue(Event(BeanDevices()))
         }
     }
 
@@ -387,9 +387,9 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         val event = Event(BeanDevices(deviceId = deviceId))
 
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            _neeReflesh.value = event
+            _neeRefresh.value = event
         } else {
-            _neeReflesh.postValue(event)
+            _neeRefresh.postValue(event)
         }
     }
 
@@ -397,9 +397,9 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         val event = Event(BeanDevices())
 
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            _neeReflesh.value = event
+            _neeRefresh.value = event
         } else {
-            _neeReflesh.postValue(event)
+            _neeRefresh.postValue(event)
         }
     }
 
@@ -556,7 +556,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             it.onSuccess {
                 myChDevices.value =
                     myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
-                _neeReflesh.postValue(Event(BeanDevices()))
+                _neeRefresh.postValue(Event(BeanDevices()))
 
                 unregisterNotification(targetDevice)
                 clearBotScript(targetDevice)
