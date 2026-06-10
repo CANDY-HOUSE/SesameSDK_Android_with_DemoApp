@@ -3,14 +3,14 @@ package co.candyhouse.app.tabs.devices.model
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
-import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
-import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
-import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
-import co.candyhouse.sesame.open.devices.base.CHSesameConnector
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
+import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHSesameConnector
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.connect.CHDeviceConnectDelegate
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.CHRemoteNanoTriggerSettings
@@ -173,13 +173,6 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                     }
                 }
             }
-            override fun onRadarReceive(device: CHSesameConnector, payload: ByteArray) {
-                notifyDelegates(device) {
-                    if (it is CHDeviceConnectDelegate) {
-                        it.onRadarReceive(device, payload)
-                    }
-                }
-            }
             override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
                 notifyDelegates(device) {
                     if (it is CHDeviceStatusDelegate) {
@@ -272,12 +265,5 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
         ssm2keys: Map<String, ByteArray>
     ) {
         (vm.ssmosLockDelegates[device] as? CHDeviceConnectDelegate)?.onSSM2KeysChanged(device, ssm2keys)
-    }
-
-    override fun onRadarReceive(
-        device: CHSesameConnector,
-        payload: ByteArray
-    ) {
-        (vm.ssmosLockDelegates[device] as? CHDeviceConnectDelegate)?.onRadarReceive(device, payload)
     }
 }

@@ -21,7 +21,6 @@ import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameConnector
 import co.candyhouse.sesame.open.devices.hasBiometricCapability
-import co.candyhouse.sesame.open.devices.sesameBiometric.capability.connect.CHDeviceConnectDelegate
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.remoteNano.CHRemoteNanoCapable
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.remoteNano.CHRemoteNanoDelegate
 import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.CHRemoteNanoTriggerSettings
@@ -88,8 +87,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         remoteNanoDevice.registerEventDelegate(biometricDevice, deviceDelegate as CHRemoteNanoDelegate)
     }
 
-    private fun createDeviceDelegate() = object : CHDeviceStatusDelegate,
-        CHRemoteNanoDelegate, CHDeviceConnectDelegate {
+    private fun createDeviceDelegate() = object : CHDeviceStatusDelegate, CHRemoteNanoDelegate {
 
         override fun onBleDeviceStatusChanged(
             device: CHDevices,
@@ -103,16 +101,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
                 device.connect { }
             }
             L.d("onSSM2KeysChanged", "onBleDeviceStatusChanged" + "---")
-        }
-
-        override fun onRadarReceive(device: CHSesameConnector, payload: ByteArray) {
-            setRadarUI(payload)
-        }
-
-        override fun onSSM2KeysChanged(
-            device: CHSesameConnector,
-            ssm2keys: Map<String, ByteArray>
-        ) {
         }
 
         @SuppressLint("DefaultLocale")
@@ -282,6 +270,9 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         val biometricDevice = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice ?: return
         val remoteNanoDevice = biometricDevice as? CHRemoteNanoCapable ?: return
 
+        observeRadarReceive()
+        setupRadarView(biometricDevice)
+
         biometricDevice.connect { }
 
         bind.recy.isNestedScrollingEnabled = false
@@ -343,16 +334,6 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         setupPalmZoneView()
         checkBiometricDeviceView()
 
-        if (biometricDevice.hasBiometricCapability(BiometricCapability.FACE)) {
-            bind.facePalm.visibility = View.VISIBLE
-            // 只有Face系列才显示雷达灵敏度设置
-            initRadarSeekBar(biometricDevice)
-        } else {
-            bind.raderSensZoneRl.visibility = View.GONE
-            bind.radarDistanceSet.visibility = View.GONE
-            bind.facePalm.visibility = View.GONE
-        }
-
         val name = biometricDevice.getNickname()
         bind.addSsmHintByTouchTxt.text = getString(R.string.add_ssm_hint_by_touch, name)
         bind.trashDeviceKeyTxt.text = getString(R.string.trash_device_key, name)
@@ -410,6 +391,14 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
             if (!isSupport) {
                 toastMSG(getString(R.string.sesame_unsupport))
             }
+        }
+    }
+
+    private fun observeRadarReceive() {
+        val biometricDevice = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice ?: return
+
+        biometricDevice.getRadarReceiveLiveData()?.observeEvent(viewLifecycleOwner) { payload ->
+            setRadarUI(payload)
         }
     }
 
@@ -505,6 +494,18 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
             }
         } else {
             bind.facePalm.visibility = View.GONE
+        }
+    }
+
+    private fun setupRadarView(biometricDevice: CHSesameBiometricDevice) {
+        val hasFaceCapability = biometricDevice.hasBiometricCapability(BiometricCapability.FACE)
+
+        bind.raderSensZoneRl.visibility = if (hasFaceCapability) View.VISIBLE else View.GONE
+
+        bind.radarDistanceSet.visibility = if (hasFaceCapability) View.VISIBLE else View.GONE
+
+        if (hasFaceCapability) {
+            initRadarSeekBar(biometricDevice)
         }
     }
 

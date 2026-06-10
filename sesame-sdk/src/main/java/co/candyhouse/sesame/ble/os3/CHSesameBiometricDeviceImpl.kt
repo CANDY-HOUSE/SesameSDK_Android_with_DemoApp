@@ -26,7 +26,6 @@ import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.card.CHCardCapable
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.card.CHCardCapableImpl
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.connect.CHDeviceConnectCapableImpl
-import co.candyhouse.sesame.open.devices.sesameBiometric.capability.connect.CHDeviceConnectDelegate
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.face.CHFaceCapable
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.face.CHFaceCapableImpl
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.fingerPrint.CHFingerPrintCapable
@@ -89,6 +88,7 @@ internal class CHSesameBiometricDeviceImpl(
 
     override var triggerDelaySetting: CHRemoteNanoTriggerSettings? = null
     override var ssm2KeysMap: MutableMap<String, ByteArray> = ObservableMutableMap()
+    private val _radarReceiveLiveData = MutableLiveData<Event<ByteArray>>()
 
     protected var isConnectedByWM2: Boolean = false
 
@@ -145,6 +145,10 @@ internal class CHSesameBiometricDeviceImpl(
 
     override fun getSSM2SupportLiveDataLiveData(): LiveData<Event<Boolean>>? {
         return (ssm2KeysMap as? ObservableMutableMap)?.supportLiveData
+    }
+
+    override fun getRadarReceiveLiveData(): LiveData<Event<ByteArray>> {
+        return _radarReceiveLiveData
     }
 
     private fun reportBatteryData(payloadString: String) {
@@ -208,7 +212,8 @@ internal class CHSesameBiometricDeviceImpl(
     }
 
     private fun handleRadar(receivePayload: SSM3PublishPayload) {
-        (delegate as? CHDeviceConnectDelegate)?.onRadarReceive(this, receivePayload.payload)
+        val payload = receivePayload.payload.copyOf()
+        _radarReceiveLiveData.postValue(Event(payload))
     }
 
     private fun handleMechStatus(receivePayload: SSM3PublishPayload) {

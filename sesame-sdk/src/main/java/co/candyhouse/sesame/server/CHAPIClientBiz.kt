@@ -25,7 +25,6 @@ import co.candyhouse.sesame.utils.AppIdentifyIdUtil
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
-import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.TokenManager
 import co.candyhouse.sesame.utils.aescmac.AesCmac
 import co.candyhouse.sesame.utils.base64Encode

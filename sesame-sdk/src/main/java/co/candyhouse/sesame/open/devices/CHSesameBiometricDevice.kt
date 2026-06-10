@@ -22,6 +22,7 @@ interface CHSesameBiometricDevice : CHSesameConnector, CHCapabilityHost {
     fun getSSM2KeysLiveData(): LiveData<Map<String, ByteArray>>?
     fun getSSM2SlotFullLiveData(): LiveData<Event<Boolean>>?
     fun getSSM2SupportLiveDataLiveData(): LiveData<Event<Boolean>>?
+    fun getRadarReceiveLiveData(): LiveData<Event<ByteArray>>?
 }
 
 // 设备支持的能力
