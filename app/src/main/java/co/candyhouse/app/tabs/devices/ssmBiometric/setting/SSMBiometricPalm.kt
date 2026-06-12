@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmFacePalmListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 /**
  * 掌纹管理界面
  */
-class SSMBiometricPalm : BaseDeviceFG<FgSsmFacePalmListBinding>() {
+class SSMBiometricPalm : BaseDeviceSettingFG<FgSsmFacePalmListBinding>() {
 
     // 常量定义
     companion object {

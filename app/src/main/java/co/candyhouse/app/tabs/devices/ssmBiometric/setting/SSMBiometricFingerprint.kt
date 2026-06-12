@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmTpFpListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.devices.base.CHDevices
@@ -36,7 +36,7 @@ import java.util.UUID
 
 data class FingerPrint(var id: String, var name: String, var type: Byte, var fingerPrintNameUUID: String)
 
-class SSMTouchProFingerprint : BaseDeviceFG<FgSsmTpFpListBinding>() {
+class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
     var mFingers = ArrayList<FingerPrint>()
     lateinit var fingerprintDelegate: CHFingerPrintDelegate
     override fun getViewBinder() = FgSsmTpFpListBinding.inflate(layoutInflater)

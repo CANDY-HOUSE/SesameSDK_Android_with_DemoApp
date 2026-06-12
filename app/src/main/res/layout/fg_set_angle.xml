@@ -26,11 +26,18 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
+    <include
+        android:id="@+id/err_zone"
+        layout="@layout/view_status_zone"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:layout_below="@+id/menu" />
+
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/menu"
+        android:layout_below="@id/err_zone"
         android:background="@color/gray0"
         android:fillViewport="true"
         android:overScrollMode="never">

@@ -49,6 +49,7 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
 import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.open.devices.hasAnyBiometricCapability
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
@@ -94,6 +95,10 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                     onChange()
                     onUIDeviceStatus(status)
                     checkVersionTag(status, device)
+                    // 满足二级设置页面的蓝牙重连，仅支持：密码、指纹、NFC卡、人脸、掌静脉
+                    if (device.hasAnyBiometricCapability() && device.deviceStatus == CHDeviceStatus.ReceivedAdV && isAdded) {
+                        device.connect { }
+                    }
                 }
 
                 override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {

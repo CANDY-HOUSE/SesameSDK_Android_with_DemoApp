@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BleStatusUpdate
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.FgRgDeviceBinding
 import co.candyhouse.app.ext.webview.data.WebViewConfig
@@ -20,19 +21,21 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
-import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManagerDelegate
+import co.candyhouse.sesame.open.CHBleStatusDelegate
+import co.candyhouse.sesame.open.CHScanStatus
+import co.candyhouse.sesame.open.devices.CHHub3
+import co.candyhouse.sesame.open.devices.CHSesame2
+import co.candyhouse.sesame.open.devices.CHSesame5
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.CHSesameBot2
+import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.base.CHProductModel
-import co.candyhouse.sesame.open.devices.CHSesame2
-import co.candyhouse.sesame.open.devices.CHSesame5
-import co.candyhouse.sesame.open.devices.CHSesameBot2
-import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
@@ -45,7 +48,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import pub.devrel.easypermissions.EasyPermissions
 
 @SuppressLint("SetTextI18n")
-class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
+class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>(), BleStatusUpdate {
 
     private val tag = "ScanNewDeviceFG"
 
@@ -84,6 +87,12 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        onChange()
+
         CHBleManager.delegate = object : CHBleManagerDelegate {
             @SuppressLint("NotifyDataSetChanged")
             override fun didDiscoverUnRegisteredCHDevices(devices: List<CHDevices>) {
@@ -98,6 +107,12 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
                 bind.leaderboardList.post {
                     (bind.leaderboardList.adapter as GenericAdapter<*>).notifyDataSetChanged()
                 }
+            }
+        }
+
+        CHBleManager.statusDelegate = object : CHBleStatusDelegate {
+            override fun didScanChange(ss: CHScanStatus) {
+                view?.post { onChange() }
             }
         }
     }
@@ -228,5 +243,19 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>() {
     override fun onPause() {
         super.onPause()
         CHBleManager.delegate = null
+        CHBleManager.statusDelegate = null
+    }
+
+    override fun onChange() {
+        when {
+            CHBleManager.mScanning == CHScanStatus.BleClose -> {
+                view?.findViewById<View>(R.id.err_zone)?.visibility = View.VISIBLE
+                view?.findViewById<TextView>(R.id.err_title)?.text = getString(R.string.noble)
+            }
+
+            else -> {
+                view?.findViewById<View>(R.id.err_zone)?.visibility = View.GONE
+            }
+        }
     }
 }

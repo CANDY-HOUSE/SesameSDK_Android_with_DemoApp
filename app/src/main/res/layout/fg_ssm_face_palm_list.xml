@@ -56,11 +56,18 @@
 
     </RelativeLayout>
 
+    <include
+        android:id="@+id/err_zone"
+        layout="@layout/view_status_zone"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:layout_below="@+id/menu" />
+
     <LinearLayout
         android:id="@+id/palm_tips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/menu"
+        android:layout_below="@id/err_zone"
         android:background="@color/white"
         android:orientation="vertical">
 

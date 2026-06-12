@@ -20,7 +20,7 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmTpPasscodeListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
@@ -56,7 +56,7 @@ data class KeyboardPassCode(var id: String, var name: String, var type: Byte, va
 /**
  * 密码管理界面
  */
-class SesameKeyboardPassCode : BaseDeviceFG<FgSsmTpPasscodeListBinding>(), CHWifiModule2Delegate {
+class SesameKeyboardPassCode : BaseDeviceSettingFG<FgSsmTpPasscodeListBinding>(), CHWifiModule2Delegate {
 
     // 常量定义
     companion object {

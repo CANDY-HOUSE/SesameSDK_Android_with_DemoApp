@@ -61,6 +61,10 @@ fun CHDevices.hasBiometricCapability(capabilities: BiometricCapability): Boolean
     return this is CHSesameBiometricDevice && supportedCapabilities().contains(capabilities)
 }
 
+fun CHDevices.hasAnyBiometricCapability(): Boolean {
+    return this is CHSesameBiometricDevice && supportedCapabilities().isNotEmpty()
+}
+
 fun CHDevices.isOpenSensor(): Boolean {
     return this is CHSesameBiometricDevice && deviceType == BiometricDeviceType.OPEN_SENSOR
 }

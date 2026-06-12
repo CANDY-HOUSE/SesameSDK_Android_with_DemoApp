@@ -45,21 +45,25 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
     var mDeviceList = ArrayList<LockDeviceStatus>()
     private var mAdapter: GenericAdapter<LockDeviceStatus>? = null
 
-    // 定义雷达灵敏度距离和固件值的查找表
-    private val DISTANCE_TO_FIRMWARE_TABLE = listOf(
+    // 旧雷达灵敏度距离和固件值的查找表 适用机型：SSMFace、SSMFacePro、SSMFaceAI、SSMFaceProAI
+    private val OLD_RADAR_DISTANCE_TO_FIRMWARE_TABLE = listOf(
         30 to 116,
         60 to 44,
         80 to 31,
-        100 to 23,
-        120 to 21,
-        150 to 20,
-        200 to 17,
-        270 to 16
+        100 to 23
+    )
+
+    // 新雷达灵敏度距离和固件值的查找表 适用机型：SSMFace2、SSMFace2Pro、SSMFace2AI、SSMFace2ProAI
+    private val NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE = listOf(
+        30 to 116,
+        60 to 80,
+        80 to 44,
+        100 to 36
     )
 
     private companion object {
         const val RADAR_MIN_DISTANCE = 0
-        const val RADAR_MAX_DISTANCE = 270
+        const val RADAR_MAX_DISTANCE = 100
         const val RADAR_FIRMWARE_OFF = 512
         const val RADAR_FIRMWARE_AT_30CM = 116
     }
@@ -130,8 +134,8 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         radarInitialized = true
 
         bind.root.post {
-            bind.radarSeekbar.setMin(0f)
-            bind.radarSeekbar.setMax(270f)
+            bind.radarSeekbar.setMin(RADAR_MIN_DISTANCE.toFloat())
+            bind.radarSeekbar.setMax(RADAR_MAX_DISTANCE.toFloat())
             bind.radarSeekbar.setIndicatorTextFormat(getString(R.string.distance) + " \${PROGRESS}cm")
 
             bind.radarSeekbar.onSeekChangeListener = object : OnSeekChangeListener {
@@ -152,7 +156,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
                     isRadarUserTracking = false
 
                     val distance = seekBar.progress
-                    val firmwareValue = calculateFirmwareValueFromDistance(distance)
+                    val firmwareValue = calculateFirmwareValueFromDistance(device, distance)
                     L.d(tag, "设置雷达灵敏度距离: ${distance}cm, 固件值: $firmwareValue")
 
                     setRadarSensitivity(device, firmwareValue)
@@ -163,7 +167,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         }
     }
 
-    private fun setRadarUI(payload: ByteArray) {
+    private fun setRadarUI(device: CHSesameConnector, payload: ByteArray) {
         if (payload.size < 5) {
             L.e(tag, "setRadarUI payload 长度不足: ${payload.size}")
             return
@@ -173,7 +177,16 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
                 ((payload[2].toInt() and 0xFF) shl 8) or
                 ((payload[3].toInt() and 0xFF) shl 16) or
                 ((payload[4].toInt() and 0xFF) shl 24)
-        val distance = calculateDistanceFromFirmwareValue(sensitivityValue)
+
+        if (shouldFixLegacyRadarValue(device, sensitivityValue)) {
+            val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
+
+            L.d(tag, "检测到历史版本雷达固件值：$sensitivityValue，自动修正为当前机型100cm固件值：$firmwareValueAtMaxDistance")
+
+            setRadarSensitivity(device, firmwareValueAtMaxDistance)
+            return
+        }
+        val distance = calculateDistanceFromFirmwareValue(device, sensitivityValue)
 
         L.d(tag, "设备返回的雷达灵敏度值：$sensitivityValue, 对应标准距离：${distance}cm")
 
@@ -188,11 +201,44 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         }
     }
 
+    private fun getRadarFirmwareTable(device: CHSesameConnector): List<Pair<Int, Int>> {
+        return when (device.productModel) {
+            CHProductModel.SSMFace,
+            CHProductModel.SSMFacePro,
+            CHProductModel.SSMFaceAI,
+            CHProductModel.SSMFaceProAI -> {
+                OLD_RADAR_DISTANCE_TO_FIRMWARE_TABLE
+            }
+
+            CHProductModel.SSMFace2,
+            CHProductModel.SSMFace2Pro,
+            CHProductModel.SSMFace2AI,
+            CHProductModel.SSMFace2ProAI -> {
+                NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE
+            }
+
+            else -> {
+                NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE
+            }
+        }
+    }
+
+    private fun getRadarFirmwareAtMaxDistance(device: CHSesameConnector): Int {
+        return getRadarFirmwareTable(device).last().second
+    }
+
+    private fun shouldFixLegacyRadarValue(device: CHSesameConnector, sensitivityValue: Int): Boolean {
+        val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
+        return sensitivityValue < firmwareValueAtMaxDistance
+    }
+
     // 根据固件值计算距离（使用线性插值）
-    private fun calculateDistanceFromFirmwareValue(firmwareValue: Int): Int {
+    private fun calculateDistanceFromFirmwareValue(device: CHSesameConnector, firmwareValue: Int): Int {
         if (firmwareValue >= RADAR_FIRMWARE_OFF) return 0
 
-        val clampedFirmwareValue = firmwareValue.coerceIn(16, RADAR_FIRMWARE_OFF)
+        val firmwareTable = getRadarFirmwareTable(device)
+        val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
+        val clampedFirmwareValue = firmwareValue.coerceIn(firmwareValueAtMaxDistance, RADAR_FIRMWARE_OFF)
 
         // 处理 0~30cm 区间：0cm -> 512, 30cm -> 116
         if (clampedFirmwareValue >= RADAR_FIRMWARE_AT_30CM) {
@@ -201,10 +247,10 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
             return (ratio * 30f).roundToInt().coerceIn(0, 30)
         }
 
-        // 处理 30~270cm 区间：按查找表分段线性插值
-        for (i in 0 until DISTANCE_TO_FIRMWARE_TABLE.size - 1) {
-            val (dist1, fw1) = DISTANCE_TO_FIRMWARE_TABLE[i]
-            val (dist2, fw2) = DISTANCE_TO_FIRMWARE_TABLE[i + 1]
+        // 处理 30~100cm 区间：根据当前机型对应查找表分段线性插值
+        for (i in 0 until firmwareTable.size - 1) {
+            val (dist1, fw1) = firmwareTable[i]
+            val (dist2, fw2) = firmwareTable[i + 1]
 
             if (clampedFirmwareValue in fw2..fw1) {
                 val ratio = (clampedFirmwareValue - fw2).toFloat() / (fw1 - fw2)
@@ -212,11 +258,11 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
             }
         }
 
-        return 30
+        return RADAR_MAX_DISTANCE
     }
 
     // 根据距离计算固件值（使用线性插值）
-    private fun calculateFirmwareValueFromDistance(distance: Int): Int {
+    private fun calculateFirmwareValueFromDistance(device: CHSesameConnector, distance: Int): Int {
         val clampedDistance = distance.coerceIn(RADAR_MIN_DISTANCE, RADAR_MAX_DISTANCE)
 
         // 处理 0~30cm 区间：0cm -> 512, 30cm -> 116
@@ -227,12 +273,14 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
             return firmwareValue.roundToInt()
         }
 
-        if (clampedDistance >= 270) return 16
+        val firmwareTable = getRadarFirmwareTable(device)
+        val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
+        if (clampedDistance >= RADAR_MAX_DISTANCE) return firmwareValueAtMaxDistance
 
-        // 处理 30~270cm 区间：按查找表分段线性插值
-        for (i in 0 until DISTANCE_TO_FIRMWARE_TABLE.size - 1) {
-            val (dist1, fw1) = DISTANCE_TO_FIRMWARE_TABLE[i]
-            val (dist2, fw2) = DISTANCE_TO_FIRMWARE_TABLE[i + 1]
+        // 处理 30~100cm 区间：根据当前机型对应查找表分段线性插值
+        for (i in 0 until firmwareTable.size - 1) {
+            val (dist1, fw1) = firmwareTable[i]
+            val (dist2, fw2) = firmwareTable[i + 1]
 
             if (clampedDistance in dist1..dist2) {
                 val ratio = (clampedDistance - dist1).toFloat() / (dist2 - dist1)
@@ -398,7 +446,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         val biometricDevice = mDeviceModel.ssmLockLiveData.value as? CHSesameBiometricDevice ?: return
 
         biometricDevice.getRadarReceiveLiveData()?.observeEvent(viewLifecycleOwner) { payload ->
-            setRadarUI(payload)
+            setRadarUI(biometricDevice, payload)
         }
     }
 

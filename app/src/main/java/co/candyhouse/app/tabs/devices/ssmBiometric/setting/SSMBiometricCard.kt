@@ -21,7 +21,7 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.ssm2.modelName
@@ -65,7 +65,7 @@ fun SuiCard.getCardType(level: Int): Int {
 /**
  * 卡片管理界面
  */
-class SesameNfcCards : BaseDeviceFG<FgSsmTpCardListBinding>() {
+class SesameNfcCards : BaseDeviceSettingFG<FgSsmTpCardListBinding>() {
 
     // 常量定义
     companion object {

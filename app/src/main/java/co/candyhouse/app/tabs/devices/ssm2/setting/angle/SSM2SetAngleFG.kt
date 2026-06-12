@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSetAngleBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.sesame.open.devices.CHSesame2
@@ -17,13 +17,13 @@ import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.vibrateDevice
 
-class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
+class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     private val tag = "SSM2SetAngleFG"
     private var useSlidingDoorUi: Boolean = false
     private var longPressRunnable: Runnable? = null
-    private var didTrigger5s: Boolean = false
-    private val LONG_PRESS_MS = 5000L
+    private var didTrigger2s: Boolean = false
+    private val LONG_PRESS_MS = 2000L
 
     override fun getViewBinder() = FgSetAngleBinding.inflate(layoutInflater)
 
@@ -103,7 +103,7 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
             bind.magnetZone.setOnTouchListener { _, event ->
                 when (event.actionMasked) {
                     MotionEvent.ACTION_DOWN -> {
-                        didTrigger5s = false
+                        didTrigger2s = false
                         longPressRunnable?.let { bind.magnetZone.removeCallbacks(it) }
 
                         val dev = this
@@ -111,7 +111,7 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                         if (dev == null || ssm5 == null) return@setOnTouchListener false
 
                         longPressRunnable = Runnable {
-                            didTrigger5s = true
+                            didTrigger2s = true
                             view.context.vibrateDevice(100)
                             val (targetUiSliding, advType) = when (dev.productModel) {
                                 CHProductModel.SS6ProSLiDingDoor -> false to 21.toByte()
@@ -142,10 +142,10 @@ class SSM2SetAngleFG : BaseDeviceFG<FgSetAngleBinding>() {
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         longPressRunnable?.let { bind.magnetZone.removeCallbacks(it) }
                         longPressRunnable = null
-                        if (!didTrigger5s && event.actionMasked == MotionEvent.ACTION_UP) {
+                        if (!didTrigger2s && event.actionMasked == MotionEvent.ACTION_UP) {
                             bind.magnetZone.performClick()
                         }
-                        didTrigger5s = false
+                        didTrigger2s = false
                         true
                     }
 

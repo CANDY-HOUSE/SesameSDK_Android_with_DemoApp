@@ -18,38 +18,11 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <include
         android:id="@+id/err_zone"
+        layout="@layout/view_status_zone"
         android:layout_width="match_parent"
-        android:layout_height="53dp"
-        android:background="@color/dark_red">
-
-        <TextView
-            android:id="@+id/err_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="17dp"
-            android:gravity="center_vertical"
-            android:textColor="@color/white"
-            android:textSize="17dp"
-            tools:text="error" />
-
-        <TextView
-            android:id="@+id/err_msg"
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="12dp"
-            android:gravity="end|center"
-            android:lines="1"
-            android:scaleType="center"
-            android:textColor="@color/white"
-            android:textSize="17dp"
-            tools:text="action" />
-
-    </RelativeLayout>
+        android:layout_height="53dp" />
 
     <co.utils.SmartSwipeRefreshLayout
         android:id="@+id/swiperefresh"

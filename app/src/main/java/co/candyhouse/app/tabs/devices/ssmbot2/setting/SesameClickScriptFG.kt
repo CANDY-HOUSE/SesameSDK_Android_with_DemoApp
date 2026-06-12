@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.sesame.open.devices.Bot2Action
@@ -44,7 +44,7 @@ class MyItemTouchHelperCallback(val adapter: GenericAdapter<ClickScript>) : Item
 
 data class ClickScript(var id: String, var actionType: Int, var goTime: Int)
 
-class SesameClickScriptFG : BaseDeviceFG<FgSsmTpCardListBinding>() {
+class SesameClickScriptFG : BaseDeviceSettingFG<FgSsmTpCardListBinding>() {
     private val tag = "SesameClickScriptFG"
 
     private var ScriptReceive: Boolean = false

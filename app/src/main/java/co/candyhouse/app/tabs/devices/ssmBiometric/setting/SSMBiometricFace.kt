@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.base.BaseDeviceFG
+import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmFaceFacesListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
 import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 /**
  * 人脸管理界面
  */
-class SesameFaceProFaces : BaseDeviceFG<FgSsmFaceFacesListBinding>() {
+class SesameFaceProFaces : BaseDeviceSettingFG<FgSsmFaceFacesListBinding>() {
     // 常量定义
     companion object {
         private const val MAX_FACE_COUNT = 100

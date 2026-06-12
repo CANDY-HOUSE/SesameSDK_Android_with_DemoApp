@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/menu"
-
         android:layout_width="match_parent"
         android:layout_height="40dp">
+
         <TextView
             android:id="@+id/menu_title"
             android:layout_width="wrap_content"
@@ -20,6 +20,7 @@
             android:textColor="@color/title"
             app:autoSizeTextType="uniform"
             tools:text="name" />
+
         <include
             layout="@layout/back_sub"
             android:layout_width="100dp"
@@ -29,13 +30,13 @@
             android:id="@+id/right_icon"
             android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true">
+            android:layout_alignParentEnd="true">
 
             <ImageView
                 android:id="@+id/img_mode_verify"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:paddingStart="36dp"
                 android:paddingEnd="12dp"
@@ -45,7 +46,7 @@
                 android:id="@+id/img_mode_add"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:paddingStart="36dp"
                 android:paddingEnd="12dp"
@@ -53,9 +54,14 @@
                 android:visibility="gone" />
         </RelativeLayout>
 
-
     </RelativeLayout>
 
+    <include
+        android:id="@+id/err_zone"
+        layout="@layout/view_status_zone"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:layout_below="@+id/menu" />
 
     <co.utils.SmartSwipeRefreshLayout
         android:id="@+id/swiperefresh"
@@ -63,7 +69,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/clview">
 
-        <co.utils.recycle.EmptyRecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
+        <co.utils.recycle.EmptyRecyclerView
             android:id="@+id/leaderboard_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -75,20 +81,20 @@
             app:layout_constraintTop_toTopOf="parent" />
     </co.utils.SmartSwipeRefreshLayout>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
         android:id="@+id/clview"
-        android:layout_below="@id/menu"
-        android:background="#f2f2f7"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/err_zone"
+        android:background="#f2f2f7">
+
         <co.utils.GifMovieView
-            android:layout_width="100dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
             android:id="@+id/gifView"
+            android:layout_width="100dp"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="@id/empty_view"
-            android:layout_height="0dp"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/empty_view"
@@ -97,17 +103,13 @@
             android:paddingVertical="10dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-
             android:text="@string/TouchEmptyFingerHint"
             android:textSize="16sp"
             app:layout_constraintHorizontal_bias="0.0"
-
             app:layout_constraintLeft_toRightOf="@id/gifView"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 </RelativeLayout>
