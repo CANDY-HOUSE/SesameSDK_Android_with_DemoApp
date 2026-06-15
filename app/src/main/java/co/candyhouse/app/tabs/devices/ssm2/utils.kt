@@ -2,12 +2,10 @@ package co.candyhouse.app.tabs.devices.ssm2
 
 import android.content.Context
 import android.graphics.Typeface
-import android.text.Layout
 import android.text.SpannableStringBuilder
 import android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-import android.text.style.AlignmentSpan
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
@@ -24,9 +22,6 @@ import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.math.pow
 
 fun ssm5UIParser(device: CHSesameBot): Int {
@@ -98,31 +93,16 @@ fun ssm5UIParser(device: CHSesameBot2): Int {
 
 }
 
-fun createOpensensorStateText(status: String, timeStamp: Long): SpannableStringBuilder? {
+fun createOpensensorStateText(status: String): SpannableStringBuilder? {
     return runCatching {
-        val statusLength = status.length
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val (dateString, timeString) = dateFormat.format(Date(timeStamp)).split(" ")
-
-        val text = buildString {
-            if (status.isNotEmpty()) {
-                append(status)
-                append("\n")
-            }
-            append(dateString)
-            append("\n")
-            append(timeString)
+        if (status.isEmpty()) {
+            return@runCatching SpannableStringBuilder("")
         }
 
-        SpannableStringBuilder(text).apply {
-            setSpan(AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, length, SPAN_EXCLUSIVE_EXCLUSIVE)
+        SpannableStringBuilder(status).apply {
             setSpan(ForegroundColorSpan("#E4E3E3".toColorInt()), 0, length, SPAN_EXCLUSIVE_EXCLUSIVE)
-
-            if (statusLength > 0) {
-                setSpan(StyleSpan(Typeface.BOLD), 0, statusLength, SPAN_EXCLUSIVE_EXCLUSIVE)
-                setSpan(RelativeSizeSpan(20f / 17f), 0, statusLength, SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
+            setSpan(StyleSpan(Typeface.BOLD), 0, length, SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(AbsoluteSizeSpan(24, true), 0, length, SPAN_EXCLUSIVE_EXCLUSIVE)
         }
     }.getOrNull()
 }

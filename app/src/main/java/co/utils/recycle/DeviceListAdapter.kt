@@ -404,13 +404,13 @@ class DeviceListAdapter(
                     val statusText = (device.mechStatus as? CHSesameOpenSensorMechStatus)?.data?.let { data ->
                         runCatching {
                             val sensorData = OpenSensorData.fromByteArray(data)
-                            createOpensensorStateText(sensorData.Status, sensorData.TimeStamp)
+                            createOpensensorStateText(sensorData.Status)
                         }.getOrNull()
                     } ?: device.userKey?.stateInfo?.let { info ->
                         val status = info.CHSesame2Status
                         val timestamp = info.timestamp
                         if (status != null && timestamp != null) {
-                            createOpensensorStateText(status, timestamp)
+                            createOpensensorStateText(status)
                         } else {
                             null
                         }
