@@ -338,15 +338,32 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
 
+            CHProductModel.SSMOpenSensor, CHProductModel.SSMOpenSensor2 -> {
+                val where = when (device.productModel) {
+                    CHProductModel.SSMOpenSensor -> "device_history_opensensor1"
+                    CHProductModel.SSMOpenSensor2 -> "device_history_opensensor2"
+                    else -> return
+                }
+
+                val config = WebViewConfig(
+                    scene = "history",
+                    params = mapOf(
+                        "deviceUUID" to device.deviceId.toString().uppercase(),
+                        "where" to where
+                    )
+                )
+                safeNavigate(R.id.action_to_webViewFragment, config.toBundle())
+            }
+
             CHProductModel.WM2 -> safeNavigate(R.id.to_WM2SettingFG)
             CHProductModel.BiKeLock -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
             CHProductModel.SesameBot1 -> safeNavigate(R.id.action_deviceListPG_to_SesameBotSettingFG)
-            CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
+            CHProductModel.RemoteNano -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
 
-            CHProductModel.SSMOpenSensor2, CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2,
-            CHProductModel.SSMTouchPro, CHProductModel.SSMTouch2Pro, CHProductModel.SSMFace, CHProductModel.SSMFace2,
-            CHProductModel.SSMFaceAI, CHProductModel.SSMFace2AI, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro,
-            CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI -> safeNavigate(R.id.to_SesameConnectorSettingFG)
+            CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro,
+            CHProductModel.SSMTouch2Pro, CHProductModel.SSMFace, CHProductModel.SSMFace2, CHProductModel.SSMFaceAI,
+            CHProductModel.SSMFace2AI, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceProAI,
+            CHProductModel.SSMFace2ProAI -> safeNavigate(R.id.to_SesameConnectorSettingFG)
         }
     }
 

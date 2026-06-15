@@ -239,6 +239,12 @@
         <action
             android:id="@+id/to_SesameBot2SettingFG"
             app:destination="@id/SesameBot2SettingFG" />
+        <action
+            android:id="@+id/to_SesameOpenSensorSettingFG"
+            app:destination="@id/SesameOpenSensorSettingFG" />
+        <action
+            android:id="@+id/to_SesameConnectorSettingFG"
+            app:destination="@id/SesameKeyboardSettingFG" />
     </fragment>
 
 </navigation>

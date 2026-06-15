@@ -28,9 +28,9 @@ import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.widget.SesameForegroundService
 import co.utils.GuestUploadFlag
-import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
@@ -193,7 +193,7 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         bind.delAccount.visibility = View.VISIBLE
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            loadUserNickname()
+            loadUserName()
             UserUtils.loadUserUserId()
         }
     }
@@ -203,11 +203,11 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         bind.delAccount.visibility = View.GONE
     }
 
-    private fun loadUserNickname() {
+    private fun loadUserName() {
         runCatching {
-            val nickname = AWSMobileClient.getInstance().getUserAttributes()["nickname"]
-            L.d(tag, "nickname=$nickname")
-            SharedPreferencesUtils.nickname = nickname
+            val name = AWSMobileClient.getInstance().getUserAttributes()["name"]
+            L.d(tag, "name=$name")
+            SharedPreferencesUtils.name = name
         }.onFailure { e ->
             L.e(tag, "${e.message}")
         }

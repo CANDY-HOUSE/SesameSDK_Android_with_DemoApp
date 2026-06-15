@@ -43,5 +43,5 @@ object UserUtils {
 }
 
 fun getHistoryTag(): ByteArray {
-    return SharedPreferencesUtils.nickname?.toByteArray() ?: CHDeviceManager.app.getString(R.string.unLoginHistoryTag).toByteArray()
+    return SharedPreferencesUtils.name?.toByteArray() ?: CHDeviceManager.app.getString(R.string.unLoginHistoryTag).toByteArray()
 }

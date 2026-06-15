@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuView
+import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
@@ -30,8 +31,8 @@ import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.L
-import co.receiver.widget.SesameForegroundService
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
+import co.receiver.widget.SesameForegroundService
 import co.utils.applyInsetsPadding
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.UserState
@@ -169,14 +170,17 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                         deviceViewModel.saveKeysToServer()
                     }
                 }
+
                 UserState.SIGNED_OUT -> {
                     L.d("hcia", "SIGNED_OUT:")
                     AWSStatus.setAWSLoginStatus(false)
                     AWSStatus.setSubUUID(null)
-                    SharedPreferencesUtils.nickname = null
+                    SharedPreferencesUtils.name = null
+                    SharedPreferencesUtils.preferences.edit { remove("nickname") }
                     SharedPreferencesUtils.userId = null
                     CHIotManagerPublic.clearIotSubscriptionCache()
                 }
+
                 else -> {
                     AWSStatus.setAWSLoginStatus(false)
                 }

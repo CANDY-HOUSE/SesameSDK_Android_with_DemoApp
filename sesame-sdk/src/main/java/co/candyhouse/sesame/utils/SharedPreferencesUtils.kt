@@ -12,7 +12,12 @@ object SharedPreferencesUtils {
         preferences = sharedPreferences
     }
 
-    var nickname by SharedPreferenceDelegates.string(null)
+    var name: String?
+        get() = preferences.getString("name", null)
+            ?: preferences.getString("nickname", null)
+        set(value) {
+            preferences.edit { putString("name", value) }
+        }
     var isNeedFreshFriend by SharedPreferenceDelegates.boolean(false)
     var isNeedFreshDevice by SharedPreferenceDelegates.boolean(false)
     var deviceToken by SharedPreferenceDelegates.string()

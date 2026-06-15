@@ -72,7 +72,7 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
                 }
 
                 withContext(Dispatchers.IO) {
-                    updateNickNameIfNeeded()
+                    updateNameIfNeeded()
                 }
 
                 handleLoginSuccess()
@@ -109,13 +109,13 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
                 })
         }
 
-    private suspend fun updateNickNameIfNeeded() = withContext(Dispatchers.IO) {
+    private suspend fun updateNameIfNeeded() = withContext(Dispatchers.IO) {
         try {
             val userAttributes = AWSMobileClient.getInstance().getUserAttributes()
-            val nickname = userAttributes["nickname"]
+            val name = userAttributes["name"]
             val email = userAttributes["email"]
 
-            if (nickname.isNullOrEmpty() && !email.isNullOrEmpty()) {
+            if (name.isNullOrEmpty() && !email.isNullOrEmpty()) {
                 updateUserNameToCognito(email.split("@").firstOrNull() ?: "")
             }
         } catch (e: Exception) {
@@ -126,21 +126,21 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
     private suspend fun updateUserNameToCognito(name: String) =
         suspendCancellableCoroutine { continuation ->
             val awsAttributes = CognitoUserAttributes().apply {
-                addAttribute("nickname", name)
+                addAttribute("name", name)
             }
 
             AWSMobileClient.getInstance().updateUserAttributes(
                 awsAttributes.attributes,
                 object : Callback<List<UserCodeDeliveryDetails>> {
                     override fun onResult(result: List<UserCodeDeliveryDetails>?) {
-                        L.d("LoginVerifyCodeFG", "update nickName success")
+                        L.d("LoginVerifyCodeFG", "update name success")
                         if (continuation.isActive) {
                             continuation.resume(Unit)
                         }
                     }
 
                     override fun onError(e: Exception?) {
-                        L.e("LoginVerifyCodeFG", "update nickName error")
+                        L.e("LoginVerifyCodeFG", "update name error")
                         if (continuation.isActive) {
                             continuation.resume(Unit)
                         }

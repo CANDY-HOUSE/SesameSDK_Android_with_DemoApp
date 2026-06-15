@@ -50,6 +50,8 @@ class SesameComposeWebView : Fragment() {
                         "device_history_ss5_lock" -> safeNavigate(R.id.action_mainRoomSS5FG_to_SSM5SettingFG)
                         "device_history_bike" -> safeNavigate(R.id.action_deviceListPG_to_sesameBikeSettingFG)
                         "device_history_bot" -> safeNavigate(R.id.to_SesameBot2SettingFG)
+                        "device_history_opensensor1" -> safeNavigate(R.id.to_SesameOpenSensorSettingFG)
+                        "device_history_opensensor2" -> safeNavigate(R.id.to_SesameConnectorSettingFG)
                     }
                 },
                 onSchemeIntercept = { uri, params ->
