@@ -365,7 +365,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             if (SharedPreferencesUtils.isNeedFreshFriend) {
                 WebViewPoolManager.setPendingRefresh("contacts")
                 navController.navigateUp()
-                findViewById<BottomNavigationView>(R.id.bottom_nav)?.setPage(1)
+                findViewById<BottomNavigationView>(R.id.bottom_nav)?.setPage(2)
                 SharedPreferencesUtils.isNeedFreshFriend = false
             }
         }

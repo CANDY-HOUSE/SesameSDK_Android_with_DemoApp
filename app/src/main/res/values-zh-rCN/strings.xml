@@ -11,6 +11,7 @@
     <string name="sesamepalmMsg">靠近 %1$s 连蓝牙, 点击 ⊕ 输入掌静脉。输入后点击 X。安装好后再注册，识别率会极高。</string>
     <string name="DelFace">删除人脸</string>
     <string name="title_list">芝麻</string>
+    <string name="title_vision">视觉</string>
     <string name="forever">永远</string>
     <string name="logout">登出</string>
     <string name="delete_account">删除账号</string>

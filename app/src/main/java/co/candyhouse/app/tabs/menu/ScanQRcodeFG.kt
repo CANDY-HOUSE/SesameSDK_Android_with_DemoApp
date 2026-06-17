@@ -183,7 +183,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                         WebViewPoolManager.setPendingRefresh("contacts")
                         findNavController().navigateUp()
                         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-                            ?.setPage(1)
+                            ?.setPage(2)
                     }
                 }
                 it.onFailure {

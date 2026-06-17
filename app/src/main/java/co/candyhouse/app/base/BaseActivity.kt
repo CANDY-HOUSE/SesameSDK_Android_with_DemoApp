@@ -54,6 +54,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     // 底部导航对应的Fragment ID
     private val bottomNavFragmentIds = listOf(
         R.id.deviceListPG,
+        R.id.VisionFG,
         R.id.FriendListFG,
         R.id.register
     )

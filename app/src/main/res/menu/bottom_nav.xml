@@ -7,6 +7,12 @@
         android:icon="@drawable/ic_keychain_original"
         android:title="@string/title_list" />
 
+    <!-- Vision -->
+    <item
+        android:id="@+id/vision_navig"
+        android:icon="@drawable/ic_vision"
+        android:title="@string/title_vision" />
+
     <!-- 通讯录 -->
     <item
         android:id="@+id/wm2_navig"

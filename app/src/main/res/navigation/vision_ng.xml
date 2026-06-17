@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/vision_navig"
+    app:startDestination="@+id/VisionFG">
+
+    <!--“Vision”界面入口-->
+    <fragment
+        android:id="@+id/VisionFG"
+        android:name="co.candyhouse.app.tabs.vision.VisionFG"
+        android:label="VisionFG"
+        tools:layout="@layout/fg_vision">
+        <action
+            android:id="@+id/to_scan"
+            app:destination="@id/scanFG2" />
+        <action
+            android:id="@+id/to_regist"
+            app:destination="@id/registerDevicesFG" />
+        <action
+            android:id="@+id/action_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+    </fragment>
+
+    <!--其他fragment-->
+    <fragment
+        android:id="@+id/scanFG2"
+        android:name="co.candyhouse.app.tabs.menu.ScanQRcodeFG"
+        android:label="ScanFG" />
+    <fragment
+        android:id="@+id/registerDevicesFG"
+        android:name="co.candyhouse.app.tabs.devices.ScanNewDeviceFG"
+        android:label="fragment_register"
+        tools:layout="@layout/fg_rg_device" />
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="co.candyhouse.app.ext.webview.SesameComposeWebView"
+        android:label="webViewFragment" />
+
+</navigation>

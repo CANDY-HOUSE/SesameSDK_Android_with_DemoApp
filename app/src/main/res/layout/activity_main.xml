@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         app:elevation="0dp"
         app:itemBackground="@color/white"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

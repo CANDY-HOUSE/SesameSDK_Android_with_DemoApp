@@ -7,6 +7,9 @@
     <!-- 设备列表选项卡的子导航图 -->
     <include app:graph="@navigation/devices_ng" />
 
+    <!-- Vision选项卡的子导航图 -->
+    <include app:graph="@navigation/vision_ng" />
+
     <!-- 通讯录选项卡的子导航图 -->
     <include app:graph="@navigation/friend_ng" />
 
