@@ -55,17 +55,16 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
 
     // 新雷达灵敏度距离和固件值的查找表 适用机型：SSMFace2、SSMFace2Pro、SSMFace2AI、SSMFace2ProAI
     private val NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE = listOf(
-        30 to 116,
-        60 to 80,
-        80 to 44,
-        100 to 36
+        30 to 65,
+        60 to 50,
+        80 to 36,
+        100 to 30
     )
 
     private companion object {
         const val RADAR_MIN_DISTANCE = 0
         const val RADAR_MAX_DISTANCE = 100
         const val RADAR_FIRMWARE_OFF = 512
-        const val RADAR_FIRMWARE_AT_30CM = 116
     }
 
     private var radarLastProgress = -1
@@ -201,26 +200,35 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         }
     }
 
-    private fun getRadarFirmwareTable(device: CHSesameConnector): List<Pair<Int, Int>> {
+    private fun isFace2RadarDevice(device: CHSesameConnector): Boolean {
         return when (device.productModel) {
-            CHProductModel.SSMFace,
-            CHProductModel.SSMFacePro,
-            CHProductModel.SSMFaceAI,
-            CHProductModel.SSMFaceProAI -> {
-                OLD_RADAR_DISTANCE_TO_FIRMWARE_TABLE
-            }
-
             CHProductModel.SSMFace2,
             CHProductModel.SSMFace2Pro,
             CHProductModel.SSMFace2AI,
-            CHProductModel.SSMFace2ProAI -> {
-                NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE
-            }
+            CHProductModel.SSMFace2ProAI -> true
 
-            else -> {
-                NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE
-            }
+            else -> false
         }
+    }
+
+    private fun getRadarSensitivityCommand(device: CHSesameConnector): Byte {
+        return if (isFace2RadarDevice(device)) {
+            0x53.toByte()
+        } else {
+            0x33.toByte()
+        }
+    }
+
+    private fun getRadarFirmwareTable(device: CHSesameConnector): List<Pair<Int, Int>> {
+        return if (isFace2RadarDevice(device)) {
+            NEW_RADAR_DISTANCE_TO_FIRMWARE_TABLE
+        } else {
+            OLD_RADAR_DISTANCE_TO_FIRMWARE_TABLE
+        }
+    }
+
+    private fun getRadarFirmwareAt30cm(device: CHSesameConnector): Int {
+        return getRadarFirmwareTable(device).first().second
     }
 
     private fun getRadarFirmwareAtMaxDistance(device: CHSesameConnector): Int {
@@ -238,12 +246,13 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
 
         val firmwareTable = getRadarFirmwareTable(device)
         val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
+        val firmwareValueAt30cm = getRadarFirmwareAt30cm(device)
         val clampedFirmwareValue = firmwareValue.coerceIn(firmwareValueAtMaxDistance, RADAR_FIRMWARE_OFF)
 
-        // 处理 0~30cm 区间：0cm -> 512, 30cm -> 116
-        if (clampedFirmwareValue >= RADAR_FIRMWARE_AT_30CM) {
+        // 处理 0~30cm 区间：0cm -> 512, 30cm -> 当前机型30cm固件值
+        if (clampedFirmwareValue >= firmwareValueAt30cm) {
             val ratio = (RADAR_FIRMWARE_OFF - clampedFirmwareValue).toFloat() /
-                    (RADAR_FIRMWARE_OFF - RADAR_FIRMWARE_AT_30CM)
+                    (RADAR_FIRMWARE_OFF - firmwareValueAt30cm)
             return (ratio * 30f).roundToInt().coerceIn(0, 30)
         }
 
@@ -265,16 +274,18 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
     private fun calculateFirmwareValueFromDistance(device: CHSesameConnector, distance: Int): Int {
         val clampedDistance = distance.coerceIn(RADAR_MIN_DISTANCE, RADAR_MAX_DISTANCE)
 
-        // 处理 0~30cm 区间：0cm -> 512, 30cm -> 116
+        val firmwareTable = getRadarFirmwareTable(device)
+        val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
+        val firmwareValueAt30cm = getRadarFirmwareAt30cm(device)
+
+        // 处理 0~30cm 区间：0cm -> 512, 30cm -> 当前机型30cm固件值
         if (clampedDistance <= 30) {
             val ratio = clampedDistance.toFloat() / 30f
             val firmwareValue = RADAR_FIRMWARE_OFF +
-                    ratio * (RADAR_FIRMWARE_AT_30CM - RADAR_FIRMWARE_OFF)
+                    ratio * (firmwareValueAt30cm - RADAR_FIRMWARE_OFF)
             return firmwareValue.roundToInt()
         }
 
-        val firmwareTable = getRadarFirmwareTable(device)
-        val firmwareValueAtMaxDistance = getRadarFirmwareAtMaxDistance(device)
         if (clampedDistance >= RADAR_MAX_DISTANCE) return firmwareValueAtMaxDistance
 
         // 处理 30~100cm 区间：根据当前机型对应查找表分段线性插值
@@ -289,7 +300,7 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
             }
         }
 
-        return RADAR_FIRMWARE_AT_30CM
+        return firmwareValueAt30cm
     }
 
     private fun setRadarSensitivity(device: CHSesameConnector, sensitivityValue: Int) {
@@ -297,7 +308,9 @@ class SSMBiometricSettingFG : BaseDeviceSettingFG<FgConnectorSettingBinding>() {
         val b1 = ((sensitivityValue shr 8) and 0xFF).toByte()
         val b2 = ((sensitivityValue shr 16) and 0xFF).toByte()
         val b3 = ((sensitivityValue shr 24) and 0xFF).toByte()
-        val payload = byteArrayOf(0x33, b0, b1, b2, b3)
+
+        val command = getRadarSensitivityCommand(device)
+        val payload = byteArrayOf(command, b0, b1, b2, b3)
 
         device.setRadarSensitivity(payload) { res ->
             res.onSuccess {
