@@ -360,20 +360,23 @@ enum class CHDeviceStatus(val value: CHDeviceLoginStatus) {
     NoBleSignal(CHDeviceLoginStatus.unlogined),
     ReceivedAdV(CHDeviceLoginStatus.unlogined),
     BleConnecting(CHDeviceLoginStatus.unlogined),
-    DiscoverServices(CHDeviceLoginStatus.unlogined),
-    BleLogining(CHDeviceLoginStatus.unlogined),
-    Registering(CHDeviceLoginStatus.unlogined),
-    ReadyToRegister(CHDeviceLoginStatus.unlogined),
-    WaitingGatt(CHDeviceLoginStatus.unlogined),
-    WaitingForAuth(CHDeviceLoginStatus.unlogined),
-    NoSettings(CHDeviceLoginStatus.logined),
     Reset(CHDeviceLoginStatus.unlogined),
+    WaitingGatt(CHDeviceLoginStatus.unlogined),
+    BleLogining(CHDeviceLoginStatus.unlogined),
+    ReadyToRegister(CHDeviceLoginStatus.unlogined),
+    WaitingForAuth(CHDeviceLoginStatus.unlogined),
+    Registering(CHDeviceLoginStatus.unlogined),
     DfuMode(CHDeviceLoginStatus.unlogined),
-    Busy(CHDeviceLoginStatus.unlogined),
+    DiscoverServices(CHDeviceLoginStatus.unlogined),
+
     Locked(CHDeviceLoginStatus.logined),
-    Moved(CHDeviceLoginStatus.logined),
     Unlocked(CHDeviceLoginStatus.logined),
+    Moved(CHDeviceLoginStatus.logined),
+    NoSettings(CHDeviceLoginStatus.logined),
+
+    //WM2
     WaitApConnect(CHDeviceLoginStatus.logined),
+    Busy(CHDeviceLoginStatus.unlogined),
     IotConnected(CHDeviceLoginStatus.logined),
     IotDisconnected(CHDeviceLoginStatus.logined)
 }

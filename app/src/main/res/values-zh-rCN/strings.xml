@@ -39,6 +39,7 @@
     <string name="no_new_devices">从⊕开始注册新设备，或扫描二维码获取已注册设备的使用权限</string> <!--?-->
     <string name="no_scan_devices">附近没有蓝牙设备</string>
 
+    <string name="onFirmwareDownloading">下载中…</string>
     <string name="onDeviceDisconnecting">DFU中断连接中…</string>
     <string name="onDeviceDisconnected">DFU未连接</string>
     <string name="onDeviceConnected">DFU已连接</string>

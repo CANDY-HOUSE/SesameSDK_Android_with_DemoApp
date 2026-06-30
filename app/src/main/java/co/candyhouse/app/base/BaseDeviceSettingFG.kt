@@ -29,8 +29,6 @@ import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.util.EmbeddedWebViewContent
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.clearNFC
-import co.candyhouse.app.tabs.devices.ssm2.getFirmwareName
-import co.candyhouse.app.tabs.devices.ssm2.getFirmwarePath
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
@@ -51,11 +49,13 @@ import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_BLE_TX_P
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.hasAnyBiometricCapability
 import co.candyhouse.sesame.utils.L
+import co.utils.FirmwareException
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
+import co.utils.getFirmwarePath
 import co.utils.getVibratorCompat
 import co.utils.safeNavigate
 import co.utils.vibrateCompat
@@ -63,6 +63,7 @@ import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSetting,
     BleStatusUpdate, DeviceStatusChange {
@@ -201,21 +202,20 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     @SuppressLint("SetTextI18n")
-    private fun versionSet(targetDevice: CHDevices, str: String) {
+    private fun versionSet(targetDevice: CHDevices, bleStatusVersion: String) {
         if (targetDevice.productModel != CHProductModel.Hub3 && targetDevice.productModel != CHProductModel.Hub3_LTE) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
-                val ctx = context ?: return@post
-                val zipName: String? = targetDevice.getFirmwareName(ctx)
-                zipName?.apply {
-                    val tailTag = str.split("-").last()
-                    val tempFlag = zipName.contains(tailTag)
-                    view?.findViewById<TextView>(R.id.device_version_txt)?.text = str + (if (tempFlag) getString(R.string.latest) else "")
-                    view?.findViewById<View>(R.id.alert_logo)?.visibility = if (tempFlag) View.GONE else View.VISIBLE
-                    // 如果是最新版，则更新设备列表对应item
-                    if (tempFlag) {
-                        CHDeviceWrapperManager.updateCurrentFwVer(targetDevice.deviceId?.toString(), str)
-                        mDeviceViewModel.updateNeeRefresh(targetDevice)
-                    }
+                val latestFwVer: String? = targetDevice.userKey?.stateInfo?.latestFwVer
+                val tempFlag = latestFwVer?.let {
+                    val tailTag = bleStatusVersion.split("-").last()
+                    it.contains(tailTag)
+                } ?: false
+                view?.findViewById<TextView>(R.id.device_version_txt)?.text = bleStatusVersion + if (tempFlag) getString(R.string.latest) else ""
+                view?.findViewById<View>(R.id.alert_logo)?.visibility = if (latestFwVer == null || tempFlag) View.GONE else View.VISIBLE
+                // 如果是最新版，则更新设备列表对应item
+                if (tempFlag) {
+                    CHDeviceWrapperManager.updateCurrentFwVer(targetDevice.deviceId?.toString(), bleStatusVersion)
+                    mDeviceViewModel.updateNeeRefresh(targetDevice)
                 }
             }
         }
@@ -311,10 +311,14 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             }
         }
         view?.findViewById<View>(R.id.dfu_zone)?.setOnClickListener {
-            val unlogined =
+            if (isDfuActionLocked()) {
+                toastMSG(getString(R.string.dfu_busy))
+                return@setOnClickListener
+            }
+            val isUnlogined =
                 mDeviceModel.ssmLockLiveData.value?.deviceStatus?.value == CHDeviceLoginStatus.unlogined
 
-            if (unlogined) {
+            if (isUnlogined) {
                 when (targetDevice.productModel) {
                     CHProductModel.SSMOpenSensor, CHProductModel.RemoteNano -> return@setOnClickListener
                     else -> {
@@ -326,32 +330,65 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             AlertView(getString(R.string.ssm_update), "", AlertStyle.IOS).apply {
                 addAction(
                     AlertAction("OK", AlertActionStyle.NEGATIVE) {
+                        if (!tryLockDfuAction()) {
+                            toastMSG(getString(R.string.dfu_busy))
+                            return@AlertAction
+                        }
                         targetDevice.updateFirmware { res ->
                             res.onSuccess {
                                 val dfuAddress = it.data.address
                                 L.d("DFU", "updateFirmware:$dfuAddress")
 
-                                val firmwarePath = targetDevice.getFirmwarePath(requireContext()) ?: return@onSuccess
-                                val pageDeviceKey = getPageDeviceKey() ?: return@onSuccess
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    val ctx = context ?: run {
+                                        unlockDfuAction()
+                                        return@launch
+                                    }
+                                    onDfuState(R.string.onFirmwareDownloading)
+                                    val firmwarePath = try {
+                                        targetDevice.getFirmwarePath(ctx)
+                                    } catch (e: CancellationException) {
+                                        unlockDfuAction()
+                                        throw e
+                                    } catch (e: FirmwareException) {
+                                        unlockDfuAction()
+                                        toastMSG(e.message ?: "Get firmware failed")
+                                        return@launch
+                                    } catch (e: Exception) {
+                                        unlockDfuAction()
+                                        L.e("firmware", "Get firmware path failed", e)
+                                        toastMSG(e.message ?: "Get firmware failed")
+                                        return@launch
+                                    }
+                                    val pageDeviceKey = getPageDeviceKey() ?: run {
+                                        unlockDfuAction()
+                                        return@launch
+                                    }
+                                    when (
+                                        DfuCenter.startDfu(
+                                            context = ctx,
+                                            deviceKey = pageDeviceKey,
+                                            deviceAddress = dfuAddress,
+                                            firmwarePath = firmwarePath,
+                                            delegate = this@BaseDeviceSettingFG,
+                                            serviceClass = DfuService::class.java
+                                        )
+                                    ) {
+                                        is DfuCenter.StartResult.Started -> {}
 
-                                when (
-                                    DfuCenter.startDfu(
-                                        context = requireContext(),
-                                        deviceKey = pageDeviceKey,
-                                        deviceAddress = dfuAddress,
-                                        firmwarePath = firmwarePath,
-                                        delegate = this@BaseDeviceSettingFG,
-                                        serviceClass = DfuService::class.java
-                                    )
-                                ) {
-                                    is DfuCenter.StartResult.Started -> {}
+                                        is DfuCenter.StartResult.AlreadyRunningSameDevice -> {}
 
-                                    is DfuCenter.StartResult.AlreadyRunningSameDevice -> {}
-
-                                    is DfuCenter.StartResult.Busy -> {
-                                        toastMSG(getString(R.string.dfu_busy))
+                                        is DfuCenter.StartResult.Busy -> {
+                                            unlockDfuAction()
+                                            toastMSG(getString(R.string.dfu_busy))
+                                        }
                                     }
                                 }
+                            }
+                            res.onFailure { throwable ->
+                                unlockDfuAction()
+
+                                L.e("DFU", "updateFirmware failed", throwable)
                             }
                         }
                     }

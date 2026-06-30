@@ -10,6 +10,7 @@ import co.candyhouse.sesame.server.dto.CHSS2RegisterReq
 import co.candyhouse.sesame.server.dto.CHSS2RegisterRes
 import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHUserKey
+import co.candyhouse.sesame.server.dto.FirmwareZipUrlResponse
 import co.candyhouse.sesame.server.dto.ScenePayload
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import com.amazonaws.mobileconnectors.apigateway.annotation.Operation
@@ -141,4 +142,11 @@ internal interface CHAPIClient {
         @Parameter(name = "device_id", location = "path") deviceId: String,
         body: Map<String, String>
     ): Any
+
+    // 获取固件zip包地址
+    @Operation(path = "/device/v1/firmwareZipUrl", method = "GET")
+    fun getFirmwareZipUrl(
+        @Parameter(name = "productType", location = "query") productType: String,
+        @Parameter(name = "deviceId", location = "query") deviceId: String
+    ): FirmwareZipUrlResponse
 }

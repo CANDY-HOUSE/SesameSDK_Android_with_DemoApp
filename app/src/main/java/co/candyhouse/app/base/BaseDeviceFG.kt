@@ -24,6 +24,29 @@ abstract class BaseDeviceFG<T : ViewBinding> : BaseNFG<T>(), DfuCenter.Delegate 
     var isUpload = false
     val mDeviceModel: CHDeviceViewModel by activityViewModels()
 
+    @Volatile
+    private var dfuActionLocked = false
+
+    @Synchronized
+    protected fun tryLockDfuAction(): Boolean {
+        if (dfuActionLocked) {
+            return false
+        }
+
+        dfuActionLocked = true
+        return true
+    }
+
+    @Synchronized
+    protected fun unlockDfuAction() {
+        dfuActionLocked = false
+    }
+
+    @Synchronized
+    protected fun isDfuActionLocked(): Boolean {
+        return dfuActionLocked
+    }
+
     protected open fun providePageDeviceKey(): String? {
         return arguments?.getString("deviceId")
             ?: mDeviceModel.ssmLockLiveData.value?.deviceId?.toString()
@@ -69,6 +92,9 @@ abstract class BaseDeviceFG<T : ViewBinding> : BaseNFG<T>(), DfuCenter.Delegate 
         } else {
             snackbar?.setText(resId)
         }
+        if (resId == R.string.onDfuCompleted || resId == R.string.onDfuAborted) {
+            unlockDfuAction()
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -84,6 +110,7 @@ abstract class BaseDeviceFG<T : ViewBinding> : BaseNFG<T>(), DfuCenter.Delegate 
     }
 
     override fun onDfuError(message: String?) {
+        unlockDfuAction()
         val msg = CHDeviceManager.app.getString(R.string.dfu_status_error_msg) + ":" + message
         val textView = dfuText
         if (textView != null) {

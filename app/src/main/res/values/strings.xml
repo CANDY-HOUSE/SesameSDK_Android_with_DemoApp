@@ -33,6 +33,7 @@
     <string name="no_new_devices">Press ⊕ to register a new device, or scan the QR code to obtain access to an already registered device.</string>
     <string name="no_scan_devices">Bluetooth devices not found</string>
 
+    <string name="onFirmwareDownloading">Downloading…</string>
     <string name="onDeviceDisconnected">onDeviceDisconnected</string>
     <string name="onDeviceDisconnecting">onDeviceDisconnecting</string>
     <string name="onDeviceConnected">onDeviceConnected</string>

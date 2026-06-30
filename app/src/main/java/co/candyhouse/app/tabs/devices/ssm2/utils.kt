@@ -19,9 +19,7 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
-import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import java.io.File
 import kotlin.math.pow
 
 fun ssm5UIParser(device: CHSesameBot): Int {
@@ -264,80 +262,6 @@ fun CHDevices.getNickname(): String {
 fun CHDevices.getDistance(): Int {
     val rssiValue = rssi?.toDouble() ?: return Int.MAX_VALUE
     return (10.0.pow(((0 - rssiValue - 62.0) / 20.0)) * 100).toInt()
-}
-
-fun CHDevices.getFirmwareName(context: Context): String? {
-    val filePrefix = when (productModel) {
-        CHProductModel.SS2 -> "sesame_2"
-        CHProductModel.SS4 -> "sesame_4"
-        CHProductModel.SS5 -> "sesame5_"
-        CHProductModel.SS5PRO -> "sesame5pro_"
-        CHProductModel.SS5US -> "sesame5us_"
-        CHProductModel.SS6 -> "sesame6_"
-        CHProductModel.SS6Pro, CHProductModel.SS6ProSLiDingDoor -> "sesame6pro_"
-        CHProductModel.SSM_MIWA -> "sesammiwa_"
-        CHProductModel.SesameBot1 -> "sesamebot1"
-        CHProductModel.SesameBot2, CHProductModel.SesameBot3 -> "sesamebot2"
-        CHProductModel.BiKeLock -> "sesamebike1"
-        CHProductModel.BiKeLock2 -> "sesamebike2"
-        CHProductModel.BiKeLock3 -> "sesamebike3"
-        CHProductModel.SSMOpenSensor -> "opensensor1"
-        CHProductModel.SSMOpenSensor2 -> "opensensor2"
-        CHProductModel.BLEConnector -> "bleconnector_"
-        CHProductModel.Remote -> "remote_"
-        CHProductModel.RemoteNano -> "remoten_"
-        CHProductModel.SSMTouch, CHProductModel.SSMTouch2 -> "sesametouch1_"
-        CHProductModel.SSMTouchPro, CHProductModel.SSMTouch2Pro -> "sesametouch1pro"
-        CHProductModel.SSMFace, CHProductModel.SSMFace2 -> "sesameface1_"
-        CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro -> "sesameface1pro_"
-        CHProductModel.SSMFaceAI, CHProductModel.SSMFace2AI -> "sesameface1ai_"
-        CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI -> "sesameface1proai_"
-        CHProductModel.WM2 -> null
-        CHProductModel.Hub3 -> "hub3_"
-        CHProductModel.Hub3_LTE -> "hub3lte_"
-    } ?: return null
-
-    return try {
-        context.assets.list("firmware")
-            ?.firstOrNull { fileName ->
-                fileName.endsWith(".zip", ignoreCase = true) &&
-                        fileName.startsWith(filePrefix, ignoreCase = true)
-            }
-            ?.substringBeforeLast(".")
-            ?.also { matchedName ->
-                L.d("firmware", "productModel:$productModel, prefix:$filePrefix, matched:$matchedName")
-            }
-            ?: run {
-                L.d("firmware", "Missing firmware file for prefix:$filePrefix")
-                null
-            }
-    } catch (e: Exception) {
-        L.e("firmware", "Failed to find firmware for prefix:$filePrefix", e)
-        null
-    }
-}
-
-fun CHDevices.getFirmwarePath(context: Context): String? {
-    val fileName = getFirmwareName(context) ?: return null
-    val cacheDir = File(context.cacheDir, "firmware")
-    if (!cacheDir.exists()) {
-        cacheDir.mkdirs()
-    }
-    val cacheFile = File(cacheDir, "$fileName.zip")
-
-    if (!cacheFile.exists()) {
-        try {
-            context.assets.open("firmware/$fileName.zip").use { input ->
-                cacheFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-        } catch (e: Exception) {
-            L.e("firmware", "Failed to copy firmware: $fileName", e)
-            return null
-        }
-    }
-    return cacheFile.absolutePath
 }
 
 fun CHProductModel.modelName(): String {

@@ -42,6 +42,7 @@
     <string name="no_new_devices">從⊕開始註冊新設備，或掃描QR碼獲取已註冊設備的使用權限</string> <!--?-->
     <string name="no_scan_devices">附近沒有藍牙設備</string>
 
+    <string name="onFirmwareDownloading">下載中…</string>
     <string name="onDeviceDisconnecting">DFU中斷連接中…</string>
     <string name="onDeviceDisconnected">DFU未連接</string>
     <string name="onDeviceConnected">DFU已連接</string>

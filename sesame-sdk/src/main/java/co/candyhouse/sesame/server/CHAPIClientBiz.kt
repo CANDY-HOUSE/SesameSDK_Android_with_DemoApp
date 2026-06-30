@@ -18,6 +18,7 @@ import co.candyhouse.sesame.server.dto.CHSS2WebCMDReq
 import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
 import co.candyhouse.sesame.server.dto.CHSSMHisUploadRequest
 import co.candyhouse.sesame.server.dto.CHUserKey
+import co.candyhouse.sesame.server.dto.FirmwareZipUrlResponse
 import co.candyhouse.sesame.server.dto.ScenePayload
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.ApiClientConfigBuilder
@@ -199,6 +200,9 @@ object CHAPIClientBiz {
 
     fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
+
+    fun getFirmwareZipUrl(productType: Int, deviceId: String, onResponse: CHResult<FirmwareZipUrlResponse>) =
+        makeApiCall(onResponse) { cHApiClient.getFirmwareZipUrl(productType.toString(), deviceId = deviceId) }
 
     fun updateRelay(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
         makeApiCall(onResponse) {
