@@ -147,6 +147,7 @@ internal interface CHAPIClient {
     @Operation(path = "/device/v1/firmwareZipUrl", method = "GET")
     fun getFirmwareZipUrl(
         @Parameter(name = "productType", location = "query") productType: String,
-        @Parameter(name = "deviceId", location = "query") deviceId: String
+        @Parameter(name = "deviceId", location = "query") deviceId: String,
+        @Parameter(name = "firmwareDir", location = "query") firmwareDir: String
     ): FirmwareZipUrlResponse
 }

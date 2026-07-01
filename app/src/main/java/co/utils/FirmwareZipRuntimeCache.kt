@@ -23,6 +23,11 @@ import kotlin.coroutines.resumeWithException
  * @author frey on 2026/6/29
  */
 
+object FirmwareDir {
+    const val PROD = "prod"
+    const val DEV = "dev"
+}
+
 class FirmwareException(
     message: String,
     cause: Throwable? = null
@@ -170,12 +175,14 @@ private object FirmwareZipRuntimeCache {
 
 suspend fun getFirmwareZipUrlSuspend(
     productType: Int,
-    deviceId: String
+    deviceId: String,
+    firmwareDir: String,
 ): FirmwareZipUrlResponse {
     return suspendCancellableCoroutine { continuation ->
         CHAPIClientBiz.getFirmwareZipUrl(
             productType = productType,
-            deviceId = deviceId
+            deviceId = deviceId,
+            firmwareDir = firmwareDir
         ) api@{ result ->
             if (!continuation.isActive) {
                 return@api
@@ -219,14 +226,16 @@ suspend fun getFirmwareZipUrlSuspend(
 }
 
 suspend fun CHDevices.getFirmwarePath(
-    context: Context
+    context: Context,
+    firmwareDir: String = FirmwareDir.PROD
 ): String = withContext(Dispatchers.IO) {
     val type = productModel.productType()
     val deviceIdUpper = deviceId.toString().uppercase()
 
     val response = getFirmwareZipUrlSuspend(
         productType = type,
-        deviceId = deviceIdUpper
+        deviceId = deviceIdUpper,
+        firmwareDir = firmwareDir
     )
 
     val zipUrl = response.zipUrl?.takeIf { it.isNotBlank() }
@@ -237,7 +246,7 @@ suspend fun CHDevices.getFirmwarePath(
 
     L.d(
         "firmware",
-        "Firmware zip url success, productModel:$productModel, productType:$type, deviceId:$deviceIdUpper, firmwareName:${response.firmwareName}, zipUrl:$zipUrl"
+        "Firmware zip url success, productModel:$productModel, productType:$type, s3Key:${response.s3Key}, deviceId:$deviceIdUpper, firmwareName:${response.firmwareName}, zipUrl:$zipUrl"
     )
 
     FirmwareZipRuntimeCache.getFirmwarePath(

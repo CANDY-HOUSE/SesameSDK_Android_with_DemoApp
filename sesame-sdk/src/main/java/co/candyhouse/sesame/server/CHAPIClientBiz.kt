@@ -201,8 +201,8 @@ object CHAPIClientBiz {
     fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
 
-    fun getFirmwareZipUrl(productType: Int, deviceId: String, onResponse: CHResult<FirmwareZipUrlResponse>) =
-        makeApiCall(onResponse) { cHApiClient.getFirmwareZipUrl(productType.toString(), deviceId = deviceId) }
+    fun getFirmwareZipUrl(productType: Int, deviceId: String, firmwareDir: String = "prod", onResponse: CHResult<FirmwareZipUrlResponse>) =
+        makeApiCall(onResponse) { cHApiClient.getFirmwareZipUrl(productType.toString(), deviceId, firmwareDir) }
 
     fun updateRelay(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
         makeApiCall(onResponse) {
