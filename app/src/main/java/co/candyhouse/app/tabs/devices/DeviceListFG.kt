@@ -13,7 +13,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgDevicelistBinding
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.tabs.HomeFragment
-import co.candyhouse.app.tabs.devices.locktest.LockToggleTestBottomSheet
+import co.candyhouse.app.tabs.devices.internal.InternalTestBottomSheet
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -89,8 +89,8 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHDeviceManager.isRefresh.set(true)
             mDeviceViewModel.refreshDevices()
         }
-        bind.lockToggleTest.setOnLongClickListener {
-            showLockToggleTestDialog()
+        bind.internalTest.setOnLongClickListener {
+            showInternalTestDialog()
             true
         }
 
@@ -98,9 +98,9 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
         setupSearchEditTextListener()
     }
 
-    private fun showLockToggleTestDialog() {
-        if (childFragmentManager.findFragmentByTag(LockToggleTestBottomSheet.TAG) != null) return
-        LockToggleTestBottomSheet.newInstance().show(childFragmentManager, LockToggleTestBottomSheet.TAG)
+    private fun showInternalTestDialog() {
+        if (childFragmentManager.findFragmentByTag(InternalTestBottomSheet.TAG) != null) return
+        InternalTestBottomSheet.newInstance().show(childFragmentManager, InternalTestBottomSheet.TAG)
     }
 
     private fun setupSearchBehavior() {

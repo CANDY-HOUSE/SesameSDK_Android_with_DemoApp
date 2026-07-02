@@ -1,6 +1,7 @@
 package co.utils
 
 import android.content.Context
+import androidx.core.content.edit
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.FirmwareZipUrlResponse
@@ -12,6 +13,7 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
@@ -26,6 +28,39 @@ import kotlin.coroutines.resumeWithException
 object FirmwareDir {
     const val PROD = "prod"
     const val DEV = "dev"
+
+    private const val PREFS_NAME = "firmware_dir_prefs"
+    private const val KEY_FIRMWARE_DIR = "firmware_dir"
+
+    fun get(context: Context): String {
+        val value = context.applicationContext
+            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_FIRMWARE_DIR, PROD)
+
+        return when (value) {
+            DEV -> DEV
+            PROD -> PROD
+            else -> PROD
+        }
+    }
+
+    fun set(context: Context, dir: String) {
+        val safeDir = when (dir) {
+            DEV -> DEV
+            PROD -> PROD
+            else -> PROD
+        }
+
+        context.applicationContext
+            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit {
+                putString(KEY_FIRMWARE_DIR, safeDir)
+            }
+    }
+
+    fun isProd(context: Context): Boolean {
+        return get(context) == PROD
+    }
 }
 
 class FirmwareException(
@@ -62,7 +97,10 @@ private object FirmwareZipRuntimeCache {
             runCatching { file.delete() }
         }
 
-        val safeFileName = sanitizeFileName(fileName)
+        val safeFileName = buildCacheFileName(
+            zipUrl = zipUrl,
+            fileName = fileName
+        )
         val targetFile = File(cacheDir, safeFileName)
         val tempFile = File(cacheDir, "$safeFileName.download")
 
@@ -148,6 +186,21 @@ private object FirmwareZipRuntimeCache {
         }
     }
 
+    private fun buildCacheFileName(
+        zipUrl: String,
+        fileName: String
+    ): String {
+        val safeName = sanitizeFileName(fileName)
+
+        val hash = MessageDigest
+            .getInstance("SHA-256")
+            .digest(zipUrl.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+            .take(8)
+
+        return "${hash}_$safeName"
+    }
+
     private fun sanitizeFileName(fileName: String): String {
         return fileName
             .substringAfterLast("/")
@@ -225,17 +278,15 @@ suspend fun getFirmwareZipUrlSuspend(
     }
 }
 
-suspend fun CHDevices.getFirmwarePath(
-    context: Context,
-    firmwareDir: String = FirmwareDir.PROD
-): String = withContext(Dispatchers.IO) {
+suspend fun CHDevices.getFirmwarePath(context: Context): String = withContext(Dispatchers.IO) {
     val type = productModel.productType()
     val deviceIdUpper = deviceId.toString().uppercase()
+    val targetFirmwareDir = FirmwareDir.get(context)
 
     val response = getFirmwareZipUrlSuspend(
         productType = type,
         deviceId = deviceIdUpper,
-        firmwareDir = firmwareDir
+        firmwareDir = targetFirmwareDir
     )
 
     val zipUrl = response.zipUrl?.takeIf { it.isNotBlank() }

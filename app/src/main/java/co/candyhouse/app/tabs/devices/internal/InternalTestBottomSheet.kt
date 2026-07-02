@@ -1,4 +1,4 @@
-package co.candyhouse.app.tabs.devices.locktest
+package co.candyhouse.app.tabs.devices.internal
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -23,13 +23,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.candyhouse.app.R
-import co.candyhouse.app.databinding.FragmentLockToggleTestSheetBinding
+import co.candyhouse.app.databinding.FragmentInternalTestSheetBinding
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.CHSesame5
+import co.candyhouse.sesame.utils.L
+import co.utils.FirmwareDir
 import co.utils.UserUtils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -47,11 +49,11 @@ import java.util.UUID
  *
  * @author frey on 2026/1/28
  */
-class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
+class InternalTestBottomSheet : BottomSheetDialogFragment() {
 
     private val mDeviceModel: CHDeviceViewModel by activityViewModels()
 
-    private var _binding: FragmentLockToggleTestSheetBinding? = null
+    private var _binding: FragmentInternalTestSheetBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: LockAdapter
@@ -69,14 +71,14 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        const val TAG = "LockToggleTestDialog"
+        const val TAG = "InternalTestDialog"
 
         private const val PREFS_NAME = "lock_toggle_test_prefs"
         private const val KEY_SELECTED_ID = "selected_id"
         private const val KEY_TOGGLE_COUNT = "toggle_count"
         private const val KEY_INTERVAL_PREFIX = "interval_"
 
-        fun newInstance(): LockToggleTestBottomSheet = LockToggleTestBottomSheet()
+        fun newInstance(): InternalTestBottomSheet = InternalTestBottomSheet()
     }
 
     override fun onCreateView(
@@ -84,7 +86,7 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLockToggleTestSheetBinding.inflate(inflater, container, false)
+        _binding = FragmentInternalTestSheetBinding.inflate(inflater, container, false)
         binding.root.setBackgroundResource(R.drawable.bg_bottom_sheet_rounded)
         binding.root.clipToOutline = true
         return binding.root
@@ -109,6 +111,7 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
         binding.btnStart.setOnClickListener { startTest() }
         binding.btnStop.setOnClickListener { stopTest() }
         binding.btnReset.setOnClickListener { resetTest() }
+        setupFirmwareDirSwitch()
 
         val locks = getAllSesame5Locks()
         adapter.submitList(locks)
@@ -216,6 +219,32 @@ class LockToggleTestBottomSheet : BottomSheetDialogFragment() {
             binding.btnReset.alpha = if (running) 0.5f else 1f
         }
         adapter.isRunning = isRunning
+    }
+
+    private fun setupFirmwareDirSwitch() {
+        val isProd = FirmwareDir.isProd(requireContext())
+
+        binding.switchFirmwareDir.setOnCheckedChangeListener(null)
+        binding.switchFirmwareDir.isChecked = isProd
+        refreshFirmwareDirText(if (isProd) FirmwareDir.PROD else FirmwareDir.DEV)
+
+        binding.switchFirmwareDir.setOnCheckedChangeListener { _, checked ->
+            val dir = if (checked) FirmwareDir.PROD else FirmwareDir.DEV
+
+            FirmwareDir.set(requireContext(), dir)
+            refreshFirmwareDirText(dir)
+        }
+    }
+
+    private fun refreshFirmwareDirText(dir: String) {
+        safeUi {
+            val isProd = dir == FirmwareDir.PROD
+
+            binding.tvFirmwareProd.alpha = if (isProd) 1f else 0.45f
+            binding.tvFirmwareDev.alpha = if (isProd) 0.45f else 1f
+
+            L.d(TAG, "固件资源环境：$dir")
+        }
     }
 
     private fun getAllSesame5Locks(): List<CHDevices> {
