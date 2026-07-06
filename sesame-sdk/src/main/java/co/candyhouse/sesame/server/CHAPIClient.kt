@@ -1,6 +1,7 @@
 package co.candyhouse.sesame.server
 
 import co.candyhouse.sesame.BuildConfig
+import co.candyhouse.sesame.server.dto.AppPromotionReadRequest
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHDeviceInfo
@@ -109,6 +110,20 @@ internal interface CHAPIClient {
     // 订阅 SNS 主题
     @Operation(path = "/device/v1/subscribe", method = "POST")
     fun subscribeToTopic(body: SubscriptionRequest): Any
+
+    // 获取当前推广活动红点
+    @Operation(path = "/device/v1/appPromotionReads", method = "GET")
+    fun getActivePromotion(
+        @Parameter(name = "appidentifyid", location = "header") identifyId: String,
+        @Parameter(name = "action", location = "query") action: String = "getActivePromotion"
+    ): Any
+
+    // 标记推广活动已读
+    @Operation(path = "/device/v1/appPromotionReads", method = "POST")
+    fun markPromotionRead(
+        @Parameter(name = "appidentifyid", location = "header") identifyId: String,
+        body: AppPromotionReadRequest
+    ): Any
 
     // 上传电池数据
     @Operation(path = "/device/v1/sesame5/{device_id}/battery", method = "POST")

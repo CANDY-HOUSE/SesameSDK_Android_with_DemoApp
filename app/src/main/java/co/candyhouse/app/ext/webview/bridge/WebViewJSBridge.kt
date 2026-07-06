@@ -3,7 +3,9 @@ package co.candyhouse.app.ext.webview.bridge
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.app.NotificationManagerCompat
+import co.candyhouse.app.ext.AppPromotionManager
 import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.server.dto.AppPromotion
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +48,8 @@ class WebViewJSBridge(
         const val requestPushToken = "requestPushToken"
         const val requestNotificationStatus = "requestNotificationStatus"
         const val requestNotificationSettings = "requestNotificationSettings"
+        const val requestActivePromotion = "requestActivePromotion"
+        const val requestMarkPromotionRead = "requestMarkPromotionRead"
         const val requestBLEConnect = "requestBLEConnect"
         const val requestConfigureInternet = "requestConfigureInternet"
         const val requestMonitorInternet = "requestMonitorInternet"
@@ -132,6 +136,14 @@ class WebViewJSBridge(
                     }
                 }
 
+                requestActivePromotion -> {
+                    handleRequestActivePromotion(callbackName)
+                }
+
+                requestMarkPromotionRead -> {
+                    handleRequestMarkPromotionRead(json, callbackName)
+                }
+
                 else -> {
                     L.e(tag, "Unknown action: $action")
                 }
@@ -163,6 +175,33 @@ class WebViewJSBridge(
         }
     }
 
+    private fun handleRequestActivePromotion(callbackName: String) {
+        if (callbackName.isBlank()) return
+
+        AppPromotionManager.refresh { promotion ->
+            sendResponseDataToH5(callbackName, promotion.toResponseJson())
+        }
+    }
+
+    private fun handleRequestMarkPromotionRead(json: JSONObject, callbackName: String) {
+        val promotionId = json.optString("promotionId")
+        val targetUrl = json.optString("targetUrl").takeIf { it.isNotBlank() }
+        if (promotionId.isBlank()) {
+            if (callbackName.isNotBlank()) {
+                sendResponseDataToH5(callbackName, JSONObject().apply {
+                    put("success", false)
+                })
+            }
+            return
+        }
+
+        AppPromotionManager.markRead(promotionId, targetUrl) { promotion ->
+            if (callbackName.isNotBlank()) {
+                sendResponseDataToH5(callbackName, promotion.toResponseJson())
+            }
+        }
+    }
+
     private fun handleRequestUpdateDeviceFWVersion(json: JSONObject) {
         val deviceId = json.optString("deviceUUID")
         val currentFwVer = json.optString("currentFwVer")
@@ -178,6 +217,18 @@ class WebViewJSBridge(
         scope.launch(context = Dispatchers.Main) {
             val jsCode = "if(window.$callbackName) window.$callbackName($responseData);"
             webView?.evaluateJavascript(jsCode, null)
+        }
+    }
+
+    private fun AppPromotion?.toResponseJson(): JSONObject {
+        return JSONObject().apply {
+            put("success", this@toResponseJson != null)
+            this@toResponseJson?.let { promotion ->
+                put("promotionId", promotion.promotionId)
+                put("enabled", promotion.enabled)
+                put("visible", promotion.visible)
+                put("targetUrl", promotion.targetUrl)
+            }
         }
     }
 

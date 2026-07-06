@@ -4,11 +4,14 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -24,12 +27,14 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.AppPromotionManager
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManagerPublic
+import co.candyhouse.sesame.server.dto.AppPromotion
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.widget.SesameForegroundService
@@ -40,6 +45,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
+import androidx.core.view.isEmpty
+import androidx.core.view.size
 
 open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
@@ -48,6 +55,10 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
     private val restartValue = 100
     private val outStateSaveKey = "outStateSaveKey"
+    private val promotionListener: (AppPromotion?) -> Unit = { promotion ->
+        updatePromotionBadge(promotion)
+    }
+    private var promotionBadgeView: View? = null
 
     protected lateinit var navController: NavController
 
@@ -99,6 +110,8 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
         // 初始化视图
         initializeMainView(findViewById(R.id.bottom_nav))
+        AppPromotionManager.addListener(promotionListener)
+        AppPromotionManager.refresh()
 
         getPermissions()
     }
@@ -134,6 +147,56 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
         disableTooltip(bottomNav)
     }
+
+    private fun updatePromotionBadge(promotion: AppPromotion?) {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav) ?: return
+        if (promotion?.visible == true) {
+            showPromotionBadge(bottomNav)
+        } else {
+            hidePromotionBadge()
+        }
+    }
+
+    private fun showPromotionBadge(bottomNav: BottomNavigationView) {
+        bottomNav.post {
+            if (bottomNav.width == 0 || bottomNav.menu.isEmpty()) return@post
+
+            val dot = promotionBadgeView ?: View(bottomNav.context).apply {
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(Color.RED)
+                }
+                promotionBadgeView = this
+            }
+
+            if (dot.parent == null) {
+                bottomNav.addView(dot)
+            }
+
+            val dotSize = 8.dp()
+            val itemWidth = bottomNav.width / bottomNav.menu.size
+            val meItemIndex = (0 until bottomNav.menu.size)
+                .firstOrNull { bottomNav.menu[it].itemId == R.id.form }
+                ?: return@post
+            val left = itemWidth * meItemIndex + itemWidth / 2 + 10.dp()
+            val top = 8.dp()
+
+            dot.layoutParams = FrameLayout.LayoutParams(dotSize, dotSize).apply {
+                leftMargin = left
+                topMargin = top
+            }
+            dot.visibility = View.VISIBLE
+        }
+    }
+
+    private fun hidePromotionBadge() {
+        promotionBadgeView?.let { dot ->
+            (dot.parent as? ViewGroup)?.removeView(dot)
+        }
+        promotionBadgeView = null
+    }
+
+    private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
 
     // 屏蔽长按时弹出 tool tips
     @SuppressLint("RestrictedApi")
@@ -294,6 +357,11 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp()
+    }
+
+    override fun onDestroy() {
+        AppPromotionManager.removeListener(promotionListener)
+        super.onDestroy()
     }
 }
 

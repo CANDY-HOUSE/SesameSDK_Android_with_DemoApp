@@ -7,6 +7,8 @@ import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
+import co.candyhouse.sesame.server.dto.AppPromotion
+import co.candyhouse.sesame.server.dto.AppPromotionReadRequest
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHBatteryDataReq
 import co.candyhouse.sesame.server.dto.CHDeviceInfo
@@ -34,6 +36,8 @@ import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt24ByteArray
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -183,6 +187,22 @@ object CHAPIClientBiz {
     fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.subscribeToTopic(body) }
 
+    fun getActivePromotion(onResponse: CHResult<AppPromotion>) =
+        makeApiCall(onResponse) { parsePromotionResponse(cHApiClient.getActivePromotion(identifyId())) }
+
+    fun markPromotionRead(promotionId: String, targetUrl: String?, onResponse: CHResult<AppPromotion>) =
+        makeApiCall(onResponse) {
+            parsePromotionResponse(
+                cHApiClient.markPromotionRead(
+                    identifyId(),
+                    AppPromotionReadRequest(
+                        promotionId = promotionId,
+                        targetUrl = targetUrl
+                    )
+                )
+            )
+        }
+
     fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { cHApiClient.postBatteryData(deviceID, CHBatteryDataReq(payloadString)) }
 
@@ -240,4 +260,32 @@ object CHAPIClientBiz {
             cHApiClient.updateRelay(hub3DeviceId, sendMap)
             CHEmpty()
         }
+
+    private fun parsePromotionResponse(resp: Any): AppPromotion {
+        val payload = unwrapApiPayload(Gson().toJsonTree(resp))
+        return Gson().fromJson(payload, AppPromotion::class.java)
+    }
+
+    private fun unwrapApiPayload(element: JsonElement): JsonElement {
+        var current = element
+        repeat(4) {
+            if (!current.isJsonObject) return current
+
+            val obj = current.asJsonObject
+            current = when {
+                obj.has("promotion") -> obj["promotion"]
+                obj.has("data") -> obj["data"]
+                obj.has("body") -> {
+                    val body = obj["body"]
+                    if (body.isJsonPrimitive && body.asJsonPrimitive.isString) {
+                        JsonParser.parseString(body.asString)
+                    } else {
+                        body
+                    }
+                }
+                else -> return current
+            }
+        }
+        return current
+    }
 }
