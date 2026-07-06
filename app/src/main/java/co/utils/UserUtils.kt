@@ -14,6 +14,10 @@ object UserUtils {
     }
 
     fun getUserIdWithByte(): ByteArray? {
+        // 优先用订阅返回的 envId 作为 history tag 来源（对齐 iOS envId → subUuid）
+        SharedPreferencesUtils.historyEnvId?.takeIf { it.isNotEmpty() }?.let {
+            return it.uuidToBytes()
+        }
         return getUserId()?.let {
             val historyTagByteArray = it.uuidToBytes()
             historyTagByteArray

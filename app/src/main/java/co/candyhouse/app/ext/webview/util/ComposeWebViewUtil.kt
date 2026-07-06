@@ -125,14 +125,17 @@ fun SesameComposeWebViewContent(
             this["ssm"] = { _, uri, params ->
                 when (uri.path) {
                     "/webview/open" -> {
-                        params["url"]?.let { targetUrl ->
-                            params["notifyName"]?.let { notifyName ->
-                                L.e(logTag, "notifyName=$notifyName")
-                                if (notifyName == "FriendChanged") {
-                                    L.e(logTag, "targetUrl=$targetUrl")
-                                    pendingUrl = targetUrl
-                                }
+                        val notifyName = params["notifyName"]
+                        L.e(logTag, "notifyName=$notifyName")
+                        if (notifyName == "FriendChanged") {
+                            // 联系人刷新场景：原地加载
+                            params["url"]?.let { targetUrl ->
+                                L.e(logTag, "targetUrl=$targetUrl")
+                                pendingUrl = targetUrl
                             }
+                        } else {
+                            // 其余场景（如历史页 open url）交给外层，新开 webview 页
+                            onSchemeIntercept?.invoke(uri, params)
                         }
                     }
 

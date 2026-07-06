@@ -19,6 +19,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
+import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.databinding.FgMeBinding
 import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
@@ -175,6 +176,9 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         CHDeviceWrapperManager.clear()
         GuestUploadFlag.clear()
         WebViewPoolManager.clearWebView("contacts")
+        // 登出：清掉旧 envId(history tag)，并以登出态重新订阅刷新
+        SharedPreferencesUtils.historyEnvId = null
+        requireActivity().candyHouseApplication.subscriptionManager.checkAndSubscribeToTopics()
         reloadRefresh()
     }
 

@@ -22,6 +22,9 @@ object SharedPreferencesUtils {
     var isNeedFreshDevice by SharedPreferenceDelegates.boolean(false)
     var deviceToken by SharedPreferenceDelegates.string()
     var userId by SharedPreferenceDelegates.string()
+
+    /** 订阅上报 env 后服务端返回的记录主键，作为 history tag 来源（对齐 iOS envId → subUuid）。 */
+    var historyEnvId by SharedPreferenceDelegates.string()
 }
 
 object SharedPreferenceDelegates {

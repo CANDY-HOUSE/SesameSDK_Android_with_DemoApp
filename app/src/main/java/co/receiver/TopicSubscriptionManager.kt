@@ -2,18 +2,25 @@ package co.receiver
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.core.content.edit
-import co.candyhouse.app.BuildConfig
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
-import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.AppIdentifyIdUtil
+import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.isInternetAvailable
 import com.google.firebase.messaging.FirebaseMessaging
-import java.util.concurrent.ConcurrentHashMap
+import com.google.gson.Gson
+import com.google.gson.JsonParser
 
 /**
  * 主题订阅
+ *
+ * 对齐 iOS：每次拿到 token / 登录状态变化即直接订阅（SNS 幂等，无节流 / 版本号 / 本地去重），
+ * 订阅请求随带 App 环境信息(env)，成功后用服务端返回的 envId 作为 history tag 来源。
  *
  * @author frey on 2025/5/14
  */
@@ -21,106 +28,43 @@ class TopicSubscriptionManager(private val context: Context) {
 
     private val tag = "TopicSubscriptionManager"
 
-    private val prefs = context.getSharedPreferences("topicSubscription", Context.MODE_PRIVATE)
-
-    private val tokenLocks = ConcurrentHashMap<String, Boolean>()
-
     // 使用标准主题而非FIFO主题
-    private val topics = listOf("app_announcements")
+    private val topic = "app_announcements"
 
-    companion object {
-        private const val PREF_APP_VERSION = "last_subscription_app_version"
-        private const val SUBSCRIPTION_REFRESH_INTERVAL = 30L * 24 * 60 * 60 * 1000
-    }
+    private val gson = Gson()
 
+    /** 拉取 token 并订阅（启动 / 登录 / 登出后调用）。 */
     fun checkAndSubscribeToTopics() {
-        if (shouldRefreshSubscriptions()) {
-            L.e(tag, "需要更新订阅...")
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val token = task.result
-                    L.d(tag, "fcmToken:$token")
-                    SharedPreferencesUtils.deviceToken = token
-                    // 强制刷新所有订阅
-                    forceRefreshSubscriptions(token)
-                }
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                L.d(tag, "fcmToken:$token")
+                SharedPreferencesUtils.deviceToken = token
+                subscribeToTopic(token)
+            } else {
+                L.e(tag, "获取 FCM token 失败: ${task.exception}")
             }
-        } else {
-            L.e(tag, "检查现有订阅...")
-            L.d(tag, "androidDeviceId=" + AppIdentifyIdUtil.get(context))
-            SharedPreferencesUtils.deviceToken?.let { subscribeToTopicsIfNeeded(it) }
         }
     }
 
-    private fun shouldRefreshSubscriptions(): Boolean {
-        val lastSubscriptionTimeKey = "last_subscription_time"
-
-        val lastSubscriptionTime = prefs.getLong(lastSubscriptionTimeKey, 0)
-        val lastAppVersion = prefs.getInt(PREF_APP_VERSION, 0)
-        val currentTime = System.currentTimeMillis()
-        val currentAppVersion = BuildConfig.VERSION_CODE
-
-        return when {
-            SharedPreferencesUtils.deviceToken == null -> true
-            currentAppVersion > lastAppVersion -> {
-                L.d(tag, "检测到版本更新: $lastAppVersion -> $currentAppVersion")
-                true
-            }
-
-            (currentTime - lastSubscriptionTime > SUBSCRIPTION_REFRESH_INTERVAL) -> {
-                L.d(tag, "距离上次订阅超过30天")
-                true
-            }
-
-            else -> false
-        }
+    /** FCM token 更新：保存并订阅。 */
+    fun onNewToken(token: String) {
+        L.d(tag, "onNewToken…… $token")
+        SharedPreferencesUtils.deviceToken = token
+        subscribeToTopic(token)
     }
 
-    private fun forceRefreshSubscriptions(token: String) {
-        clearAllTokenSubscriptions()
-        subscribeToTopicsIfNeeded(token)
-    }
+    // MARK: - 订阅（每次调用直接订阅，SNS 幂等，无节流 / 去重 / 状态记录）
 
-    private fun clearAllTokenSubscriptions() {
-        prefs.edit {
-            prefs.all.keys
-                .filter { it.startsWith("topic_") }
-                .forEach { remove(it) }
-        }
-        L.d(tag, "已清除所有token的订阅记录，将强制重新订阅")
-    }
-
-    private fun subscribeToTopicsIfNeeded(token: String) {
-        if (tokenLocks.putIfAbsent(token, true) != null) {
-            L.e(tag, "正在订阅中，跳过。Token:$token")
+    @SuppressLint("HardwareIds")
+    private fun subscribeToTopic(token: String) {
+        // 无网：挂一次性监听，恢复后重试自己
+        if (!isInternetAvailable()) {
+            L.d(tag, "无网络，挂监听待恢复后重试订阅")
+            retryWhenNetworkAvailable { subscribeToTopic(token) }
             return
         }
 
-        try {
-            topics.forEach { topic ->
-                if (!isTopicSubscribed(topic, token)) {
-                    L.d(tag, "开始订阅：$topic")
-                    subscribeToTopic(topic, token) {
-                        checkIfAllTopicsSubscribed(token)
-                    }
-                } else {
-                    L.d(tag, "Token:$token 已经订阅过了")
-                }
-            }
-        } catch (e: Exception) {
-            tokenLocks.remove(token)
-            throw e
-        }
-    }
-
-    private fun isTopicSubscribed(topic: String, token: String): Boolean {
-        val key = "topic_${topic}_${token.takeLast(10)}"
-        return prefs.getBoolean(key, false)
-    }
-
-    @SuppressLint("HardwareIds")
-    private fun subscribeToTopic(topic: String, token: String, onComplete: (() -> Unit)? = null) {
-        // 获取设备唯一标识
         val appIdentifyId = AppIdentifyIdUtil.get(context)
         L.d(tag, "appIdentifyId=$appIdentifyId")
 
@@ -129,52 +73,58 @@ class TopicSubscriptionManager(private val context: Context) {
             topicName = topic,
             pushToken = token,
             appIdentifyId = appIdentifyId,
-            platform = "android"
+            platform = "android",
+            env = AppEnvironment.collect(context)
         )
 
         CHAPIClientBiz.subscribeToTopic(request) { result ->
             result.onSuccess { response ->
                 L.d(tag, "Response data: ${response.data}")
-
-                if (response.data.toString().contains("\"success\":true")) {
-                    val key = "topic_${topic}_${token.takeLast(10)}"
-                    prefs.edit {
-                        putBoolean(key, true)
-                        putLong("last_subscription_time", System.currentTimeMillis())
-                        putInt(PREF_APP_VERSION, BuildConfig.VERSION_CODE)
-                    }
-                    L.d(tag, "订阅成功: $topic")
+                val envId = parseEnvId(response.data)
+                if (envId != null) {
+                    SharedPreferencesUtils.historyEnvId = envId
+                    L.d(tag, "订阅成功: $topic envId=$envId")
                 } else {
-                    L.e(tag, "订阅失败: success 不为 true")
+                    L.e(tag, "订阅失败: success 不为 true 或缺少 envId")
                 }
             }
             result.onFailure { error ->
                 L.e(tag, "Subscribe failed", error)
             }
-
-            onComplete?.invoke()
         }
     }
 
-    private fun checkIfAllTopicsSubscribed(token: String) {
-        val allSubscribed = topics.all { isTopicSubscribed(it, token) }
-        if (allSubscribed) {
-            tokenLocks.remove(token)
-            L.d(tag, ">>>> Token:$token 的所有主题订阅完成")
-        }
+    /**
+     * 解析订阅响应，成功时返回服务端记录主键 envId，否则 null。
+     * 兼容 body 为内嵌 JSON 字符串或已展开对象两种形式。
+     */
+    private fun parseEnvId(data: Any?): String? {
+        return runCatching {
+            val root = JsonParser.parseString(gson.toJson(data)).asJsonObject
+            val body = when {
+                root.has("body") && root.get("body").isJsonPrimitive ->
+                    JsonParser.parseString(root.get("body").asString).asJsonObject
+                else -> root
+            }
+            val success = body.has("success") && body.get("success").asBoolean
+            if (success && body.has("envId")) body.get("envId").asString else null
+        }.getOrNull()
     }
 
-    fun onNewToken(token: String) {
-        L.d(tag, "onNewToken…… $token")
-
-        val oldToken = SharedPreferencesUtils.deviceToken
-        if (oldToken != token) {
-            L.d(tag, "Token已变更，强制刷新订阅")
-            SharedPreferencesUtils.deviceToken = token
-            forceRefreshSubscriptions(token)
-        } else {
-            L.d(tag, "Token未变更，跳过处理")
+    /** 挂一次性网络监听，恢复后回调一次并注销自己。 */
+    private fun retryWhenNetworkAvailable(onAvailable: () -> Unit) {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                runCatching { cm.unregisterNetworkCallback(this) }
+                L.d(tag, "网络恢复，重试订阅")
+                onAvailable()
+            }
         }
+        runCatching { cm.registerNetworkCallback(networkRequest, callback) }
     }
-
 }

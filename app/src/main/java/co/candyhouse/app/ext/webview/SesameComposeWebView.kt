@@ -56,6 +56,14 @@ class SesameComposeWebView : Fragment() {
                 },
                 onSchemeIntercept = { uri, params ->
                     when (uri.path) {
+                        "/webview/open" -> {
+                            // 对齐 iOS：新开一个 webview 页加载目标 url
+                            params["url"]?.let { targetUrl ->
+                                L.e(logTag, "open new webview url=$targetUrl")
+                                openNewWebView(targetUrl)
+                            }
+                        }
+
                         "/webview/notify" -> {
                             params["notifyName"]?.let { notifyName ->
                                 L.e(logTag, "notifyName=$notifyName")
@@ -127,5 +135,16 @@ class SesameComposeWebView : Fragment() {
         if (!findNavController().popBackStack()) {
             requireActivity().finish()
         }
+    }
+
+    /** 新开一个 webview 页加载指定 url（webViewFragment 为当前图内目的地，按目的地 id 直接跳）。 */
+    private fun openNewWebView(url: String) {
+        if (!isAdded) return
+        runCatching {
+            findNavController().navigate(
+                R.id.webViewFragment,
+                WebViewConfig(url = url).toBundle()
+            )
+        }.onFailure { L.e(logTag, "openNewWebView failed: $it") }
     }
 }

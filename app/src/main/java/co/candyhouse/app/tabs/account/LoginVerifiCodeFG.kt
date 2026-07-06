@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
+import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.databinding.FgVerifyMailBinding
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
@@ -152,6 +153,8 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
     private fun handleLoginSuccess() {
         if (!isAdded) return
 
+        // 登录后重新订阅，随带 env 并刷新 envId(history tag)
+        requireActivity().candyHouseApplication.subscriptionManager.checkAndSubscribeToTopics()
         WebViewPoolManager.setPendingRefresh("me-index")
         findNavController().apply {
             popBackStack()
