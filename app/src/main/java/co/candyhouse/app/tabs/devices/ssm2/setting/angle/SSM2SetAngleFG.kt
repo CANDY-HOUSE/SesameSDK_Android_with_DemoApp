@@ -49,10 +49,10 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
             }
             bind.ssmView.setOnClickListener {
                 (this as? CHSesame2)?.toggle() {}
-                (this as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {}
+                (this as? CHSesame5)?.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) {}
             }
             bind.slidingDoorView.setOnClickListener {
-                (this as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) {}
+                (this as? CHSesame5)?.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) {}
             }
             bind.setunlockZone.setOnClickListener {
                 if ((this as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {

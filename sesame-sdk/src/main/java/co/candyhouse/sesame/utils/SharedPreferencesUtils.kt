@@ -23,8 +23,8 @@ object SharedPreferencesUtils {
     var deviceToken by SharedPreferenceDelegates.string()
     var userId by SharedPreferenceDelegates.string()
 
-    /** 订阅上报 env 后服务端返回的记录主键，作为 history tag 来源（对齐 iOS envId → subUuid）。 */
-    var historyEnvId by SharedPreferenceDelegates.string()
+    /** 订阅上报 env 后服务端返回的记录主键，作为 OS3 history tag 来源（对齐 iOS envId → EnvironmentId）。 */
+    var environmentId by SharedPreferenceDelegates.string()
 }
 
 object SharedPreferenceDelegates {

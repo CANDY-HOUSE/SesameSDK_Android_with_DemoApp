@@ -177,7 +177,7 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         GuestUploadFlag.clear()
         WebViewPoolManager.clearWebView("contacts")
         // 登出：清掉旧 envId(history tag)，并以登出态重新订阅刷新
-        SharedPreferencesUtils.historyEnvId = null
+        SharedPreferencesUtils.environmentId = null
         requireActivity().candyHouseApplication.subscriptionManager.checkAndSubscribeToTopics()
         reloadRefresh()
     }

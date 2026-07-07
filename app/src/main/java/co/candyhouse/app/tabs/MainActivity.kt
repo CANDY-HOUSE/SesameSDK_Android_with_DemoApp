@@ -229,7 +229,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                 CoroutineScope(IO).launch {
                     for (index in 0 until 5) {//每隔兩秒開一次開開
                         if (checkBLELock) {
-                            device.toggle(historytag = UserUtils.getUserIdWithByte()) {
+                            device.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) {
                                 it.onSuccess {
                                     checkBLELock = false
                                 }
@@ -258,13 +258,13 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             }
 
             is CHSesameBike2 -> {
-                device.unlock(historytag = UserUtils.getUserIdWithByte()) {
+                device.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) {
                     it.onFailure {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
                                 if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
-                                    device.unlock(historytag = UserUtils.getUserIdWithByte()) {}
+                                    device.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) {}
                                     return@launch
                                 }
                             }
@@ -274,13 +274,13 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             }
 
             is CHSesameBot2 -> {
-                device.click(historytag = UserUtils.getUserIdWithByte()) {
+                device.click(historytag = UserUtils.getEnvironmentIdWithByte()) {
                     it.onFailure {
                         GlobalScope.launch {
                             repeat(8) {
                                 delay(1000)
                                 if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
-                                    device.click(historytag = UserUtils.getUserIdWithByte()) {}
+                                    device.click(historytag = UserUtils.getEnvironmentIdWithByte()) {}
                                     return@launch
                                 }
                             }

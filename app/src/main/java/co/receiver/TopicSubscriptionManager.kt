@@ -82,7 +82,7 @@ class TopicSubscriptionManager(private val context: Context) {
                 L.d(tag, "Response data: ${response.data}")
                 val envId = parseEnvId(response.data)
                 if (envId != null) {
-                    SharedPreferencesUtils.historyEnvId = envId
+                    SharedPreferencesUtils.environmentId = envId
                     L.d(tag, "订阅成功: $topic envId=$envId")
                 } else {
                     L.e(tag, "订阅失败: success 不为 true 或缺少 envId")

@@ -230,7 +230,7 @@ class SesameForegroundService : Service() {
                         device.setIsNOHandG(false)
                     } else if (device.deviceStatus != CHDeviceStatus.Unlocked) {
                         device.setIsNOHandG(false)
-                        (device as? CHSesame5)?.unlock(historytag = UserUtils.getUserIdWithByte()) { }
+                        (device as? CHSesame5)?.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                         (device as? CHSesame2)?.unlock() { }
                     }
                 }

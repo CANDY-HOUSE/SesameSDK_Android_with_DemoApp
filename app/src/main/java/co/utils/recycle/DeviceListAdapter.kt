@@ -185,7 +185,7 @@ class DeviceListAdapter(
                     ssmLockView.visibility = View.VISIBLE
                     ssmLockView.setLockImage(device)
                     ssmLockView.setOnClickListener {
-                        device.toggle(historytag = UserUtils.getUserIdWithByte()) { }
+                        device.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                     }
                 }
 
@@ -218,7 +218,7 @@ class DeviceListAdapter(
                 ssmLockView.setOnClickListener {
                     view.context.vibrateDevice(100)
                     when (device) {
-                        is CHSesame5 -> device.toggle(historytag = UserUtils.getUserIdWithByte()) {
+                        is CHSesame5 -> device.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) {
                             it.onSuccess { }
                         }
 
@@ -252,7 +252,7 @@ class DeviceListAdapter(
                         bot2Adapter?.updateData(newList)
                     }
                     bot2Adapter?.callback = { bot2Item ->
-                        device.click(bot2Item.id.toUByte(), UserUtils.getUserIdWithByte()) {}
+                        device.click(bot2Item.id.toUByte(), UserUtils.getEnvironmentIdWithByte()) {}
                     }
                     bot2Adapter?.onOrderChanged = { changedList ->
                         uploadBotScriptDisplayOrder(device, changedList)
@@ -385,12 +385,12 @@ class DeviceListAdapter(
         private fun handleBikeBotViewClick(device: CHDevices) {
             when (device) {
                 is CHSesameBike -> device.unlock { it.onSuccess { } }
-                is CHSesameBike2 -> device.unlock(historytag = UserUtils.getUserIdWithByte()) { it.onSuccess { } }
+                is CHSesameBike2 -> device.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) { it.onSuccess { } }
                 is CHSesameBot -> device.click { it.onSuccess { } }
                 is CHSesameBot2 -> {
                     val bot2ScriptCurIndexKey = "${device.deviceId}_ScriptIndex"
                     val index = SharedPreferencesUtils.preferences.getInt(bot2ScriptCurIndexKey, 0)
-                    device.click(index.toUByte(), UserUtils.getUserIdWithByte()) {}
+                    device.click(index.toUByte(), UserUtils.getEnvironmentIdWithByte()) {}
                 }
             }
         }

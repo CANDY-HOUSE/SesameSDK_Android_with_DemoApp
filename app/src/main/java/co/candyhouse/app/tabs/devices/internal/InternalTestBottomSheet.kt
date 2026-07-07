@@ -291,7 +291,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
             var next = SystemClock.elapsedRealtime()
             while (isActive && isRunning) {
                 next += intervalMs
-                device.toggle(historytag = UserUtils.getUserIdWithByte()) {}
+                device.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) {}
                 val delayMs = next - SystemClock.elapsedRealtime()
                 if (delayMs > 0) delay(delayMs) else yield()
             }

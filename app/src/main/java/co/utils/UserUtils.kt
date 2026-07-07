@@ -13,18 +13,13 @@ object UserUtils {
         SharedPreferencesUtils.userId?.let { return it } ?: run { return null }
     }
 
-    fun getUserIdWithByte(): ByteArray? {
-        // 优先用订阅返回的 envId 作为 history tag 来源（对齐 iOS envId → subUuid）
-        SharedPreferencesUtils.historyEnvId?.takeIf { it.isNotEmpty() }?.let {
+    fun getEnvironmentIdWithByte(): ByteArray? {
+        // history tag 只有两档（对齐 iOS）：订阅返回的 envId → 未取到则全ff
+        SharedPreferencesUtils.environmentId?.takeIf { it.isNotEmpty() }?.let {
             return it.uuidToBytes()
         }
-        return getUserId()?.let {
-            val historyTagByteArray = it.uuidToBytes()
-            historyTagByteArray
-        } ?: run {
-            // 协议要求，UUID为全ff
-            "ffffffffffffffffffffffffffffffff".uuidToBytes()
-        }
+        // 协议要求，UUID为全ff
+        return "ffffffffffffffffffffffffffffffff".uuidToBytes()
     }
 
     fun loadUserUserId() {

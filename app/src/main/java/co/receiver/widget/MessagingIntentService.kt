@@ -38,9 +38,9 @@ class MessagingIntentService : IntentService("MyService") {
         when (device) {
             is CHSesame5 -> {
                 if (open) {
-                    device.lock(historytag = UserUtils.getUserIdWithByte()) { }
+                    device.lock(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                 } else {
-                    device.unlock(historytag = UserUtils.getUserIdWithByte()) { }
+                    device.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                 }
                 isPerforme = true
             }
@@ -57,7 +57,7 @@ class MessagingIntentService : IntentService("MyService") {
                 isPerforme = true
             }
             is CHSesameBot2 -> {
-                device.click(historytag = UserUtils.getUserIdWithByte()) { }
+                device.click(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                 isPerforme = true
             }
             is CHSesameBike -> {
@@ -68,7 +68,7 @@ class MessagingIntentService : IntentService("MyService") {
             }
             is CHSesameBike2 -> {
                 if (!open) {
-                    device.unlock(historytag = UserUtils.getUserIdWithByte()) { }
+                    device.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                     isPerforme = true
                 }
             }
@@ -103,12 +103,12 @@ class MessagingIntentService : IntentService("MyService") {
                                 } else if (intent?.action?.contains("close_all") == true) {
                                     actionOpenAll(device, false)
                                 } else if (intent?.action == "toggle_ssm" + device.deviceId.hashCode()) {
-                                    (device as? CHSesame5)?.toggle(historytag = UserUtils.getUserIdWithByte()) { }
+                                    (device as? CHSesame5)?.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                                     (device as? CHSesame2)?.toggle() { }
                                     (device as? CHSesameBike)?.unlock { }
-                                    (device as? CHSesameBike2)?.unlock(historytag = UserUtils.getUserIdWithByte()) { }
+                                    (device as? CHSesameBike2)?.unlock(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                                     (device as? CHSesameBot)?.click { }
-                                    (device as? CHSesameBot2)?.click(historytag = UserUtils.getUserIdWithByte()) { }
+                                    (device as? CHSesameBot2)?.click(historytag = UserUtils.getEnvironmentIdWithByte()) { }
                                 }
                             }
                         }
