@@ -173,13 +173,13 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                 bottomNav.addView(dot)
             }
 
-            val dotSize = 8.dp()
+            val dotSize = 20.dp()
             val itemWidth = bottomNav.width / bottomNav.menu.size
             val meItemIndex = (0 until bottomNav.menu.size)
                 .firstOrNull { bottomNav.menu[it].itemId == R.id.form }
                 ?: return@post
             val left = itemWidth * meItemIndex + itemWidth / 2 + 10.dp()
-            val top = 8.dp()
+            val top = 2.dp()
 
             dot.layoutParams = FrameLayout.LayoutParams(dotSize, dotSize).apply {
                 leftMargin = left

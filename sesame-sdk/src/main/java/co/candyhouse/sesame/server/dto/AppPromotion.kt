@@ -12,6 +12,10 @@ data class AppPromotion(
     val targetUrl: String = ""
 )
 
+data class AppPromotionResponse(
+    val promotion: AppPromotion?
+)
+
 data class AppPromotionReadRequest(
     val action: String = "markPromotionRead",
     val promotionId: String,
