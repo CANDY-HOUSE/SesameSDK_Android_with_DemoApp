@@ -47,9 +47,9 @@ internal object CHIotManager {
 
     private var mqttManager =
         AWSIotMqttManager(UUID.randomUUID().toString(), CUSTOMER_SPECIFIC_ENDPOINT)
-    private var iotDataClient = AWSIotDataClient(createCredentialsProvider()).apply {
-        endpoint = CUSTOMER_SPECIFIC_ENDPOINT
-    }
+
+    @Volatile
+    private var iotDataClient: AWSIotDataClient? = null
 
     @Volatile
     private var iotStatus = AWSIotMqttClientStatus.ConnectionLost
@@ -241,6 +241,16 @@ internal object CHIotManager {
         )
     }
 
+    private fun getIotDataClient(): AWSIotDataClient {
+        return iotDataClient ?: synchronized(this) {
+            iotDataClient ?: AWSIotDataClient(createCredentialsProvider()).apply {
+                endpoint = CUSTOMER_SPECIFIC_ENDPOINT
+            }.also {
+                iotDataClient = it
+            }
+        }
+    }
+
     fun subscribeSesame2Shadow(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
         L.d(tag, "🐖 請求訂閱 ssm2 iotStatus:" + iotStatus + " " + ssm2.deviceId.toString().uppercase())
 
@@ -277,16 +287,18 @@ internal object CHIotManager {
             }
         }
 
-        try {
-            val ss2ShodaowDataHttp = iotDataClient.getThingShadow(
-                GetThingShadowRequest().withThingName("sesame2").withShadowName(ssm2.deviceId.toString().uppercase())
-            )
-            L.d(tag, "🐖 ss2ShodaowDataHttp:" + String(ss2ShodaowDataHttp.payload.array()))
-            val ss2StateHttp = Gson().fromJson(String(ss2ShodaowDataHttp.payload.array()), Sesame2Shadow::class.java)
-            L.d(tag, "🐖 拿到影子 ss2ShodaowDataHttp:")
-            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateHttp)))
-        } catch (e: Exception) {
-            L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
+        iotScope.launch {
+            try {
+                val ss2ShodaowDataHttp = getIotDataClient().getThingShadow(
+                    GetThingShadowRequest().withThingName("sesame2").withShadowName(ssm2.deviceId.toString().uppercase())
+                )
+                L.d(tag, "🐖 ss2ShodaowDataHttp:" + String(ss2ShodaowDataHttp.payload.array()))
+                val ss2StateHttp = Gson().fromJson(String(ss2ShodaowDataHttp.payload.array()), Sesame2Shadow::class.java)
+                L.d(tag, "🐖 拿到影子 ss2ShodaowDataHttp:$ss2StateHttp")
+                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateHttp)))
+            } catch (e: Exception) {
+                L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
+            }
         }
     }
 
@@ -304,14 +316,18 @@ internal object CHIotManager {
             }
         }
 
-        try {
-            val wm2ShodaowDataHttp = iotDataClient.getThingShadow(
-                GetThingShadowRequest().withThingName("wm2").withShadowName(wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36))
-            )
-            val wm2StateHttp = Gson().fromJson(String(wm2ShodaowDataHttp.payload.array()), WM2Shadow::class.java)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))
-        } catch (e: Exception) {
-            L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
+        iotScope.launch {
+            try {
+                val wm2ShodaowDataHttp = getIotDataClient().getThingShadow(
+                    GetThingShadowRequest().withThingName("wm2").withShadowName(wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36))
+                )
+                L.d(tag, "🐖 wm2ShodaowDataHttp:" + String(wm2ShodaowDataHttp.payload.array()))
+                val wm2StateHttp = Gson().fromJson(String(wm2ShodaowDataHttp.payload.array()), WM2Shadow::class.java)
+                L.d(tag, "🐖 拿到影子 wm2StateHttp:$wm2StateHttp")
+                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))
+            } catch (e: Exception) {
+                L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
+            }
         }
     }
 

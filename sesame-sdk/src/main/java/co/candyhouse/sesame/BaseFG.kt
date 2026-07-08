@@ -29,6 +29,10 @@ abstract class BaseFG<T : ViewBinding> : Fragment() {
 
     abstract fun getViewBinder(): T
 
+    protected fun bindingOrNull(): T? {
+        return if (view != null && ::bind.isInitialized) bind else null
+    }
+
     override fun onResume() {
         super.onResume()
     }

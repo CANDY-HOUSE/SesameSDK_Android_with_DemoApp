@@ -8,7 +8,6 @@ import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
-import co.candyhouse.sesame.server.CHIotManager
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
@@ -32,10 +31,6 @@ object CHDeviceManager {
     var lockStates = mutableMapOf<String, LockDeviceState>()
 
     const val NOTIFICATION_FLAG = "notification"
-
-    init {
-        CHIotManager
-    }
 
     private fun isValidUUID(uuid: String): Boolean {
         return try {

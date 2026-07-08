@@ -86,10 +86,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
     override fun onResume() {
         super.onResume()
         if (EasyPermissions.hasPermissions(requireContext(), Manifest.permission.CAMERA)) {
-            bind.zxingview.visibility = View.VISIBLE
-            bind.zxingview.startCamera()
-            bind.zxingview.startSpotAndShowRect()
-            bind.zxingview.setDelegate(this)
+            startScan()
         }
     }
 
@@ -115,17 +112,18 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         L.d("hcia", "onPermissionsGranted requestCode:$requestCode")
-        bind.zxingview.visibility = View.VISIBLE
 
         startScan()
     }
 
     private fun startScan() {
         safeDestroy()
-        bind.imgRestart.visibility = View.GONE
-        bind.zxingview.startCamera()
-        bind.zxingview.startSpotAndShowRect()
-        bind.zxingview.setDelegate(this)
+        val binding = bindingOrNull() ?: return
+        binding.zxingview.visibility = View.VISIBLE
+        binding.imgRestart.visibility = View.GONE
+        binding.zxingview.startCamera()
+        binding.zxingview.startSpotAndShowRect()
+        binding.zxingview.setDelegate(this)
     }
 
     override fun onScanQRCodeSuccess(result: String?) {
@@ -239,13 +237,12 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
     }
 
     private fun safeDestroy() {
-        bind?.let { binding ->
-            try {
-                binding.zxingview.onDestroy()
-            } catch (e: Exception) {
-                // 处理异常
-                e.printStackTrace()
-            }
+        val binding = bindingOrNull() ?: return
+        try {
+            binding.zxingview.onDestroy()
+        } catch (e: Exception) {
+            // 处理异常
+            e.printStackTrace()
         }
     }
 
