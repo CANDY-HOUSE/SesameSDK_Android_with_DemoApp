@@ -189,14 +189,23 @@
                         android:textColor="@color/black"
                         android:textSize="17sp" />
 
-                    <TextView
-                        android:id="@+id/device_uuid_txt"
+                    <ImageView
+                        android:id="@+id/uuid_arrow"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginRight="16dp"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_arrow_gray" />
+
+                    <TextView
+                        android:id="@+id/device_uuid_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_toLeftOf="@+id/uuid_arrow"
+                        android:layout_centerVertical="true"
                         android:gravity="center"
-                        android:paddingRight="12dp"
                         android:scaleType="center" />
 
                     <View

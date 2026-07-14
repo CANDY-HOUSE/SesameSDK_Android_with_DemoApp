@@ -407,6 +407,18 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
             )
             safeNavigate(R.id.action_DeviceMember_to_webViewFragment, config.toBundle())
         }
+
+        // 点击 UUID 行：请求 scene=factory-info，展示返回的网页
+        (view?.findViewById<TextView>(R.id.device_uuid_txt)?.parent as? View)?.setOnClickListener {
+            val config = WebViewConfig(
+                scene = "factory-info",
+                params = mapOf(
+                    "deviceUUID" to targetDevice.deviceId.toString().uppercase(),
+                    "deviceName" to targetDevice.productModel.deviceModelName()
+                )
+            )
+            safeNavigate(R.id.action_DeviceMember_to_webViewFragment, config.toBundle())
+        }
     }
 
     override fun providePageDeviceKey(): String? {
