@@ -151,9 +151,12 @@ object CHBleManager {
     }
 
     fun disableScan(result: CHResult<CHEmpty>) {
-        if (::bluetoothManager.isInitialized) return
+        if (!::bluetoothManager.isInitialized || !::bluetoothAdapter.isInitialized) {
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            return
+        }
         if (bluetoothAdapter.isEnabled) {
-            bluetoothAdapter.bluetoothLeScanner.stopScan(bleScanner)
+            bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
             mScanning = CHScanStatus.Disable
         } else {
             mScanning = CHScanStatus.BleClose
