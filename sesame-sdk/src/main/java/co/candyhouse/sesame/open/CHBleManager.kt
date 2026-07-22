@@ -155,11 +155,26 @@ object CHBleManager {
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             return
         }
-        if (bluetoothAdapter.isEnabled) {
-            bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
-            mScanning = CHScanStatus.Disable
-        } else {
-            mScanning = CHScanStatus.BleClose
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val canScan =
+                appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+            val canConnect =
+                appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+            if (!canScan || !canConnect) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
+            }
+        }
+        try {
+            if (bluetoothAdapter.isEnabled) {
+                bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
+                mScanning = CHScanStatus.Disable
+            } else {
+                mScanning = CHScanStatus.BleClose
+            }
+        } catch (_: SecurityException) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return
         }
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
     }
