@@ -1,17 +1,11 @@
 package co.candyhouse.sesame.utils
 
 import android.util.Base64
-import com.amazonaws.regions.Regions
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.Random
 import java.util.UUID
 import kotlin.experimental.and
-
-public fun String.getClientRegion(): Regions {
-    return Regions.fromName(this.split(":").first())
-}
-
 
 fun String.base64decodeByteArray(): ByteArray {
     return Base64.decode(this, Base64.DEFAULT)
@@ -173,4 +167,3 @@ fun String.uuidToBytes(): ByteArray {
     }
     return bytes
 }
-

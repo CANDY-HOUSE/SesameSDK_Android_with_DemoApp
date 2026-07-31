@@ -9,9 +9,9 @@ plugins {
 
 ext {
     // Build Version
-    compileSdkVersion = 35
-    minSdkVersion = 21
-    targetSdkVersion = 35
+    compileSdkVersion = 36
+    minSdkVersion = 24
+    targetSdkVersion = 36
 
     // Load Config
     def configFile = file('app.properties')

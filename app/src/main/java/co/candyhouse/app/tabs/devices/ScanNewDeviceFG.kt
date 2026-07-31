@@ -36,6 +36,7 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.server.CHApiException
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
@@ -43,7 +44,6 @@ import co.utils.alertview.fragments.toastMSG
 import co.utils.getHistoryTag
 import co.utils.recycle.GenericAdapter
 import co.utils.safeNavigate
-import com.amazonaws.mobileconnectors.apigateway.ApiClientException
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import pub.devrel.easypermissions.EasyPermissions
 
@@ -197,7 +197,7 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>(), BleStatusUpdate {
             }
             it.onFailure { err ->
                 device.delegate = null
-                if (err is ApiClientException && err.statusCode == 0) {
+                if (err is CHApiException && err.statusCode == 0) {
                     err.errorMessage?.let { message -> toastMSG(message) }
                 }
             }

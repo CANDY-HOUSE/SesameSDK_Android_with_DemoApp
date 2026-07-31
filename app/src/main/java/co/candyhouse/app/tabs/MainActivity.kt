@@ -70,7 +70,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         if (AWSStatus.isInitialized()) {
             setupAWSFeatures()
         } else {
-            AWSStatus.initAWSMobileClient(this) { isLoggedIn ->
+            AWSStatus.initAmplify(this) {
                 setupAWSFeatures()
             }
         }

@@ -4,7 +4,6 @@ import co.candyhouse.sesame.BuildConfig
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHWifiModule2Device
-import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
@@ -14,15 +13,18 @@ import co.candyhouse.sesame.server.dto.WM2Shadow
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.getClientRegion
-import com.amazonaws.auth.CognitoCachingCredentialsProvider
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttSubscriptionStatusCallback
-import com.amazonaws.services.iotdata.AWSIotDataClient
-import com.amazonaws.services.iotdata.model.GetThingShadowRequest
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
+import com.amazonaws.services.iot.client.AWSIotMessage
+import com.amazonaws.services.iot.client.AWSIotMqttClient
+import com.amazonaws.services.iot.client.AWSIotQos
+import com.amazonaws.services.iot.client.AWSIotTopic
+import com.amazonaws.services.iot.client.auth.Credentials
+import com.amazonaws.services.iot.client.auth.CredentialsProvider
 import com.google.gson.Gson
+import aws.sdk.kotlin.services.cognitoidentity.CognitoIdentityClient
+import aws.sdk.kotlin.services.cognitoidentity.model.GetCredentialsForIdentityRequest
+import aws.sdk.kotlin.services.cognitoidentity.model.GetIdRequest
+import aws.sdk.kotlin.services.cognitoidentity.model.NotAuthorizedException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,48 +32,51 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Collections
 import java.util.Locale.getDefault
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 private const val CUSTOMER_SPECIFIC_ENDPOINT = BuildConfig.AWS_IOT_ENDPOINT
+private const val CREDENTIAL_REFRESH_WINDOW_SECONDS = 300
+private val IOT_IDENTITY_ID_KEY =
+    "iot_unauthenticated_identity_id_${BuildConfig.AWS_IDENTITY_POOL_ID}"
+private val IDENTITY_POOL_REGION = BuildConfig.AWS_IDENTITY_POOL_ID.substringBefore(":")
+private val CUSTOMER_REGION = CUSTOMER_SPECIFIC_ENDPOINT
+    .substringAfter(".iot.", IDENTITY_POOL_REGION)
+    .substringBefore(".amazonaws.com")
 
 internal object CHIotManager {
 
+    private enum class IotStatus {
+        Connected,
+        Reconnecting,
+        ConnectionLost
+    }
+
     private val tag = "AWSIotMqttManager"
 
-    private var mqttManager =
-        AWSIotMqttManager(UUID.randomUUID().toString(), CUSTOMER_SPECIFIC_ENDPOINT)
+    @Volatile
+    private var mqttClient: AWSIotMqttClient? = null
 
     @Volatile
-    private var iotDataClient: AWSIotDataClient? = null
-
-    @Volatile
-    private var iotStatus = AWSIotMqttClientStatus.ConnectionLost
+    private var iotStatus = IotStatus.ConnectionLost
     private val iotScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var connectionJob: Job? = null
+    private var reconnectJob: Job? = null
     private var subscribeDevicesJob: Job? = null
     private val subscribedIotDeviceIds = Collections.synchronizedSet(mutableSetOf<String>())
-
-    init {
-        L.d(tag, "CHIotManager init:")
-        // 初始化配置，不执行连接，避免主线程阻塞造成ANR
-        mqttManager.apply {
-            setAutoResubscribe(true)
-            setReconnectRetryLimits(1, 5)
-            maxAutoReconnectAttempts = 10
-        }
-    }
+    private val credentialsMutex = Mutex()
+    private var cachedIotCredentials: CachedIotCredentials? = null
 
     // 启动连接（从应用启动处调用）
     fun startConnection() {
         // 取消之前的任务
         connectionJob?.cancel()
+        reconnectJob?.cancel()
 
         // 在IO线程执行连接
         connectionJob = iotScope.launch {
@@ -80,15 +85,13 @@ internal object CHIotManager {
     }
 
     fun clearIotSubscriptionCache() {
-        L.d(tag, "🥝 clearIotSubscriptionCache")
         subscribeDevicesJob?.cancel()
         subscribeDevicesJob = null
         subscribedIotDeviceIds.clear()
     }
 
     fun subscribeDevicesIfConnected(devices: List<CHDevices>) {
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
-            L.d(tag, "🥝 subscribeDevicesIfConnected skip, iotStatus=$iotStatus")
+        if (iotStatus != IotStatus.Connected) {
             return
         }
 
@@ -102,7 +105,7 @@ internal object CHIotManager {
     }
 
     private fun subscribeDeviceIfNeeded(device: CHDevices) {
-        if (iotStatus != AWSIotMqttClientStatus.Connected) return
+        if (iotStatus != IotStatus.Connected) return
 
         val deviceUtil = device as? CHDeviceUtil
         if (deviceUtil == null) {
@@ -114,7 +117,6 @@ internal object CHIotManager {
 
         val shouldSubscribe = subscribedIotDeviceIds.add(deviceId)
         if (!shouldSubscribe) {
-            L.d(tag, "🥝 skip duplicated iot subscribe: $deviceId")
             return
         }
 
@@ -130,62 +132,142 @@ internal object CHIotManager {
     private suspend fun connectIoT() {
         L.d(tag, "🥝 啟動連線ＩＯＴ--> iotStatus:$iotStatus")
         // 避免重复连接
-        if (iotStatus != AWSIotMqttClientStatus.ConnectionLost) return
+        if (iotStatus != IotStatus.ConnectionLost) return
 
         try {
-            // 使用协程包装异步回调
-            suspendCancellableCoroutine { continuation ->
-                val resumed = AtomicBoolean(false)
+            iotStatus = IotStatus.Reconnecting
+            resetDevicesOnReconnecting()
 
-                mqttManager.connect(createCredentialsProvider()) { status, error ->
-                    val oldStatus = iotStatus
-                    iotStatus = status
-                    L.d(tag, "🥝 IoT连接状态: $status oldStatus=$oldStatus")
-
-                    when (status) {
-                        AWSIotMqttClientStatus.Connected -> {
-                            if (oldStatus != AWSIotMqttClientStatus.Connected) {
-                                clearIotSubscriptionCache()
-                            }
-                            // 连接成功，更新设备状态
-                            iotScope.launch {
-                                updateDevicesOnConnect()
-                            }
-                            if (resumed.compareAndSet(false, true) && continuation.isActive) continuation.resume(Unit)
-                        }
-
-                        AWSIotMqttClientStatus.Reconnecting -> {
-                            // 重连中，重置设备状态
-                            iotScope.launch {
-                                resetDevicesOnReconnecting()
-                            }
-                        }
-
-                        AWSIotMqttClientStatus.ConnectionLost -> {
-                            L.d(tag, "🥝 連線狀態 ConnectionLost!!!!!!! IOT:$status")
-                            clearIotSubscriptionCache()
-                            // 连接丢失，延迟重试
-                            iotScope.launch {
-                                delay(3000)
-                                connectIoT() // 重新连接
-                            }
-                            if (resumed.compareAndSet(false, true) && continuation.isActive) continuation.resume(Unit)
-                        }
-
-                        else -> {
-                            if (resumed.compareAndSet(false, true) && continuation.isActive) {
-                                if (error != null) continuation.resumeWithException(error)
-                                else continuation.resume(Unit)
-                            }
-                        }
-                    }
-                }
-            }
+            val client = createMqttClient()
+            mqttClient = client
+            client.connect()
         } catch (e: Exception) {
             L.e(tag, "IoT连接异常", e)
-            // 延迟后重试
-            delay(5000)
-            connectIoT()
+            mqttClient?.let(::scheduleReconnect)
+        }
+    }
+
+    private fun createMqttClient(): AWSIotMqttClient {
+        val credentialsProvider = CredentialsProvider {
+            val (accessKey, secretKey, sessionToken) = runBlocking { getIotCredentials() }
+            Credentials(accessKey, secretKey, sessionToken)
+        }
+
+        return object : AWSIotMqttClient(
+            CUSTOMER_SPECIFIC_ENDPOINT,
+            UUID.randomUUID().toString(),
+            credentialsProvider,
+            CUSTOMER_REGION
+        ) {
+            override fun onConnectionSuccess() {
+                super.onConnectionSuccess()
+                if (mqttClient !== this) return
+
+                L.d(tag, "IoT连接成功")
+                iotStatus = IotStatus.Connected
+                clearIotSubscriptionCache()
+                iotScope.launch { updateDevicesOnConnect() }
+            }
+
+            override fun onConnectionFailure() {
+                if (mqttClient === this) {
+                    iotStatus = IotStatus.Reconnecting
+                    iotScope.launch { resetDevicesOnReconnecting() }
+                }
+                super.onConnectionFailure()
+            }
+
+            override fun onConnectionClosed() {
+                super.onConnectionClosed()
+                if (mqttClient === this) scheduleReconnect(this)
+            }
+        }.apply {
+            maxConnectionRetries = 10
+            baseRetryDelay = 1_000
+            maxRetryDelay = 5_000
+        }
+    }
+
+    private suspend fun getIotCredentials(): Triple<String, String, String?> =
+        credentialsMutex.withLock {
+            val now = System.currentTimeMillis() / 1_000
+            cachedIotCredentials
+                ?.takeIf { it.expirationEpochSeconds - CREDENTIAL_REFRESH_WINDOW_SECONDS > now }
+                ?.let { return@withLock Triple(it.accessKey, it.secretKey, it.sessionToken) }
+
+            val client = CognitoIdentityClient {
+                region = IDENTITY_POOL_REGION
+            }
+            try {
+                val preferences = SharedPreferencesUtils.preferences
+                val identityId = getOrCreateIotIdentityId(client)
+                val credentials = try {
+                    fetchIotCredentials(client, identityId)
+                } catch (_: NotAuthorizedException) {
+                    preferences.edit().remove(IOT_IDENTITY_ID_KEY).apply()
+                    fetchIotCredentials(
+                        client,
+                        getOrCreateIotIdentityId(client)
+                    )
+                }
+
+                val cached = CachedIotCredentials(
+                    accessKey = credentials.accessKeyId
+                        ?: error("Unauthenticated AWS access key is unavailable"),
+                    secretKey = credentials.secretKey
+                        ?: error("Unauthenticated AWS secret key is unavailable"),
+                    sessionToken = credentials.sessionToken,
+                    expirationEpochSeconds = credentials.expiration?.epochSeconds
+                        ?: error("Unauthenticated AWS credential expiration is unavailable")
+                )
+                cachedIotCredentials = cached
+                Triple(cached.accessKey, cached.secretKey, cached.sessionToken)
+            } finally {
+                client.close()
+            }
+        }
+
+    private suspend fun getOrCreateIotIdentityId(client: CognitoIdentityClient): String {
+        val preferences = SharedPreferencesUtils.preferences
+        return preferences.getString(IOT_IDENTITY_ID_KEY, null)
+            ?: client.getId(
+                GetIdRequest {
+                    identityPoolId = BuildConfig.AWS_IDENTITY_POOL_ID
+                }
+            ).identityId?.also {
+                preferences.edit().putString(IOT_IDENTITY_ID_KEY, it).apply()
+            }
+            ?: error("Unauthenticated Cognito identity is unavailable")
+    }
+
+    private suspend fun fetchIotCredentials(
+        client: CognitoIdentityClient,
+        identityId: String
+    ) = client.getCredentialsForIdentity(
+        GetCredentialsForIdentityRequest {
+            this.identityId = identityId
+        }
+    ).credentials ?: error("Unauthenticated AWS credentials are unavailable")
+
+    private data class CachedIotCredentials(
+        val accessKey: String,
+        val secretKey: String,
+        val sessionToken: String?,
+        val expirationEpochSeconds: Long
+    )
+
+    @Synchronized
+    private fun scheduleReconnect(client: AWSIotMqttClient) {
+        if (mqttClient !== client) return
+
+        iotStatus = IotStatus.ConnectionLost
+        clearIotSubscriptionCache()
+        reconnectJob?.cancel()
+        reconnectJob = iotScope.launch {
+            delay(5_000)
+            if (mqttClient === client && iotStatus == IotStatus.ConnectionLost) {
+                connectIoT()
+            }
         }
     }
 
@@ -232,29 +314,10 @@ internal object CHIotManager {
         }
     }
 
-    // 创建凭证提供者的辅助方法
-    private fun createCredentialsProvider(): CognitoCachingCredentialsProvider {
-        return CognitoCachingCredentialsProvider(
-            CHBleManager.appContext,
-            BuildConfig.API_GATEWAY_CLIENT_ID,
-            BuildConfig.API_GATEWAY_CLIENT_ID.getClientRegion()
-        )
-    }
-
-    private fun getIotDataClient(): AWSIotDataClient {
-        return iotDataClient ?: synchronized(this) {
-            iotDataClient ?: AWSIotDataClient(createCredentialsProvider()).apply {
-                endpoint = CUSTOMER_SPECIFIC_ENDPOINT
-            }.also {
-                iotDataClient = it
-            }
-        }
-    }
-
     fun subscribeSesame2Shadow(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
         L.d(tag, "🐖 請求訂閱 ssm2 iotStatus:" + iotStatus + " " + ssm2.deviceId.toString().uppercase())
 
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
+        if (iotStatus != IotStatus.Connected) {
             return
         }
 
@@ -264,19 +327,10 @@ internal object CHIotManager {
     private fun doSubscribeSSM(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
         val ss2Topic = "\$aws/things/sesame2/shadow/name/${ssm2.deviceId.toString().uppercase()}/update/documents"
         if (ssm2.deviceShadowStatus == null) {
-            mqttManager.subscribeToTopic(
-                ss2Topic, AWSIotMqttQos.QOS0,
-                object : AWSIotMqttSubscriptionStatusCallback {
-                    override fun onSuccess() {}
-
-                    override fun onFailure(exception: Throwable?) {
-                        L.d("hub3_ss5", "🐖  訂閱失敗 exception")
-                    }
-
-                }) { _, data ->
+            subscribeTopicInternal(ss2Topic) { data ->
                 try {
-                    L.d(tag, "String(data!!): " + String(data!!))
-                    val ss5StateIot = Gson().fromJson(String(data!!), Sesame5ShadowDocuments::class.java)
+                    L.d(tag, "String(data): " + String(data))
+                    val ss5StateIot = Gson().fromJson(String(data), Sesame5ShadowDocuments::class.java)
                     L.d(tag, "ss2StateIot: $ss5StateIot")
                     var ss2StateIot: Sesame2Shadow? = null
                     ss2StateIot = Sesame2Shadow(ss5StateIot.current.state)
@@ -288,28 +342,18 @@ internal object CHIotManager {
         }
 
         iotScope.launch {
-            try {
-                val ss2ShodaowDataHttp = getIotDataClient().getThingShadow(
-                    GetThingShadowRequest().withThingName("sesame2").withShadowName(ssm2.deviceId.toString().uppercase())
-                )
-                L.d(tag, "🐖 ss2ShodaowDataHttp:" + String(ss2ShodaowDataHttp.payload.array()))
-                val ss2StateHttp = Gson().fromJson(String(ss2ShodaowDataHttp.payload.array()), Sesame2Shadow::class.java)
-                L.d(tag, "🐖 拿到影子 ss2ShodaowDataHttp:$ss2StateHttp")
-                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateHttp)))
-            } catch (e: Exception) {
-                L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
-            }
+            requestSesame2Shadow(ssm2, onResponse)
         }
     }
 
     fun subscribeWifiModule2(wm2: CHWifiModule2Device, onResponse: CHResult<WM2Shadow>) {
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
+        if (iotStatus != IotStatus.Connected) {
             return
         }
         val topic = "\$aws/things/wm2/shadow/name/" + wm2.deviceId.toString().uppercase().substring(24, 36) + "/update/accepted"
-        mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { topic, data ->
+        subscribeTopicInternal(topic) { data ->
             try {
-                val ss2StateIOT = Gson().fromJson(String(data!!), WM2Shadow::class.java)
+                val ss2StateIOT = Gson().fromJson(String(data), WM2Shadow::class.java)
                 onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateIOT)))
             } catch (e: Exception) {
                 L.d(tag, "🥝 wm2影子格式不符合e:" + e)
@@ -317,37 +361,72 @@ internal object CHIotManager {
         }
 
         iotScope.launch {
-            try {
-                val wm2ShodaowDataHttp = getIotDataClient().getThingShadow(
-                    GetThingShadowRequest().withThingName("wm2").withShadowName(wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36))
-                )
-                L.d(tag, "🐖 wm2ShodaowDataHttp:" + String(wm2ShodaowDataHttp.payload.array()))
-                val wm2StateHttp = Gson().fromJson(String(wm2ShodaowDataHttp.payload.array()), WM2Shadow::class.java)
-                L.d(tag, "🐖 拿到影子 wm2StateHttp:$wm2StateHttp")
-                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))
-            } catch (e: Exception) {
-                L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
-            }
+            requestWifiModule2Shadow(wm2, onResponse)
         }
     }
 
     fun subscribeHub3(hub3: CHHub3Device, onResponse: CHResult<String>) {
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
+        if (iotStatus != IotStatus.Connected) {
             return
         }
         val topic = "\$aws/things/wm2/shadow/name/" + hub3.deviceId.toString().uppercase().substring(24, 36) + "/update/accepted"
-        mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { topic, data ->
+        subscribeTopicInternal(topic) { data ->
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(String(data))))
         }
     }
 
     fun subscribeTopic(topic: String, callback: CHResult<ByteArray>) {
-        if (iotStatus != AWSIotMqttClientStatus.Connected) {
+        if (iotStatus != IotStatus.Connected) {
             return
         }
-        mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0) { _, data ->
+        subscribeTopicInternal(topic) { data ->
             callback.invoke(Result.success(CHResultState.CHResultStateNetworks(data)))
         }
+    }
+
+    private fun subscribeTopicInternal(topic: String, blocking: Boolean = false, onMessage: (ByteArray) -> Unit) {
+        mqttClient?.subscribe(
+            object : AWSIotTopic(topic, AWSIotQos.QOS0) {
+                override fun onMessage(message: AWSIotMessage) {
+                    onMessage(message.payload)
+                }
+            },
+            blocking
+        )
+    }
+
+    private fun publishString(topic: String, payload: String = "{}") {
+        mqttClient?.publish(topic, AWSIotQos.QOS0, payload)
+    }
+
+    private fun requestSesame2Shadow(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
+        val shadowName = ssm2.deviceId.toString().uppercase()
+        val acceptedTopic = "\$aws/things/sesame2/shadow/name/$shadowName/get/accepted"
+        subscribeTopicInternal(acceptedTopic, blocking = true) { data ->
+            try {
+                L.d(tag, "🐖 ss2ShadowGet:" + String(data))
+                val ss2StateHttp = Gson().fromJson(String(data), Sesame2Shadow::class.java)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateHttp)))
+            } catch (e: Exception) {
+                L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
+            }
+        }
+        publishString("\$aws/things/sesame2/shadow/name/$shadowName/get")
+    }
+
+    private fun requestWifiModule2Shadow(wm2: CHWifiModule2Device, onResponse: CHResult<WM2Shadow>) {
+        val shadowName = wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36)
+        val acceptedTopic = "\$aws/things/wm2/shadow/name/$shadowName/get/accepted"
+        subscribeTopicInternal(acceptedTopic, blocking = true) { data ->
+            try {
+                L.d(tag, "🐖 wm2ShadowGet:" + String(data))
+                val wm2StateHttp = Gson().fromJson(String(data), WM2Shadow::class.java)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))
+            } catch (e: Exception) {
+                L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
+            }
+        }
+        publishString("\$aws/things/wm2/shadow/name/$shadowName/get")
     }
 
 }

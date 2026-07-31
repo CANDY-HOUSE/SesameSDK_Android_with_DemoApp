@@ -14,25 +14,21 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseNFG
 import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.databinding.FgVerifyMailBinding
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
+import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.utils.L
+import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.alertview.fragments.toastMSG
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
-import com.amazonaws.mobile.client.results.SignInResult
-import com.amazonaws.mobile.client.results.UserCodeDeliveryDetails
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.CognitoServiceConstants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
     private val mloginViewModel: CHLoginViewModel by activityViewModels()
+    private val deviceViewModel: CHDeviceViewModel by activityViewModels()
     override fun getViewBinder() = FgVerifyMailBinding.inflate(layoutInflater)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,36 +81,18 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
         }
     }
 
-    private suspend fun confirmSignInAsync(code: String): SignInResult =
-        suspendCancellableCoroutine { continuation ->
-            val res = mutableMapOf(
-                CognitoServiceConstants.CHLG_RESP_ANSWER to code
-            )
-
-            mloginViewModel.isJustLogin = true
-
-            AWSMobileClient.getInstance().confirmSignIn(
-                res,
-                object : Callback<SignInResult?> {
-                    override fun onResult(result: SignInResult?) {
-                        if (continuation.isActive) {
-                            continuation.resume(result ?: throw Exception("SignIn result is null"))
-                        }
-                    }
-
-                    override fun onError(e: Exception) {
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(e)
-                        }
-                    }
-                })
-        }
+    private suspend fun confirmSignInAsync(code: String) {
+        mloginViewModel.isJustLogin = true
+        AWSStatus.confirmSignIn(code)
+        AWSStatus.refreshAuthSessionNow()
+    }
 
     private suspend fun updateNameIfNeeded() = withContext(Dispatchers.IO) {
         try {
-            val userAttributes = AWSMobileClient.getInstance().getUserAttributes()
+            val userAttributes = AWSStatus.getUserAttributes()
             val name = userAttributes["name"]
             val email = userAttributes["email"]
+            AWSStatus.setSubUUID(userAttributes["sub"])
 
             if (name.isNullOrEmpty() && !email.isNullOrEmpty()) {
                 updateUserNameToCognito(email.split("@").firstOrNull() ?: "")
@@ -124,35 +102,21 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
         }
     }
 
-    private suspend fun updateUserNameToCognito(name: String) =
-        suspendCancellableCoroutine { continuation ->
-            val awsAttributes = CognitoUserAttributes().apply {
-                addAttribute("name", name)
-            }
-
-            AWSMobileClient.getInstance().updateUserAttributes(
-                awsAttributes.attributes,
-                object : Callback<List<UserCodeDeliveryDetails>> {
-                    override fun onResult(result: List<UserCodeDeliveryDetails>?) {
-                        L.d("LoginVerifyCodeFG", "update name success")
-                        if (continuation.isActive) {
-                            continuation.resume(Unit)
-                        }
-                    }
-
-                    override fun onError(e: Exception?) {
-                        L.e("LoginVerifyCodeFG", "update name error")
-                        if (continuation.isActive) {
-                            continuation.resume(Unit)
-                        }
-                    }
-                }
-            )
-        }
+    private suspend fun updateUserNameToCognito(name: String) {
+        runCatching { AWSStatus.updateUserName(name) }
+            .onSuccess { L.d("LoginVerifyCodeFG", "update name success") }
+            .onFailure { L.e("LoginVerifyCodeFG", "update name error") }
+    }
 
     private fun handleLoginSuccess() {
         if (!isAdded) return
 
+        mloginViewModel.gUserState.value = AWSStatus.getCachedUserState()
+        SharedPreferencesUtils.deviceToken?.let { CHAPIClientBiz.uploadUserDeviceToken(it) {} }
+        if (mloginViewModel.isJustLogin) {
+            mloginViewModel.isJustLogin = false
+            deviceViewModel.saveKeysToServer()
+        }
         // 登录后重新订阅，随带 env 并刷新 envId(history tag)
         requireActivity().candyHouseApplication.subscriptionManager.checkAndSubscribeToTopics()
         WebViewPoolManager.setPendingRefresh("me-index")

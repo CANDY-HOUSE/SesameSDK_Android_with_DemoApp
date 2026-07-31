@@ -3,10 +3,11 @@ agp = "9.3.1"
 compose = "2.2.10"
 ksp = "2.3.7"
 appcompat = "1.7.0"
-awsAndroidSdkApigatewayCore = "2.77.0"
-awsAndroidSdkMobileClient = "2.77.0"
+amplifyAndroid = "2.38.1"
+awsIotDeviceSdkJava = "1.3.16"
 core = "3.3.3"
 coreKtxVersion = "1.8.0"
+desugarJdkLibs = "2.1.5"
 dfu = "2.5.0"
 easypermissions = "3.0.0"
 firebaseBom = "33.4.0"
@@ -48,10 +49,12 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-rxjava2 = { module = "androidx.room:room-rxjava2", version.ref = "roomRuntime" }
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
-aws-android-sdk-apigateway-core = { module = "com.amazonaws:aws-android-sdk-apigateway-core", version.ref = "awsAndroidSdkApigatewayCore" }
-aws-android-sdk-iot = { module = "com.amazonaws:aws-android-sdk-iot", version.ref = "awsAndroidSdkMobileClient" }
-aws-android-sdk-mobile-client = { module = "com.amazonaws:aws-android-sdk-mobile-client", version.ref = "awsAndroidSdkMobileClient" }
+amplify-aws-api = { module = "com.amplifyframework:aws-api", version.ref = "amplifyAndroid" }
+amplify-aws-auth-cognito = { module = "com.amplifyframework:aws-auth-cognito", version.ref = "amplifyAndroid" }
+amplify-core-kotlin = { module = "com.amplifyframework:core-kotlin", version.ref = "amplifyAndroid" }
+aws-iot-device-sdk-java = { module = "com.amazonaws:aws-iot-device-sdk-java", version.ref = "awsIotDeviceSdkJava" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 dfu = { module = "no.nordicsemi.android:dfu", version.ref = "dfu" }
 easypermissions = { module = "pub.devrel:easypermissions", version.ref = "easypermissions" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }

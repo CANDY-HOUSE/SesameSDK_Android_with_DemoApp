@@ -356,7 +356,7 @@ import kotlin.experimental.and
     }
 
     override fun connectWifi(result: CHResult<CHEmpty>) {
-        val company = co.candyhouse.sesame.BuildConfig.API_GATEWAY_CLIENT_ID!!.replace(":", "").replace("-", "")
+        val company = co.candyhouse.sesame.BuildConfig.AWS_IDENTITY_POOL_ID.replace(":", "").replace("-", "")
         //        L.d("hcia", "company.toByteArray():" + company.toByteArray().toHexString())
         val verification = company + ":" + deviceId.toString().uppercase().split('-').last()
         L.d("wm2", "verification: $verification")
@@ -539,4 +539,3 @@ internal object Wm2Chracs {
 internal enum class WM2ActionCode(val value: UByte) {
     CODE_NON(0U), REGISTER_WM2(1U), LOGIN_WM2(2U), UPDATE_WIFI_SSID(3U), UPDATE_WIFI_PASSWORD(4U), CONNECT_WIFI(5U), NETWORK_STATUS(6U), DELETE_SESAME(7U), ADD_SESAME(8U), INITIAL(13U), CCCD(14U), SESAME_KEYS(16U), RESET_WM2(18U), SCAN_WIFI_SSID(19U), OPEN_OTA_SERVER(126U), VERSION_TAG(127U), ;
 }
-

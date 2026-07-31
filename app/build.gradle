@@ -55,7 +55,6 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            shrinkResources false
             firebaseCrashlytics {
                 mappingFileUploadEnabled = false
                 nativeSymbolUploadEnabled = false
@@ -88,8 +87,15 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packaging {
+        resources {
+            excludes += '/META-INF/DEPENDENCIES'
+        }
     }
 
     buildFeatures {
@@ -114,6 +120,8 @@ androidComponents {
 }
 
 dependencies {
+    coreLibraryDesugaring libs.desugar.jdk.libs
+
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation project(':sesame-sdk')
 

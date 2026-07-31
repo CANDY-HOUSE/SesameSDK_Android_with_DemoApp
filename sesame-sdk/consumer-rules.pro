@@ -8,28 +8,13 @@
 -keepattributes InnerClasses
 -keepattributes EnclosingMethod
 
--keep class com.amazonaws.mobileconnectors.apigateway.annotation.** { *; }
 -keep class co.candyhouse.sesame.server.** { *; }
--keep class com.amazonaws.services.**.*Handler { *; }
 
--keep class com.amazonaws.mobile.client.** { *; }
--keep class com.amazonaws.mobile.auth.core.** { *; }
-
--keep class com.amazonaws.mobileconnectors.cognitoidentityprovider.** { *; }
--keep class com.amazonaws.services.cognitoidentityprovider.** { *; }
--keep class com.amazonaws.services.cognitoidentity.** { *; }
-
--dontwarn com.amazonaws.mobile.auth.ui.**
--dontwarn com.amazonaws.mobile.auth.facebook.**
--dontwarn com.amazonaws.mobile.auth.google.**
--dontwarn com.amazonaws.mobile.auth.userpools.**
--dontwarn com.amazonaws.mobileconnectors.cognitoauth.**
+-keep class com.amazonaws.services.iot.client.** { *; }
 
 -dontwarn com.fasterxml.jackson.**
 -dontwarn org.apache.commons.logging.**
 -dontwarn org.apache.http.**
--dontwarn com.amazonaws.http.**
--dontwarn com.amazonaws.metrics.**
 
 -dontwarn sun.misc.**
 -dontwarn com.android.org.conscrypt.SSLParametersImpl

@@ -28,6 +28,7 @@ import androidx.navigation.ui.setupWithNavController
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.ext.AppPromotionManager
+import co.candyhouse.app.ext.aws.AWSLoginState
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
@@ -39,8 +40,10 @@ import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.widget.SesameForegroundService
 import co.utils.applyInsetsPadding
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.UserState
+import com.amplifyframework.auth.AuthChannelEventName
+import com.amplifyframework.core.Amplify
+import com.amplifyframework.hub.HubChannel
+import com.amplifyframework.hub.SubscriptionToken
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,6 +62,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
         updatePromotionBadge(promotion)
     }
     private var promotionBadgeView: View? = null
+    private var authSubscriptionToken: SubscriptionToken? = null
 
     protected lateinit var navController: NavController
 
@@ -215,42 +219,61 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     }
 
     protected fun setAWSUserStateListener() {
-        AWSMobileClient.getInstance().addUserStateListener { details ->
-            L.d("hcia", "💋----> 登入狀態:" + details?.userState?.name)
-            when (details?.userState) {
-                UserState.SIGNED_IN -> {
-                    AWSStatus.setAWSLoginStatus(true)
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        try {
-                            val attributes = AWSMobileClient.getInstance().getUserAttributes()
-                            AWSStatus.setSubUUID(attributes["sub"])
-                        } catch (_: Exception) {
-                        }
-                    }
-                    SharedPreferencesUtils.deviceToken?.let { CHAPIClientBiz.uploadUserDeviceToken(it) {} }
-                    if (loginViewModel.isJustLogin) {
-                        L.d("hcia", "💋 第一次登入上傳所有鑰匙" + loginViewModel.isJustLogin)
-                        loginViewModel.isJustLogin = false
-                        deviceViewModel.saveKeysToServer()
+        authSubscriptionToken?.let(Amplify.Hub::unsubscribe)
+        authSubscriptionToken = Amplify.Hub.subscribe(HubChannel.AUTH) { event ->
+            val userState = when (event.name) {
+                AuthChannelEventName.SIGNED_IN.name -> AWSLoginState.SIGNED_IN
+                AuthChannelEventName.SIGNED_OUT.name,
+                AuthChannelEventName.SESSION_EXPIRED.name -> AWSLoginState.SIGNED_OUT
+                else -> return@subscribe
+            }
+            lifecycleScope.launch {
+                handleAWSUserState(userState)
+            }
+        }
+
+        AWSStatus.refreshAuthSession {
+            lifecycleScope.launch {
+                handleAWSUserState(AWSStatus.getCachedUserState())
+            }
+        }
+    }
+
+    private fun handleAWSUserState(userState: AWSLoginState) {
+        L.d("hcia", "💋----> 登入狀態:" + userState.name)
+        when (userState) {
+            AWSLoginState.SIGNED_IN -> {
+                AWSStatus.setAWSLoginStatus(true)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        val attributes = AWSStatus.getUserAttributes()
+                        AWSStatus.setSubUUID(attributes["sub"])
+                    } catch (_: Exception) {
                     }
                 }
-
-                UserState.SIGNED_OUT -> {
-                    L.d("hcia", "SIGNED_OUT:")
-                    AWSStatus.setAWSLoginStatus(false)
-                    AWSStatus.setSubUUID(null)
-                    SharedPreferencesUtils.name = null
-                    SharedPreferencesUtils.preferences.edit { remove("nickname") }
-                    SharedPreferencesUtils.userId = null
-                    CHIotManagerPublic.clearIotSubscriptionCache()
-                }
-
-                else -> {
-                    AWSStatus.setAWSLoginStatus(false)
+                SharedPreferencesUtils.deviceToken?.let { CHAPIClientBiz.uploadUserDeviceToken(it) {} }
+                if (loginViewModel.isJustLogin) {
+                    L.d("hcia", "💋 第一次登入上傳所有鑰匙" + loginViewModel.isJustLogin)
+                    loginViewModel.isJustLogin = false
+                    deviceViewModel.saveKeysToServer()
                 }
             }
-            loginViewModel.gUserState.value = details.userState
+
+            AWSLoginState.SIGNED_OUT -> {
+                L.d("hcia", "SIGNED_OUT:")
+                AWSStatus.setAWSLoginStatus(false)
+                AWSStatus.setSubUUID(null)
+                SharedPreferencesUtils.name = null
+                SharedPreferencesUtils.preferences.edit { remove("nickname") }
+                SharedPreferencesUtils.userId = null
+                CHIotManagerPublic.clearIotSubscriptionCache()
+            }
+
+            else -> {
+                AWSStatus.setAWSLoginStatus(false)
+            }
         }
+        loginViewModel.gUserState.value = userState
     }
 
     private fun getPermissions() {
@@ -360,6 +383,8 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     }
 
     override fun onDestroy() {
+        authSubscriptionToken?.let(Amplify.Hub::unsubscribe)
+        authSubscriptionToken = null
         AppPromotionManager.removeListener(promotionListener)
         super.onDestroy()
     }

@@ -16,6 +16,7 @@ import cn.bingoogolapple.qrcode.core.QRCodeView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
@@ -35,7 +36,6 @@ import co.utils.getHistoryTag
 import co.utils.hexStringToByteArray
 import co.utils.noHashtoUUID
 import co.utils.toHexString
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.MultiFormatReader
@@ -192,7 +192,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
     }
 
     private fun handleFriendFailure() {
-        if (!AWSMobileClient.getInstance().isSignedIn) {
+        if (!AWSStatus.isSignedIn()) {
             toastMSG(getString(R.string.loginNeed))
         }
         activity?.runOnUiThread {

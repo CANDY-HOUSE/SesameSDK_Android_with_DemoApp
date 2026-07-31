@@ -1,11 +1,10 @@
 package co.utils
 
 import co.candyhouse.app.R
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.uuidToBytes
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
 
 object UserUtils {
 
@@ -22,20 +21,11 @@ object UserUtils {
         return "ffffffffffffffffffffffffffffffff".uuidToBytes()
     }
 
-    fun loadUserUserId() {
+    suspend fun loadUserUserId() {
         runCatching {
-            AWSMobileClient.getInstance().getUserAttributes(object : Callback<Map<String, String>> {
-                override fun onResult(userAttributes: Map<String, String>) {
-                    val sub = userAttributes["sub"]
-//                    val email = userAttributes["email"]
-                    SharedPreferencesUtils.userId = sub
-                }
-
-                override fun onError(e: Exception?) {
-
-                }
-            })
-
+            val userAttributes = AWSStatus.getUserAttributes()
+            val sub = userAttributes["sub"]
+            SharedPreferencesUtils.userId = sub
         }
     }
 

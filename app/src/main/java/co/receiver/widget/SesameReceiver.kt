@@ -15,8 +15,10 @@ import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.sesame.utils.L
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class SesameReceiver : BroadcastReceiver() {
@@ -124,7 +126,9 @@ class SesameReceiver : BroadcastReceiver() {
                     log("当前应用状态，是否在前台：$isInForeground")
                     log("前台服务是否存在：${SesameForegroundService.isLive}")
                     if (AWSStatus.getLoginStatus()) {
-                        setCustomKey("mail", AWSMobileClient.getInstance().username + "")
+                        CoroutineScope(Dispatchers.IO).launch {
+                            AWSStatus.getUsername()?.let { setCustomKey("mail", it) }
+                        }
                     }
                     recordException(e)
                 }

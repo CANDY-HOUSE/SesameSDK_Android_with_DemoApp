@@ -40,7 +40,6 @@ import co.candyhouse.sesame.utils.L
 import co.utils.PermissionUtils
 import co.utils.UserUtils
 import co.utils.getLastKnownLocation
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -96,7 +95,9 @@ class SesameForegroundService : Service() {
                     log("SesameForegroundService onCreate run...")
                     log("当前应用状态，是否在前台：${baseContext.candyHouseApplication.appLifecycleObserver.isAppForeground}")
                     if (AWSStatus.getLoginStatus()) {
-                        setCustomKey("mail", AWSMobileClient.getInstance().username + "")
+                        CoroutineScope(Dispatchers.IO).launch {
+                            AWSStatus.getUsername()?.let { setCustomKey("mail", it) }
+                        }
                     }
                     recordException(e)
                 }

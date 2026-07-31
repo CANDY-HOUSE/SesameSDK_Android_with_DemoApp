@@ -15,7 +15,6 @@ import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.AppIdentifyIdUtil
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.TopicSubscriptionManager
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +65,7 @@ open class BaseApp : Application() {
     }
 
     private fun initializeAWS() {
-        AWSStatus.initAWSMobileClient(this)
+        AWSStatus.initAmplify(this)
         setCHAPIClient()
     }
 
@@ -94,10 +93,7 @@ open class BaseApp : Application() {
 
     private fun setCHAPIClient() {
         CHAPIClientBiz.initialize(
-            context = this,
-            credentialsProvider = AWSMobileClient.getInstance(),
-            region = "ap-northeast-1",
-            apiKey = co.candyhouse.sesame.BuildConfig.API_GATEWAY_API_KEY
+            context = this
         )
     }
 }

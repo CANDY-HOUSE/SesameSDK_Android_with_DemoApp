@@ -24,7 +24,6 @@ import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.FirmwareZipUrlResponse
 import co.candyhouse.sesame.server.dto.ScenePayload
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
-import co.candyhouse.sesame.utils.ApiClientConfigBuilder
 import co.candyhouse.sesame.utils.AppIdentifyIdUtil
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
@@ -35,7 +34,8 @@ import co.candyhouse.sesame.utils.base64Encode
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt24ByteArray
-import com.amazonaws.auth.AWSCredentialsProvider
+import com.amplifyframework.api.rest.RestOptions
+import com.amplifyframework.kotlin.core.Amplify
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,36 +53,21 @@ object CHAPIClientBiz {
 
     private lateinit var appContext: Context
 
-    private lateinit var cHApiClient: CHAPIClient
-
     private val httpScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val gson = Gson()
 
     @Volatile
     private var initialized = false
 
     @JvmStatic
     @Synchronized
-    fun initialize(
-        context: Context,
-        credentialsProvider: AWSCredentialsProvider,
-        region: String,
-        apiKey: String? = null
-    ) {
+    fun initialize(context: Context) {
         appContext = context.applicationContext
-
-        val factory = ApiClientConfigBuilder.buildApiClientFactory(
-            credentialsProvider = credentialsProvider,
-            apiKey = apiKey,
-            region = region
-        )
-
-        cHApiClient = factory.build(CHAPIClient::class.java)
-
         initialized = true
     }
 
     private fun requireInit() {
-        check(initialized) { "CHAPIClient is not initialized. Call CHAPIClient.initialize(...) first." }
+        check(initialized) { "CHAPIClientBiz is not initialized. Call CHAPIClientBiz.initialize(...) first." }
     }
 
     private fun identifyId(): String {
@@ -90,76 +75,194 @@ object CHAPIClientBiz {
         return AppIdentifyIdUtil.get(appContext)
     }
 
-    private fun <T> makeApiCall(onResponse: CHResult<T>, block: () -> T) {
+    private fun identifyHeader(): Map<String, String> {
+        return mapOf("appidentifyid" to identifyId())
+    }
+
+    private fun <T> makeApiCall(onResponse: CHResult<T>, block: suspend () -> T) {
         requireInit()
         httpScope.launch {
             runCatching { block() }
                 .onSuccess { onResponse(Result.success(CHResultState.CHResultStateNetworks(it))) }
-                .onFailure { onResponse(Result.failure(it)) }
+                .onFailure { onResponse(Result.failure(toApiException(it))) }
         }
     }
 
-    fun upLoadKeys(keys: List<CHUserKey>, onResponse: CHResult<Array<CHUserKey>>) =
-        makeApiCall(onResponse) { cHApiClient.updateKeys(identifyId(), keys) }
-
-    fun putKey(key: CHUserKey, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.putKey(identifyId(), key) }
-
-    fun getDevicesList(onResponse: CHResult<Array<CHUserKey>>) =
-        makeApiCall(onResponse) { cHApiClient.getDevicesList(identifyId()) }
-
-    fun removeKey(keyId: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.removeKey(identifyId(), keyId) }
-
-    fun addFriend(friendID: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.addFriend(identifyId(), friendID) }
-
-    fun uploadUserDeviceToken(deviceToken: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.uploadDeviceToken(identifyId(), deviceToken) }
-
-    fun getWebUrlByScene(scene: String, extInfo: Map<String, String>? = null, onResponse: CHResult<String>) {
-        requireInit()
-        httpScope.launch {
-            TokenManager.getValidToken { result ->
-                result.fold(
-                    onSuccess = { token ->
-                        runCatching {
-                            val req = ScenePayload(scene = scene, token = token, extInfo = extInfo)
-                            val resp = cHApiClient.getWebUrlByScene(identifyId(), req)
-                            val url = Gson().toJsonTree(resp).asJsonObject["url"].asString
-                            onResponse(Result.success(CHResultState.CHResultStateNetworks(url)))
-                        }.onFailure { onResponse(Result.failure(it)) }
-                    },
-                    onFailure = { onResponse(Result.failure(it)) }
-                )
-            }
+    private fun toApiException(error: Throwable): Throwable {
+        return if (error is CHApiException) {
+            error
+        } else {
+            CHApiException(0, error.localizedMessage, error)
         }
     }
 
-    fun cancelNotification(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) {
-            cHApiClient.fcmTokenSignDelete(
-                CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken)
+    private suspend inline fun <reified T> apiGet(
+        path: String,
+        headers: Map<String, String> = emptyMap(),
+        query: Map<String, String> = emptyMap()
+    ): T = parse(apiRequest("GET", path, null, headers, query))
+
+    private suspend inline fun <reified T> apiPost(
+        path: String,
+        body: Any?,
+        headers: Map<String, String> = emptyMap()
+    ): T = parse(apiRequest("POST", path, body, headers))
+
+    private suspend inline fun <reified T> apiPut(
+        path: String,
+        body: Any?,
+        headers: Map<String, String> = emptyMap()
+    ): T = parse(apiRequest("PUT", path, body, headers))
+
+    private suspend inline fun <reified T> apiDelete(
+        path: String,
+        body: Any?,
+        headers: Map<String, String> = emptyMap()
+    ): T = parse(apiRequest("DELETE", path, body, headers))
+
+    private suspend fun apiRequest(
+        method: String,
+        path: String,
+        body: Any?,
+        headers: Map<String, String>,
+        query: Map<String, String> = emptyMap()
+    ): String {
+        val optionsBuilder = RestOptions.builder()
+            .addPath(path)
+            .addHeader("x-api-key", co.candyhouse.sesame.BuildConfig.API_GATEWAY_API_KEY)
+
+        headers.forEach { (key, value) -> optionsBuilder.addHeader(key, value) }
+        if (query.isNotEmpty()) optionsBuilder.addQueryParameters(query)
+        body?.let { optionsBuilder.addBody(gson.toJson(it).toByteArray(Charsets.UTF_8)) }
+
+        val response = when (method) {
+            "GET" -> Amplify.API.get(optionsBuilder.build())
+            "POST" -> Amplify.API.post(optionsBuilder.build())
+            "PUT" -> Amplify.API.put(optionsBuilder.build())
+            "DELETE" -> Amplify.API.delete(optionsBuilder.build())
+            else -> error("Unsupported API method: $method")
+        }
+
+        val statusCode = response.code.hashCode()
+        val responseBody = response.data.asString()
+        if (!response.code.isSuccessful) {
+            throw CHApiException(
+                statusCode,
+                parseApiErrorMessage(responseBody) ?: "HTTP $statusCode"
             )
         }
+        return responseBody
+    }
 
-    internal fun signGuestKey(key: CHRemoveSignKeyRequest, onResponse: CHResult<String>) =
-        makeApiCall(onResponse) { cHApiClient.guestKeysSignPost(key) }
+    private fun parseApiErrorMessage(responseBody: String): String? {
+        return runCatching {
+            val json = gson.fromJson(responseBody, Map::class.java)
+            sequenceOf("message", "errorMessage", "error")
+                .mapNotNull { key -> json?.get(key)?.toString() }
+                .firstOrNull { it.isNotBlank() }
+        }.getOrNull()
+    }
 
-    fun getHub3StatusFromIot(deviceUUID: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.getHub3StatusFromIot(deviceUUID) }
+    private inline fun <reified T> parse(json: String): T {
+        if (T::class == Unit::class) return Unit as T
+        if (T::class == Any::class) return gson.fromJson(json, Any::class.java) as T
+        if (T::class == String::class) {
+            return runCatching { gson.fromJson(json, String::class.java) as T }
+                .getOrElse { json as T }
+        }
+        return gson.fromJson(json, T::class.java)
+    }
 
-    fun updateDeviceFirmwareVersion(deviceUUID: String, versionTag: String, onResponse: CHResult<Any>) =
+    // 发送網路鑰匙
+    fun upLoadKeys(keys: List<CHUserKey>, onResponse: CHResult<Array<CHUserKey>>) =
+        makeApiCall(onResponse) { apiPost("/device", keys, identifyHeader()) }
+
+    // 更新網路鑰匙
+    fun putKey(key: CHUserKey, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) {
-            cHApiClient.postFirmwareVersion(deviceUUID, mapOf("versionTag" to versionTag))
+            apiPut<Unit>("/device", key, identifyHeader())
+            CHEmpty()
         }
 
+    // 获取網路鑰匙
+    fun getDevicesList(onResponse: CHResult<Array<CHUserKey>>) =
+        makeApiCall(onResponse) { apiGet("/device/list", identifyHeader()) }
+
+    // 移除用戶網路鑰匙
+    fun removeKey(keyId: String, onResponse: CHResult<CHEmpty>) =
+        makeApiCall(onResponse) {
+            apiDelete<Unit>("/device", keyId, identifyHeader())
+            CHEmpty()
+        }
+
+    // 新增好友
+    fun addFriend(friendID: String, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/friend", friendID, identifyHeader())
+            CHEmpty()
+        }
+
+    // 上传用户 Token
+    fun uploadUserDeviceToken(deviceToken: String, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/friend/token", deviceToken, identifyHeader())
+            CHEmpty()
+        }
+
+    // 获取网页链接
+    fun getWebUrlByScene(scene: String, extInfo: Map<String, String>? = null, onResponse: CHResult<String>) {
+        makeApiCall(onResponse) {
+            val req = ScenePayload(scene = scene, token = TokenManager.getValidTokenValue(), extInfo = extInfo)
+            val resp: Any = apiPost("/web_route", req, identifyHeader())
+            val responseJson = gson.toJsonTree(resp).asJsonObject
+            responseJson["url"]?.takeUnless { it.isJsonNull }?.asString
+                ?: throw CHApiException(
+                    0,
+                    responseJson["message"]?.takeUnless { it.isJsonNull }?.asString ?: "Empty URL"
+                )
+        }
+    }
+
+    // 移除用户 Token
+    fun cancelNotification(device: CHSesameLock, fcmToken: String, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) {
+            apiDelete<Unit>(
+                "/device/v1/token",
+                CHFcmTokenUpload((device as CHDevices).deviceId.toString().uppercase(), fcmToken)
+            )
+            CHEmpty()
+        }
+
+    // 访客钥匙签名
+    internal fun signGuestKey(key: CHRemoveSignKeyRequest, onResponse: CHResult<String>) =
+        makeApiCall(onResponse) { apiPost("/device/v1/sesame2/sign", key) }
+
+    // 获取Hub3状态
+    fun getHub3StatusFromIot(deviceUUID: String, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) { apiGet("/device/v1/wifi_module/$deviceUUID/status") }
+
+    // 上传固件版本号
+    fun updateDeviceFirmwareVersion(deviceUUID: String, versionTag: String, onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/v1/sesame5/$deviceUUID/fwVer", mapOf("versionTag" to versionTag))
+            CHEmpty()
+        }
+
+    // 上传历史记录标签
     fun postSS2History(deviceID: String, hisHex: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.feedHistory(CHSSMHisUploadRequest(deviceID, hisHex)) }
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/v1/sesame2/historys", CHSSMHisUploadRequest(deviceID, hisHex))
+            CHEmpty()
+        }
 
+    // 上传历史记录标签
     fun postOS3History(deviceID: String, hisHex: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.feedHistory(CHSS5HisUploadRequest(deviceID, hisHex, "5")) }
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/v1/sesame2/historys", CHSS5HisUploadRequest(deviceID, hisHex, "5"))
+            CHEmpty()
+        }
 
+    // 发送IoT命令到设备
     internal fun cmdSesame(cmd: SesameItemCode, ss2: CHDevices, historytag: ByteArray, onResponse: CHResult<CHEmpty>) =
         makeApiCall(onResponse) {
             val msg = System.currentTimeMillis().toUInt24ByteArray()
@@ -167,62 +270,106 @@ object CHAPIClientBiz {
                 .computeMac(msg)!!
                 .sliceArray(0..3)
 
-            cHApiClient.ss2CommandToWM2Post(
-                ss2.deviceId.toString().uppercase(),
+            apiPost<Unit>(
+                "/device/v1/iot/sesame2/${ss2.deviceId.toString().uppercase()}",
                 CHSS2WebCMDReq(cmd.value, historytag.base64Encode(), keyCheck.toHexString())
             )
             CHEmpty()
         }
 
+    // 生物识别数据操作 (通用)
     fun postCredentialListToServer(credentialListRequest: AuthenticationDataWrapper, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.biometricsOperation(credentialListRequest) }
+        makeApiCall(onResponse) {
+            if (credentialListRequest.operation.endsWith("_put")) {
+                apiPost<Unit>("/device/v1/biometrics", credentialListRequest)
+                CHEmpty()
+            } else {
+                apiPost("/device/v1/biometrics", credentialListRequest)
+            }
+        }
 
+    // 生物识别数据操作 (通用)
     fun updateAuthenticationName(authData: Any, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.biometricsOperation(authData) }
+        makeApiCall(onResponse) { apiPost("/device/v1/biometrics", authData) }
 
+    // 生物识别数据操作 (通用)
     fun deleteCredentialInfo(request: AuthenticationDataWrapper, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.biometricsOperation(request) }
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/v1/biometrics", request)
+            CHEmpty()
+        }
 
+    // 订阅 SNS 主题
     fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.subscribeToTopic(body) }
+        makeApiCall(onResponse) { apiPost("/device/v1/subscribe", body) }
 
+    // 获取当前推广活动红点
     fun getActivePromotion(onResponse: CHResult<AppPromotion>) =
-        makeApiCall(onResponse) { parsePromotionResponse(cHApiClient.getActivePromotion(identifyId())) }
+        makeApiCall(onResponse) {
+            parsePromotionResponse(apiGet<Any>("/device/v1/appPromotionReads", identifyHeader(), mapOf("action" to "getActivePromotion")))
+        }
 
+    // 标记推广活动已读
     fun markPromotionRead(promotionId: String, targetUrl: String?, onResponse: CHResult<AppPromotion>) =
         makeApiCall(onResponse) {
             parsePromotionResponse(
-                cHApiClient.markPromotionRead(
-                    identifyId(),
+                apiPost<Any>(
+                    "/device/v1/appPromotionReads",
                     AppPromotionReadRequest(
                         promotionId = promotionId,
                         targetUrl = targetUrl
-                    )
+                    ),
+                    identifyHeader()
                 )
             )
         }
 
+    // 上传电池数据
     fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.postBatteryData(deviceID, CHBatteryDataReq(payloadString)) }
+        makeApiCall(onResponse) { apiPost("/device/v1/sesame5/$deviceID/battery", CHBatteryDataReq(payloadString)) }
 
+    // 注册设备（os2）
     internal fun myDevicesRegisterSesame2Post(deviceId: String?, req: CHSS2RegisterReq?, onResponse: CHResult<CHSS2RegisterRes>) {
-        makeApiCall(onResponse) { cHApiClient.myDevicesRegisterSesame2Post(deviceId, req) }
+        makeApiCall(onResponse) { apiPost("/device/v1/sesame2/$deviceId", req) }
     }
 
+    // 注册设备（os3）
     fun myDevicesRegisterSesame5Post(deviceId: String?, body: Any?, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) { cHApiClient.myDevicesRegisterSesame5Post(deviceId, body) }
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/v1/sesame5/$deviceId", body)
+            CHEmpty()
+        }
     }
 
+    // 更新Sesame设备信息
     fun postCHDeviceInfo(body: CHDeviceInfo, onResponse: CHResult<Any>) {
-        makeApiCall(onResponse) { cHApiClient.postCHDeviceInfo(body) }
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/infor", body)
+            CHEmpty()
+        }
     }
 
+    // 更新 bot script
     fun updateBotScript(body: BotScriptRequest, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { cHApiClient.updateBotScript(body) }
+        makeApiCall(onResponse) {
+            apiPost<Unit>("/device/v1/bot/script", body)
+            CHEmpty()
+        }
 
+    // 获取固件zip包地址
     fun getFirmwareZipUrl(productType: Int, deviceId: String, firmwareDir: String = "prod", onResponse: CHResult<FirmwareZipUrlResponse>) =
-        makeApiCall(onResponse) { cHApiClient.getFirmwareZipUrl(productType.toString(), deviceId, firmwareDir) }
+        makeApiCall(onResponse) {
+            apiGet(
+                "/device/v1/firmwareZipUrl",
+                query = mapOf(
+                    "productType" to productType.toString(),
+                    "deviceId" to deviceId,
+                    "firmwareDir" to firmwareDir
+                )
+            )
+        }
 
+    // 更新 Hub3_LTE 继电器开关状态
     fun updateRelay(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
         makeApiCall(onResponse) {
             val sendMap: MutableMap<String, String> = mutableMapOf()
@@ -256,7 +403,7 @@ object CHAPIClientBiz {
             sendMap["payload"] = payload
             sendMap["topic"] = "wm2${hub3DeviceIdLastSegment.uppercase()}cmd"
 
-            cHApiClient.updateRelay(hub3DeviceId, sendMap)
+            apiPost<Unit>("/device/v1/wifi_module/$hub3DeviceId/switch", sendMap)
             CHEmpty()
         }
 

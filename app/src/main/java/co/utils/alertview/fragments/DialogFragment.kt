@@ -16,7 +16,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertTheme
 import co.utils.alertview.objects.AlertAction
-import com.amazonaws.AmazonClientException
 
 import java.util.*
 
@@ -129,26 +128,11 @@ fun Fragment.toastMSG(msg: String?, duration: Int = Toast.LENGTH_SHORT) {
 }
 
 fun Fragment.toastError(error: Exception?) {
-
-    when (error) {
-        is AmazonClientException -> {
-            activity?.runOnUiThread {
-                Toast.makeText(
-                        activity,
-                        error.message,
-                        Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-        else -> {
-            activity?.runOnUiThread {
-                Toast.makeText(
-                        activity,
-                        error?.message,
-                        Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+    activity?.runOnUiThread {
+        Toast.makeText(
+                activity,
+                error?.message,
+                Toast.LENGTH_LONG
+        ).show()
     }
-
 }

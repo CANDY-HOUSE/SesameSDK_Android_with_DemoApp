@@ -22,6 +22,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.databinding.FgMeBinding
 import co.candyhouse.app.ext.CHDeviceWrapperManager
+import co.candyhouse.app.ext.aws.AWSLoginState
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
@@ -36,12 +38,12 @@ import co.utils.UserUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
+import co.utils.alertview.fragments.toastMSG
 import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.UserState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
 
@@ -149,8 +151,23 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
 
     @SuppressLint("ImplicitSamInstance")
     private fun performLogout() {
-        // 执行退出登录操作
-        AWSMobileClient.getInstance().signOut()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    AWSStatus.signOut()
+                }
+            } catch (error: Exception) {
+                L.e(tag, "Sign out failed", error)
+                toastMSG(error.localizedMessage ?: "Sign out failed")
+                return@launch
+            }
+
+            loginViewModel.gUserState.value = AWSLoginState.SIGNED_OUT
+            completeLogout()
+        }
+    }
+
+    private fun completeLogout() {
         bind.scrollView.scrollTo(0, 0)
 
         CHDeviceManager.getCandyDevices { result ->
@@ -182,10 +199,10 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         reloadRefresh()
     }
 
-    private fun updateUIForLoginState(loginState: UserState) {
+    private fun updateUIForLoginState(loginState: AWSLoginState) {
         bind.loginStateTxt.text = loginState.name
 
-        if (loginState == UserState.SIGNED_IN) {
+        if (loginState == AWSLoginState.SIGNED_IN) {
             handleSignedInState()
         } else {
             handleSignedOutState()
@@ -207,9 +224,9 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         bind.delAccount.visibility = View.GONE
     }
 
-    private fun loadUserName() {
+    private suspend fun loadUserName() {
         runCatching {
-            val name = AWSMobileClient.getInstance().getUserAttributes()["name"]
+            val name = AWSStatus.getUserAttributes()["name"]
             L.d(tag, "name=$name")
             SharedPreferencesUtils.name = name
         }.onFailure { e ->

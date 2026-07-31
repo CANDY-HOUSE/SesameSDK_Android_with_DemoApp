@@ -13,11 +13,11 @@ android {
         consumerProguardFiles "consumer-rules.pro"
 
         // AWS Gateway 配置
-        buildConfigField("String", "API_GATEWAY_CLIENT_ID", "\"${rootProject.ext['aws.apigateway.clientId']}\"")
         buildConfigField("String", "API_GATEWAY_API_KEY", "\"${rootProject.ext['aws.apigateway.apiKey']}\"")
 
         // AWS IoT 配置
         buildConfigField("String", "AWS_IOT_ENDPOINT", "\"${rootProject.ext['aws.iot.endpoint']}\"")
+        buildConfigField("String", "AWS_IDENTITY_POOL_ID", "\"${rootProject.ext['aws.cognito.identityPoolId']}\"")
     }
 
     buildTypes {
@@ -44,9 +44,12 @@ android {
 }
 
 dependencies {
-    api libs.aws.android.sdk.apigateway.core
-    api(libs.aws.android.sdk.mobile.client) { transitive = true }
-    implementation libs.aws.android.sdk.iot
+    api libs.amplify.aws.api
+    api libs.amplify.aws.auth.cognito
+    api libs.amplify.core.kotlin
+    implementation(libs.aws.iot.device.sdk.java) {
+        exclude group: "com.amazonaws", module: "aws-java-sdk-secretsmanager"
+    }
 
     api libs.androidx.room.runtime
     api libs.androidx.room.ktx
