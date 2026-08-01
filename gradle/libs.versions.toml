@@ -4,6 +4,7 @@ compose = "2.2.10"
 ksp = "2.3.7"
 appcompat = "1.7.0"
 amplifyAndroid = "2.38.1"
+awsSdkKotlin = "1.5.15"
 awsIotDeviceSdkJava = "1.3.16"
 core = "3.3.3"
 coreKtxVersion = "1.8.0"
@@ -52,6 +53,7 @@ androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "
 amplify-aws-api = { module = "com.amplifyframework:aws-api", version.ref = "amplifyAndroid" }
 amplify-aws-auth-cognito = { module = "com.amplifyframework:aws-auth-cognito", version.ref = "amplifyAndroid" }
 amplify-core-kotlin = { module = "com.amplifyframework:core-kotlin", version.ref = "amplifyAndroid" }
+aws-iot-data-plane = { module = "aws.sdk.kotlin:iotdataplane", version.ref = "awsSdkKotlin" }
 aws-iot-device-sdk-java = { module = "com.amazonaws:aws-iot-device-sdk-java", version.ref = "awsIotDeviceSdkJava" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }

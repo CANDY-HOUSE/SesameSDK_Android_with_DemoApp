@@ -25,6 +25,12 @@ import aws.sdk.kotlin.services.cognitoidentity.CognitoIdentityClient
 import aws.sdk.kotlin.services.cognitoidentity.model.GetCredentialsForIdentityRequest
 import aws.sdk.kotlin.services.cognitoidentity.model.GetIdRequest
 import aws.sdk.kotlin.services.cognitoidentity.model.NotAuthorizedException
+import aws.sdk.kotlin.services.iotdataplane.IotDataPlaneClient
+import aws.sdk.kotlin.services.iotdataplane.model.GetThingShadowRequest
+import aws.smithy.kotlin.runtime.auth.awscredentials.Credentials as AwsCredentials
+import aws.smithy.kotlin.runtime.auth.awscredentials.CredentialsProvider as AwsCredentialsProvider
+import aws.smithy.kotlin.runtime.collections.Attributes
+import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -69,8 +75,21 @@ internal object CHIotManager {
     private var reconnectJob: Job? = null
     private var subscribeDevicesJob: Job? = null
     private val subscribedIotDeviceIds = Collections.synchronizedSet(mutableSetOf<String>())
+    private val subscribedIotTopics = Collections.synchronizedSet(mutableSetOf<String>())
     private val credentialsMutex = Mutex()
     private var cachedIotCredentials: CachedIotCredentials? = null
+    private val iotDataPlaneClient by lazy {
+        IotDataPlaneClient {
+            region = CUSTOMER_REGION
+            endpointUrl = Url.parse("https://$CUSTOMER_SPECIFIC_ENDPOINT")
+            credentialsProvider = object : AwsCredentialsProvider {
+                override suspend fun resolve(attributes: Attributes): AwsCredentials {
+                    val (accessKey, secretKey, sessionToken) = getIotCredentials()
+                    return AwsCredentials(accessKey, secretKey, sessionToken)
+                }
+            }
+        }
+    }
 
     // 启动连接（从应用启动处调用）
     fun startConnection() {
@@ -106,6 +125,7 @@ internal object CHIotManager {
 
     private fun subscribeDeviceIfNeeded(device: CHDevices) {
         if (iotStatus != IotStatus.Connected) return
+        if (device.getLevel() == 2) return
 
         val deviceUtil = device as? CHDeviceUtil
         if (deviceUtil == null) {
@@ -262,6 +282,7 @@ internal object CHIotManager {
 
         iotStatus = IotStatus.ConnectionLost
         clearIotSubscriptionCache()
+        subscribedIotTopics.clear()
         reconnectJob?.cancel()
         reconnectJob = iotScope.launch {
             delay(5_000)
@@ -384,49 +405,64 @@ internal object CHIotManager {
         }
     }
 
-    private fun subscribeTopicInternal(topic: String, blocking: Boolean = false, onMessage: (ByteArray) -> Unit) {
-        mqttClient?.subscribe(
-            object : AWSIotTopic(topic, AWSIotQos.QOS0) {
-                override fun onMessage(message: AWSIotMessage) {
-                    onMessage(message.payload)
+    private fun subscribeTopicInternal(topic: String, onMessage: (ByteArray) -> Unit) {
+        if (!subscribedIotTopics.add(topic)) return
+
+        val client = mqttClient
+        if (client == null) {
+            subscribedIotTopics.remove(topic)
+            return
+        }
+
+        try {
+            client.subscribe(
+                object : AWSIotTopic(topic, AWSIotQos.QOS0) {
+                    override fun onMessage(message: AWSIotMessage) {
+                        onMessage(message.payload)
+                    }
                 }
-            },
-            blocking
-        )
+            )
+        } catch (e: Exception) {
+            subscribedIotTopics.remove(topic)
+            throw e
+        }
     }
 
-    private fun publishString(topic: String, payload: String = "{}") {
-        mqttClient?.publish(topic, AWSIotQos.QOS0, payload)
-    }
-
-    private fun requestSesame2Shadow(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
+    private suspend fun requestSesame2Shadow(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
         val shadowName = ssm2.deviceId.toString().uppercase()
-        val acceptedTopic = "\$aws/things/sesame2/shadow/name/$shadowName/get/accepted"
-        subscribeTopicInternal(acceptedTopic, blocking = true) { data ->
-            try {
-                L.d(tag, "🐖 ss2ShadowGet:" + String(data))
-                val ss2StateHttp = Gson().fromJson(String(data), Sesame2Shadow::class.java)
-                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateHttp)))
-            } catch (e: Exception) {
-                L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
-            }
+        try {
+            val response = iotDataPlaneClient.getThingShadow(
+                GetThingShadowRequest {
+                    thingName = "sesame2"
+                    this.shadowName = shadowName
+                }
+            )
+            val payload = response.payload ?: error("Sesame shadow payload is unavailable")
+            val shadow = Gson().fromJson(String(payload), Sesame2Shadow::class.java)
+            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(shadow)))
+        } catch (e: Exception) {
+            L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
         }
-        publishString("\$aws/things/sesame2/shadow/name/$shadowName/get")
     }
 
-    private fun requestWifiModule2Shadow(wm2: CHWifiModule2Device, onResponse: CHResult<WM2Shadow>) {
+    private suspend fun requestWifiModule2Shadow(wm2: CHWifiModule2Device, onResponse: CHResult<WM2Shadow>) {
         val shadowName = wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36)
-        val acceptedTopic = "\$aws/things/wm2/shadow/name/$shadowName/get/accepted"
-        subscribeTopicInternal(acceptedTopic, blocking = true) { data ->
-            try {
-                L.d(tag, "🐖 wm2ShadowGet:" + String(data))
-                val wm2StateHttp = Gson().fromJson(String(data), WM2Shadow::class.java)
-                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(wm2StateHttp)))
-            } catch (e: Exception) {
-                L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
-            }
+        try {
+            val response = iotDataPlaneClient.getThingShadow(
+                GetThingShadowRequest {
+                    thingName = "wm2"
+                    this.shadowName = shadowName
+                }
+            )
+            val payload = response.payload ?: error("WM2 shadow payload is unavailable")
+            val shadow = Gson().fromJson(String(payload), WM2Shadow::class.java)
+            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(shadow)))
+        } catch (e: Exception) {
+            L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
         }
-        publishString("\$aws/things/wm2/shadow/name/$shadowName/get")
     }
 
 }
+
+private fun CHDevices.getLevel(): Int =
+    SharedPreferencesUtils.preferences.getInt("l" + deviceId.toString(), -1)
