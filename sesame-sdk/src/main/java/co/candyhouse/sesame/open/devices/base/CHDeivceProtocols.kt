@@ -214,10 +214,10 @@ enum class CHProductModel {
         override fun deviceModelName() = "Sesame Face 2 Pro AI"
         override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO_AI, DeviceProfiles.SESAME_FACE_PRO_AI)
     },
-    SS6ProSLiDingDoor {
+    SS6ProSlidingDoor {
         override fun productType() = 32
         override fun deviceModel() = "sesame_6_pro_slidingdoor" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "Sesame 6 Pro SLiDingDoor"
+        override fun deviceModelName() = "Sesame 6 Pro SlidingDoor"
         override fun deviceFactory() = CHSesame5Device()
     },
     BiKeLock3 {

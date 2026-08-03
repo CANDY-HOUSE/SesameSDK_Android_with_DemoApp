@@ -40,7 +40,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                 CHProductModel.BLEConnector,
                 CHProductModel.SS6,
                 CHProductModel.SS6Pro,
-                CHProductModel.SS6ProSLiDingDoor,
+                CHProductModel.SS6ProSlidingDoor,
                 CHProductModel.SSM_MIWA
             )
 

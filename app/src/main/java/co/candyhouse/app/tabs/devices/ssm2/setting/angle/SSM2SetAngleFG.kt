@@ -114,7 +114,7 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
                             didTrigger2s = true
                             view.context.vibrateDevice(100)
                             val (targetUiSliding, advType) = when (dev.productModel) {
-                                CHProductModel.SS6ProSLiDingDoor -> false to 21.toByte()
+                                CHProductModel.SS6ProSlidingDoor -> false to 21.toByte()
                                 CHProductModel.SS6Pro -> true to 32.toByte()
                                 else -> return@Runnable
                             }
@@ -157,7 +157,7 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     @SuppressLint("SetTextI18n")
     fun updateLockView(device: CHDevices) {
-        useSlidingDoorUi = device.productModel == CHProductModel.SS6ProSLiDingDoor
+        useSlidingDoorUi = device.productModel == CHProductModel.SS6ProSlidingDoor
 
         bind.angleTv.text = (device.mechStatus?.position ?: 0).toString() + "°"
         bind.ssmView.visibility = if (useSlidingDoorUi) View.GONE else View.VISIBLE

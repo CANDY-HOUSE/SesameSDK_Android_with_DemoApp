@@ -293,7 +293,7 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFace2AI -> CHDeviceManager.app.getString(R.string.SSMFace2AI)
         CHProductModel.SS6 -> CHDeviceManager.app.getString(R.string.Sesame6)
         CHProductModel.SS6Pro -> CHDeviceManager.app.getString(R.string.Sesame6Pro)
-        CHProductModel.SS6ProSLiDingDoor -> CHDeviceManager.app.getString(R.string.Sesame6ProSLiDingDoor)
+        CHProductModel.SS6ProSlidingDoor -> CHDeviceManager.app.getString(R.string.Sesame6ProSlidingDoor)
         CHProductModel.SSMOpenSensor2 -> CHDeviceManager.app.getString(R.string.SesameOpenSensor2)
         CHProductModel.SSMTouch2Pro -> CHDeviceManager.app.getString(R.string.SSMTouch2Pro)
         CHProductModel.SSMTouch2 -> CHDeviceManager.app.getString(R.string.SSMTouch2)
