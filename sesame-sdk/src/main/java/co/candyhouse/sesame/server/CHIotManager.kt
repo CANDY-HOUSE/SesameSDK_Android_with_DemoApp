@@ -70,6 +70,11 @@ internal object CHIotManager {
 
     @Volatile
     private var iotStatus = IotStatus.ConnectionLost
+
+    /** IoT 连接成功回调（刷新服务端列表，对齐 iOS 连接后 getCHUserKeys） */
+    @Volatile
+    internal var onReconnected: (() -> Unit)? = null
+
     private val iotScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var connectionJob: Job? = null
     private var reconnectJob: Job? = null
@@ -78,18 +83,6 @@ internal object CHIotManager {
     private val subscribedIotTopics = Collections.synchronizedSet(mutableSetOf<String>())
     private val credentialsMutex = Mutex()
     private var cachedIotCredentials: CachedIotCredentials? = null
-    private val iotDataPlaneClient by lazy {
-        IotDataPlaneClient {
-            region = CUSTOMER_REGION
-            endpointUrl = Url.parse("https://$CUSTOMER_SPECIFIC_ENDPOINT")
-            credentialsProvider = object : AwsCredentialsProvider {
-                override suspend fun resolve(attributes: Attributes): AwsCredentials {
-                    val (accessKey, secretKey, sessionToken) = getIotCredentials()
-                    return AwsCredentials(accessKey, secretKey, sessionToken)
-                }
-            }
-        }
-    }
 
     // 启动连接（从应用启动处调用）
     fun startConnection() {
@@ -187,6 +180,8 @@ internal object CHIotManager {
                 iotStatus = IotStatus.Connected
                 clearIotSubscriptionCache()
                 iotScope.launch { updateDevicesOnConnect() }
+                // 连接成功：刷新服务端列表（含 stateInfo），对齐 iOS 连接后 getCHUserKeys
+                onReconnected?.invoke()
             }
 
             override fun onConnectionFailure() {
@@ -347,23 +342,17 @@ internal object CHIotManager {
 
     private fun doSubscribeSSM(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
         val ss2Topic = "\$aws/things/sesame2/shadow/name/${ssm2.deviceId.toString().uppercase()}/update/documents"
-        if (ssm2.deviceShadowStatus == null) {
-            subscribeTopicInternal(ss2Topic) { data ->
-                try {
-                    L.d(tag, "String(data): " + String(data))
-                    val ss5StateIot = Gson().fromJson(String(data), Sesame5ShadowDocuments::class.java)
-                    L.d(tag, "ss2StateIot: $ss5StateIot")
-                    var ss2StateIot: Sesame2Shadow? = null
-                    ss2StateIot = Sesame2Shadow(ss5StateIot.current.state)
-                    onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateIot)))
-                } catch (e: Exception) {
-                    L.d("hub3_ss5", "🥝 ssm影子格式不符合e: " + ssm2 + e)
-                }
+        subscribeTopicInternal(ss2Topic) { data ->
+            try {
+                L.d(tag, "String(data): " + String(data))
+                val ss5StateIot = Gson().fromJson(String(data), Sesame5ShadowDocuments::class.java)
+                L.d(tag, "ss2StateIot: $ss5StateIot")
+                var ss2StateIot: Sesame2Shadow? = null
+                ss2StateIot = Sesame2Shadow(ss5StateIot.current.state)
+                onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(ss2StateIot)))
+            } catch (e: Exception) {
+                L.d("hub3_ss5", "🥝 ssm影子格式不符合e: " + ssm2 + e)
             }
-        }
-
-        iotScope.launch {
-            requestSesame2Shadow(ssm2, onResponse)
         }
     }
 
@@ -379,10 +368,6 @@ internal object CHIotManager {
             } catch (e: Exception) {
                 L.d(tag, "🥝 wm2影子格式不符合e:" + e)
             }
-        }
-
-        iotScope.launch {
-            requestWifiModule2Shadow(wm2, onResponse)
         }
     }
 
@@ -425,40 +410,6 @@ internal object CHIotManager {
         } catch (e: Exception) {
             subscribedIotTopics.remove(topic)
             throw e
-        }
-    }
-
-    private suspend fun requestSesame2Shadow(ssm2: CHDevices, onResponse: CHResult<Sesame2Shadow>) {
-        val shadowName = ssm2.deviceId.toString().uppercase()
-        try {
-            val response = iotDataPlaneClient.getThingShadow(
-                GetThingShadowRequest {
-                    thingName = "sesame2"
-                    this.shadowName = shadowName
-                }
-            )
-            val payload = response.payload ?: error("Sesame shadow payload is unavailable")
-            val shadow = Gson().fromJson(String(payload), Sesame2Shadow::class.java)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(shadow)))
-        } catch (e: Exception) {
-            L.d(tag, "🐖 ssm影子:" + e.localizedMessage)
-        }
-    }
-
-    private suspend fun requestWifiModule2Shadow(wm2: CHWifiModule2Device, onResponse: CHResult<WM2Shadow>) {
-        val shadowName = wm2.deviceId.toString().uppercase(getDefault()).substring(24, 36)
-        try {
-            val response = iotDataPlaneClient.getThingShadow(
-                GetThingShadowRequest {
-                    thingName = "wm2"
-                    this.shadowName = shadowName
-                }
-            )
-            val payload = response.payload ?: error("WM2 shadow payload is unavailable")
-            val shadow = Gson().fromJson(String(payload), WM2Shadow::class.java)
-            onResponse.invoke(Result.success(CHResultState.CHResultStateBLE(shadow)))
-        } catch (e: Exception) {
-            L.d(tag, "🐖 wm2影子沒創建例外!!:" + e)
         }
     }
 

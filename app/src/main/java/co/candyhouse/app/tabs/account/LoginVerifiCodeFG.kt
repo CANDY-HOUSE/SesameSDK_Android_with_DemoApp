@@ -18,7 +18,6 @@ import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
-import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.alertview.fragments.toastMSG
@@ -112,7 +111,6 @@ class LoginVerifiCodeFG : BaseNFG<FgVerifyMailBinding>() {
         if (!isAdded) return
 
         mloginViewModel.gUserState.value = AWSStatus.getCachedUserState()
-        SharedPreferencesUtils.deviceToken?.let { CHAPIClientBiz.uploadUserDeviceToken(it) {} }
         if (mloginViewModel.isJustLogin) {
             mloginViewModel.isJustLogin = false
             deviceViewModel.saveKeysToServer()

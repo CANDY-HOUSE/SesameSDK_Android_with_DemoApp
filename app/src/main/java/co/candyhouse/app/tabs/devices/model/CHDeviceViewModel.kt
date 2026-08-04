@@ -92,6 +92,11 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     // 搜索关键词
     val searchQuery = MutableStateFlow("")
 
+    init {
+        // IoT 重连成功后刷新服务端列表（含 stateInfo），对齐 iOS 重连后 getCHUserKeys
+        CHIotManagerPublic.setOnReconnected { refreshDevices() }
+    }
+
     // 更新搜索关键词
     fun updateSearchQuery(query: String) {
         L.e("DeviceListFG", "updateSearchQuery $query")
@@ -179,7 +184,12 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 }
                 CHDeviceManager.receiveCHDeviceKeys(devicesKeys) { response ->
                     response.onSuccess { deviceResponse ->
+                        // 用列表 stateInfo 直接写入设备状态，替代冷启动 IoT 快照（对齐 iOS）
+                        val stateById = serverUserKeys.associateBy { it.deviceUUID.lowercase() }
                         deviceResponse.data.forEach { device ->
+                            stateById[device.deviceId?.toString()?.lowercase()]?.let { userKey ->
+                                CHDeviceManager.applyServerState(device, userKey.stateInfo)
+                            }
                             CHDeviceWrapperManager.updateDevice(device)
                         }
                         updateDevices(deviceResponse.data)
@@ -819,5 +829,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     override fun onCleared() {
         super.onCleared()
         syncJob?.cancel()
+        CHIotManagerPublic.setOnReconnected(null)
     }
 }

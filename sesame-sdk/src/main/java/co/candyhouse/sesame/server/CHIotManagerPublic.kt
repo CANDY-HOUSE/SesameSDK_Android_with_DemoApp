@@ -28,4 +28,11 @@ object CHIotManagerPublic {
     fun clearIotSubscriptionCache() {
         CHIotManager.clearIotSubscriptionCache()
     }
+
+    /**
+     * 设置 IoT 重连成功回调（用于重连后刷新服务端设备列表）
+     */
+    fun setOnReconnected(callback: (() -> Unit)?) {
+        CHIotManager.onReconnected = callback
+    }
 }

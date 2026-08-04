@@ -237,10 +237,6 @@ object CHAPIClientBiz {
     internal fun signGuestKey(key: CHRemoveSignKeyRequest, onResponse: CHResult<String>) =
         makeApiCall(onResponse) { apiPost("/device/v1/sesame2/sign", key) }
 
-    // 获取Hub3状态
-    fun getHub3StatusFromIot(deviceUUID: String, onResponse: CHResult<Any>) =
-        makeApiCall(onResponse) { apiGet("/device/v1/wifi_module/$deviceUUID/status") }
-
     // 上传固件版本号
     fun updateDeviceFirmwareVersion(deviceUUID: String, versionTag: String, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) {

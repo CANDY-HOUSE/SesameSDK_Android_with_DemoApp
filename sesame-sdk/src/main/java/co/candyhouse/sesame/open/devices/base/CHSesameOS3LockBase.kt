@@ -47,6 +47,11 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
 
     protected var isConnectedByWM2: Boolean = false
 
+    /** 供 applyServerState 用服务端 wm2State 写入在线状态。 */
+    internal fun setConnectedByWM2(connected: Boolean) {
+        isConnectedByWM2 = connected
+    }
+
     protected var isHistory: Boolean = false
         set(value) {
             if (deviceStatus.value == CHDeviceLoginStatus.logined) {

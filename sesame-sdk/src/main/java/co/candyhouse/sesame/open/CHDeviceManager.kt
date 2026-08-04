@@ -3,6 +3,7 @@ package co.candyhouse.sesame.open
 import android.annotation.SuppressLint
 import android.content.Context
 import co.candyhouse.sesame.ble.CHDeviceUtil
+import co.candyhouse.sesame.ble.applyServerState
 import co.candyhouse.sesame.db.CHDB
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
@@ -144,6 +145,11 @@ object CHDeviceManager {
     }
 
     // 批量设备替换（全量覆盖）
+    /** 用服务端 list 的 stateInfo 直接写入设备状态，替代冷启动 IoT 快照（对齐 iOS applyServerStates）。 */
+    fun applyServerState(device: CHDevices, state: co.candyhouse.sesame.server.dto.StateInfo) {
+        device.applyServerState(state)
+    }
+
     fun receiveCHDeviceKeys(devicesKeys: List<CHDevice>, result: CHResult<ArrayList<CHDevices>>) {
         L.d("hcia", "插入" + devicesKeys.size)
 

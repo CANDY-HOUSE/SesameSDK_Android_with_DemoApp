@@ -73,37 +73,10 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     private val gson by lazy { Gson() }
 
-    override fun getHub3StatusFromIot(deviceUUID: String) {
-        CHAPIClientBiz.getHub3StatusFromIot(deviceUUID) { result ->
-            result.onSuccess { success ->
-                runCatching {
-                    val json = JSONObject(gson.toJson(success.data))
-                    val eventType = json.optString("eventType")
-                    val isConnectIOT = eventType == "connected"
-                    json.optInt("relay_status", -1).takeIf { it != -1 }?.let { isRelayOn = it == 1 }
-                    mechStatus = CHWifiModule2NetWorkStatus(
-                        isAPWork = isConnectIOT,
-                        isNetWork = isConnectIOT,
-                        isIOTWork = isConnectIOT,
-                        isAPConnecting = false,
-                        isConnectingNet = false,
-                        isConnectingIOT = false,
-                        isAPCheck = isConnectIOT
-                    )
-                }.onFailure { e ->
-                    L.e("getHub3StatusFromIot", "parse error: ${e.message}")
-                }
-            }
-            result.onFailure { e ->
-                L.e("getHub3StatusFromIot", "API failed: ${e.message}")
-            }
-        }
-    }
-
     /** 聯網處理  override fun goIOT() {} */
     override fun goIOT() {
         L.d("hcia", "[hub3]goIOT:")
-        getHub3StatusFromIot(deviceId.toString())
+        // 冷启动状态由 getDevicesList 的 stateInfo(applyServerState: wm2State/relayStatus) 提供，MQTT 负责实时更新
         subscribeHub3mechStatus()
         subscribeRelayStatus()
     }

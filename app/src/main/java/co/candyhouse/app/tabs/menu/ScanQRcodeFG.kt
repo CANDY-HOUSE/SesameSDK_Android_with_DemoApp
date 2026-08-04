@@ -345,7 +345,8 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                     ) {}
                 }
 
-                mDeviceModel.updateDevices()
+                // 加钥匙后重新拉服务端列表（含 stateInfo）刷新，对齐 iOS 扫码后 getCHUserKeys
+                mDeviceModel.refreshDevices()
                 onSuccess()
             }
             result.onFailure {

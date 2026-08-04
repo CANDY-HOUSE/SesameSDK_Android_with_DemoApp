@@ -53,6 +53,8 @@ data class StateInfo(
     val latestFwVer: String? = null,
     val timestamp: Long? = null,
     val wm2State: Boolean? = null,
+    val position: Int? = null,        // SS5/Bike2 角度（0-1024），用于冷启动近似角度
+    val relayStatus: Int? = null,     // Hub3 继电器状态（1=开）
     val remoteList: List<IrRemote>? = null,
     val scriptList: List<BotScriptItem>? = null
 )
