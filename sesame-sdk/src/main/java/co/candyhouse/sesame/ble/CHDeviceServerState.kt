@@ -52,17 +52,17 @@ internal fun CHDevices.applyServerState(state: StateInfo) {
 
     state.batteryPercentage?.let { batteryPercentage = it }
 
-    val flags: Byte = if (isLocked) 2 else 0 // bit1 = isInLockRange
+    val flags = if (isLocked) 2 else 4 // bit1 isInLockRange / bit2 isInUnlockRange
     when (this) {
         is CHSesame5Device -> {
             val pos = ((state.position ?: 0) * 360 / 1024).toShort()
             // CHSesame5MechStatus: [0,1]battery [2,3]target [4,5]position [6]flags
-            val bytes = 0.toShort().toReverseBytes() + pos.toReverseBytes() + pos.toReverseBytes() + byteArrayOf(flags)
+            val bytes = 0.toShort().toReverseBytes() + pos.toReverseBytes() + pos.toReverseBytes() + byteArrayOf((flags or 16).toByte()) // SS5: bit4(16)=isStop
             mechStatus = CHSesame5MechStatus(bytes)
         }
         is CHSesameBike2Device -> {
             // CHSesameBike2MechStatus: [0,1]battery [2]flags
-            val bytes = 0.toShort().toReverseBytes() + byteArrayOf(flags)
+            val bytes = 0.toShort().toReverseBytes() + byteArrayOf((flags or 4).toByte()) // Bike2: bit2(4)=isStop
             mechStatus = CHSesameBike2MechStatus(bytes)
         }
         // Bot2 等无角度环，仅用 deviceShadowStatus
