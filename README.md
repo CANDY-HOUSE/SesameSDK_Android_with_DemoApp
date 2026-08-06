@@ -1,175 +1,197 @@
-![SesameSDK](https://github.com/CANDY-HOUSE/.github/blob/main/profile/images/SesameSDK.png?raw=true)
-# SesameSDK3.0 for Android
+![Sesame SDK](https://raw.githubusercontent.com/CANDY-HOUSE/.github/refs/heads/main/profile/images/SesameSDK.png)
 
-- Sesame app on [![Play Store](https://img.shields.io/badge/Play%20Store-34A853?logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
-- Sesame app on [![GitHub release](https://img.shields.io/github/release/CANDY-HOUSE/SesameSDK_Android_with_DemoApp.svg)](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases/latest)
+# SesameOS3 Android
 
-- ![CANDY HOUSE](https://jp.candyhouse.co/cdn/shop/files/3_eea4302e-b1ab-435d-8112-f97d85d5eda2.png?v=1682502225&width=18)[CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
+日本語 | [简体中文](README_zh-CN.md) | [English](README_en.md)
 
+CANDY HOUSE の Android アプリと Sesame SDK を収録したオープンソースプロジェクトです。現在は `co.candyhouse.sesame.ble.os3` を中心に、Sesame OS3 デバイスの BLE 接続、登録、操作、状態同期、ファームウェア更新を提供しています。
 
-## 概要
-#### SesameSDKは、Androidアプリケーション向けの無料で、シンプル且つパワフルなBluetooth/ AIoTライブラリです。Sesameの公式アプリケーションもこのSesameSDKを使用してすべての機能を構築し実現しております。SesameSDKでできること：
+- [CANDY HOUSE 公式サイト](https://jp.candyhouse.co/)
+- [Google Play](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
+- [GitHub Releases](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases)
 
-- Sesameデバイスの登録（Sesame 5、Sesame 5 pro、Sesame Bike2、BLE Connector1、Open Sensor1、Sesame Touch 1 Pro、 Sesame Touch 1 、Sesame Bot1、WIFI Module2、Sesame 4、Sesame 3、Sesame Bike1、）
-- 施錠、解除、作動させるなど
-- 履歴記録の取得
-- SesameOS3のアップデート
-- デバイスの各種設定
-- バッテリー残量の取得
+## SDK の導入
 
+### 動作環境
 
-##  Requirements
-<img src="https://img.shields.io/badge/Kotlin-1.4-7F52FF" />.  
-<img src="https://img.shields.io/badge/Bluetooth-4.0LE +-0082FC" />  
-<img src="https://img.shields.io/badge/Android-5.0 +-3DDC84" />  
-<img src="https://img.shields.io/badge/Android Studio-2022 +-3DDC84" />  
+- Android Studio
+- JDK 17
+- Android SDK 36
+- minSdk 24
 
-## 設定方法
+### 1. 依存関係を追加する
 
-本デモはAWS・Firebaseサービスを使用します。以下の手順で設定してください：
+同じプロジェクト内のソースコードを使用する場合：
 
-1. **Google Firebase設定**  
-   「app/google-services.json」ファイルを置き換えてください。詳細はGoogle Firebase連携をご参照ください
-2. **Google Maps API設定**  
-   「app.properties」を開き、「YOUR_GOOGLE_MAP_KEY」を置き換えてください
-3. **AWS設定**  
-   無料で利用可能なAWS設定パラメータを提供していますが、リクエスト回数に制限があります
- 
-### 1. ライブラリーの依存
-1.1 ソースコード統合
-```svg
-   implementation project(':sesame-sdk')
+```groovy
+dependencies {
+    implementation project(':sesame-sdk')
+}
 ```
-1.2 JitPack統合
-```svg
-   // settings.gradle
-   dependencyResolutionManagement {
-		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-		repositories {
-			maven { url 'https://jitpack.io' }
-		}
-	}
 
-   // build.gradle
-   dependencies {
-       implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesame-sdk:Tag'
-	}
-```
-最新バージョンを確認：[https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp](https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp)
-### 2. manifest.xml でAndroid権限を設定しましょう
-```agsl
-   
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.FLASHLIGHT" />
+JitPack を使用する場合、`settings.gradle` にリポジトリを追加します。
 
-    <uses-feature
-        android:name="android.hardware.bluetooth"
-        android:required="true" />
-    <uses-feature
-        android:name="android.hardware.bluetooth_le"
-        android:required="false" />
-```
-### 3. application 初期化
-```agsl
-   override fun onCreate() {
-        super.onCreate()
-           CHBleManager(this)
-        }
-```
-CHBleManagerの初期化は、端末のBluetoothが正常に動作しているか、端末から権限をもらっているか、Bluetoothが起動しているかを判断します。すべてが正常に動作している場合、Bluetoothスキャンが始まります。
-Bluetooth Service Uuid:0000FD81-0000-1000-8000-00805f9b34fb
-```agsl
- bluetoothAdapter.bluetoothLeScanner.startScan(
- mutableListOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(UUID.fromString("0000FD81-0000-1000-8000-00805f9b34fb"))).build()), ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanner)
-
-```
-bleScannerがスキャンしたデバイスをCHDeviceMapに入れる。
-
-### 4. 新規デバイスはScanNewDeviceFGオブジェクトに追加され、AdapterはCHDeviceMapからフィルタリングされた(it.rssi!=null)データをリストで表示します。
-```svg
-    private var mDeviceList = ArrayList<CHDevices>()
- CHBleManager.delegate = object : CHBleManagerDelegate {
-            override fun didDiscoverUnRegisteredCHDevices(devices: List<CHDevices>) {
-
-          //     L.d("devices size",devices.size.toString())
-                mDeviceList.clear()
-                mDeviceList.addAll(devices.filter { it.rssi != null }
-//                    .filter { it.rssi!! > -65 }///註冊列表只顯示距離近的
-                )
-                mDeviceList.sortBy { it.getDistance() }
-                mDeviceList.firstOrNull()?.connect { }
-                leaderboard_list.post((leaderboard_list.adapter as GenericAdapter<*>)::notifyDataSetChanged)
-            }
-        }
+```groovy
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
+}
 ```
-### 5. デバイスとの接続手順は、connectを実行し、onBleDeviceStatusChangedでデバイスの状態を監視すること。
-```agsl
-            device.connect { }
-            doRegisterDevice(device)
-            device.delegate = object : CHDeviceStatusDelegate {
-                override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {
-                    if (status == CHDeviceStatus.ReadyToRegister) {
-                      doRegisterDevice(device)
-                       
+
+アプリの `build.gradle` に SDK を追加します。`<version>` は [Releases](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases) にある利用したいタグへ置き換えてください。
+
+```groovy
+dependencies {
+    implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesame-sdk:<version>'
+}
+```
+
+### 2. 権限を設定する
+
+アプリの `AndroidManifest.xml` に必要な権限を追加し、BLE スキャン前に位置情報および Bluetooth の実行時権限を取得してください。
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+<uses-permission android:name="android.permission.INTERNET" />
+
+<uses-feature
+    android:name="android.hardware.bluetooth_le"
+    android:required="false" />
+```
+
+### 3. CANDY HOUSE サービスを初期化する
+
+Sesame OS3 の登録やクラウド機能を利用するには、アプリ起動時に以下を初期化します。
+
+1. Amplify に `AWSCognitoAuthPlugin` と `AWSApiPlugin` を登録し、Cognito / API の設定で `Amplify.configure(...)` を実行する。
+2. `CHAPIClientBiz.initialize(applicationContext)` を実行する。
+3. `CHBleManager(applicationContext)` を実行する。
+
+実装例は Demo App の [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/ext/aws/AWSStatus.kt) と [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt) を参照してください。
+
+```kotlin
+override fun onCreate() {
+    super.onCreate()
+
+    // Amplify の Auth / API 設定後に初期化する
+    CHAPIClientBiz.initialize(applicationContext)
+    CHBleManager(applicationContext)
+}
+```
+
+公開 Demo 用の CANDY HOUSE サービス設定は評価用途であり、リクエスト数などに制限がある場合があります。本番環境では、自分の Firebase / AWS / Google Maps 設定を使用し、認証情報をリポジトリへコミットしないでください。
+
+Demo App を実行する場合は、次のローカル設定も必要です。
+
+- `app.properties`：CANDY HOUSE API、AWS Cognito / IoT、Google Maps の設定
+- `app/google-services.json`：Firebase の設定
+
+### 4. デバイスを検出して登録する
+
+権限取得後にスキャンを開始し、未登録デバイスを受け取ります。接続後、状態が `ReadyToRegister` になった時点で `register` を実行してください。
+
+```kotlin
+CHBleManager.delegate = object : CHBleManagerDelegate {
+    override fun didDiscoverUnRegisteredCHDevices(devices: List<CHDevices>) {
+        val device = devices.firstOrNull() ?: return
+
+        device.delegate = object : CHDeviceStatusDelegate {
+            override fun onBleDeviceStatusChanged(
+                device: CHDevices,
+                status: CHDeviceStatus,
+                shadowStatus: CHDeviceStatus?
+            ) {
+                if (status == CHDeviceStatus.ReadyToRegister) {
+                    device.register { result ->
+                        result.onSuccess { /* 登録成功 */ }
+                        result.onFailure { /* 登録失敗 */ }
                     }
                 }
             }
-            
-           
-   fun  doRegisterDevice(device: CHDevices){
-       device.register {
-       it.onSuccess {
-           //  登録成功
-       }
-       it.onFailure {
-          //  登録失敗
-           }
-       }
-   }
+        }
+
+        device.connect { }
+    }
+}
+
+CHBleManager.enableScan { result ->
+    result.onFailure { /* 権限または Bluetooth の状態を確認 */ }
+}
 ```
-### 6. device.register登録コマンドの成功や失敗のコールバックによって、所属製品のdevice modelを判断できます。
-```svg
-                    (device as? CHWifiModule2)?.let {
-                     
-                    }
-                    (device as? CHSesame2)?.let {
-                     
-                    }
-                    (device as? CHSesame5)?.let {
-                    
-                    }
-                    (device as? CHSesameTouchPro)?.let {
-                       
-                    }
 
+## プロジェクト構成
+
+| モジュール | 内容 |
+| --- | --- |
+| `app` | デバイス、アカウント、フレンドなどを含む Android Demo App |
+| `sesame-sdk` | BLE、OS3 デバイス実装、ローカル DB、クラウド通信 |
+| `sesame-sdk/.../open` | 公開デバイス API、製品モデル、デバイス管理 |
+| `sesame-sdk/.../ble/os3` | 現在メンテナンスしている OS3 プロトコルとデバイス実装 |
+
+## OS3 デバイス構成
+
+```mermaid
+flowchart TB
+    Devices[CHDevices]
+
+    Devices --> Lock[CHSesameLock]
+    Lock --> LockBase[CHSesameOS3LockBase]
+    LockBase --> S5[CHSesame5Device]
+    LockBase --> Bike2[CHSesameBike2Device]
+    Bike2 --> Bike3[CHSesameBike3Device<br/>+ Fingerprint capability]
+    LockBase --> Bot2[CHSesameBot2Device]
+
+    Devices --> Connector[CHSesameConnector]
+    Connector --> Bio[CHSesameBiometricDevice]
+    Bio --> BioImpl[CHSesameBiometricDeviceImpl<br/>Capabilities by product profile]
+
+    Devices --> Gateway[CHWifiModule2]
+    Gateway --> Hub[CHHub3 / CHHub3Device]
 ```
-- [Sesame 5](doc/command/sesame5fun.md):このインスタンスオブジェクトは、Sesame5、Sesame5 Pro製品に適用される。
-- [Sesame Bike 2](doc/command/sesamebike2fun.md) : このインスタンスオブジェクトは、Sesame Bike 2 製品に適用される。
-- [Sesame WiFi Module 2](doc/command/sesamewifimodule.md):このインスタンスオブジェクトは、WiFi Module 2 製品に適用される。
-- [Sesame touch pro](doc/command/sesametouchpro.md):このインスタンスオブジェクトは、 BLE Connector1、 Sesame Touch 1 Pro 、  Sesame Touch 1 製品に適用される。
-- [Sesame Open Sensor 1](doc/command/sesame_open_sensor.md):このインスタンスオブジェクトは、Open Sensor 1 製品に適用される。
-- [Class对象](doc/class/allclass.md)
-### フローチャート
-![BleConnect](doc/bleprotocol/BleConnect.svg)
 
-### [プロジェクト構造](./doc/product_structure.md)
-### [プロジェクトフレームワーク](./doc/Sesame_framework.md)
-### [プロジェクトインターフェース](./doc/APP_instroduce.md)
-###  [その他の関連説明](./doc/sesame_code.md)
- ### Android関連知識
-- [Android Ble](https://developer.android.com/guide/topics/connectivity/bluetooth-le?hl=zh-cn)
-- [Android Nfc](https://developer.android.com/guide/topics/connectivity/nfc?hl=zh-cn)
-- [Android jetpack](https://developer.android.com/jetpack?hl=zh-cn)
+### 対応製品
 
+対応範囲は `CHProductModel` を基準とし、実際の Device 実装ごとに分類しています。
 
+| Device 実装 | 製品 |
+| --- | --- |
+| `CHSesame5Device` | Sesame 5、Sesame 5 Pro、Sesame 5 US、Sesame 6、Sesame 6 Pro、Sesame 6 Pro SlidingDoor、Sesame miwa、BLE Connector 1 |
+| `CHSesameBike2Device` | Sesame Bike 2 |
+| `CHSesameBike3Device` | Sesame Bike 3（指紋機能を組み合わせ） |
+| `CHSesameBot2Device` | Sesame Bot 2、Sesame Bot 3 |
+| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2、Remote、Remote Nano、Sesame Touch 1/1 Pro/2/2 Pro、Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI |
+| `CHHub3Device` | Hub 3、Hub 3 LTE |
 
+> メンテナンス終了：Sesame 3（`SS2`）、WiFi Module 2（`WM2`）、Sesame Bot 1、Sesame Bike 1、Sesame 4（`SS4`）。
 
+### 生体認証機能
 
+`CHSesameBiometricDeviceImpl` は製品 Profile に応じて機能を組み合わせます。
+
+| 製品シリーズ | 機能 |
+| --- | --- |
+| Touch | カード、指紋 |
+| Touch Pro | カード、指紋、暗証番号 |
+| Face | カード、指紋、手のひら、顔認証 |
+| Face Pro | カード、指紋、暗証番号、手のひら、顔認証 |
+| Face AI | 手のひら、顔認証 |
+| Face Pro AI | 暗証番号、手のひら、顔認証 |
+
+関連 API：`CHCardCapable`、`CHPassCodeCapable`、`CHFingerPrintCapable`、`CHPalmCapable`、`CHFaceCapable`、`CHRemoteNanoCapable`。
+
+## ビルド
+
+```bash
+./gradlew :app:assembleDebug
+```
+
+## メンテナンス方針
+
+- 新製品は `CHProductModel` に追加し、対応する OS3 Device 実装へマッピングします。
+- 共通処理は基底クラスへ集約し、製品差分は個別実装または Capability の組み合わせで対応します。
+- `co.candyhouse.sesame.ble.os2` は互換性維持のための旧コードであり、現在のメンテナンス対象外です。

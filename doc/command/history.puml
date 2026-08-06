@@ -1,4 +1,0 @@
-@startuml
-APP -> Device: send_command(4,isPeek))
-Device --> APP: response_command(response,command,status,payload)
-@enduml

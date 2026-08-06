@@ -1,4 +1,0 @@
-@startuml
-APP -> Device: send_command(3，80,payload))
-Device --> APP: response_command(3,7,80,status)
-@enduml

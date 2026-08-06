@@ -1,4 +1,0 @@
-@startuml
-
-Device --> APP: response_command(8,14,randomcode)
-@enduml

@@ -14,7 +14,7 @@ android {
             def passStore = System.getenv("storePassword")
             def passKey = System.getenv("keyPassword")
             def ssmKeyAlias = System.getenv("keyAlias")
-            storeFile file(rootProject.file('Sesame.jks').getCanonicalFile())
+            storeFile file('keystore/Sesame.jks')
             storePassword "$passStore"
             keyPassword "$passKey"
             keyAlias "$ssmKeyAlias"
