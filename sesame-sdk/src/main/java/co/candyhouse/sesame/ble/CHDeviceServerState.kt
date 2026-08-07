@@ -4,6 +4,8 @@ import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHSesame5Device
 import co.candyhouse.sesame.ble.os3.CHSesameBike2Device
 import co.candyhouse.sesame.ble.os3.CHSesameBot2Device
+import co.candyhouse.sesame.open.devices.BiometricDeviceType
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.devices.CHSesame5MechStatus
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHSesameBike2MechStatus
@@ -35,6 +37,19 @@ internal fun CHDevices.applyServerState(state: StateInfo) {
         if (this is CHHub3Device) {
             state.relayStatus?.let { isRelayOn = it == 1 }
         }
+        return
+    }
+
+    // Touch / Face 连接器：用服务端状态恢复 WiFi 在线状态
+    val biometricType = (this as? CHSesameBiometricDevice)?.deviceType
+    if (biometricType == BiometricDeviceType.SESAME_TOUCH ||
+        biometricType == BiometricDeviceType.SESAME_TOUCH_PRO ||
+        biometricType == BiometricDeviceType.SESAME_FACE ||
+        biometricType == BiometricDeviceType.SESAME_FACE_PRO ||
+        biometricType == BiometricDeviceType.SESAME_FACE_AI ||
+        biometricType == BiometricDeviceType.SESAME_FACE_PRO_AI
+    ) {
+        deviceShadowStatus = if (wm2Connected) CHDeviceStatus.IotConnected else null
         return
     }
 
