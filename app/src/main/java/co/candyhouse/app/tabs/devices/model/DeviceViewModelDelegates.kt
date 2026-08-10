@@ -180,6 +180,13 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                     }
                 }
             }
+            override fun onSensorDetectIntervalReceive(device: CHDevices, intervalMs: Short) {
+                notifyDelegates(device) {
+                    if (it is CHDeviceStatusDelegate) {
+                        it.onSensorDetectIntervalReceive(device, intervalMs)
+                    }
+                }
+            }
         }
     }
 
@@ -251,6 +258,12 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
     override fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {
         vm.viewModelScope.launch {
             (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onBleTxPowerReceive(device, txPower)
+        }
+    }
+
+    override fun onSensorDetectIntervalReceive(device: CHDevices, intervalMs: Short) {
+        vm.viewModelScope.launch {
+            (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onSensorDetectIntervalReceive(device, intervalMs)
         }
     }
 

@@ -266,6 +266,8 @@ interface CHDevices {
     */
     companion object {
         const val UNSET_BLE_TX_POWER_VALUE = 21
+        // 固件未上报 sensor 检测间隔时的默认值（毫秒）。非 0 的哨兵值， 0 是合法的间隔。
+        const val UNSET_SENSOR_DETECT_INTERVAL_MS: Short = -1
     }
 
     var mechStatus: CHSesameProtocolMechStatus?
@@ -280,6 +282,9 @@ interface CHDevices {
     // 为了解决门和墙密封较好的情况下， 蓝牙信号受影响， 门外的刷卡机与门内的锁经常断线的问题， 添加此参数。
     // 让用户可以自己设置一个合适的蓝牙信号强度阈值， 以保持BLE长连接。
     var bleTxPower: Byte
+    // sensor 检测间隔（毫秒）。由固件通过 SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING 上报；未上报时为 UNSET_SENSOR_DETECT_INTERVAL_MS，
+    // 表示固件不支持该能力， UI 据此决定是否显示相关设置项。
+    var sensorDetectIntervalMs: Short
     var deviceId: UUID?
     var isRegistered: Boolean
     var productModel: CHProductModel
@@ -298,6 +303,8 @@ interface CHDevices {
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
     fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {}
     fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {}
+    fun getSensorDetectInterval(result: CHResult<Short>) {}
+    fun setSensorDetectInterval(intervalMs: Short, result: CHResult<CHEmpty>) {}
     fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
         if ((this as CHDeviceUtil).sesame2KeyData == null) {
             result.invoke(Result.failure(CHError.BleUnauth.value))
@@ -354,6 +361,7 @@ interface CHDeviceStatusDelegate {
     fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus, shadowStatus: CHDeviceStatus?) {}
     fun onMechStatus(device: CHDevices) {}
     fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {}
+    fun onSensorDetectIntervalReceive(device: CHDevices, intervalMs: Short) {}
 }
 
 enum class CHDeviceStatus(val value: CHDeviceLoginStatus) {

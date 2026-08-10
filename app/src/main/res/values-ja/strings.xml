@@ -238,6 +238,8 @@
     <string name="registering">Registering</string>
 
     <string name="ble_tx_power">BLE送信出力</string>
+    <string name="sensor_detect_interval">検知間隔</string>
+    <string name="millisecond">ミリ秒</string>
     <string name="dBm">dBm</string>
     <string name="dfu_busy">他のCANDY HOUSE製品を更新中、お待ち下さいませ。</string>
 </resources>

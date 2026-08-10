@@ -107,6 +107,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                     showBleTxPowerUI(device, txPower)
                 }
 
+                override fun onSensorDetectIntervalReceive(device: CHDevices, intervalMs: Short) {
+                    L.d("Sensor detect interval", "onSensorDetectIntervalReceive...$intervalMs")
+                    showSensorDetectIntervalUI(device, intervalMs)
+                }
+
                 @SuppressLint("SetTextI18n")
                 override fun onMechStatus(device: CHDevices) {
                     setBatteryResult(device)
@@ -152,6 +157,47 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
                 }
 
                 bleTxPowerZone?.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun showSensorDetectIntervalUI(targetDevice: CHDevices, intervalMs: Short) {
+        L.d("Sensor detect interval", "sensorDetectIntervalMs: $intervalMs")
+
+        val sensorDetectIntervalZone = view?.findViewById<View>(R.id.sensor_detect_interval_zone)
+        val sensorDetectIntervalSeekbar = view?.findViewById<IndicatorSeekBar>(R.id.sensor_detect_interval_seekbar)
+        activity?.runOnUiThread {
+            // 固件未上报有效的 sensor 检测间隔， 表示不支持该能力， 隐藏 UI。
+            if (intervalMs == CHDevices.UNSET_SENSOR_DETECT_INTERVAL_MS) {
+                sensorDetectIntervalZone?.visibility = View.GONE
+                return@runOnUiThread
+            } else {
+                if (!isAdded) return@runOnUiThread
+
+                sensorDetectIntervalSeekbar?.setIndicatorTextFormat("\${PROGRESS} " + getString(R.string.millisecond))
+                sensorDetectIntervalSeekbar?.setProgress(intervalMs.toFloat())
+
+                var lastProgress = intervalMs.toInt()
+                sensorDetectIntervalSeekbar?.onSeekChangeListener = object : OnSeekChangeListener {
+
+                    override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
+
+                    override fun onSeeking(seekParams: SeekParams) {
+                        val currentProgress = seekParams.progress.toInt()
+                        if (currentProgress != lastProgress) {
+                            lastProgress = currentProgress
+                            vibrator?.vibrateCompat(3L)
+                        }
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
+                        val interval = seekBar.progress.toInt().toShort()
+                        L.d("Sensor detect interval", "设置 sensor 检测间隔为： $interval ms ")
+                        targetDevice.setSensorDetectInterval(interval) {}
+                    }
+                }
+
+                sensorDetectIntervalZone?.visibility = View.VISIBLE
             }
         }
     }
@@ -242,6 +288,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
         handleUI(targetDevice)
         setBatteryResult(targetDevice)
         showBleTxPowerUI(targetDevice, targetDevice.bleTxPower)
+        showSensorDetectIntervalUI(targetDevice, targetDevice.sensorDetectIntervalMs)
         setupListeners(targetDevice)
     }
 

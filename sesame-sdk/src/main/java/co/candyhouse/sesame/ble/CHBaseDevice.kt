@@ -23,6 +23,7 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
+import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_SENSOR_DETECT_INTERVAL_MS
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.utils.CHEmpty
@@ -68,6 +69,17 @@ internal interface CHDeviceUtil {
             if (this is CHDevices) {
                 val device: CHDevices = this
                 delegate?.onBleTxPowerReceive(device, device.bleTxPower)
+            }
+        }
+
+    var sensorDetectIntervalMs: Short = UNSET_SENSOR_DETECT_INTERVAL_MS
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+            if (this is CHDevices) {
+                val device: CHDevices = this
+                delegate?.onSensorDetectIntervalReceive(device, device.sensorDetectIntervalMs)
             }
         }
 
@@ -234,6 +246,10 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
         override var bleTxPower: Byte
             get() = this@toCHDevices.bleTxPower
             set(value) { this@toCHDevices.bleTxPower = value }
+
+        override var sensorDetectIntervalMs: Short
+            get() = this@toCHDevices.sensorDetectIntervalMs
+            set(value) { this@toCHDevices.sensorDetectIntervalMs = value }
 
         override var deviceId: UUID?
             get() = this@toCHDevices.deviceId

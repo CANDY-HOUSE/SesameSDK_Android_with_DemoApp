@@ -18,13 +18,17 @@ import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.bytesToUShort
 import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.aescmac.AesCmac
+import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toBigLong
+import co.candyhouse.sesame.utils.toInt
+import co.candyhouse.sesame.utils.toReverseBytes
 import co.candyhouse.sesame.utils.toUInt32ByteArray
 import kotlin.math.abs
 
@@ -66,13 +70,17 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
 
     override fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {
         if (!isBleAvailable(result)) return
-        sendCommand(
-            SesameOS3Payload(
-                SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value,
-                byteArrayOf(txPower)
-            ),
-            DeviceSegmentType.cipher
-        ) {}
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value, byteArrayOf(txPower)), DeviceSegmentType.cipher) {}
+    }
+
+    override fun setSensorDetectInterval(intervalMs: Short, result: CHResult<CHEmpty>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING.value, intervalMs.toReverseBytes()), DeviceSegmentType.cipher) { res ->
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                sensorDetectIntervalMs = intervalMs
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            }
+        }
     }
 
     override fun register(result: CHResult<CHEmpty>) {
@@ -84,21 +92,12 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
         deviceStatus = CHDeviceStatus.Registering
         val serverSecret = mSesameToken.toHexString()
 
-        CHAPIClientBiz.myDevicesRegisterSesame5Post(
-            deviceId.toString(),
-            CHOS3RegisterReq(productModel.productType().toString(), serverSecret)
-        ) { apiResult ->
+        CHAPIClientBiz.myDevicesRegisterSesame5Post(deviceId.toString(), CHOS3RegisterReq(productModel.productType().toString(), serverSecret)) { apiResult ->
             apiResult.exceptionOrNull()?.let { e ->
                 L.d("os3lock", "[register][server] failed: ${e.message}")
             }
 
-            sendCommand(
-                SesameOS3Payload(
-                    SesameItemCode.registration.value,
-                    EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()
-                ),
-                DeviceSegmentType.plain
-            ) { registerRes ->
+            sendCommand(SesameOS3Payload(SesameItemCode.registration.value, EccKey.getPubK().hexStringToByteArray() + System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.plain) { registerRes ->
                 handleRegisterResponse(registerRes, serverSecret, result)
                 goIOT()
             }
@@ -114,16 +113,9 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
             AesCmac(sesame2KeyData!!.secretKey.hexStringToByteArray(), 16).computeMac(mSesameToken)
         }
 
-        cipher = SesameOS3BleCipher(
-            "customDeviceName",
-            sessionAuth!!,
-            ("00" + mSesameToken.toHexString()).hexStringToByteArray()
-        )
+        cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
 
-        sendCommand(
-            SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)),
-            DeviceSegmentType.plain
-        ) { loginPayload ->
+        sendCommand(SesameOS3Payload(SesameItemCode.login.value, sessionAuth.sliceArray(0..3)), DeviceSegmentType.plain) { loginPayload ->
             handleLoginResponse(loginPayload)
         }
     }
@@ -133,43 +125,18 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
         val currentTimestamp = System.currentTimeMillis() / 1000
         val timeMinus = currentTimestamp.minus(systemTime)
         if (abs(timeMinus) > 3) {
-            sendCommand(
-                SesameOS3Payload(
-                    SesameItemCode.time.value,
-                    System.currentTimeMillis().toUInt32ByteArray()
-                ),
-                DeviceSegmentType.cipher
-            ) {}
+            sendCommand(SesameOS3Payload(SesameItemCode.time.value, System.currentTimeMillis().toUInt32ByteArray()), DeviceSegmentType.cipher) {}
         }
     }
 
-    protected abstract fun handleRegisterResponse(
-        registerRes: SSM3ResponsePayload,
-        serverSecret: String,
-        result: CHResult<CHEmpty>
-    )
+    protected abstract fun handleRegisterResponse(registerRes: SSM3ResponsePayload, serverSecret: String, result: CHResult<CHEmpty>)
 
-    protected fun saveDeviceAndCipher(
-        deviceSecretHex: String,
-        serverSecret: String,
-        result: CHResult<CHEmpty>
-    ) {
-        val candyDevice = CHDevice(
-            deviceId.toString(),
-            advertisement!!.productModel!!.deviceModel(),
-            null,
-            "0000",
-            deviceSecretHex,
-            serverSecret
-        )
+    protected fun saveDeviceAndCipher(deviceSecretHex: String, serverSecret: String, result: CHResult<CHEmpty>) {
+        val candyDevice = CHDevice(deviceId.toString(), advertisement!!.productModel!!.deviceModel(), null, "0000", deviceSecretHex, serverSecret)
         sesame2KeyData = candyDevice
 
         val sessionAuth = AesCmac(deviceSecretHex.hexStringToByteArray(), 16).computeMac(mSesameToken)
-        cipher = SesameOS3BleCipher(
-            "customDeviceName",
-            sessionAuth!!,
-            ("00" + mSesameToken.toHexString()).hexStringToByteArray()
-        )
+        cipher = SesameOS3BleCipher("customDeviceName", sessionAuth!!, ("00" + mSesameToken.toHexString()).hexStringToByteArray())
 
         CHDB.CHSS2Model.insert(candyDevice) {
             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
@@ -189,28 +156,16 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
 
     protected fun readHistoryCommand() {
         val isConnectNET = isInternetAvailable()
-        sendCommand(
-            SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)),
-            DeviceSegmentType.cipher
-        ) { res ->
+        sendCommand(SesameOS3Payload(SesameItemCode.history.value, byteArrayOf(0x01)), DeviceSegmentType.cipher) { res ->
             val historyPayload = res.payload
             onHistoryReceivedInternal(historyPayload)
 
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 if (isConnectNET && !isConnectedByWM2) {
-                    CHAPIClientBiz.postOS3History(
-                        deviceId.toString().uppercase(),
-                        historyPayload.toHexString()
-                    ) { postResult ->
+                    CHAPIClientBiz.postOS3History(deviceId.toString().uppercase(), historyPayload.toHexString()) { postResult ->
                         val recordId = historyPayload.sliceArray(0..3)
                         postResult.onSuccess {
-                            sendCommand(
-                                SesameOS3Payload(
-                                    SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value,
-                                    recordId
-                                ),
-                                DeviceSegmentType.cipher
-                            ) { deleteRes ->
+                            sendCommand(SesameOS3Payload(SesameItemCode.SSM2_ITEM_CODE_HISTORY_DELETE.value, recordId), DeviceSegmentType.cipher) { deleteRes ->
                                 L.d("os3lock", "[history][delete]: ${deleteRes.cmdResultCode}")
                             }
                         }
@@ -233,6 +188,12 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
 
             SesameItemCode.SSM3_ITEM_CODE_BLE_TX_POWER_SETTING.value -> {
                 bleTxPower = receivePayload.payload[0]
+            }
+
+            SesameItemCode.SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING.value -> {
+                val intervalMs = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
+                L.d("os3lock", "[sensorDetectIntervalMs] $intervalMs")
+                sensorDetectIntervalMs = intervalMs
             }
         }
 

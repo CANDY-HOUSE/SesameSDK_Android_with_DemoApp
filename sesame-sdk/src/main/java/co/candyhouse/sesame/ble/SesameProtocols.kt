@@ -31,7 +31,7 @@ internal enum class SesameResultCode(val value: UByte) {
 
 internal enum class SesameItemCode(val value: UByte) {
 
-    none(0u), registration(1u), login(2u), user(3u), history(4u), versionTag(5u), disconnectRebootNow(6u), enableDFU(7u), time(8u), bleConnectionParam(9u), bleAdvParam(10u), autolock(11u), serverAdvKick(12u), ssmtoken(13u), initial(14u), IRER(15u), timePhone(16u), magnet(17u), SSM2_ITEM_CODE_HISTORY_DELETE(18u), SENSOR_INVERVAL(19u), SENSOR_INVERVAL_GET(20u),
+    none(0u), registration(1u), login(2u), user(3u), history(4u), versionTag(5u), disconnectRebootNow(6u), enableDFU(7u), time(8u), bleConnectionParam(9u), bleAdvParam(10u), autolock(11u), serverAdvKick(12u), ssmtoken(13u), initial(14u), IRER(15u), timePhone(16u), magnet(17u), SSM2_ITEM_CODE_HISTORY_DELETE(18u), SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING(19u), SENSOR_INVERVAL_GET(20u),
 
     mechSetting(80u), mechStatus(81u), lock(82u), unlock(83u), moveTo(84u), driveDirection(85u), stop(86u), detectDir(87u), toggle(88u), click(89u), DOOR_OPEN(90u), DOOR_CLOSE(91u), OPS_CONTROL(92u), SCRIPT_SETTING(93u), SCRIPT_SELECT(94u), SCRIPT_CURRENT(95u), SCRIPT_NAME_LIST(96u),ADD_SESAME(101u), PUB_KEY_SESAME(102u), REMOVE_SESAME(103u), Reset(104u), NOTIFY_LOCK_DOWN(106u),
     SSM_OS3_CARD_CHANGE(107u), SSM_OS3_CARD_DELETE(108u), SSM_OS3_CARD_GET(109u), SSM_OS3_CARD_NOTIFY(110u), SSM_OS3_CARD_LAST(111u), SSM_OS3_CARD_FIRST(112u), SSM_OS3_CARD_MODE_GET(113u), SSM_OS3_CARD_MODE_SET(114u),
@@ -49,7 +49,7 @@ internal enum class SesameItemCode(val value: UByte) {
     STP_ITEM_CODE_CARDS_ADD(182u), STP_ITEM_CODE_DEVICE_STATUS(183u), REMOTE_NANO_ITEM_CODE_SET_TRIGGER_DELAYTIME(190u), REMOTE_NANO_ITEM_CODE_PUB_TRIGGER_DELAYTIME(191u),
     SSM_OS3_FACE_MODE_DELETE_NOTIFY(192u),SSM_OS3_PALM_MODE_DELETE_NOTIFY(193u),SSM_OS3_RADAR_PARAM_SET(200u),SSM_OS3_RADAR_PARAM_PUBLISH(201u),
     SSM3_ITEM_CODE_BATTERY_VOLTAGE(202u),SSM3_ITEM_CODE_SESAME_UNSUPPORT(204u),SS3_ITEM_CODE_SET_ADV_PRODUCT_TYPE(205u),
-    SSM3_ITEM_CODE_BLE_TX_POWER_SETTING(206u),HUB3_ITEM_CODE_RELAY_SWITCH(208u)
+    SSM3_ITEM_CODE_BLE_TX_POWER_SETTING(206u), HUB3_ITEM_CODE_RELAY_SWITCH(208u)
 }
 
 internal enum class SSM2OpCode(val value: Byte) {
