@@ -45,7 +45,13 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
                     override fun onMechStatus(device: CHDevices) {
                         updateLockView(it)
                     }
+
+                    override fun onLockUnlockSwitchPointReceive(device: CHDevices, point: Short) {
+                        updateSwitchPointUI(device)
+                    }
                 }.bindLifecycle(viewLifecycleOwner)
+                // 若固件已上报过切换点，进入页面时即显示按钮与角度标记
+                updateSwitchPointUI(it)
             }
             bind.ssmView.setOnClickListener {
                 (this as? CHSesame2)?.toggle() {}
@@ -99,6 +105,22 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
             }
             bind.magnetZone.setOnClickListener {
                 (this as? CHSesame5)?.magnet {}
+            }
+            bind.switchPointZone.setOnClickListener {
+                if ((this as CHDevices).deviceStatus.value == CHDeviceLoginStatus.unlogined) {
+                    return@setOnClickListener
+                }
+                (this as? CHSesame5)?.let { device ->
+                    val point = (device.mechStatus?.position ?: 0).toShort()
+                    device.setLockUnlockSwitchPoint(point) {
+                        it.onSuccess {
+                            L.d(tag, "[setLockUnlockSwitchPoint] success point=$point")
+                        }
+                        it.onFailure { err ->
+                            L.e(tag, "[setLockUnlockSwitchPoint] failed message=${err.message}")
+                        }
+                    }
+                }
             }
             bind.magnetZone.setOnTouchListener { _, event ->
                 when (event.actionMasked) {
@@ -183,7 +205,19 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
                 } else {
                     bind.ssmView.setLock(device)
                 }
+                updateSwitchPointUI(device)
             }
+        }
+    }
+
+    /** 根据固件是否上报过切换点（hasLockUnlockSwitchPointSetting），显示/隐藏切换点按钮，并在角度视图上标记对应位置。 */
+    private fun updateSwitchPointUI(device: CHDevices) {
+        if (device.hasLockUnlockSwitchPointSetting) {
+            bind.switchPointZone.visibility = View.VISIBLE
+            bind.ssmView.setSwitchPoint(device.lockUnlockSwitchPoint.toInt())
+        } else {
+            bind.switchPointZone.visibility = View.GONE
+            bind.ssmView.clearSwitchPoint()
         }
     }
 

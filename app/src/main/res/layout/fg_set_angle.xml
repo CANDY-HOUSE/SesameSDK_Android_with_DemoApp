@@ -163,6 +163,54 @@
                     android:layout_height="1dp" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/switch_point_zone"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="50dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_icon_lock_uncheck" />
+
+                    <ImageView
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_marginStart="2dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_icon_unlock_uncheck" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/set_switch_point_tv"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/set_switch_point_position"
+                    android:textColor="@color/title"
+                    android:textSize="20sp" />
+
+                <View
+                    android:layout_width="85dp"
+                    android:layout_height="1dp" />
+            </LinearLayout>
+
             <RelativeLayout
                 android:id="@+id/magnet_zone"
                 android:layout_width="match_parent"

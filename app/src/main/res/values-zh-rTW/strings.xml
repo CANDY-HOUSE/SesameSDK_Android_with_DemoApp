@@ -255,5 +255,6 @@
     <string name="sensor_detect_interval">感測器偵測間隔</string>
     <string name="millisecond">毫秒</string>
     <string name="dBm">dBm</string>
+    <string name="set_switch_point_position">切換點</string>
     <string name="dfu_busy">其他CANDY HOUSE產品正在進行升級, 請稍候。</string>
 </resources>

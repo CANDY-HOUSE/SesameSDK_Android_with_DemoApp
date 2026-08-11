@@ -31,7 +31,7 @@ internal enum class SesameResultCode(val value: UByte) {
 
 internal enum class SesameItemCode(val value: UByte) {
 
-    none(0u), registration(1u), login(2u), user(3u), history(4u), versionTag(5u), disconnectRebootNow(6u), enableDFU(7u), time(8u), bleConnectionParam(9u), bleAdvParam(10u), autolock(11u), serverAdvKick(12u), ssmtoken(13u), initial(14u), IRER(15u), timePhone(16u), magnet(17u), SSM2_ITEM_CODE_HISTORY_DELETE(18u), SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING(19u), SENSOR_INVERVAL_GET(20u),
+    none(0u), registration(1u), login(2u), user(3u), history(4u), versionTag(5u), disconnectRebootNow(6u), enableDFU(7u), time(8u), bleConnectionParam(9u), bleAdvParam(10u), autolock(11u), serverAdvKick(12u), ssmtoken(13u), initial(14u), IRER(15u), timePhone(16u), magnet(17u), SSM2_ITEM_CODE_HISTORY_DELETE(18u), SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING(19u), SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING(20u),
 
     mechSetting(80u), mechStatus(81u), lock(82u), unlock(83u), moveTo(84u), driveDirection(85u), stop(86u), detectDir(87u), toggle(88u), click(89u), DOOR_OPEN(90u), DOOR_CLOSE(91u), OPS_CONTROL(92u), SCRIPT_SETTING(93u), SCRIPT_SELECT(94u), SCRIPT_CURRENT(95u), SCRIPT_NAME_LIST(96u),ADD_SESAME(101u), PUB_KEY_SESAME(102u), REMOVE_SESAME(103u), Reset(104u), NOTIFY_LOCK_DOWN(106u),
     SSM_OS3_CARD_CHANGE(107u), SSM_OS3_CARD_DELETE(108u), SSM_OS3_CARD_GET(109u), SSM_OS3_CARD_NOTIFY(110u), SSM_OS3_CARD_LAST(111u), SSM_OS3_CARD_FIRST(112u), SSM_OS3_CARD_MODE_GET(113u), SSM_OS3_CARD_MODE_SET(114u),

@@ -24,6 +24,7 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
 import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_SENSOR_DETECT_INTERVAL_MS
+import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_LOCK_UNLOCK_SWITCH_POINT
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.utils.CHEmpty
@@ -80,6 +81,28 @@ internal interface CHDeviceUtil {
             if (this is CHDevices) {
                 val device: CHDevices = this
                 delegate?.onSensorDetectIntervalReceive(device, device.sensorDetectIntervalMs)
+            }
+        }
+
+    var lockUnlockSwitchPoint: Short = UNSET_LOCK_UNLOCK_SWITCH_POINT
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+            if (this is CHDevices) {
+                val device: CHDevices = this
+                delegate?.onLockUnlockSwitchPointReceive(device, device.lockUnlockSwitchPoint)
+            }
+        }
+
+    var hasLockUnlockSwitchPointSetting: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+            if (this is CHDevices) {
+                val device: CHDevices = this
+                delegate?.onLockUnlockSwitchPointReceive(device, device.lockUnlockSwitchPoint)
             }
         }
 
@@ -250,6 +273,14 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
         override var sensorDetectIntervalMs: Short
             get() = this@toCHDevices.sensorDetectIntervalMs
             set(value) { this@toCHDevices.sensorDetectIntervalMs = value }
+
+        override var lockUnlockSwitchPoint: Short
+            get() = this@toCHDevices.lockUnlockSwitchPoint
+            set(value) { this@toCHDevices.lockUnlockSwitchPoint = value }
+
+        override var hasLockUnlockSwitchPointSetting: Boolean
+            get() = this@toCHDevices.hasLockUnlockSwitchPointSetting
+            set(value) { this@toCHDevices.hasLockUnlockSwitchPointSetting = value }
 
         override var deviceId: UUID?
             get() = this@toCHDevices.deviceId

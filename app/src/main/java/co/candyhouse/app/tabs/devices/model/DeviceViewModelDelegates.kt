@@ -187,6 +187,13 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
                     }
                 }
             }
+            override fun onLockUnlockSwitchPointReceive(device: CHDevices, point: Short) {
+                notifyDelegates(device) {
+                    if (it is CHDeviceStatusDelegate) {
+                        it.onLockUnlockSwitchPointReceive(device, point)
+                    }
+                }
+            }
         }
     }
 
@@ -264,6 +271,12 @@ class DeviceViewModelDelegates(private val vm: CHDeviceViewModel) : CHDeviceStat
     override fun onSensorDetectIntervalReceive(device: CHDevices, intervalMs: Short) {
         vm.viewModelScope.launch {
             (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onSensorDetectIntervalReceive(device, intervalMs)
+        }
+    }
+
+    override fun onLockUnlockSwitchPointReceive(device: CHDevices, point: Short) {
+        vm.viewModelScope.launch {
+            (vm.ssmosLockDelegates[device] as? CHDeviceStatusDelegate)?.onLockUnlockSwitchPointReceive(device, point)
         }
     }
 

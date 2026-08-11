@@ -83,6 +83,17 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
         }
     }
 
+    override fun setLockUnlockSwitchPoint(point: Short, result: CHResult<CHEmpty>) {
+        if (!isBleAvailable(result)) return
+        sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING.value, point.toReverseBytes()), DeviceSegmentType.cipher) { res ->
+            if (res.cmdResultCode == SesameResultCode.success.value) {
+                hasLockUnlockSwitchPointSetting = true
+                lockUnlockSwitchPoint = point
+                result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            }
+        }
+    }
+
     override fun register(result: CHResult<CHEmpty>) {
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
             result.invoke(Result.failure(NSError("Busy", "CBCentralManager", 7)))
@@ -194,6 +205,13 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
                 val intervalMs = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
                 L.d("os3lock", "[sensorDetectIntervalMs] $intervalMs")
                 sensorDetectIntervalMs = intervalMs
+            }
+            
+            SesameItemCode.SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING.value -> {
+                val point = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
+                L.d("os3lock", "[lockUnlockSwitchPoint] $point")
+                hasLockUnlockSwitchPointSetting = true
+                lockUnlockSwitchPoint = point
             }
         }
 
