@@ -12,12 +12,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import co.candyhouse.app.R
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertTheme
 import co.utils.alertview.objects.AlertAction
-
-import java.util.*
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /**
  * Created by hammad.akram on 3/14/18.

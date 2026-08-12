@@ -36,8 +36,8 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
-import co.candyhouse.sesame.server.CHApiException
 import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.CHApiException
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.alertview.fragments.toastMSG

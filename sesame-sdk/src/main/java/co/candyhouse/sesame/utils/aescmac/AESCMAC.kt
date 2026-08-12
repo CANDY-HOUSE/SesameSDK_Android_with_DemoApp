@@ -2,7 +2,7 @@ package co.candyhouse.sesame.utils.aescmac
 
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
-import java.util.*
+import java.util.Arrays
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec

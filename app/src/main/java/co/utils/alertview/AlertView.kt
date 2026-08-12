@@ -1,11 +1,11 @@
 package co.utils.alertview
 
 import androidx.appcompat.app.AppCompatActivity
-import co.utils.alertview.objects.AlertAction
-import co.utils.alertview.fragments.BottomSheetFragment
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.enums.AlertTheme
+import co.utils.alertview.fragments.BottomSheetFragment
 import co.utils.alertview.fragments.DialogFragment
+import co.utils.alertview.objects.AlertAction
 
 /**
  * Created by hammad.akram on 3/14/18.

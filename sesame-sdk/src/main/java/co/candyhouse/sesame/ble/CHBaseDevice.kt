@@ -23,8 +23,8 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
-import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_SENSOR_DETECT_INTERVAL_MS
 import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_LOCK_UNLOCK_SWITCH_POINT
+import co.candyhouse.sesame.open.devices.base.CHDevices.Companion.UNSET_SENSOR_DETECT_INTERVAL_MS
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.CHSesameProtocolMechStatus
 import co.candyhouse.sesame.utils.CHEmpty

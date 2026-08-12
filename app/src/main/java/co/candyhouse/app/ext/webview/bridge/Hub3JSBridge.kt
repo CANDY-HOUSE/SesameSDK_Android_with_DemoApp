@@ -6,14 +6,14 @@ import co.candyhouse.app.R
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.localizedDescription
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
-import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
-import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
+import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.NSError
 import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L

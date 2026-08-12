@@ -1,5 +1,9 @@
 package co.candyhouse.sesame.server
 
+import aws.sdk.kotlin.services.cognitoidentity.CognitoIdentityClient
+import aws.sdk.kotlin.services.cognitoidentity.model.GetCredentialsForIdentityRequest
+import aws.sdk.kotlin.services.cognitoidentity.model.GetIdRequest
+import aws.sdk.kotlin.services.cognitoidentity.model.NotAuthorizedException
 import co.candyhouse.sesame.BuildConfig
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.os3.CHHub3Device
@@ -21,16 +25,6 @@ import com.amazonaws.services.iot.client.AWSIotTopic
 import com.amazonaws.services.iot.client.auth.Credentials
 import com.amazonaws.services.iot.client.auth.CredentialsProvider
 import com.google.gson.Gson
-import aws.sdk.kotlin.services.cognitoidentity.CognitoIdentityClient
-import aws.sdk.kotlin.services.cognitoidentity.model.GetCredentialsForIdentityRequest
-import aws.sdk.kotlin.services.cognitoidentity.model.GetIdRequest
-import aws.sdk.kotlin.services.cognitoidentity.model.NotAuthorizedException
-import aws.sdk.kotlin.services.iotdataplane.IotDataPlaneClient
-import aws.sdk.kotlin.services.iotdataplane.model.GetThingShadowRequest
-import aws.smithy.kotlin.runtime.auth.awscredentials.Credentials as AwsCredentials
-import aws.smithy.kotlin.runtime.auth.awscredentials.CredentialsProvider as AwsCredentialsProvider
-import aws.smithy.kotlin.runtime.collections.Attributes
-import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,7 +37,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Collections
-import java.util.Locale.getDefault
 import java.util.UUID
 
 private const val CUSTOMER_SPECIFIC_ENDPOINT = BuildConfig.AWS_IOT_ENDPOINT

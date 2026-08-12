@@ -20,6 +20,8 @@ import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
+import androidx.core.view.isEmpty
+import androidx.core.view.size
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -48,8 +50,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
-import androidx.core.view.isEmpty
-import androidx.core.view.size
 
 open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 

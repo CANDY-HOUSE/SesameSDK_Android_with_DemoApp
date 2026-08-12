@@ -1,24 +1,24 @@
 package co.utils
 
-import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Base64
-import com.google.android.gms.location.LocationServices
-import java.nio.charset.StandardCharsets
-import java.util.*
-import android.location.Location
-import androidx.core.app.ActivityCompat
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Base64
+import androidx.core.app.ActivityCompat
 import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
 import java.io.Serializable
+import java.nio.charset.StandardCharsets
+import java.util.UUID
 import kotlin.experimental.and
 
 internal fun String.base64decodeHex(): String {

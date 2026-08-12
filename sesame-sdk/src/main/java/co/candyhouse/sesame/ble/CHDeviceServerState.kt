@@ -3,12 +3,11 @@ package co.candyhouse.sesame.ble
 import co.candyhouse.sesame.ble.os3.CHHub3Device
 import co.candyhouse.sesame.ble.os3.CHSesame5Device
 import co.candyhouse.sesame.ble.os3.CHSesameBike2Device
-import co.candyhouse.sesame.ble.os3.CHSesameBot2Device
 import co.candyhouse.sesame.open.devices.BiometricDeviceType
-import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.devices.CHSesame5MechStatus
-import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHSesameBike2MechStatus
+import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
+import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices

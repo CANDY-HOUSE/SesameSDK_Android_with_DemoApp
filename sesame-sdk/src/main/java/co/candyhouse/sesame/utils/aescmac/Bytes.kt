@@ -2,7 +2,7 @@ package co.candyhouse.sesame.utils.aescmac
 
 import java.nio.ByteBuffer
 import java.security.GeneralSecurityException
-import java.util.*
+import java.util.Arrays
 import kotlin.experimental.xor
 
 object Bytes {

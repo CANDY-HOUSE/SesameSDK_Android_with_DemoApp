@@ -1,6 +1,6 @@
 package co.candyhouse.sesame.ble.os3.base
 
-import co.candyhouse.sesame.utils.*
+import co.candyhouse.sesame.utils.toBytes
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec

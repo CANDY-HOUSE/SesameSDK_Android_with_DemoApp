@@ -30,11 +30,11 @@ import co.candyhouse.app.tabs.devices.ssm2.getNOHandRadius
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandRight
 import co.candyhouse.app.tabs.devices.ssm2.setIsNOHandG
 import co.candyhouse.sesame.open.CHDeviceManager
+import co.candyhouse.sesame.open.devices.CHSesame2
+import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.CHSesame2
-import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.utils.PermissionUtils

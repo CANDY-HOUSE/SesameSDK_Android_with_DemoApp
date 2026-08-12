@@ -3,7 +3,6 @@ package co.candyhouse.sesame.open.devices.sesameBiometric.capability.fingerPrint
 import co.candyhouse.sesame.ble.SSM3PublishPayload
 import co.candyhouse.sesame.ble.SesameItemCode
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.candyhouse.sesame.open.devices.base.CHSesameConnector
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.CHEventHandler
 import co.candyhouse.sesame.open.devices.sesameBiometric.parseData.CHSesameTouchCard
 import co.candyhouse.sesame.utils.L

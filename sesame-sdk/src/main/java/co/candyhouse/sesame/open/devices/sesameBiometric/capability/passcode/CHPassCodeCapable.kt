@@ -1,9 +1,9 @@
 package co.candyhouse.sesame.open.devices.sesameBiometric.capability.passcode
 
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.CHCapabilityHost
-import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.open.devices.sesameBiometric.capability.baseCapbale.CHDataSynchronizeCapable
 import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
 
 interface CHPassCodeCapable {
     fun sendKeyBoardPassCodeDataGetCmd(result: CHResult<CHEmpty>)

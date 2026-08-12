@@ -4,7 +4,6 @@ import java.io.File
 import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
-import java.util.Locale
 import java.util.Locale.getDefault
 import java.util.regex.Pattern
 

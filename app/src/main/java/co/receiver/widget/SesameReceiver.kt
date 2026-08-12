@@ -11,9 +11,9 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.sesame.utils.L
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope

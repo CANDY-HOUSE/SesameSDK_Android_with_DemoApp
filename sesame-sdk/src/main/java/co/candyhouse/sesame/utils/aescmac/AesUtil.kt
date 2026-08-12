@@ -1,6 +1,6 @@
 package co.candyhouse.sesame.utils.aescmac
 
-import java.util.*
+import java.util.Arrays
 import kotlin.experimental.or
 import kotlin.experimental.xor
 

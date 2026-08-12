@@ -20,13 +20,13 @@ import android.content.Intent
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHDeviceManager
-import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.CHSesameBike
 import co.candyhouse.sesame.open.devices.CHSesameBike2
 import co.candyhouse.sesame.open.devices.CHSesameBot
 import co.candyhouse.sesame.open.devices.CHSesameBot2
+import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils

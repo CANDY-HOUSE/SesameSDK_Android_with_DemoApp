@@ -1,7 +1,7 @@
 package co.candyhouse.sesame.utils
 
-import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.AWSTemporaryCredentials
+import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.kotlin.core.Amplify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

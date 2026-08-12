@@ -14,7 +14,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.tabs.MainActivity
-import co.candyhouse.app.tabs.devices.ssm2.*
+import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
+import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.app.tabs.devices.ssm2.ssm5UIParser
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 

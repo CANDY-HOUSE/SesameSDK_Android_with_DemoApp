@@ -1,5 +1,6 @@
 package co.utils.alertview.fragments
 
+
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,14 +10,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import co.utils.alertview.objects.AlertAction
-
-
-import java.util.ArrayList
 import co.utils.alertview.enums.AlertActionStyle
 import co.utils.alertview.enums.AlertStyle
 import co.utils.alertview.enums.AlertTheme
+import co.utils.alertview.objects.AlertAction
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /**
  * Created by hammad.akram on 3/14/18.

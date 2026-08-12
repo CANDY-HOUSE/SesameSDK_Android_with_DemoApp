@@ -18,7 +18,6 @@ import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.CHOS3RegisterReq
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.bytesToUShort
 import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.EccKey
 import co.candyhouse.sesame.utils.L
@@ -27,7 +26,6 @@ import co.candyhouse.sesame.utils.bytesToShort
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.isInternetAvailable
 import co.candyhouse.sesame.utils.toBigLong
-import co.candyhouse.sesame.utils.toInt
 import co.candyhouse.sesame.utils.toReverseBytes
 import co.candyhouse.sesame.utils.toUInt32ByteArray
 import kotlin.math.abs

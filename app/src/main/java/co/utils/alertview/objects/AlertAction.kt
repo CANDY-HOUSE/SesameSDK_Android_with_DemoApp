@@ -1,7 +1,7 @@
 package co.utils.alertview.objects
 
-import co.utils.alertview.interfaces.AlertActionListener
 import co.utils.alertview.enums.AlertActionStyle
+import co.utils.alertview.interfaces.AlertActionListener
 
 /**
  * Created by hammad.akram on 3/14/18.

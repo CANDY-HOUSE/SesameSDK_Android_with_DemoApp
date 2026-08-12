@@ -4,9 +4,10 @@ import android.content.Context
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.sesame.utils.L
 import com.amplifyframework.AmplifyException
-import com.amplifyframework.auth.AuthException
+import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.AuthUserAttribute
 import com.amplifyframework.auth.AuthUserAttributeKey
+import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
 import com.amplifyframework.auth.cognito.options.AuthFlowType
@@ -15,13 +16,11 @@ import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.auth.options.AuthUpdateUserAttributeOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.AmplifyConfiguration
-import com.amplifyframework.kotlin.core.Amplify as KotlinAmplify
-import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
-import com.amplifyframework.api.aws.AWSApiPlugin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import com.amplifyframework.kotlin.core.Amplify as KotlinAmplify
 
 class AWSStatus {
     companion object {

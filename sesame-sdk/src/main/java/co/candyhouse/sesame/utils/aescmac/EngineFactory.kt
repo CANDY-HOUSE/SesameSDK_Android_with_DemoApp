@@ -1,7 +1,12 @@
 package co.candyhouse.sesame.utils.aescmac
 
-import java.security.*
-import java.util.*
+import java.security.GeneralSecurityException
+import java.security.KeyFactory
+import java.security.KeyPairGenerator
+import java.security.MessageDigest
+import java.security.Provider
+import java.security.Security
+import java.security.Signature
 import java.util.logging.Logger
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement

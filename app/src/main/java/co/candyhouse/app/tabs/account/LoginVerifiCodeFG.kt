@@ -19,7 +19,6 @@ import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.utils.L
-import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.alertview.fragments.toastMSG
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

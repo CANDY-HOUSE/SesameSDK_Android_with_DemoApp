@@ -2,15 +2,23 @@ package co.candyhouse.sesame.ble.os2
 
 
 import android.util.Base64
-import co.candyhouse.sesame.utils.*
 import co.candyhouse.sesame.utils.aescmac.AesCmac
+import co.candyhouse.sesame.utils.base64Encode
 import co.candyhouse.sesame.utils.hexStringToByteArray
-
+import co.candyhouse.sesame.utils.toHexString
 import java.math.BigInteger
-import java.security.*
+import java.security.Key
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
-import java.security.spec.*
+import java.security.spec.ECFieldFp
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.ECPublicKeySpec
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
 import javax.crypto.KeyAgreement
 import kotlin.random.Random
 
