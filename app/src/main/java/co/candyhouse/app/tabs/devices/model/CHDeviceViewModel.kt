@@ -391,6 +391,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     fun handleAppGoToForeground() {
+        CHIotManagerPublic.reconnectImmediatelyIfWaiting()
         viewModelScope.launch(Dispatchers.Main) {
             _neeRefresh.postValue(Event(BeanDevices()))
         }

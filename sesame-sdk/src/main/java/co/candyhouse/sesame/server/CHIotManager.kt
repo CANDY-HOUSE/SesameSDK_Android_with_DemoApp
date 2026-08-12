@@ -32,7 +32,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -41,6 +40,7 @@ import java.util.UUID
 
 private const val CUSTOMER_SPECIFIC_ENDPOINT = BuildConfig.AWS_IOT_ENDPOINT
 private const val CREDENTIAL_REFRESH_WINDOW_SECONDS = 300
+private const val IOT_KEEP_ALIVE_INTERVAL_MILLISECONDS = 60_000
 private val IOT_IDENTITY_ID_KEY =
     "iot_unauthenticated_identity_id_${BuildConfig.AWS_IDENTITY_POOL_ID}"
 private val IDENTITY_POOL_REGION = BuildConfig.AWS_IDENTITY_POOL_ID.substringBefore(":")
@@ -85,6 +85,16 @@ internal object CHIotManager {
 
         // 在IO线程执行连接
         connectionJob = iotScope.launch {
+            connectIoT()
+        }
+    }
+
+    @Synchronized
+    fun reconnectImmediatelyIfWaiting() {
+        if (iotStatus != IotStatus.ConnectionLost) return
+
+        reconnectJob?.cancel()
+        reconnectJob = iotScope.launch {
             connectIoT()
         }
     }
@@ -144,18 +154,18 @@ internal object CHIotManager {
             iotStatus = IotStatus.Reconnecting
             resetDevicesOnReconnecting()
 
-            val client = createMqttClient()
+            val client = createMqttClient(getIotCredentials())
             mqttClient = client
             client.connect()
         } catch (e: Exception) {
             L.e(tag, "IoT连接异常", e)
-            mqttClient?.let(::scheduleReconnect)
+            scheduleReconnect(mqttClient)
         }
     }
 
-    private fun createMqttClient(): AWSIotMqttClient {
+    private fun createMqttClient(credentials: Triple<String, String, String?>): AWSIotMqttClient {
+        val (accessKey, secretKey, sessionToken) = credentials
         val credentialsProvider = CredentialsProvider {
-            val (accessKey, secretKey, sessionToken) = runBlocking { getIotCredentials() }
             Credentials(accessKey, secretKey, sessionToken)
         }
 
@@ -190,9 +200,10 @@ internal object CHIotManager {
                 if (mqttClient === this) scheduleReconnect(this)
             }
         }.apply {
-            maxConnectionRetries = 10
-            baseRetryDelay = 1_000
-            maxRetryDelay = 5_000
+            // Credentials refresh and client recreation are owned by CHIotManager.
+            // This avoids SDK retry tasks silently stopping when credential refresh fails.
+            maxConnectionRetries = 0
+            keepAliveInterval = IOT_KEEP_ALIVE_INTERVAL_MILLISECONDS
         }
     }
 
@@ -265,12 +276,13 @@ internal object CHIotManager {
     )
 
     @Synchronized
-    private fun scheduleReconnect(client: AWSIotMqttClient) {
+    private fun scheduleReconnect(client: AWSIotMqttClient?) {
         if (mqttClient !== client) return
 
         iotStatus = IotStatus.ConnectionLost
         clearIotSubscriptionCache()
         subscribedIotTopics.clear()
+        iotScope.launch { resetDevicesOnReconnecting() }
         reconnectJob?.cancel()
         reconnectJob = iotScope.launch {
             delay(5_000)
@@ -395,6 +407,14 @@ internal object CHIotManager {
         try {
             client.subscribe(
                 object : AWSIotTopic(topic, AWSIotQos.QOS0) {
+                    override fun onFailure() {
+                        L.e(tag, "IoT订阅失败: $topic")
+                    }
+
+                    override fun onTimeout() {
+                        L.e(tag, "IoT订阅超时: $topic")
+                    }
+
                     override fun onMessage(message: AWSIotMessage) {
                         onMessage(message.payload)
                     }

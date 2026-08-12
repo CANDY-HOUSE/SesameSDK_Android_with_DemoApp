@@ -16,6 +16,13 @@ object CHIotManagerPublic {
     }
 
     /**
+     * 回到前台时，如果IoT正在等待重试则立即重连
+     */
+    fun reconnectImmediatelyIfWaiting() {
+        CHIotManager.reconnectImmediatelyIfWaiting()
+    }
+
+    /**
      * 冷启动后，当列表完成刷新后补偿一次IoT订阅（解决kill APP，再登录拉取数据的情况）
      */
     fun subscribeDevicesIfConnected(updatedDevices: List<CHDevices>) {
