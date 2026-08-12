@@ -1,17 +1,22 @@
 package co.candyhouse.app.tabs
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
 import androidx.preference.PreferenceManager
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
@@ -34,7 +39,8 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.widget.SesameForegroundService
+import co.receiver.widget.AutoUnlockForegroundService
+import co.receiver.widget.AutoUnlockGeofenceManager
 import co.utils.AnalyticsUtil
 import co.utils.UserUtils
 import co.utils.getParcelableExtraCompat
@@ -51,7 +57,11 @@ import java.lang.reflect.InvocationTargetException
 class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
 
     private val requestCodeNFC = 100
+    private val requestCodeBackgroundLocation = 202
     private var pendingOpenWebViewUrl: String? = null
+    private var isAutoUnlockPermissionDialogShowing = false
+    private var pendingAutoUnlockPermissionRequest = false
+    private var pendingAutoUnlockPermissionSync = false
 
     companion object {
         var activity: MainActivity? = null
@@ -101,6 +111,15 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
         super.onResume()
         CHBleManager.enableScan {}
         deviceViewModel.handleAppGoToForeground()
+        if (pendingAutoUnlockPermissionRequest) {
+            requestAutoUnlockBackgroundPermissionIfNeeded()
+        }
+        if (pendingAutoUnlockPermissionSync &&
+            AutoUnlockGeofenceManager.hasRequiredLocationPermission(this)
+        ) {
+            pendingAutoUnlockPermissionSync = false
+            deviceViewModel.updateAutoUnlock()
+        }
         checkNfcAdapterPermissions()
     }
 
@@ -318,7 +337,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                 val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
                 nfcAdapter?.disableForegroundDispatch(this)
 
-                if (!SesameForegroundService.isLive) {
+                if (!AutoUnlockForegroundService.isLive) {
                     CHBleManager.disableScan {}
                 }
             } catch (e: IllegalStateException) {
@@ -357,7 +376,62 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
             } else {
                 L.d("MainActivity", "NFC permission denied")
             }
+        } else if (requestCode == requestCodeBackgroundLocation &&
+            grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        ) {
+            pendingAutoUnlockPermissionSync = false
+            deviceViewModel.updateAutoUnlock()
         }
+    }
+
+    fun requestAutoUnlockBackgroundPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+            AutoUnlockGeofenceManager.hasRequiredLocationPermission(this)
+        ) {
+            pendingAutoUnlockPermissionRequest = false
+            return
+        }
+        if (isAutoUnlockPermissionDialogShowing) {
+            return
+        }
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            pendingAutoUnlockPermissionRequest = true
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        pendingAutoUnlockPermissionRequest = false
+        isAutoUnlockPermissionDialogShowing = true
+        AlertDialog.Builder(this)
+            .setTitle(R.string.auto_unlock_location_permission_title)
+            .setMessage(R.string.auto_unlock_location_permission_message)
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
+                isAutoUnlockPermissionDialogShowing = false
+            }
+            .setPositiveButton(R.string.auto_unlock_location_permission_open_settings) { _, _ ->
+                isAutoUnlockPermissionDialogShowing = false
+                pendingAutoUnlockPermissionSync = true
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                        requestCodeBackgroundLocation
+                    )
+                } else {
+                    startActivity(
+                        Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", packageName, null)
+                        )
+                    )
+                }
+            }
+            .setOnCancelListener { isAutoUnlockPermissionDialogShowing = false }
+            .show()
     }
 
     override fun onSharedPreferenceChanged(p0: SharedPreferences?, key: String?) {

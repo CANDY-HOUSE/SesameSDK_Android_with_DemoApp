@@ -74,7 +74,7 @@
     <string name="min15">15 分</string>
     <string name="min30">30 分</string>
     <string name="hr1">1 時間</string>
-    <string name="sesame_widget">ウィジェットと手ぶら解錠</string>
+    <string name="sesame_widget">通知ウィジェット</string>
 
     <string name="WM2">WiFiモジュール</string>
     <string name="Sesame">セサミ</string>
@@ -150,7 +150,11 @@
     一度失敗した場合でも、通常数回お試し頂くと、接続に成功することがほとんどです。🙏</string>
 
     <string name="auto_mode">手ぶら解錠</string>
-    <string name="sesame_autounlock_hint">1. 赤い円を調整してください。スマホのGPS情報がこの赤い円から出て再度この円の中に入った時にのみスマホがBluetoothでセサミと繋がると手ぶら解錠が作動します。\n2. GPS情報が不安定な場合、赤い円の範囲を広めに設定してください。画面をタップしてセサミ位置を設定できます。\n3. もし手ぶら解錠が作動され難くなった場合、一度スマホを再起動してください。
+    <string name="auto_unlock_service_notification">登録済みのセサミをBluetoothで検出しています</string>
+    <string name="auto_unlock_location_permission_title">バックグラウンド位置情報を許可</string>
+    <string name="auto_unlock_location_permission_message">手ぶら解錠では Geofence API を使用し、アプリが閉じているときやバックグラウンドでも、設定したエリアから離れたことを検出します。エリアから離れただけでは解錠されません。このスマートフォンが近くの登録済みセサミにBluetooth接続した場合のみ解錠します。システム設定の位置情報で「常に許可」を選択してください。手ぶら解錠はいつでもオフにできます。</string>
+    <string name="auto_unlock_location_permission_open_settings">設定を開く</string>
+    <string name="sesame_autounlock_hint">1. セサミの周囲に赤い円を設定してください。円の外に出ると、手ぶら解錠が1回有効になります。戻ったとき、このスマートフォンが近くの登録済みセサミにBluetooth接続した場合のみ解錠します。\n2. 位置検出が不安定な場合は、赤い円を広めに設定してください。地図をタップしてセサミの位置を設定できます。\n3. 手ぶら解錠が動作しない場合は、スマートフォンを再起動してください。
     </string>
     <string name="Mode">モード</string>
 
@@ -244,7 +248,5 @@
     <string name="set_switch_point_position">切替点</string>
     <string name="dfu_busy">他のCANDY HOUSE製品を更新中、お待ち下さいませ。</string>
 </resources>
-
-
 
 

@@ -40,7 +40,7 @@ import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.server.dto.AppPromotion
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.widget.SesameForegroundService
+import co.receiver.widget.AutoUnlockForegroundService
 import co.utils.applyInsetsPadding
 import com.amplifyframework.auth.AuthChannelEventName
 import com.amplifyframework.core.Amplify
@@ -76,7 +76,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
 
     @SuppressLint("ImplicitSamInstance")
     private fun restartApp(context: Context) {
-        stopService(Intent(this, SesameForegroundService::class.java))
+        stopService(Intent(this, AutoUnlockForegroundService::class.java))
         finishAndRemoveTask()
         SystemClock.sleep(30)
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)

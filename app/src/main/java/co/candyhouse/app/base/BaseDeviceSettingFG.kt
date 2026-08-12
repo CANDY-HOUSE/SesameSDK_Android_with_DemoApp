@@ -34,7 +34,6 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNFC
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.modelName
-import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.setIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.setNFC
 import co.candyhouse.app.tabs.devices.ssm2.setting.DfuService
@@ -565,14 +564,6 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
     private fun updataTargetDevice(isChecked: Boolean, targetDevice: CHDevices?) {
         targetDevice?.apply {
-            view?.findViewById<View>(R.id.no_hand_zone)?.visibility =
-                if (isChecked) View.VISIBLE else View.GONE
-            if (!isChecked) {
-                targetDevice.setIsNOHand(false)
-                if (!isAdded) return
-                view?.findViewById<TextView>(R.id.auto_open_txt)?.text = getString(R.string.Off)
-            }
-
             mDeviceModel.updateWidgets(this.deviceId.toString())
         }
     }

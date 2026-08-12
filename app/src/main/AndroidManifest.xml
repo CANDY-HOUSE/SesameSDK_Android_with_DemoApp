@@ -10,9 +10,11 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission
         android:name="com.google.android.gms.permission.AD_ID"
         tools:node="remove" />
@@ -84,9 +86,9 @@
             </intent-filter>
         </service>
         <service
-            android:name="co.receiver.widget.SesameForegroundService"
+            android:name="co.receiver.widget.AutoUnlockForegroundService"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="connectedDevice" />
         <service
             android:name="co.receiver.widget.MessagingIntentService"
             android:exported="false" />
@@ -100,10 +102,14 @@
 
         <!--注册广播-->
         <receiver
-            android:name="co.receiver.widget.SesameReceiver"
-            android:exported="true">
+            android:name="co.receiver.widget.AutoUnlockGeofenceReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="co.receiver.widget.AutoUnlockBootReceiver"
+            android:exported="false">
             <intent-filter>
-                <action android:name="co.candyhouse.sesame2.START_FOREGROUND_SERVICE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

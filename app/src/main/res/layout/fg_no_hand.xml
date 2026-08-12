@@ -89,7 +89,7 @@
                 app:isb_indicator_text_color="@color/white"
                 app:isb_indicator_text_size="18sp"
                 app:isb_max="500"
-                app:isb_min="0"
+                app:isb_min="20"
                 app:isb_only_thumb_draggable="false"
                 app:isb_progress_value_float="true"
                 app:isb_seek_smoothly="true"

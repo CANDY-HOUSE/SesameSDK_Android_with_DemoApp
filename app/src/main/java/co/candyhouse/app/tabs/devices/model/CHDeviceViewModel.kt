@@ -12,9 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import co.candyhouse.app.R
 import co.candyhouse.app.ext.BotScriptStore
@@ -22,6 +20,8 @@ import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
+import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -51,8 +51,9 @@ import co.candyhouse.sesame.utils.Event
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.isInternetAvailable
-import co.receiver.widget.SesameForegroundService
-import co.receiver.widget.SesameReceiver
+import co.receiver.widget.AutoUnlockForegroundService
+import co.receiver.widget.AutoUnlockGeofenceManager
+import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
@@ -372,11 +373,21 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         }
                     }
                     myChDevices.value = updatedDevices
+                    synchronized(CHDeviceManager.listDevices) {
+                        CHDeviceManager.listDevices.clear()
+                        CHDeviceManager.listDevices.addAll(updatedDevices)
+                    }
                 } finally {
                     isApplyingFullDeviceList = false
                 }
             }
             notifyFullDeviceListChanged()
+            AutoUnlockGeofenceManager.sync(CHDeviceManager.app, updatedDevices)
+            if (updatedDevices.any { it.getIsNOHand() } &&
+                !AutoUnlockGeofenceManager.hasRequiredLocationPermission(CHDeviceManager.app)
+            ) {
+                MainActivity.activity?.requestAutoUnlockBackgroundPermissionIfNeeded()
+            }
             CHIotManagerPublic.subscribeDevicesIfConnected(updatedDevices)
         }
     }
@@ -500,76 +511,58 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     @SuppressLint("ServiceCast", "ImplicitSamInstance")
     fun updateWidgets(id: String? = null) {
-        ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.Main) {
             synchronized(CHDeviceManager.listDevices) {
                 CHDeviceManager.listDevices.clear()
                 CHDeviceManager.listDevices.addAll(myChDevices.value)
                 val isOpenWidget = CHDeviceManager.listDevices.any { it.getIsWidget() }
                 if (isOpenWidget) {
-                    if (ContextCompat.checkSelfPermission(
-                            CHDeviceManager.app,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        )
-                        != PackageManager.PERMISSION_GRANTED ||
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                         ContextCompat.checkSelfPermission(
                             CHDeviceManager.app,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        )
-                        != PackageManager.PERMISSION_GRANTED
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED
                     ) {
                         MainActivity.activity?.apply {
                             ActivityCompat.requestPermissions(
-                                this, arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                ), 201
+                                this,
+                                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                                201
                             )
                         }
                         return@synchronized
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        if (ContextCompat.checkSelfPermission(
-                                CHDeviceManager.app,
-                                Manifest.permission.FOREGROUND_SERVICE_LOCATION
-                            )
-                            != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            MainActivity.activity?.apply {
-                                ActivityCompat.requestPermissions(
-                                    this,
-                                    arrayOf(Manifest.permission.FOREGROUND_SERVICE_LOCATION),
-                                    201
-                                )
-                            }
-                            return@synchronized
-                        }
-
-                    }
-                    // SesameForegroundService.isLive 避免重启前台服务
-                    if (!SesameForegroundService.isLive) {
-                        CHDeviceManager.app.sendBroadcast(
-                            Intent(
-                                CHDeviceManager.app,
-                                SesameReceiver::class.java
-                            ).apply {
-                                action = SesameReceiver.SERVER_ACTION
-                            })
-                    } else {
-                        CHDeviceManager.app.sendBroadcast(Intent(SesameForegroundService.aciton).apply {
-                            putExtra(SesameForegroundService.acitonKey, id)
-                        })
-                    }
+                    SesameWidgetNotificationManager.update(
+                        CHDeviceManager.app,
+                        CHDeviceManager.listDevices,
+                        id
+                    )
                 } else {
-                    if (SesameForegroundService.isLive) {
-                        CHDeviceManager.app.stopService(
-                            Intent(
-                                CHDeviceManager.app,
-                                SesameForegroundService::class.java
-                            )
-                        )
-                    }
+                    SesameWidgetNotificationManager.cancelAll(
+                        CHDeviceManager.app,
+                        CHDeviceManager.listDevices
+                    )
                 }
             }
+        }
+    }
+
+    fun updateAutoUnlock() {
+        viewModelScope.launch(Dispatchers.Main) {
+            val devices = myChDevices.value.toList()
+            synchronized(CHDeviceManager.listDevices) {
+                CHDeviceManager.listDevices.clear()
+                CHDeviceManager.listDevices.addAll(devices)
+            }
+            AutoUnlockGeofenceManager.sync(CHDeviceManager.app, devices)
+            if (devices.none { it.getIsNOHand() && it.getIsNOHandG() } &&
+                AutoUnlockForegroundService.isLive
+            ) {
+                CHDeviceManager.app.stopService(
+                    Intent(CHDeviceManager.app, AutoUnlockForegroundService::class.java)
+                )
+            }
+            updateWidgets()
         }
     }
 

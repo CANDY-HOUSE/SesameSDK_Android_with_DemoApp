@@ -32,7 +32,9 @@ import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.widget.SesameForegroundService
+import co.receiver.widget.AutoUnlockForegroundService
+import co.receiver.widget.AutoUnlockGeofenceManager
+import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
 import co.utils.UserUtils
 import co.utils.alertview.AlertView
@@ -187,8 +189,13 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         }
 
         NotificationManagerCompat.from(CHDeviceManager.app).cancel("all".hashCode())
-        if (SesameForegroundService.isLive) {
-            CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, SesameForegroundService::class.java))
+        AutoUnlockGeofenceManager.clear(CHDeviceManager.app)
+        SesameWidgetNotificationManager.cancelAll(
+            CHDeviceManager.app,
+            CHDeviceManager.listDevices
+        )
+        if (AutoUnlockForegroundService.isLive) {
+            CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, AutoUnlockForegroundService::class.java))
         }
         CHDeviceWrapperManager.clear()
         GuestUploadFlag.clear()

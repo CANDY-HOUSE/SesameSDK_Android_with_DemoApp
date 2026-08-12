@@ -80,7 +80,7 @@
     <string name="min15">15 分</string>
     <string name="min30">30 分</string>
     <string name="hr1">1 小時</string>
-    <string name="sesame_widget">Widget 與 自動解鎖</string>
+    <string name="sesame_widget">通知列 Widget</string>
 
     <string name="WM2">WiFi模組</string>
     <string name="Sesame">芝麻</string>
@@ -159,9 +159,13 @@
         然後多試幾次，通常能成功連上線🙏</string>
 
     <string name="auto_mode">全自動解鎖</string>
+    <string name="auto_unlock_service_notification">正在透過藍牙等待偵測已登記的芝麻</string>
+    <string name="auto_unlock_location_permission_title">允許背景位置資訊</string>
+    <string name="auto_unlock_location_permission_message">全自動解鎖會使用 Geofence API，即使應用程式關閉或在背景，也能偵測您是否離開所設定的區域。離開區域只會啟用一次自動解鎖；只有本手機透過附近的藍牙連線到已登記的芝麻後，門鎖才會解鎖。請在系統設定的位置權限中選擇「永遠允許」。您可以隨時關閉全自動解鎖。</string>
+    <string name="auto_unlock_location_permission_open_settings">開啟設定</string>
     <string name="sesame_autounlock_hint">
-        1. 若欲啟用自動解鎖功能，必須將紅色圓圈調整至適當位置，使得當您的手機GPS訊號進出該圓圈時，即可透過藍牙與芝麻連線，自動完成解鎖程序。\n
-        2. 如果GPS訊號不穩定，請將紅色圓圈的範圍設置更廣，您可以點擊螢幕來設置芝麻的位置。\n
+        1. 請在芝麻周圍設定紅色圓圈。離開圓圈後會啟用一次自動解鎖；返回時，只有本手機透過附近的藍牙連線到已登記的芝麻後，門鎖才會解鎖。\n
+        2. 如果位置偵測不穩定，請將紅色圓圈設定得更大。您可以點擊地圖來設定芝麻的位置。\n
         3. 如果手機無法正常啟動無鑰匙解鎖功能，請先重新啟動手機。</string>
 
     <string name="Mode">模式</string>

@@ -71,7 +71,7 @@
     <string name="min15">15 min</string>
     <string name="min30">30 min</string>
     <string name="hr1">1 hr</string>
-    <string name="sesame_widget">Widget &amp; Auto Unlock</string>
+    <string name="sesame_widget">Notification Widget</string>
 
     <string name="WM2">WiFi Module</string>
     <string name="Sesame">Sesame</string>
@@ -154,8 +154,12 @@
         Then normally retry for a few times it will get connected successfully.🙏</string>
 
     <string name="auto_mode">Auto Unlock</string>
-    <string name="sesame_autounlock_hint">1. Setup the red circle area. While your smartphone GPS going out and coming back into the red circle, your smartphone will automatically unlock the door via Bluetooth. \n
-        2. If your GPS is unstable, please extend the red area. You can adjust Sesame\'s location by tapping the map. \n
+    <string name="auto_unlock_service_notification">Waiting to detect your registered Sesame over Bluetooth</string>
+    <string name="auto_unlock_location_permission_title">Allow background location</string>
+    <string name="auto_unlock_location_permission_message">Auto Unlock uses the Geofence API to detect when you leave the area you set, even while the app is closed or in the background. Leaving the area only arms Auto Unlock. Your door unlocks only after this phone connects to your registered Sesame over nearby Bluetooth. Select “Allow all the time” for Location in system settings. You can turn Auto Unlock off at any time.</string>
+    <string name="auto_unlock_location_permission_open_settings">Open settings</string>
+    <string name="sesame_autounlock_hint">1. Set the red circle around your Sesame. Leaving the circle arms one Auto Unlock. When you return, the door unlocks only after this phone connects to the registered Sesame over nearby Bluetooth. \n
+        2. If location detection is unstable, make the red circle larger. You can adjust Sesame\'s location by tapping the map. \n
         3. Restart your smartphone if Auto Unlock is not functional.</string>
 
     <string name="Mode">Mode</string>

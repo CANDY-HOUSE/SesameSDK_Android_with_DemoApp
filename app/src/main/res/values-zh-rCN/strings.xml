@@ -77,7 +77,7 @@
     <string name="min15">15 分</string>
     <string name="min30">30 分</string>
     <string name="hr1">1 小时</string>
-    <string name="sesame_widget">小组件 和 自动解锁</string>
+    <string name="sesame_widget">通知栏小组件</string>
 
     <string name="WM2">WiFi模块</string>
     <string name="Sesame">芝麻</string>
@@ -157,9 +157,13 @@
         然后多试几次，通常能成功连上线🙏</string>
 
     <string name="auto_mode">全自动解锁</string>
+    <string name="auto_unlock_service_notification">正在通过蓝牙等待检测已登记的芝麻</string>
+    <string name="auto_unlock_location_permission_title">允许后台位置信息</string>
+    <string name="auto_unlock_location_permission_message">全自动解锁会使用 Geofence API，即使应用关闭或在后台，也能检测您是否离开所设置的区域。离开区域只会启用一次自动解锁；只有本手机通过附近的蓝牙连接到已登记的芝麻后，门锁才会解锁。请在系统设置的位置权限中选择“始终允许”。您可以随时关闭全自动解锁。</string>
+    <string name="auto_unlock_location_permission_open_settings">打开设置</string>
     <string name="sesame_autounlock_hint">
-        1. 要实现自动解锁，您需要将红色圆圈调整到正确的位置，这样当您的手机GPS信息进入或离开该圆圈时，它将通过蓝牙与芝麻连接，执行自动解锁。\n
-        2. 如果GPS信息不稳定，请将红色圆圈的范围设置得更广。您可以点击屏幕来设置芝麻的位置。\n
+        1. 请在芝麻周围设置红色圆圈。离开圆圈后会启用一次自动解锁；返回时，只有本手机通过附近的蓝牙连接到已登记的芝麻后，门锁才会解锁。\n
+        2. 如果位置检测不稳定，请将红色圆圈设置得更大。您可以点击地图来设置芝麻的位置。\n
         3. 如果手机无法正常启动自动解锁功能，请先重新启动手机。</string>
 
     <string name="Mode">模式</string>

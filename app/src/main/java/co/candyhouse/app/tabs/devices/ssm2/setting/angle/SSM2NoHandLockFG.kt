@@ -8,14 +8,17 @@ import androidx.core.app.ActivityCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgNoHandBinding
+import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandLeft
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandRadius
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandRight
 import co.candyhouse.app.tabs.devices.ssm2.setIsNOHand
+import co.candyhouse.app.tabs.devices.ssm2.setIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.setNOHandLeft
 import co.candyhouse.app.tabs.devices.ssm2.setNOHandRadius
 import co.candyhouse.app.tabs.devices.ssm2.setNOHandRight
+import co.receiver.widget.AutoUnlockGeofenceManager
 import co.utils.getLastKnownLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -34,13 +37,17 @@ import com.warkiz.widget.SeekParams
 class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private lateinit var googleMap: GoogleMap
+    private var pendingEnableAutoUnlock = false
+    private var changingAutoUnlockSwitch = false
 
     override fun getViewBinder() = FgNoHandBinding.inflate(layoutInflater)
 
     private fun checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
         } else {
             initializeMap()
@@ -51,7 +58,10 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                initializeMap()
+                if (!::mapFragment.isInitialized) initializeMap()
+                if (pendingEnableAutoUnlock) {
+                    completePendingAutoUnlockOrRequestBackgroundLocation()
+                }
             }
         }
     }
@@ -64,6 +74,8 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
+
+        completePendingAutoUnlockOrRequestBackgroundLocation(requestIfMissing = false)
 
         if (::mapFragment.isInitialized){
             mapFragment.onResume()
@@ -105,8 +117,35 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
 
         bind.autolockSwitch.isChecked = mDeviceModel.ssmLockLiveData.value?.getIsNOHand() ?: false
         bind.autolockSwitch.setOnCheckedChangeListener { _, isChecked ->
-            mDeviceModel.ssmLockLiveData.value?.setIsNOHand(isChecked)
-            mDeviceModel.updateWidgets()
+            if (changingAutoUnlockSwitch) return@setOnCheckedChangeListener
+
+            if (isChecked && ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                pendingEnableAutoUnlock = true
+                changingAutoUnlockSwitch = true
+                bind.autolockSwitch.isChecked = false
+                changingAutoUnlockSwitch = false
+                checkLocationPermission()
+                return@setOnCheckedChangeListener
+            }
+
+            if (isChecked && !AutoUnlockGeofenceManager.hasRequiredLocationPermission(requireContext())) {
+                pendingEnableAutoUnlock = true
+                changingAutoUnlockSwitch = true
+                bind.autolockSwitch.isChecked = false
+                changingAutoUnlockSwitch = false
+                completePendingAutoUnlockOrRequestBackgroundLocation()
+                return@setOnCheckedChangeListener
+            }
+
+            mDeviceModel.ssmLockLiveData.value?.let { device ->
+                device.setIsNOHand(isChecked)
+                if (!isChecked) device.setIsNOHandG(false)
+            }
+            mDeviceModel.updateAutoUnlock()
         }
 
         bind.rangeBar.setProgress(mDeviceModel.ssmLockLiveData.value?.getNOHandRadius() ?: 0f)
@@ -120,7 +159,27 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
             override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
                 circle?.radius = seekBar.progress.toDouble()
                 mDeviceModel.ssmLockLiveData.value?.setNOHandRadius(seekBar.progress.toFloat())
+                mDeviceModel.updateAutoUnlock()
             }
+        }
+    }
+
+    private fun completePendingAutoUnlockOrRequestBackgroundLocation(requestIfMissing: Boolean = true) {
+        if (!pendingEnableAutoUnlock) return
+        if (!AutoUnlockGeofenceManager.hasRequiredLocationPermission(requireContext())) {
+            if (requestIfMissing) {
+                (activity as? MainActivity)?.requestAutoUnlockBackgroundPermissionIfNeeded()
+            }
+            return
+        }
+
+        pendingEnableAutoUnlock = false
+        mDeviceModel.ssmLockLiveData.value?.let { device ->
+            device.setIsNOHand(true)
+            changingAutoUnlockSwitch = true
+            bind.autolockSwitch.isChecked = true
+            changingAutoUnlockSwitch = false
+            mDeviceModel.updateAutoUnlock()
         }
     }
 
@@ -163,6 +222,7 @@ class SSM2NoHandLockFG : BaseDeviceFG<FgNoHandBinding>(), OnMapReadyCallback {
                     circle?.center = latLng
                     lockLiveData.setNOHandLeft(latLng.latitude.toFloat())
                     lockLiveData.setNOHandRight(latLng.longitude.toFloat())
+                    mDeviceModel.updateAutoUnlock()
                 }
 
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 17f))

@@ -191,11 +191,15 @@ fun CHDevices.getIsNOHandG(): Boolean {
 }
 
 fun CHDevices.setNOHandRadius(level: Float) {
-    SharedPreferencesUtils.preferences.edit().putFloat("getNOHandRadius" + this.deviceId.toString(), level).apply()
+    SharedPreferencesUtils.preferences.edit()
+        .putFloat("getNOHandRadius" + this.deviceId.toString(), level.coerceIn(20f, 500f))
+        .apply()
 }
 
 fun CHDevices.getNOHandRadius(): Float {
-    return SharedPreferencesUtils.preferences.getFloat("getNOHandRadius" + this.deviceId.toString(), 100f)
+    return SharedPreferencesUtils.preferences
+        .getFloat("getNOHandRadius" + this.deviceId.toString(), 150f)
+        .coerceIn(20f, 500f)
 }
 
 fun CHDevices.setNOHandLeft(level: Float) {
