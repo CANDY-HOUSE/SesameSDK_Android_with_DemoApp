@@ -25,8 +25,9 @@ import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.app.tabs.devices.ssm2.getRank
-import co.candyhouse.app.tabs.devices.ssm2.setRank
+import co.candyhouse.app.tabs.devices.ssm2.getOrderKey
+import co.candyhouse.app.tabs.devices.ssm2.setOrderKey
+import co.candyhouse.app.tabs.devices.ssm2.chDeviceOrderComparator
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHSesameBot2
@@ -57,6 +58,7 @@ import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
+import co.utils.UserUtils
 import co.utils.getHistoryTag
 import co.utils.isLockDevice
 import kotlinx.coroutines.CoroutineScope
@@ -110,7 +112,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             it.onSuccess { chResultState ->
                 if (chResultState.data.isNotEmpty()) {
                     CHAPIClientBiz.upLoadKeys(chResultState.data.map {
-                        cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname())
+                        cheyKeyToUserKey(it.getKey(), it.getLevel(), it.getNickname(), orderKey = it.getOrderKey())
                     }) {
                         it.onFailure {
                             MainActivity.activity?.let { act ->
@@ -159,6 +161,11 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                         putString(deviceId, userKey.deviceName)
                         putInt("l$deviceId", userKey.keyLevel)
                         userKey.rank?.let { putInt("ra$deviceId", it) }
+                        // 本地 orderKey 与服务端保持一致：服务端没有则清掉本地残留，
+                        // 否则会误判“已全有键”而跳过迁移、永不上传
+                        val serverOrderKey = userKey.orderKey
+                        if (serverOrderKey != null) putString("order_$deviceId", serverOrderKey)
+                        else remove("order_$deviceId")
                     }
 
                     val scriptMetaMap = userKey.stateInfo.scriptList
@@ -193,6 +200,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                             }
                             CHDeviceWrapperManager.updateDevice(device)
                         }
+                        viewModelScope.launch { migrateOrderKeysIfNeeded() }
                         updateDevices(deviceResponse.data)
                     }
                     response.onFailure {
@@ -335,12 +343,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     private fun updateDevices(list: List<CHDevices>) {
         viewModelScope.launch {
             val updatedDevices = ArrayList(list).apply {
-                sortWith(
-                    compareBy(
-                        { -it.getRank() },
-                        { it.getNickname() }
-                    )
-                )
+                sortWith(chDeviceOrderComparator)
             }
             synchronized(this@CHDeviceViewModel) {
                 isApplyingFullDeviceList = true
@@ -437,7 +440,10 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         }
     }
 
-    suspend fun applyDeviceOrderFromUI(visibleOrderedDevices: List<CHDevices>): ArrayList<CHDevices> {
+    suspend fun applyDeviceOrderFromUI(
+        visibleOrderedDevices: List<CHDevices>,
+        movedDeviceId: String? = null
+    ): DeviceMoveResult {
         val currentAllDevicesSnapshot = ArrayList(myChDevices.value)
         val visibleOrderedSnapshot = ArrayList(visibleOrderedDevices)
 
@@ -494,11 +500,28 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 }
             }
 
-            rebuiltDevices.forEachIndexed { index, device ->
-                device.setRank(-index)
-            }
-
             rebuiltDevices
+        }
+
+        // 找出本次唯一被移动的设备，只给它算新 orderKey（移动一项只更新一项，只上传一项）
+        val oldIds = currentAllDevicesSnapshot.mapNotNull { it.deviceId?.toString() }
+        val newIds = newAllDevices.mapNotNull { it.deviceId?.toString() }
+        // 优先用拖动手势记录的被拖项；无则回退到 diff 猜测。顺序未变则不改动
+        val movedId = if (oldIds == newIds) null
+        else (movedDeviceId?.takeIf { it in newIds } ?: findMovedId(oldIds, newIds))
+        var moved: CHDevices? = null
+        var oldKey: String? = null
+        var prevKey: String? = null
+        var nextKey: String? = null
+        if (movedId != null) {
+            val idx = newAllDevices.indexOfFirst { it.deviceId?.toString() == movedId }
+            if (idx >= 0) {
+                moved = newAllDevices[idx]
+                oldKey = moved.getOrderKey()
+                // 取被移动项新相邻两项的 orderKey，交服务端在其间生成（不本地计算）
+                prevKey = if (idx > 0) newAllDevices[idx - 1].getOrderKey() else null
+                nextKey = if (idx < newAllDevices.size - 1) newAllDevices[idx + 1].getOrderKey() else null
+            }
         }
 
         withContext(Dispatchers.Main) {
@@ -506,7 +529,48 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
             notifyFullDeviceListChanged()
         }
 
-        return newAllDevices
+        return DeviceMoveResult(newAllDevices, moved, oldKey, prevKey, nextKey)
+    }
+
+    data class DeviceMoveResult(
+        val allOrdered: ArrayList<CHDevices>,
+        val moved: CHDevices?,
+        val oldKey: String?,
+        val prevKey: String?,
+        val nextKey: String?
+    )
+
+    // 单项移动检测：从两个全序列中剔除同一 id 后若相等，则该 id 即被移动项
+    private fun findMovedId(old: List<String>, new: List<String>): String? {
+        if (old.size != new.size || old == new) return null
+        if (old.toHashSet() != new.toHashSet()) return null
+        for (id in new) {
+            if (old.filter { it != id } == new.filter { it != id }) return id
+        }
+        return null
+    }
+
+    // orderKey 迁移：本地标记只迁移一次；交服务端 merge 补键，成功后置标记并重拉刷新
+    private suspend fun migrateOrderKeysIfNeeded() {
+        val subId = UserUtils.getSubId() ?: ""
+        val flagKey = "orderKeyMigrated_$subId"
+        val prefs = SharedPreferencesUtils.preferences
+        if (prefs.getBoolean(flagKey, false)) return
+        CHAPIClientBiz.mergeDeviceOrder { result ->
+            result.onSuccess {
+                prefs.edit { putBoolean(flagKey, true) }
+                refreshDevices()
+            }
+        }
+    }
+
+    // 拖动上传失败时：恢复被移动项的旧 orderKey，并按 orderKey 重新排序回滚 UI
+    fun republishSortedDevices() {
+        viewModelScope.launch(Dispatchers.Main) {
+            val sorted = ArrayList(myChDevices.value).apply { sortWith(chDeviceOrderComparator) }
+            myChDevices.value = sorted
+            notifyFullDeviceListChanged()
+        }
     }
 
     @SuppressLint("ServiceCast", "ImplicitSamInstance")

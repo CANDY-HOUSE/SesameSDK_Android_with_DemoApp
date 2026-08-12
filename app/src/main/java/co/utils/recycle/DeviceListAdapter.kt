@@ -17,7 +17,7 @@ import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.createOpensensorStateText
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.app.tabs.devices.ssm2.getRank
+import co.candyhouse.app.tabs.devices.ssm2.setOrderKey
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
@@ -39,21 +39,16 @@ import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptItem
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.server.dto.CHDeviceInfo
-import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.IrRemote
-import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.utils.UserUtils
 import co.utils.getLastKnownLocation
 import co.utils.hasFirmwareUpdate
 import co.utils.vibrateDevice
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class DeviceListAdapter(
     private val mDeviceViewModel: CHDeviceViewModel,
@@ -61,29 +56,33 @@ class DeviceListAdapter(
     private val callBackHub3: (CHHub3, IrRemote) -> Unit,
 ) : GenericAdapter<CHDevices>(mDeviceViewModel.myChDevices.value) {
 
-    override fun onItemMoveFinished() {
-        super.onItemMoveFinished()
+    override fun onItemMoveFinished(fromPosition: Int, toPosition: Int) {
+        super.onItemMoveFinished(fromPosition, toPosition)
 
+        // 未真正移动则不处理（起止位置相同时直接返回）
+        if (fromPosition == -1 || toPosition == -1 || fromPosition == toPosition) return
         if (isUploading) return
         isUploading = true
+
+        // 用拖动最终位置精确定位被拖项，避免相邻交换误判成邻居
+        val movedDeviceId = getCurrentItems().getOrNull(toPosition)?.deviceId?.toString()
 
         mDeviceViewModel.viewModelScope.launch {
             try {
                 val visibleOrderedDevices = getCurrentItems()
-                val newAllOrderedDevices = mDeviceViewModel.applyDeviceOrderFromUI(visibleOrderedDevices)
+                val result = mDeviceViewModel.applyDeviceOrderFromUI(visibleOrderedDevices, movedDeviceId)
+                val moved = result.moved ?: return@launch // 未检测到单项移动，无需上传
+                val deviceUUID = moved.deviceId?.toString()?.uppercase() ?: return@launch
 
-                val uploadKeys = withContext(Dispatchers.IO) {
-                    newAllOrderedDevices.map {
-                        cheyKeyToUserKey(
-                            it.getKey(),
-                            it.getLevel(),
-                            it.getNickname(),
-                            it.getRank()
-                        )
-                    }
+                // 交服务端在 prevKey、nextKey 之间生成 orderKey，只更新该设备，回传新键
+                val newKey = moveDeviceOrderAwait(deviceUUID, result.prevKey, result.nextKey)
+                if (newKey != null) {
+                    moved.setOrderKey(newKey) // 服务端返回的 orderKey
+                } else {
+                    // 失败：回滚该项 orderKey
+                    moved.setOrderKey(result.oldKey)
                 }
-
-                uploadKeysAwait(uploadKeys)
+                mDeviceViewModel.republishSortedDevices()
             } catch (_: Exception) {
             } finally {
                 isUploading = false
@@ -91,17 +90,17 @@ class DeviceListAdapter(
         }
     }
 
-    private suspend fun uploadKeysAwait(keys: List<CHUserKey>) =
+    private suspend fun moveDeviceOrderAwait(deviceUUID: String, prevKey: String?, nextKey: String?): String? =
         suspendCancellableCoroutine { continuation ->
             try {
-                CHAPIClientBiz.upLoadKeys(keys) {
+                CHAPIClientBiz.moveDeviceOrder(deviceUUID, prevKey, nextKey) { result ->
                     if (continuation.isActive) {
-                        continuation.resume(Unit)
+                        continuation.resume(result.getOrNull()?.data?.takeIf { it.isNotEmpty() })
                     }
                 }
             } catch (e: Exception) {
                 if (continuation.isActive) {
-                    continuation.resumeWithException(e)
+                    continuation.resume(null)
                 }
             }
         }

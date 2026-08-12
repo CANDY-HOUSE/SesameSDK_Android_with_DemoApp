@@ -7,7 +7,7 @@ import co.candyhouse.sesame.db.model.CHDevice
  *
  * @author frey on 2026/1/12
  */
-fun cheyKeyToUserKey(key: CHDevice, level: Int, nickName: String, rank: Int? = null): CHUserKey {
+fun cheyKeyToUserKey(key: CHDevice, level: Int, nickName: String, rank: Int? = null, orderKey: String? = null): CHUserKey {
     return CHUserKey(
         key.deviceUUID,
         key.deviceModel,
@@ -16,7 +16,8 @@ fun cheyKeyToUserKey(key: CHDevice, level: Int, nickName: String, rank: Int? = n
         key.sesame2PublicKey,
         nickName,
         level,
-        rank
+        rank,
+        orderKey = orderKey
     )
 }
 
@@ -43,6 +44,7 @@ data class CHUserKey(
     var keyLevel: Int,
     var rank: Int? = null,
     val subUUID: String = "",
+    var orderKey: String? = null,
     val stateInfo: StateInfo = StateInfo()
 )
 

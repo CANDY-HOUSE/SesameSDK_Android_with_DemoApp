@@ -12,6 +12,12 @@ object UserUtils {
         SharedPreferencesUtils.userId?.let { return it } ?: run { return null }
     }
 
+    suspend fun getSubId(): String? {
+        getUserId()?.takeIf { it.isNotEmpty() }?.let { return it }
+        loadUserUserId()
+        return getUserId()?.takeIf { it.isNotEmpty() }
+    }
+
     fun getEnvironmentIdWithByte(): ByteArray? {
         // history tag 只有两档（对齐 iOS）：订阅返回的 envId → 未取到则全ff
         SharedPreferencesUtils.environmentId?.takeIf { it.isNotEmpty() }?.let {

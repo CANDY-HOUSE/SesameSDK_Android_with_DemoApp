@@ -75,11 +75,14 @@ abstract class GenericAdapter<T>(private var listItems: MutableList<T> = mutable
 
 interface ItemTouchHelperAdapter {
     fun onItemMove(fromPosition: Int, toPosition: Int)
-    fun onItemMoveFinished() {}
+    fun onItemMoveFinished(fromPosition: Int, toPosition: Int) {}
 }
 
 class SimpleItemTouchHelperCallback(private val adapter: ItemTouchHelperAdapter) :
     ItemTouchHelper.Callback() {
+
+    private var dragFrom = -1
+    private var dragTo = -1
 
     override fun getMovementFlags(
         recyclerView: RecyclerView,
@@ -95,7 +98,11 @@ class SimpleItemTouchHelperCallback(private val adapter: ItemTouchHelperAdapter)
         source: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        adapter.onItemMove(source.adapterPosition, target.adapterPosition)
+        val from = source.adapterPosition
+        val to = target.adapterPosition
+        if (dragFrom == -1) dragFrom = from // 首个 onMove 的起点即拖动初始位置
+        dragTo = to                          // 末个 onMove 的终点即拖动最终位置
+        adapter.onItemMove(from, to)
         return true
     }
 
@@ -118,8 +125,10 @@ class SimpleItemTouchHelperCallback(private val adapter: ItemTouchHelperAdapter)
             // 当拖拽或滑动动作结束时，actionState 会变为 ACTION_STATE_IDLE
             // 此时 viewHolder 通常为 null，因为没有 item 被选中
             if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
-                // 拖拽结束，通知适配器
-                adapter.onItemMoveFinished()
+                // 拖拽结束，回传初始/最终位置
+                adapter.onItemMoveFinished(dragFrom, dragTo)
+                dragFrom = -1
+                dragTo = -1
             }
         } catch (e: Exception) {
             L.d("sf", "SimpleItemTouchHelperCallback:onSelectedChanged Exception=${e.message}")

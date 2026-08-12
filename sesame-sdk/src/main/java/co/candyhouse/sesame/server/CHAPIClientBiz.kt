@@ -22,6 +22,7 @@ import co.candyhouse.sesame.server.dto.CHSS5HisUploadRequest
 import co.candyhouse.sesame.server.dto.CHSSMHisUploadRequest
 import co.candyhouse.sesame.server.dto.CHUserKey
 import co.candyhouse.sesame.server.dto.FirmwareZipUrlResponse
+import co.candyhouse.sesame.server.dto.RedeemQRRequest
 import co.candyhouse.sesame.server.dto.ScenePayload
 import co.candyhouse.sesame.server.dto.SubscriptionRequest
 import co.candyhouse.sesame.utils.AppIdentifyIdUtil
@@ -298,6 +299,34 @@ object CHAPIClientBiz {
     // 订阅 SNS 主题
     fun subscribeToTopic(body: SubscriptionRequest, onResponse: CHResult<Any>) =
         makeApiCall(onResponse) { apiPost("/device/v1/subscribe", body) }
+
+    /**
+     * 兑换扫码：qrToken 为扫到的分享钥匙二维码全文，成功回传服务端下发的新 URL(data)，失败透传异常（与其他 API 一致）。
+     */
+    fun redeemQR(qrToken: String, onResponse: CHResult<String>) =
+        makeApiCall(onResponse) {
+            val resp = apiPost<Any>("/device/v1/redeem_qr", RedeemQRRequest(qrToken = qrToken))
+            Gson().toJsonTree(resp).asJsonObject.get("data")?.takeIf { !it.isJsonNull }?.asString
+                ?.takeIf { it.isNotEmpty() }
+                ?: throw Exception("Redeem QR failed")
+        }
+
+    // 设备排序（服务端 orderKey）——migrate：为缺 orderKey 的设备按旧规则(rank/名)补键
+    fun mergeDeviceOrder(onResponse: CHResult<Any>) =
+        makeApiCall(onResponse) {
+            apiPost<Any>("/device/v1/reorder", mapOf("op" to "merge"), identifyHeader())
+            CHEmpty()
+        }
+
+    // 设备排序（服务端 orderKey）——reorder：在 prevKey、nextKey 之间生成 orderKey 只更新该设备，返回新 orderKey
+    fun moveDeviceOrder(deviceUUID: String, prevKey: String?, nextKey: String?, onResponse: CHResult<String>) =
+        makeApiCall(onResponse) {
+            val body = mutableMapOf<String, Any>("op" to "move", "deviceUUID" to deviceUUID)
+            prevKey?.let { body["prevKey"] = it }
+            nextKey?.let { body["nextKey"] = it }
+            val resp = apiPost<Any>("/device/v1/reorder", body, identifyHeader())
+            Gson().toJsonTree(resp).asJsonObject.get("orderKey")?.takeIf { !it.isJsonNull }?.asString ?: ""
+        }
 
     // 获取当前推广活动红点
     fun getActivePromotion(onResponse: CHResult<AppPromotion>) =

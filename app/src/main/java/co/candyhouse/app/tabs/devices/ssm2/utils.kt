@@ -249,6 +249,35 @@ fun CHDevices.getRank(): Int {
     return SharedPreferencesUtils.preferences.getInt("ra$id", 0)
 }
 
+// 分数排序键(orderKey)：拖动排序时“移动一项只更新一项”
+fun CHDevices.setOrderKey(key: String?) {
+    val id = this.deviceId?.toString() ?: return
+    SharedPreferencesUtils.preferences.edit {
+        if (key != null) putString("order_$id", key) else remove("order_$id")
+    }
+}
+
+fun CHDevices.getOrderKey(): String? {
+    val id = this.deviceId?.toString() ?: return null
+    return SharedPreferencesUtils.preferences.getString("order_$id", null)
+}
+
+// 设备排序：orderKey 升序，缺失回退旧 rank（迁移种子），最终按昵称
+val chDeviceOrderComparator = Comparator<CHDevices> { x, y ->
+    val a = x.getOrderKey()
+    val b = y.getOrderKey()
+    when {
+        a != null && b != null -> if (a == b) x.getNickname().compareTo(y.getNickname()) else a.compareTo(b)
+        a != null -> -1
+        b != null -> 1
+        else -> {
+            val ra = x.getRank()
+            val rb = y.getRank()
+            if (ra == rb) x.getNickname().compareTo(y.getNickname()) else rb.compareTo(ra) // rank 降序
+        }
+    }
+}
+
 fun CHDevices.setNickname(name: String) {
     SharedPreferencesUtils.preferences.edit().putString(this.deviceId.toString(), name).apply()
 }

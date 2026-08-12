@@ -152,7 +152,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
 
             when (type) {
                 "friend" -> handleFriendType(receiveUri)
-                "sk" -> handleSkType(receiveUri)
+                "sk" -> handleSkType(result)
                 else -> {
                     qrCodeError(getString(R.string.qrcodeNotSupport))
                 }
@@ -200,24 +200,28 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         }
     }
 
-    private fun handleSkType(receiveUri: Uri) {
-        val sharedKey = receiveUri.getQueryParameter("sk")
-        val level = receiveUri.getQueryParameter("l")
-        val customName = receiveUri.getQueryParameter("n")
-        val parameterNames = receiveUri.queryParameterNames
-        for (name in parameterNames) {
-            val value = receiveUri.getQueryParameter(name)
-            L.d("handleSkType", "Parameter:name:$name----$value")
-        }
+    // 分享钥匙(sk)：先向服务端兑换扫码全文(qrToken)，成功后用下发的新 URL 再走原发钥匙流程
+    private fun handleSkType(qrToken: String) {
+        CHAPIClientBiz.redeemQR(qrToken) { result ->
+            result.onSuccess { state ->
+                val receiveUri = state.data.replace("+", "%2B").toUri()
+                val sharedKey = receiveUri.getQueryParameter("sk")
+                val level = receiveUri.getQueryParameter("l")
+                val customName = receiveUri.getQueryParameter("n")
 
-        sharedKey?.let {
-            val keyData = it.base64decodeHex().hexStringToByteArray()
-            val devModel = CHProductModel.getByValue(keyData[0].toInt())
-            L.d("handleSkType", "devModel:$devModel")
-            if (devModel.isValidModel()) {
-                handleValidModel(keyData, level, customName)
-            } else {
-                handleInvalidModel(keyData, level, customName)
+                sharedKey?.let {
+                    val keyData = it.base64decodeHex().hexStringToByteArray()
+                    val devModel = CHProductModel.getByValue(keyData[0].toInt())
+                    L.d("handleSkType", "devModel:$devModel")
+                    if (devModel.isValidModel()) {
+                        handleValidModel(keyData, level, customName)
+                    } else {
+                        handleInvalidModel(keyData, level, customName)
+                    }
+                }
+            }
+            result.onFailure { error ->
+                qrCodeError(error.message ?: getString(R.string.qrcodeNotSupport))
             }
         }
     }
@@ -332,21 +336,23 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
 
         CHDeviceManager.receiveCHDeviceKeys(receiveDevoiceKey) { result ->
             result.onSuccess { data ->
+                // 先取到 VM 实例；put 回调触发时 Fragment 可能已脱离 Activity，
+                // 届时再访问 activityViewModels 会 requireActivity 崩溃
+                val deviceModel = mDeviceModel
                 data.data.forEach { device ->
                     device.setLevel(level!!.toInt())
                     device.setNickname(customName!!)
-                    // 上传到云端
+                    // 上传到云端（put 不带 orderKey）；put 成功后才重拉服务端列表刷新，
+                    // 避免 put 未落库就刷新导致新设备被"以服务端为准"丢弃
                     CHAPIClientBiz.putKey(
                         cheyKeyToUserKey(
                             device.getKey(),
                             device.getLevel(),
                             device.getNickname()
                         )
-                    ) {}
+                    ) { putResult -> putResult.onSuccess { deviceModel.refreshDevices() } }
                 }
 
-                // 加钥匙后重新拉服务端列表（含 stateInfo）刷新，对齐 iOS 扫码后 getCHUserKeys
-                mDeviceModel.refreshDevices()
                 onSuccess()
             }
             result.onFailure {

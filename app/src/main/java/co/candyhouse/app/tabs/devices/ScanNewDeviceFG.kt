@@ -184,9 +184,10 @@ class ScanNewDeviceFG : BaseDeviceFG<FgRgDeviceBinding>(), BleStatusUpdate {
                     device.setLevel(0)
                     device.setIsJustRegister(true)
                     mDeviceViewModel.updateDevices()
+                    // put 不带 orderKey，排序统一由服务端处理；成功后重拉服务端列表刷新
                     CHAPIClientBiz.putKey(
                         cheyKeyToUserKey(device.getKey(), device.getLevel(), device.getNickname())
-                    ) {}
+                    ) { result -> result.onSuccess { mDeviceViewModel.refreshDevices() } }
                     activity?.runOnUiThread {
                         mDeviceViewModel.ssmLockLiveData.value = device
                         findNavController().navigateUp()
