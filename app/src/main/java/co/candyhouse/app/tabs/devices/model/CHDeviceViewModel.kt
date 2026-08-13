@@ -216,11 +216,14 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     }
 
     fun refreshDevices() {
-        val isSignedIn = AWSStatus.getAWSLoginStatus()
-        if (isSignedIn) {
-            syncDeviceFromServer()
-        } else {
-            refreshDevicesAsGuest()
+        viewModelScope.launch {
+            val isSignedIn = runCatching { AWSStatus.refreshAuthSessionNow() }
+                .getOrElse { AWSStatus.getAWSLoginStatus() }
+            if (isSignedIn) {
+                syncDeviceFromServer()
+            } else {
+                refreshDevicesAsGuest()
+            }
         }
     }
 
@@ -259,7 +262,8 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 cheyKeyToUserKey(
                     it.getKey(),
                     it.getLevel(),
-                    it.getNickname()
+                    it.getNickname(),
+                    orderKey = it.getOrderKey()
                 )
             }
         ) { uploadResult ->
