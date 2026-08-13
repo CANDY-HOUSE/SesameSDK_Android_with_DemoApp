@@ -165,7 +165,7 @@
     <string name="Mode">Mode</string>
 
     <string name="no_scan_devices_hint1">1. Are Bluetooth and Location Service permissions on Android are both enabled？</string>
-    <string name="no_scan_devices_hint2">2. Sometimes restarting the android phone can solve the problem.</string>
+    <string name="no_scan_devices_hint2">2. Restarting the android phone may resolve the problem.</string>
     <string name="no_scan_devices_hint3">3. Is the unregistered device nearby？</string>
     <string name="no_scan_devices_hint4">4. To reset the registered device, please press the reset button with a pin until the LED light turns off.</string>
 

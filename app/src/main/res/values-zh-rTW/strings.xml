@@ -171,9 +171,9 @@
     <string name="Mode">模式</string>
 
     <string name="no_scan_devices_hint1">1. 您已經允許了手機的藍牙和位置權限嗎？</string>
-    <string name="no_scan_devices_hint2">2. 附近是否有未註冊的設備？</string>
-    <string name="no_scan_devices_hint3">3. 若要重置已註冊的設備，請用針戳長按重置按鈕直到LED燈熄滅</string>
-    <string name="no_scan_devices_hint4">4. 有時候，重啟手機可以解決問題。</string>
+    <string name="no_scan_devices_hint2">2. 有時候，重啟手機可以解決問題。</string>
+    <string name="no_scan_devices_hint3">3. 附近是否有未註冊的設備？</string>
+    <string name="no_scan_devices_hint4">4. 若要重置已註冊的設備，請用針戳長按重置按鈕直到LED燈熄滅</string>
 
     <string name="pull_fresh_hint">↓您可以下拉刷新</string>
     <string name="latest">(最新)</string>
