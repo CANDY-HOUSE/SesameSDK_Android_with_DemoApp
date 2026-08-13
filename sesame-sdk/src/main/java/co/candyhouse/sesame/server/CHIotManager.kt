@@ -1,9 +1,5 @@
 package co.candyhouse.sesame.server
 
-import aws.sdk.kotlin.services.cognitoidentity.CognitoIdentityClient
-import aws.sdk.kotlin.services.cognitoidentity.model.GetCredentialsForIdentityRequest
-import aws.sdk.kotlin.services.cognitoidentity.model.GetIdRequest
-import aws.sdk.kotlin.services.cognitoidentity.model.NotAuthorizedException
 import co.candyhouse.sesame.BuildConfig
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.os3.CHHub3Device
@@ -18,6 +14,7 @@ import co.candyhouse.sesame.utils.CHResult
 import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
+import co.candyhouse.sesame.utils.TokenManager
 import com.amazonaws.services.iot.client.AWSIotMessage
 import com.amazonaws.services.iot.client.AWSIotMqttClient
 import com.amazonaws.services.iot.client.AWSIotQos
@@ -32,17 +29,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Collections
 import java.util.UUID
 
 private const val CUSTOMER_SPECIFIC_ENDPOINT = BuildConfig.AWS_IOT_ENDPOINT
-private const val CREDENTIAL_REFRESH_WINDOW_SECONDS = 300
 private const val IOT_KEEP_ALIVE_INTERVAL_MILLISECONDS = 60_000
-private val IOT_IDENTITY_ID_KEY =
-    "iot_unauthenticated_identity_id_${BuildConfig.AWS_IDENTITY_POOL_ID}"
 private val IDENTITY_POOL_REGION = BuildConfig.AWS_IDENTITY_POOL_ID.substringBefore(":")
 private val CUSTOMER_REGION = CUSTOMER_SPECIFIC_ENDPOINT
     .substringAfter(".iot.", IDENTITY_POOL_REGION)
@@ -74,8 +66,6 @@ internal object CHIotManager {
     private var subscribeDevicesJob: Job? = null
     private val subscribedIotDeviceIds = Collections.synchronizedSet(mutableSetOf<String>())
     private val subscribedIotTopics = Collections.synchronizedSet(mutableSetOf<String>())
-    private val credentialsMutex = Mutex()
-    private var cachedIotCredentials: CachedIotCredentials? = null
 
     // 启动连接（从应用启动处调用）
     fun startConnection() {
@@ -207,70 +197,9 @@ internal object CHIotManager {
         }
     }
 
+    // 复用 Amplify Auth 的已认证凭证；Amplify 内部自动缓存/到期刷新，无需自管 identityId 与凭证缓存
     private suspend fun getIotCredentials(): Triple<String, String, String?> =
-        credentialsMutex.withLock {
-            val now = System.currentTimeMillis() / 1_000
-            cachedIotCredentials
-                ?.takeIf { it.expirationEpochSeconds - CREDENTIAL_REFRESH_WINDOW_SECONDS > now }
-                ?.let { return@withLock Triple(it.accessKey, it.secretKey, it.sessionToken) }
-
-            val client = CognitoIdentityClient {
-                region = IDENTITY_POOL_REGION
-            }
-            try {
-                val preferences = SharedPreferencesUtils.preferences
-                val identityId = getOrCreateIotIdentityId(client)
-                val credentials = try {
-                    fetchIotCredentials(client, identityId)
-                } catch (_: NotAuthorizedException) {
-                    preferences.edit().remove(IOT_IDENTITY_ID_KEY).apply()
-                    fetchIotCredentials(client, getOrCreateIotIdentityId(client))
-                }
-
-                val cached = CachedIotCredentials(
-                    accessKey = credentials.accessKeyId
-                        ?: error("Unauthenticated AWS access key is unavailable"),
-                    secretKey = credentials.secretKey
-                        ?: error("Unauthenticated AWS secret key is unavailable"),
-                    sessionToken = credentials.sessionToken,
-                    expirationEpochSeconds = credentials.expiration?.epochSeconds
-                        ?: error("Unauthenticated AWS credential expiration is unavailable")
-                )
-                cachedIotCredentials = cached
-                Triple(cached.accessKey, cached.secretKey, cached.sessionToken)
-            } finally {
-                client.close()
-            }
-        }
-
-    private suspend fun getOrCreateIotIdentityId(client: CognitoIdentityClient): String {
-        val preferences = SharedPreferencesUtils.preferences
-        return preferences.getString(IOT_IDENTITY_ID_KEY, null)
-            ?: client.getId(
-                GetIdRequest {
-                    identityPoolId = BuildConfig.AWS_IDENTITY_POOL_ID
-                }
-            ).identityId?.also {
-                preferences.edit().putString(IOT_IDENTITY_ID_KEY, it).apply()
-            }
-            ?: error("Unauthenticated Cognito identity is unavailable")
-    }
-
-    private suspend fun fetchIotCredentials(
-        client: CognitoIdentityClient,
-        identityId: String
-    ) = client.getCredentialsForIdentity(
-        GetCredentialsForIdentityRequest {
-            this.identityId = identityId
-        }
-    ).credentials ?: error("Unauthenticated AWS credentials are unavailable")
-
-    private data class CachedIotCredentials(
-        val accessKey: String,
-        val secretKey: String,
-        val sessionToken: String?,
-        val expirationEpochSeconds: Long
-    )
+        TokenManager.getCredentials()
 
     @Synchronized
     private fun scheduleReconnect(client: AWSIotMqttClient?) {
