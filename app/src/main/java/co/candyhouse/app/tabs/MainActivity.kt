@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.preference.PreferenceManager
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseActivity
+import co.candyhouse.app.base.BaseApp
 import co.candyhouse.app.base.NfcSetting
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.ext.NfcHandler
@@ -110,7 +111,10 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     override fun onResume() {
         super.onResume()
         CHBleManager.enableScan {}
-        deviceViewModel.handleAppGoToForeground()
+        val returnedFromBackground = (application as BaseApp)
+            .appLifecycleObserver
+            .consumeBackgroundTransition()
+        deviceViewModel.handleAppGoToForeground(returnedFromBackground)
         if (pendingAutoUnlockPermissionRequest) {
             requestAutoUnlockBackgroundPermissionIfNeeded()
         }

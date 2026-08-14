@@ -325,6 +325,14 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         onSuccess: () -> Unit = {},
         onFailure: (String) -> Unit = {}
     ) {
+        val keyLevel = level?.toIntOrNull()
+        if (keyLevel == null) {
+            onFailure(getString(R.string.qrcodeNotSupport))
+            return
+        }
+
+        val deviceModel = mDeviceModel
+        val addFailMessage = getString(R.string.addFail)
         val receiveDevoiceKey = CHDevice(
             uuidStr,
             modelStr,
@@ -336,12 +344,9 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
 
         CHDeviceManager.receiveCHDeviceKeys(receiveDevoiceKey) { result ->
             result.onSuccess { data ->
-                // 先取到 VM 实例；put 回调触发时 Fragment 可能已脱离 Activity，
-                // 届时再访问 activityViewModels 会 requireActivity 崩溃
-                val deviceModel = mDeviceModel
                 data.data.forEach { device ->
-                    device.setLevel(level!!.toInt())
-                    device.setNickname(customName!!)
+                    device.setLevel(keyLevel)
+                    customName?.takeIf { it.isNotBlank() }?.let(device::setNickname)
                     // 上传到云端（put 不带 orderKey）；put 成功后才重拉服务端列表刷新，
                     // 避免 put 未落库就刷新导致新设备被"以服务端为准"丢弃
                     CHAPIClientBiz.putKey(
@@ -356,7 +361,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                 onSuccess()
             }
             result.onFailure {
-                onFailure(getString(R.string.addFail))
+                onFailure(addFailMessage)
             }
         }
     }

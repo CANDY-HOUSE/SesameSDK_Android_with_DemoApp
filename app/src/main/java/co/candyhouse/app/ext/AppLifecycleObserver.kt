@@ -12,6 +12,11 @@ import co.candyhouse.sesame.utils.L
 class AppLifecycleObserver : DefaultLifecycleObserver {
     var isAppForeground = false
         private set
+    private var hasEnteredBackground = false
+
+    fun consumeBackgroundTransition(): Boolean = hasEnteredBackground.also {
+        hasEnteredBackground = false
+    }
 
     override fun onStart(owner: LifecycleOwner) {
         // 应用进入前台
@@ -25,6 +30,7 @@ class AppLifecycleObserver : DefaultLifecycleObserver {
         L.d("sf", "App is in the background")
         super.onStop(owner)
         isAppForeground = false
+        hasEnteredBackground = true
     }
 
 }

@@ -142,7 +142,6 @@ internal object CHIotManager {
 
         try {
             iotStatus = IotStatus.Reconnecting
-            resetDevicesOnReconnecting()
 
             val client = createMqttClient(getIotCredentials())
             mqttClient = client
@@ -180,7 +179,6 @@ internal object CHIotManager {
             override fun onConnectionFailure() {
                 if (mqttClient === this) {
                     iotStatus = IotStatus.Reconnecting
-                    iotScope.launch { resetDevicesOnReconnecting() }
                 }
                 super.onConnectionFailure()
             }
@@ -227,10 +225,12 @@ internal object CHIotManager {
         }
     }
 
-    // 重连时重置设备状态
+    // 连接真正丢失时重置一次设备状态，后续重试不重复清空。
     private suspend fun resetDevicesOnReconnecting() = withContext(Dispatchers.IO) {
         CHDeviceManager.getCandyDevices { result ->
             result.onSuccess { response ->
+                if (iotStatus == IotStatus.Connected) return@onSuccess
+
                 response.data.forEach { device ->
                     device.deviceShadowStatus = null
 
