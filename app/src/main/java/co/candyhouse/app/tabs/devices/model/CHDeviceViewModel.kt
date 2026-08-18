@@ -20,14 +20,13 @@ import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.MainActivity
+import co.candyhouse.app.tabs.devices.ssm2.chDeviceOrderComparator
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getOrderKey
-import co.candyhouse.app.tabs.devices.ssm2.setOrderKey
-import co.candyhouse.app.tabs.devices.ssm2.chDeviceOrderComparator
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHSesameBot2
@@ -56,9 +55,9 @@ import co.receiver.widget.AutoUnlockForegroundService
 import co.receiver.widget.AutoUnlockGeofenceManager
 import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
+import co.utils.UserUtils
 import co.utils.alertview.AlertView
 import co.utils.alertview.enums.AlertStyle
-import co.utils.UserUtils
 import co.utils.getHistoryTag
 import co.utils.isLockDevice
 import kotlinx.coroutines.CoroutineScope

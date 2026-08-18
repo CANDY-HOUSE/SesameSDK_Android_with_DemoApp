@@ -212,7 +212,6 @@
     <string name="facepalm">Manage Palm Veins</string>
     <string name="login_fg_input_mail_warn">Please enter a valid email address</string>
 
-    <string name="sesame_widget_notification">Tap to start unlock widget!</string>
     <string name="delete_failed_tips">Failed to delete. Please try again</string>
 
     <string name="distance">Distance</string>

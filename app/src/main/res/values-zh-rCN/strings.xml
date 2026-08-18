@@ -217,7 +217,6 @@
     <string name="default_palm_name">掌静脉🖊️</string>
     <string name="login_fg_input_mail_warn">请输入正确的邮箱</string>
 
-    <string name="sesame_widget_notification">请点击启动开锁小组件!</string>
     <string name="delete_failed_tips">删除失败，请重试</string>
 
     <string name="distance">距离</string>

@@ -217,7 +217,6 @@
     <string name="android_notifica_permis_off">未獲得 安卓的 通知權限(按這裡)</string>
     <string name="login_fg_input_mail_warn">請輸入正確的電子郵件</string>
 
-    <string name="sesame_widget_notification">請點擊啟動開鎖小工具!</string>
     <string name="delete_failed_tips">刪除失敗，請重試</string>
 
     <string name="distance">距離</string>

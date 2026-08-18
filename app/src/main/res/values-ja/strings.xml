@@ -203,7 +203,6 @@
     <string name="facepalm">手のひら静脈の管理</string>
     <string name="login_fg_input_mail_warn">正しいメールアドレスを入力してください</string>
 
-    <string name="sesame_widget_notification">タップしてロック解除ウィジェットを起動</string>
     <string name="delete_failed_tips">削除に失敗しました。再試行してください</string>
 
     <string name="distance">距離</string>
