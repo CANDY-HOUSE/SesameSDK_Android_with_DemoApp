@@ -334,7 +334,6 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFace2Pro -> CHDeviceManager.app.getString(R.string.SSMFace2Pro)
         CHProductModel.SSM_MIWA -> CHDeviceManager.app.getString(R.string.SSM_MIWA)
         CHProductModel.Hub3_LTE -> CHDeviceManager.app.getString(R.string.Hub3_lte)
-        CHProductModel.SSMFace3 -> TODO("Not yet implemented")
     }
 }
 
