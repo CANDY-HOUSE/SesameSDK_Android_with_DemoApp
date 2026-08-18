@@ -364,6 +364,8 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.SSMTouch2Pro, CHProductModel.SSMFace, CHProductModel.SSMFace2, CHProductModel.SSMFaceAI,
             CHProductModel.SSMFace2AI, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceProAI,
             CHProductModel.SSMFace2ProAI -> safeNavigate(R.id.to_SesameConnectorSettingFG)
+
+            CHProductModel.SSMFace3 -> TODO("Not yet implemented")
         }
     }
 
