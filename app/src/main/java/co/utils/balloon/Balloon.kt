@@ -19,14 +19,12 @@
 package com.skydoves.balloon
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -49,6 +47,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.LayoutBalloonBinding
+import co.utils.balloon.circularRevealed
+import co.utils.balloon.circularUnRevealed
+import co.utils.balloon.visible
 import com.skydoves.balloon.annotations.Dp
 import com.skydoves.balloon.annotations.Sp
 
@@ -158,11 +159,8 @@ class Balloon(
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   private fun initializeBalloonWindow() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      bodyWindow.elevation = builder.elevation
-    }
+    bodyWindow.elevation = builder.elevation
   }
 
   private fun initializeBalloonListeners() {
@@ -824,7 +822,6 @@ class Balloon(
     }
 
     /** sets the elevation to the popup. */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     fun setElevation(value: Float): Builder = apply {
       this.elevation = value
     }

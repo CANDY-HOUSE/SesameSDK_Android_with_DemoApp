@@ -619,15 +619,11 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
     }
 
     private fun isNotifyEnable(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val notificationManager = getSystemService(
-                requireContext(),
-                NotificationManager::class.java
-            ) as NotificationManager
-            return notificationManager.areNotificationsEnabled()
-        } else {
-            return true
-        }
+        val notificationManager = getSystemService(
+            requireContext(),
+            NotificationManager::class.java
+        ) as NotificationManager
+        return notificationManager.areNotificationsEnabled()
     }
 
     private fun openSettingNotify() {

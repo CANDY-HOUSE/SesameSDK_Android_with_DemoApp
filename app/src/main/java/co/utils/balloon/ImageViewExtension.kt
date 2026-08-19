@@ -20,6 +20,7 @@ import android.content.res.ColorStateList
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.widget.ImageViewCompat
+import co.utils.balloon.visible
 
 /** applies icon form attributes to a ImageView instance. */
 internal fun AppCompatImageView.applyIconForm(iconForm: IconForm) {

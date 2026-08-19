@@ -181,11 +181,9 @@ object CHBleManager {
 
     fun enableScan(openble: Boolean = false, result: CHResult<CHEmpty>) {
         // 检查权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                result.invoke(Result.failure(CHError.BleUnauth.value))
-                return
-            }
+        if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {

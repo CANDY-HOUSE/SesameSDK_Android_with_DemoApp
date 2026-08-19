@@ -100,11 +100,7 @@ internal open class CHSesameOS3 : CHBaseDevice(), CHSesameOS3Publish {
             return
         }
         val remoteDevice = bluetoothAdapter.getRemoteDevice(deviceAddress)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            remoteDevice.connectGatt(appContext, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else {
-            remoteDevice.connectGatt(appContext, false, gattCallback)
-        }
+        remoteDevice.connectGatt(appContext, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
     }
 
     private val mBluetoothGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {

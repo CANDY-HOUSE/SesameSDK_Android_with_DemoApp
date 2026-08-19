@@ -15,7 +15,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
 
 /**
  * WebView通用配置和工具类
@@ -99,7 +98,6 @@ object WebViewCore {
                 return false
             }
 
-            @RequiresApi(Build.VERSION_CODES.M)
             override fun onReceivedError(
                 view: WebView?,
                 request: WebResourceRequest?,

@@ -235,9 +235,6 @@ open class MaterialTextField : androidx.appcompat.widget.AppCompatEditText {
 
         styledAttributes.recycle()
 
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
-            setPaddingRelative(paddingStart, paddingTop + dp(6f).toInt(), paddingEnd, paddingBottom - dp(2f).toInt())
-        }
         originalPaddingBottom = paddingBottom
 
         ContextCompat.getDrawable(context, R.drawable.ic_warning)?.let {

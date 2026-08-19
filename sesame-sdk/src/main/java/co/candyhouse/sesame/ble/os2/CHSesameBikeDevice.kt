@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
-import android.os.Build
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
@@ -65,22 +64,17 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@SuppressLint("MissingPermission") internal class CHSesameBikeDevice() : CHSesameOS2(), CHSesameBike, CHDeviceUtil {
-
-
-    var isConnectedByWM2: Boolean = false
-
+@SuppressLint("MissingPermission")
+internal class CHSesameBikeDevice() : CHSesameOS2(), CHSesameBike, CHDeviceUtil {
 
     override var advertisement: CHadv? = null
         set(value) {
-//            L.d("hcia", "adv:" + field + "😷 -> " + value + " " + deviceId.toString()+ deviceStatus)
             field = value
             if (value == null) {
                 deviceStatus = CHDeviceStatus.NoBleSignal
                 return
             }
             rssi = advertisement?.rssi
-//            L.d("hcia", "rssi:" + rssi)
             deviceId = advertisement!!.deviceID
             isRegistered = advertisement!!.isRegistered
 
@@ -95,9 +89,7 @@ import java.util.UUID
             if (deviceStatus == CHDeviceStatus.WaitingForAuth && isInternetAvailable()) {
                 deviceStatus = CHDeviceStatus.ReceivedAdV
             }
-
         }
-
 
     override fun goIOT() {
         CHIotManager.subscribeSesame2Shadow(this) { result ->
@@ -108,25 +100,24 @@ import java.util.UUID
                     }
                 }
                 resource.data.state.reported.wm2s?.let { wm2s ->
-                    isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
-                }
-                if (isConnectedByWM2) {
-                    deviceShadowStatus = if ((mechStatus as CHSesameBotMechStatus).isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-                } else {
-                    deviceShadowStatus = null
+                    val isConnectedByWM2 = wm2s
+                        .map { it.value.hexStringToByteArray().first().toInt() }
+                        .contains(1)
+                    if (isConnectedByWM2) {
+                        deviceShadowStatus = if ((mechStatus as CHSesameBotMechStatus).isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
+                    } else {
+                        deviceShadowStatus = null
+                    }
                 }
             }
         }
     }
 
-
     override fun connect(result: CHResult<CHEmpty>) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                if (CHBleManager.mScanning == CHScanStatus.BleClose) {
-                    result.invoke(Result.failure(CHError.BleUnauth.value))
-                    return
-                }
+        if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
             }
         }
 
@@ -139,39 +130,23 @@ import java.util.UUID
             return
         }
 
-        if (isNeedAuthFromServer == true && isInternetAvailable() == false) {
+        if (isNeedAuthFromServer == true && !isInternetAvailable()) {
             deviceStatus = CHDeviceStatus.WaitingForAuth
             return
         }
 
-
         if (CHBleManager.connectR.indexOf(advertisement?.device?.address) == -1) {
-//            L.b("hcia", customDeviceName + ":連接紀錄:" + advertisement!!.device.address)
             CHBleManager.connectR.add(advertisement!!.device.address)
-        } else {
-//            L.b("hcia", customDeviceName + ":我已經連接過了：" + (advertisement as CHadv).device.address)
-            return
-        }
+        } else return
 
         deviceStatus = CHDeviceStatus.BleConnecting
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 
-//        L.d("hcia", "Build.VERSION.SDK_INT:" + Build.VERSION.SDK_INT)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                L.d("hcia", "ssm" + ":連接 O:")
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                L.d("hcia", "ssm" + ":連接 M:")
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else {
-//                L.d("hcia", "ssm" + ":主動連接 old:")
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(appContext, false, mBluetoothGattCallback)
-        }
+        bluetoothAdapter.getRemoteDevice(advertisement!!.device.address)
+            .connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
     }
 
-
     private val mBluetoothGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
-
         override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
             super.onCharacteristicChanged(gatt, characteristic)
             val ssmSay = gattRxBuffer.feed(characteristic!!.value)
@@ -200,15 +175,11 @@ import java.util.UUID
             transmit()
         }
 
-
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
-//            L.d("hcia", "BluetoothGatt " + ":發現服務:")
-
             for (service in gatt?.services!!) {
                 if (service.uuid == Sesame2Chracs.uuidService01) {
                     for (charc in service.characteristics) {
-//                        L.d("hcia", "BluetoothGatt 特徵:" + charc.uuid)
                         if (charc.uuid == Sesame2Chracs.uuidChr02) {
                             mCharacteristic = charc
                         }
@@ -224,43 +195,30 @@ import java.util.UUID
             }
         }
 
-
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-//                    L.d("hcia", "ssm " + ":連接狀態＋＋" + BleBaseType.GattConnectStateDec(newState) + " 狀態:" + BleBaseType.GattConnectStatusDec(status))
                 deviceStatus = CHDeviceStatus.DiscoverServices
                 mBluetoothGatt = gatt
                 gatt.discoverServices()
             } else {
-//                L.d("hcia", "bike " + ":連接狀態 --" + BleBaseType.GattConnectStateDec(newState) + " 狀態:" + BleBaseType.GattConnectStatusDec(status))
-//                gatt?.disconnect()
                 gatt.close()
                 advertisement = null
                 mBluetoothGatt = null
                 CHBleManager.connectR.remove(gatt.device.address)
-
             }
-
         }
     }
 
     private fun onGattSesameResponse(ssm2ResponsePayload: SSM2ResponsePayload) {
         CoroutineScope(IO).launch {
-//            L.d("hcia","解鎖<-------")
             semaphore.receive().invoke(ssm2ResponsePayload)
         }
     }
 
     private fun onGattSesamePublish(receivePayload: SSM3PublishPayload) {
-
-//        L.d("hcia", "receivePayload.cmdItCode:" + receivePayload.cmdItCode)
         if (receivePayload.cmdItCode == SesameItemCode.login.value) {
-
-//            L.d("hcia", "註冊完畢收到login:")
-
             val loginResponse = SSMBotLoginResponsePayload(receivePayload.payload)
-//            L.d("hcia", ":登入成功 loginResponse:" + loginResponse + " 歷史數量:" + loginResponse.historyCnt)
 
             sendEncryptCommand(SSM2Payload(SSM2OpCode.update, SesameItemCode.timePhone, System.currentTimeMillis().toUInt32ByteArray())) { }
 
@@ -282,7 +240,6 @@ import java.util.UUID
                         }
                         it.onFailure {}
                     }
-
                 } else {
                     login()
                 }
@@ -292,19 +249,14 @@ import java.util.UUID
         }
 
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
-//            L.d("hcia", "receivePayload.payload:" + receivePayload.payload.toHexString())
             mechStatus = CHSesameBotMechStatus(receivePayload.payload)
-//            L.d("hcia", "isStop:" + mechStatus!!.isStop)
-//            L.d("hcia", "mechStatus!!.retCode:" + mechStatus!!.retCode + " target:" + mechStatus!!.target)
             deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else if (mechStatus!!.isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
-//            L.d("hcia", "ssm Status:" + deviceStatus.toString())
             reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 
-
     override fun unlock(historyTag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historyTag), result)
         }
         if (!isBleAvailable(result)) return
@@ -319,9 +271,7 @@ import java.util.UUID
         }
     }
 
-
     override fun login(token: String?) {
-//        L.d("hcia", "重作配置semaphore")
         semaphore = Channel(capacity = 1)
         deviceStatus = CHDeviceStatus.BleLogining
         val secret = sesame2KeyData!!.secretKey.hexStringToByteArray()
@@ -343,22 +293,15 @@ import java.util.UUID
         cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
         val cmd = SSM2Payload(SSM2OpCode.sync, SesameItemCode.login, loginPayload)
         sendPlainCommand(cmd) { ssm2ResponsePayload ->
-//            L.d("hcia", "下指令登入成功")
             if (ssm2ResponsePayload.cmdItCode == SesameItemCode.login.value && ssm2ResponsePayload.cmdResultCode == SesameResultCode.success.value) {
-
-//                L.d("hcia", "登入 payload:" + ssm2ResponsePayload.payload.toHexString())
                 val loginResponse = SSMBotLoginResponsePayload(ssm2ResponsePayload.payload)
                 val currentTimestamp = System.currentTimeMillis() / 1000
                 val timeError = currentTimestamp.minus(loginResponse.systemTime)
-//                L.d("hcia", "loginResponse.fw_version:" + loginResponse.fw_version)
-//                L.d("hcia", "timeError:" + timeError)
                 if (timeError > 3) { // check check  time error
-//                    L.d("hcia", "登入後設定時間開始 ==>")
                     sendEncryptCommand(SSM2Payload(SSM2OpCode.update, SesameItemCode.timePhone, System.currentTimeMillis().toUInt32ByteArray())) { }
                 }
                 mechStatus = loginResponse.SSMBotMechStatus
                 deviceStatus = if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-//                L.d("hcia", "deviceStatus:" + deviceStatus)
             }
         }
     }
@@ -396,7 +339,6 @@ import java.util.UUID
                 deviceId.toString(),
                 req
             ) { apiResult ->
-
                 apiResult.fold(
                     onSuccess = { state ->
                         val registerSesame1 = state.data
@@ -453,7 +395,6 @@ import java.util.UUID
 
     override fun updateFirmware(result: CHResult<BluetoothDevice>) {
         L.d("hcia", "啟動dfu" + deviceStatus + " " + isRegistered)
-
         if (isRegistered) {
             if (!isBleAvailable(result)) return
             sendEncryptCommand(SSM2Payload(SSM2OpCode.update, SesameItemCode.enableDFU, "01".hexStringToByteArray())) { res ->
@@ -491,9 +432,7 @@ import java.util.UUID
 
     private fun sendCommand(txClosure: SesameBleTransmit) {
         CoroutineScope(IO).launch {
-//            L.d("hcia", "🀄Command: ==>:" + payload.itemCode + " " + payload.opCode + " " + delegate)
             gattTxBuffer = txClosure
-//            gattTxBuffer?.payloadCMD = payload
             transmit()
         }
     }
@@ -505,9 +444,7 @@ import java.util.UUID
         val data = gattTxBuffer?.getChunk() ?: return
         mCharacteristic?.value = data
         mBluetoothGatt?.writeCharacteristic(mCharacteristic)
-//        L.d("hcia", "botWrite:" + botWrite)
     }
-
 }
 
 internal class SSMBotLoginResponsePayload(loginPayload: ByteArray) {
@@ -517,6 +454,6 @@ internal class SSMBotLoginResponsePayload(loginPayload: ByteArray) {
     val mech_setting_t = loginPayload.sliceArray(8..19)
     val mech_status_t = loginPayload.sliceArray(20..27)
     var SSMBotMechStatus = CHSesameBotMechStatus(mech_status_t)
-    var SSMBotMechSetting = CHSesameBotMechSettings(mech_setting_t[0], mech_setting_t[1], mech_setting_t[2], mech_setting_t[3], mech_setting_t[4], mech_setting_t[5], mech_setting_t[6])
+    var SSMBotMechSetting =
+        CHSesameBotMechSettings(mech_setting_t[0], mech_setting_t[1], mech_setting_t[2], mech_setting_t[3], mech_setting_t[4], mech_setting_t[5], mech_setting_t[6])
 }
-

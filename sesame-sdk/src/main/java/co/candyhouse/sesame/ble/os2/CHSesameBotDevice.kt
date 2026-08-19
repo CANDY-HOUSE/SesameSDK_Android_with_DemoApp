@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
-import android.os.Build
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
@@ -142,7 +141,7 @@ internal class CHSesameBotDevice : CHSesameOS2(), CHSesameBot, CHDeviceUtil {
             return
         }
 
-        if (isNeedAuthFromServer == true && isInternetAvailable() == false) {
+        if (isNeedAuthFromServer == true && !isInternetAvailable()) {
             deviceStatus = CHDeviceStatus.WaitingForAuth
             return
         }
@@ -154,10 +153,8 @@ internal class CHSesameBotDevice : CHSesameOS2(), CHSesameBot, CHDeviceUtil {
         deviceStatus = CHDeviceStatus.BleConnecting
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
+        bluetoothAdapter.getRemoteDevice(advertisement!!.device.address)
+            .connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
     }
 
     private val mBluetoothGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {

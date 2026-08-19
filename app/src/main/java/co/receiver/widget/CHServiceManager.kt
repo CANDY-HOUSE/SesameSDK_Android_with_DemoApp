@@ -13,7 +13,6 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
-import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -39,35 +38,18 @@ object CHServiceManager {
 
     private fun isScreenOn(context: Context): Boolean {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        /*return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-            powerManager.isInteractive
-        } else {
-            powerManager.isScreenOn
-        }*/
         return powerManager.isInteractive
     }
 
     fun widgetLock(locker: CHDevices, context: Context): Notification {
-        val replyActionPendingIntent: PendingIntent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val intent = Intent(context, MessagingIntentService::class.java)
-            intent.action = "toggle_ssm" + locker.deviceId.hashCode()
-            replyActionPendingIntent = PendingIntent.getService(
-                context,
-                locker.deviceId.hashCode(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        } else {
-            val notifyIntent = Intent(context, MainActivity::class.java)
-            notifyIntent.action = "toggle_ssm" + locker.deviceId.hashCode()
-            replyActionPendingIntent = PendingIntent.getActivity(
-                context,
-                locker.deviceId.hashCode(),
-                notifyIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        val intent = Intent(context, MessagingIntentService::class.java)
+        intent.action = "toggle_ssm" + locker.deviceId.hashCode()
+        val replyActionPendingIntent = PendingIntent.getService(
+            context,
+            locker.deviceId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val notificationLayout = RemoteViews(context.packageName, R.layout.cell_weget_unlock)
         notificationLayout.setOnClickPendingIntent(R.id.toggle, replyActionPendingIntent)
         notificationLayout.setTextViewText(R.id.title, locker.getNickname())
@@ -121,47 +103,22 @@ object CHServiceManager {
     }
 
     fun connectedNotification(requestID: Int, context: Context): Notification {
-        val replyActionPendingIntent: PendingIntent
-        val replyCloseAllIntent: PendingIntent
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val intent = Intent(context, MessagingIntentService::class.java)
-            intent.action = "open_all$requestID"
-            replyActionPendingIntent = PendingIntent.getService(
-                context,
-                requestID,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
-        } else {
-            val notifyIntent = Intent(context, MainActivity::class.java)
-            notifyIntent.action = "open_all$requestID"
-            replyActionPendingIntent = PendingIntent.getActivity(
-                context,
-                requestID,
-                notifyIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val intent = Intent(context, MessagingIntentService::class.java)
-            intent.action = "close_all$requestID"
-            replyCloseAllIntent = PendingIntent.getService(
-                context,
-                requestID,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
-        } else {
-            val notifyIntent = Intent(context, MainActivity::class.java)
-            notifyIntent.action = "close_all$requestID"
-            replyCloseAllIntent = PendingIntent.getActivity(
-                context,
-                requestID,
-                notifyIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
-        }
+        val openIntent = Intent(context, MessagingIntentService::class.java)
+        openIntent.action = "open_all$requestID"
+        val replyActionPendingIntent = PendingIntent.getService(
+            context,
+            requestID,
+            openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        )
+        val closeIntent = Intent(context, MessagingIntentService::class.java)
+        closeIntent.action = "close_all$requestID"
+        val replyCloseAllIntent = PendingIntent.getService(
+            context,
+            requestID,
+            closeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        )
 
         val notificationLayout = RemoteViews(context.packageName, R.layout.cell_weget)
         notificationLayout.setOnClickPendingIntent(R.id.open_all, replyActionPendingIntent)

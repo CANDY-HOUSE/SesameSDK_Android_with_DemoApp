@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
-import android.os.Build
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
@@ -141,12 +140,10 @@ import kotlin.experimental.and
         }
 
     override fun connect(result: CHResult<CHEmpty>) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                if (CHBleManager.mScanning == CHScanStatus.BleClose) {
-                    result.invoke(Result.failure(CHError.BleUnauth.value))
-                    return
-                }
+        if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
             }
         }
 
@@ -170,14 +167,8 @@ import kotlin.experimental.and
         deviceStatus = CHDeviceStatus.BleConnecting
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 
-        //            withContext(Main){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { //                L.d("hcia", "wm2" + ":連接 O:")
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(CHBleManager.appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //                L.d("hcia", "wm2" + ":連接 M:")
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(CHBleManager.appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else { //                L.d("hcia", "wm2" + ":主動連接 old:")
-            bluetoothAdapter.getRemoteDevice(advertisement!!.device.address).connectGatt(CHBleManager.appContext, false, mBluetoothGattCallback)
-        }
+        bluetoothAdapter.getRemoteDevice(advertisement!!.device.address)
+            .connectGatt(CHBleManager.appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
 
     }
 

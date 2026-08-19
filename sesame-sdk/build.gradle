@@ -47,7 +47,6 @@ dependencies {
     api libs.amplify.aws.api
     api libs.amplify.aws.auth.cognito
     api libs.amplify.core.kotlin
-    implementation libs.aws.iot.data.plane
     implementation(libs.aws.iot.device.sdk.java) {
         exclude group: "com.amazonaws", module: "aws-java-sdk-secretsmanager"
     }

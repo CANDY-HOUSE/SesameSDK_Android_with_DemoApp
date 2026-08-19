@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.annotation.Keep
 import co.candyhouse.sesame.ble.os2.CHError
 import co.candyhouse.sesame.db.CHDB
@@ -212,13 +211,10 @@ internal interface CHDeviceUtil {
 }
 
 internal fun <T> CHDevices.isBleAvailable(result: CHResult<T>): Boolean {
-    // 检查位置权限（Android 6.0及以上需要）
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (CHBleManager.mScanning == CHScanStatus.BleClose) {
-                result.invoke(Result.failure(CHError.BleUnauth.value))
-                return false
-            }
+    if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return false
         }
     }
     if (CHBleManager.mScanning == CHScanStatus.BleClose) {

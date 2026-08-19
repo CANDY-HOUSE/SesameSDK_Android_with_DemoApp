@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
-import android.os.Build
 import co.candyhouse.sesame.ble.CHDeviceUtil
 import co.candyhouse.sesame.ble.CHadv
 import co.candyhouse.sesame.ble.DeviceSegmentType
@@ -67,15 +66,24 @@ import java.util.UUID
 import kotlin.math.abs
 
 internal enum class CHError(val value: NSError) {
-    SesameUnlogin(NSError("Sesame BLE unlogin", "SesameSDK", -1)), Noble(NSError("without receivedBle", "SesameSDK", -2)), BlePoweroff(NSError("PoweredOff", "CBCentralManager", 4)), BleUnauth(NSError("Unauthorized", "CBCentralManager", 3)), BUSY(NSError("BUSY", "Sesame2SDK", 7)), INVALID_PARAM(NSError("INVALID_PARAM", "Sesame2SDK", 8)), BleInvalidAction(NSError("InvalidAction", "Sesame2SDK", 9)), NotfoundError(NSError("notfound", "Sesame2SDK", 5)), NetWorkError(NSError("NetWork", "Sesame2SDK", -3)),
+    SesameUnlogin(NSError("Sesame BLE unlogin", "SesameSDK", -1)), Noble(NSError("without receivedBle", "SesameSDK", -2)), BlePoweroff(
+        NSError(
+            "PoweredOff",
+            "CBCentralManager",
+            4
+        )
+    ),
+    BleUnauth(NSError("Unauthorized", "CBCentralManager", 3)), BUSY(NSError("BUSY", "Sesame2SDK", 7)), INVALID_PARAM(NSError("INVALID_PARAM", "Sesame2SDK", 8)), BleInvalidAction(
+        NSError("InvalidAction", "Sesame2SDK", 9)
+    ),
+    NotfoundError(NSError("notfound", "Sesame2SDK", 5)), NetWorkError(NSError("NetWork", "Sesame2SDK", -3)),
 }
 
-@SuppressLint("MissingPermission") internal class CHSesame2Device() : CHSesameOS2(), CHSesame2, CHDeviceUtil {
+@SuppressLint("MissingPermission")
+internal class CHSesame2Device : CHSesameOS2(), CHSesame2, CHDeviceUtil {
     private var mResultRegister: CHResult<CHEmpty>? = null
-    var isConnectedByWM2: Boolean = false
 
     override fun goIOT() {
-//        L.d("hcia", "goIOT:" +this.deviceId)
         CHIotManager.subscribeSesame2Shadow(this) { result ->
             result.onSuccess { resourse ->
                 if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
@@ -84,12 +92,15 @@ internal enum class CHError(val value: NSError) {
                     }
                 }
                 resourse.data.state.reported.wm2s?.let { wm2s ->
-                    isConnectedByWM2 = wm2s.map { it.value.hexStringToByteArray().first().toInt() }.contains(1)
-                }
-                if (isConnectedByWM2) {
-                    deviceShadowStatus = if ((mechStatus as CHSesame2MechStatus).isInLockRange) CHDeviceStatus.Locked else if ((mechStatus as CHSesame2MechStatus).isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
-                } else {
-                    deviceShadowStatus = null
+                    val isConnectedByWM2 = wm2s
+                        .map { it.value.hexStringToByteArray().first().toInt() }
+                        .contains(1)
+                    if (isConnectedByWM2) {
+                        deviceShadowStatus =
+                            if ((mechStatus as CHSesame2MechStatus).isInLockRange) CHDeviceStatus.Locked else if ((mechStatus as CHSesame2MechStatus).isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
+                    } else {
+                        deviceShadowStatus = null
+                    }
                 }
             }
         }
@@ -119,12 +130,9 @@ internal enum class CHError(val value: NSError) {
             if (deviceStatus == CHDeviceStatus.WaitingForAuth && isInternetAvailable()) {
                 deviceStatus = CHDeviceStatus.ReceivedAdV
             }
-
         }
 
-
     override var mechSetting: CHSesame2MechSettings? = null
-
 
     override fun getVersionTag(result: CHResult<String>) {
         if (!isBleAvailable(result)) return
@@ -155,20 +163,15 @@ internal enum class CHError(val value: NSError) {
         if (!isBleAvailable(result)) return
 
         sendEncryptCommand(SSM2Payload(SSM2OpCode.read, SesameItemCode.autolock, byteArrayOf())) { res ->
-//            val autoLockSecond = res.payload.reversedArray().toInt()
-            val autoLockSecond =  java.lang.Long.parseLong(res.payload.reversedArray().toHexString(), 16).toInt()
+            val autoLockSecond = java.lang.Long.parseLong(res.payload.reversedArray().toHexString(), 16).toInt()
             result.invoke(Result.success(CHResultState.CHResultStateBLE(autoLockSecond)))
         }
     }
 
-
     override fun toggle(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-
-
-        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
-
             if (mechStatus?.isInLockRange == true) {
                 unlock(historytag, result)
             } else {
@@ -178,7 +181,7 @@ internal enum class CHError(val value: NSError) {
     }
 
     override fun lock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAPIClientBiz.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
             if (!isBleAvailable(result)) return
@@ -193,8 +196,7 @@ internal enum class CHError(val value: NSError) {
     }
 
     override fun unlock(historytag: ByteArray?, result: CHResult<CHEmpty>) {
-
-        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && isConnectedByWM2) {
+        if (deviceStatus.value == CHDeviceLoginStatus.unlogined && deviceShadowStatus != null) {
             CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.hisTagC(historytag), result)
         } else {
             if (!isBleAvailable(result)) return
@@ -210,24 +212,7 @@ internal enum class CHError(val value: NSError) {
 
     }
 
-    override fun login(token: String?) { //        L.d("hcia", "loginSesame BluetoothGatt " + " mSSTK:" + mSesameToken.toHexString())
-        //        L.d("hcia", "semaphore.isEmpty:" + semaphore.isEmpty)
-//        L.d("hcia", "[ss2][login]")
-//        val ssm = this
-//        L.d("hcia", "ssm.sesame2KeyData!!.deviceUUID:" + ssm.sesame2KeyData!!.deviceUUID.uppercase())
-//        val noHashUUID = ssm.sesame2KeyData!!.deviceUUID.replace("-", "")
-//        val b64k = noHashUUID.hexStringToByteArray().base64Encode().replace("=", "")
-//        val ssmIRData = b64k.toByteArray()
-//        val ssmPKData = ssm.sesame2KeyData!!.sesame2PublicKey.hexStringToByteArray()
-//        val ssmSecKa = ssm.sesame2KeyData!!.secretKey.hexStringToByteArray()
-//        val ssmUUid = ssm.sesame2KeyData!!.deviceUUID.uppercase(Locale.getDefault()).toByteArray()
-//        val allKey = ssmIRData + ssmPKData + ssmSecKa + ssmUUid
-//        L.d("hcia", "[TEST][mSesameToken]:" + mSesameToken.toHexString()+" "+mSesameToken.size)
-//        L.d("hcia", "[TEST][IR]:" + ssmIRData.toHexString())
-//        L.d("hcia", "[TEST][ssm-public-key]:" + ssmPKData.toHexString())
-//        L.d("hcia", "[TEST][ssm-secret-key]:" + ssmSecKa.toHexString())
-//        L.d("hcia", "[TEST][ALL]:" + allKey.toHexString())
-
+    override fun login(token: String?) {
         semaphore = Channel(capacity = 1)
         deviceStatus = CHDeviceStatus.BleLogining
         val secret = sesame2KeyData!!.secretKey.hexStringToByteArray()
@@ -242,19 +227,14 @@ internal enum class CHError(val value: NSError) {
         } else {
             sessionAuth = AesCmac(secret, 16).computeMac(signPayload)
         }
-
         val ecdhSecret = EccKey.ecdh(ssmPublicKeyBytes)
         val ecdhSecretPre16 = ecdhSecret.sliceArray(0..15)
         val sessionKey = AesCmac(ecdhSecretPre16, 16).computeMac(sessionToken)
-//        L.d("hcia", "ecdhSecretPre16:" + ecdhSecretPre16.toHexString())
-//        L.d("hcia", "sessionKey:" + sessionKey!!.toHexString())
         cipher = SesameOS2BleCipher(sessionKey!!, sessionToken)
         val loginPayload = userIdx + appPublicKeyBytes + mAppToken + sessionAuth!!.sliceArray(0..3)
-//        L.d("hcia", "loginPayload:"+loginPayload.toHexString()+" " + loginPayload.size)
-        val cmd = SSM2Payload(SSM2OpCode.sync, SesameItemCode.login, loginPayload) //        L.d("hcia", "下指令登入成功---->")
-        sendEncryptCommand(cmd, DeviceSegmentType.plain) { ssm2ResponsePayload -> //            L.d("hcia", "下指令登入成功<-------")
+        val cmd = SSM2Payload(SSM2OpCode.sync, SesameItemCode.login, loginPayload)
+        sendEncryptCommand(cmd, DeviceSegmentType.plain) { ssm2ResponsePayload ->
             if (ssm2ResponsePayload.cmdItCode == SesameItemCode.login.value && ssm2ResponsePayload.cmdResultCode == SesameResultCode.success.value) {
-//                L.d("hcia", "ssm2ResponsePayload.payload:" + ssm2ResponsePayload.payload.toHexString())
                 val loginResponse = SSM2LoginResponsePayload(ssm2ResponsePayload.payload)
                 val currentTimestamp = System.currentTimeMillis() / 1000
                 val timeError = currentTimestamp.minus(loginResponse.systemTime)
@@ -265,21 +245,17 @@ internal enum class CHError(val value: NSError) {
                 }
                 mechStatus = loginResponse.SSM2MechStatus
                 mechSetting = loginResponse.SSM2MechSetting
-                deviceStatus = if (!mechSetting!!.isConfigured) CHDeviceStatus.NoSettings else if ((mechStatus as CHSesame2MechStatus).isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
-
+                deviceStatus =
+                    if (!mechSetting!!.isConfigured) CHDeviceStatus.NoSettings else if ((mechStatus as CHSesame2MechStatus).isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
             }
         }
     }
 
-
-
     override fun connect(result: CHResult<CHEmpty>) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                if (CHBleManager.mScanning == CHScanStatus.BleClose) {
-                    result.invoke(Result.failure(CHError.BleUnauth.value))
-                    return
-                }
+        if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
             }
         }
 
@@ -302,34 +278,24 @@ internal enum class CHError(val value: NSError) {
             result.invoke(Result.failure(CHError.Noble.value))
             return
         }
-        val address=advertisement!!.device.address
+        val address = advertisement!!.device.address
 
         if (CHBleManager.connectR.indexOf(address) == -1) {
             CHBleManager.connectR.add(address)
-        } else {
-            return
-        }
+        } else return
 
         deviceStatus = CHDeviceStatus.BleConnecting
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
 
         val remoteDevice = bluetoothAdapter.getRemoteDevice(address)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            remoteDevice.connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            remoteDevice.connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else {
-            remoteDevice.connectGatt(appContext, false, mBluetoothGattCallback)
-        }
+        remoteDevice.connectGatt(appContext, false, mBluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
     }
 
     private val mBluetoothGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
 
         override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
             super.onCharacteristicChanged(gatt, characteristic)
-//            L.d("hcia", "[ssm][say]:" + characteristic!!.value.toHexString())
             val ssmSay = gattRxBuffer.feed(characteristic!!.value)
-          //  L.d("sendEncryptCommand","parceNotifyPayloadfirst:"+ssmSay?.first)
             if (ssmSay?.first == DeviceSegmentType.cipher) {
                 parceNotifyPayload(cipher!!.decrypt(ssmSay.second))
             }
@@ -339,9 +305,6 @@ internal enum class CHError(val value: NSError) {
         }
 
         private fun parceNotifyPayload(palntext: ByteArray) {
-//            L.d("hcia", "palntext:" + palntext.toHexString())
-
-       //     L.d("sendEncryptCommand","parceNotifyPayload:"+palntext.toHexString())
             val ssm2notify = SesameNotifypayload(palntext) //1
             if (ssm2notify.notifyOpCode == SSM2OpCode.publish) {
                 val ssm2pubPayload = SSM3PublishPayload(ssm2notify.payload)
@@ -349,7 +312,6 @@ internal enum class CHError(val value: NSError) {
             }
             if (ssm2notify.notifyOpCode == SSM2OpCode.response) {
                 val ssm2responsePayload = SSM2ResponsePayload(ssm2notify.payload)
-//                L.d("hcia", "🀄Command:<==:" + ssm2responsePayload.cmdOPCode + "-" + ssm2responsePayload.cmdItCode + "-" + ssm2responsePayload.cmdResultCode)
                 CoroutineScope(IO).launch {
                     semaphore.receive().invoke(ssm2responsePayload)
                 }
@@ -363,17 +325,12 @@ internal enum class CHError(val value: NSError) {
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
-//            L.d("hcia", "BluetoothGatt " + ":發現服務:")
             for (service in gatt?.services!!) {
-//                L.d("hcia", "service.uuid:" + service.uuid)
                 if (service.uuid == Sesame2Chracs.uuidService01) {
                     for (charc in service.characteristics) {
-//                        L.d("hcia", "BluetoothGatt 特徵:" + charc.uuid)
-//                        L.d("hcia", "charc.uuid:" + charc.uuid)
                         if (charc.uuid == Sesame2Chracs.uuidChr02) {
                             mCharacteristic = charc
                         }
-
                         if (charc.uuid == Sesame2Chracs.uuidChr03) {
                             gatt.setCharacteristicNotification(charc, true)
                             val descriptor = charc.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
@@ -385,15 +342,13 @@ internal enum class CHError(val value: NSError) {
             }
         }
 
-
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
-            if (newState == BluetoothProfile.STATE_CONNECTED) { //                L.d("hcia", "ssm " + ":連接狀態＋＋" + BleBaseType.GattConnectStateDec(newState) + " 狀態:" + BleBaseType.GattConnectStatusDec(status))
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
                 deviceStatus = CHDeviceStatus.DiscoverServices
                 mBluetoothGatt = gatt
                 gatt.discoverServices()
             } else {
-//                L.d("hcia", "ssm " + ":連接狀態 --" + BleBaseType.GattConnectStateDec(newState) + " 狀態:" + BleBaseType.GattConnectStatusDec(status))
                 gatt.close()
                 advertisement = null
                 mBluetoothGatt = null
@@ -401,7 +356,6 @@ internal enum class CHError(val value: NSError) {
             }
         }
     }
-
 
     override fun register(resultRegister: CHResult<CHEmpty>) {
         if (deviceStatus != CHDeviceStatus.ReadyToRegister) {
@@ -413,7 +367,6 @@ internal enum class CHError(val value: NSError) {
             SSM2Payload(SSM2OpCode.read, SesameItemCode.IRER, byteArrayOf()),
             DeviceSegmentType.plain
         ) { IRRes ->
-
             L.d("hcia", "IRER:" + IRRes.payload.toHexString())
             val ER = IRRes.payload.drop(16).toByteArray().toHexString()
 
@@ -482,11 +435,8 @@ internal enum class CHError(val value: NSError) {
     }
 
     private fun sendEncryptCommand(payload: SSM2Payload, isCipher: DeviceSegmentType = DeviceSegmentType.cipher, onResponse: SesameOS2ResponseCallback) {
-
-
         CoroutineScope(IO).launch {
             semaphore.send(onResponse)
-//            L.d("hcia", "🀄Command: ==>:" + payload.itemCode + " " + payload.opCode)
             gattTxBuffer = (SesameBleTransmit(isCipher, if (isCipher == DeviceSegmentType.cipher) cipher!!.encrypt(payload.toDataWithHeader()) else payload.toDataWithHeader()))
             transmit()
         }
@@ -495,11 +445,7 @@ internal enum class CHError(val value: NSError) {
     private fun transmit() {
         mCharacteristic ?: return //todo check return work
         mCharacteristic?.value = gattTxBuffer?.getChunk() ?: return
-
-//        mBluetoothGatt?.writeCharacteristic(mCharacteristic)
         val check = mBluetoothGatt?.writeCharacteristic(mCharacteristic)
-//        L.d("hcia", "[app][say]:" + mCharacteristic?.value?.toHexString() + " check:" + check)
-
         if (check == false) {
             disconnect { }
         }
@@ -529,8 +475,6 @@ internal enum class CHError(val value: NSError) {
                         }
                         it.onFailure {}
                     }
-
-
                 } else {
                     login()
                 }
@@ -539,26 +483,29 @@ internal enum class CHError(val value: NSError) {
             }
         }
 
-
         if (receivePayload.cmdItCode == SesameItemCode.mechStatus.value) {
             mechStatus = CHSesame2MechStatus(receivePayload.payload)
             if ((mechStatus as CHSesame2MechStatus).retCode != 0) {
-
                 readHistoryCommand {}
             } else if (mechStatus!!.target == Short.MIN_VALUE) {
                 readHistoryCommand {}
             }
-            deviceStatus = if (!mechSetting!!.isConfigured) CHDeviceStatus.NoSettings else if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else if ((mechStatus as CHSesame2MechStatus)!!.isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
+            deviceStatus =
+                if (!mechSetting!!.isConfigured) CHDeviceStatus.NoSettings else if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else if ((mechStatus as CHSesame2MechStatus)!!.isInUnlockRange) CHDeviceStatus.Unlocked else CHDeviceStatus.Moved
             reportBatteryData(receivePayload.payload.sliceArray(0..1).toHexString())
         }
     }
 
     override fun configureLockPosition(lockTarget: Short, unlockTarget: Short, result: CHResult<CHEmpty>) {
-        val payload = CHSesameLockPositionConfiguration((lockTarget.toInt() * 1024 / 360).toShort(), (unlockTarget.toInt() * 1024 / 360).toShort()).toPayload() + sesame2KeyData!!.createHistag(null)
+        val payload = CHSesameLockPositionConfiguration(
+            (lockTarget.toInt() * 1024 / 360).toShort(),
+            (unlockTarget.toInt() * 1024 / 360).toShort()
+        ).toPayload() + sesame2KeyData!!.createHistag(null)
         val cmd = SSM2Payload(SSM2OpCode.update, SesameItemCode.mechSetting, payload)
         sendEncryptCommand(cmd) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
-                mechSetting = CHSesame2MechSettings(CHSesameLockPositionConfiguration((lockTarget.toInt() * 1024 / 360).toShort(), (unlockTarget.toInt() * 1024 / 360).toShort()).toPayload())
+                mechSetting =
+                    CHSesame2MechSettings(CHSesameLockPositionConfiguration((lockTarget.toInt() * 1024 / 360).toShort(), (unlockTarget.toInt() * 1024 / 360).toShort()).toPayload())
                 deviceStatus = if (!mechSetting!!.isConfigured) CHDeviceStatus.NoSettings else if (mechStatus!!.isInLockRange) CHDeviceStatus.Locked else CHDeviceStatus.Unlocked
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
             } else {
@@ -632,6 +579,7 @@ internal class SSM2LoginResponsePayload(loginPayload: ByteArray) {
     var SSM2MechStatus = CHSesame2MechStatus(mech_status_t)
     var SSM2MechSetting = CHSesame2MechSettings(mech_setting_t)
 }
+
 internal class CHSesameLockPositionConfiguration(private val lockTarget: Short, private val unlockTarget: Short) {
     private val range = 150
     private val lockRangeMin: Short = (lockTarget - range).toShort()
