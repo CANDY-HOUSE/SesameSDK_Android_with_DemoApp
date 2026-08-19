@@ -305,8 +305,12 @@ class WebViewJSBridge(
         val context = webView?.context ?: return
         scope.launch(Dispatchers.Main) {
             runCatching {
-                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-            }.onFailure { L.e(tag, "openExternalURL failed: ${it.message}") }
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+            }.onFailure { L.e(tag, "openExternalURL failed: $url", it) }
         }
     }
 
