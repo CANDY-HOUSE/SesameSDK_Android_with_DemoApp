@@ -10,13 +10,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import co.candyhouse.app.R
+import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.ext.CHDeviceWrapperManager
+import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
 import co.candyhouse.app.ext.webview.data.WebViewConfig
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.ext.webview.util.SesameComposeWebViewContent
 import co.candyhouse.app.tabs.devices.hub3.setting.Hub3ScanSSIDDialogFragment
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
+import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.utils.L
 import co.utils.ContainerPaddingManager
 import co.utils.safeNavigate
@@ -26,6 +29,7 @@ class SesameComposeWebView : Fragment() {
     private val logTag = "SesameComposeWebView"
 
     private val mDeviceModel: CHDeviceViewModel by activityViewModels()
+    private val mLoginViewModel: CHLoginViewModel by activityViewModels()
     private var currentScene: String = ""
     private var wifiModuleJsBridge: WebViewJSBridge? = null
 
@@ -78,7 +82,7 @@ class SesameComposeWebView : Fragment() {
                                     }
 
                                     "UserProfileChanged" -> {
-                                        WebViewPoolManager.setPendingRefresh("me-index")
+                                        WebViewPoolManager.setPendingRefresh("me-homepage")
                                     }
                                 }
                             }
@@ -101,6 +105,9 @@ class SesameComposeWebView : Fragment() {
                     L.d(logTag, "H5 requestUpdateDeviceFWVersion, deviceId=$deviceId, currentFwVer=$currentFwVer")
                     CHDeviceWrapperManager.updateCurrentFwVer(deviceId, currentFwVer)
                     mDeviceModel.updateNeeRefresh(deviceId)
+                },
+                onSignInSucceeded = {
+                    onLoginSucceeded()
                 }
             )
         }
@@ -135,6 +142,22 @@ class SesameComposeWebView : Fragment() {
         if (!findNavController().popBackStack()) {
             requireActivity().finish()
         }
+    }
+
+    /**
+     * H5 登录成功（native 已完成 Cognito 登录）：
+     * 同步登录态、上传本地钥匙、重新订阅（带 env 刷新 envId），刷新「我的」页并关闭登录页。
+     */
+    private fun onLoginSucceeded() {
+        if (!isAdded) return
+        mLoginViewModel.gUserState.value = AWSStatus.getCachedUserState()
+        if (mLoginViewModel.isJustLogin) {
+            mLoginViewModel.isJustLogin = false
+        }
+        mDeviceModel.saveKeysToServer()
+        requireActivity().candyHouseApplication.subscriptionManager.checkAndSubscribeToTopics()
+        WebViewPoolManager.setPendingRefresh("me-homepage")
+        exit()
     }
 
     /** 新开一个 webview 页加载指定 url（webViewFragment 为当前图内目的地，按目的地 id 直接跳）。 */

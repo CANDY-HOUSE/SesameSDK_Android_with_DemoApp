@@ -15,9 +15,7 @@
     <string name="addFail">追加に失敗しました</string>
     <string name="cameraError">カメラエラーError</string>
     <string name="forever">永遠</string>
-    <string name="delete_account">アカウントを削除する</string>
     <string name="clickaction">⊕をクリックし動作を追加してください。\n秒数を「永遠」に設定し実行された場合、他の台本へ切替えて実行しない限り、SesameBot2は止まりません。\nモーター正逆回転スピードに公差があり、押す時間が戻すより少し長くするようお願い。</string>
-    <string name="logout">ログアウト</string>
     <string name="title_friends">連絡先</string>
     <string name="change_sesame_angle">角度の設定</string>
     <string name="ssm_update">SesameOS更新と再起動</string>
@@ -115,7 +113,6 @@
     <string name="wm2_pwk">WiFi パスワード</string>
     <string name="wm2_pwk_hint">WiFi環境のパスワードをご入力ください</string>
     <string name="wm2_ssid">WiFi SSID</string>
-    <string name="login">ログイン/登録</string>
     <string name="loginNeed">ログインをお願い。</string>
     <string name="OpenSensor_on">オープンセンサーで施錠</string>
     <string name="remoteNanoTriggerSettingHint">誤作動防止の為の長押して作動させる時間</string>
@@ -201,7 +198,6 @@
     <string name="android_notifica_permis_on">Androidの通知権限を取得済み</string>
     <string name="android_notifica_permis_off">Androidの通知権限がありません(ここをクリック)</string>
     <string name="facepalm">手のひら静脈の管理</string>
-    <string name="login_fg_input_mail_warn">正しいメールアドレスを入力してください</string>
 
     <string name="delete_failed_tips">削除に失敗しました。再試行してください</string>
 

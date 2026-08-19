@@ -94,7 +94,8 @@ fun SesameComposeWebViewContent(
     onRequestRefreshApp: (() -> Unit)? = null,
     deviceModel: CHDeviceViewModel? = null,
     onJSBridgeCreated: ((WebViewJSBridge?) -> Unit)? = null,
-    onRequestUpdateDeviceFWVersion: ((deviceId: String, currentFwVer: String) -> Unit)? = null
+    onRequestUpdateDeviceFWVersion: ((deviceId: String, currentFwVer: String) -> Unit)? = null,
+    onSignInSucceeded: (() -> Unit)? = null
 ) {
     val logTag = "SesameComposeWebView"
     val scope = rememberCoroutineScope()
@@ -372,7 +373,8 @@ fun SesameComposeWebViewContent(
                                 onEnablePullRefresh = { enabled ->
                                     binding.swipeRefresh.isEnabled = (config.scene == "wifi-module") && enabled
                                 },
-                                onRequestUpdateDeviceFWVersion = onRequestUpdateDeviceFWVersion
+                                onRequestUpdateDeviceFWVersion = onRequestUpdateDeviceFWVersion,
+                                onSignInSucceeded = onSignInSucceeded
                             )
                             onJSBridgeCreated?.invoke(jsBridge)
                         }

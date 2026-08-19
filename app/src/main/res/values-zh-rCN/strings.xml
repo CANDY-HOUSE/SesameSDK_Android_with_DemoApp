@@ -13,8 +13,6 @@
     <string name="title_list">芝麻</string>
     <string name="title_vision">视觉</string>
     <string name="forever">永远</string>
-    <string name="logout">登出</string>
-    <string name="delete_account">删除账号</string>
     <!--    更新Ssm名稱用↓-->
     <string name="change_sesame_angle">设置角度</string>
     <string name="ssm_update">SesameOS更新＆重启</string>
@@ -121,7 +119,6 @@
     <string name="wm2_pwk_hint">请输入 WiFi 密码</string>
     <string name="wm2_ssid">WiFi SSID</string>
 
-    <string name="login">登入/注册</string>
     <string name="loginNeed">请登入。</string>
     <string name="OpenSensor_on">用 开关传感器 上锁</string>
     <string name="remoteNanoTriggerSettingHint">防误触之长按启动时间</string>
@@ -215,7 +212,6 @@
     <string name="facepalm">管理掌静脉</string>
     <string name="default_face_name">人脸🖊️</string>
     <string name="default_palm_name">掌静脉🖊️</string>
-    <string name="login_fg_input_mail_warn">请输入正确的邮箱</string>
 
     <string name="delete_failed_tips">删除失败，请重试</string>
 

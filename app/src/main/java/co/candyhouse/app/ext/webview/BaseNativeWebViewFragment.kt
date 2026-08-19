@@ -186,11 +186,11 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
                 scene = webViewName,
                 scope = GlobalScope,
                 context = requireContext(),
-                onRequestLogin = {
+                onRequestLogin = { loginUrl ->
                     activeFragments[webViewName]?.get()?.let { fragment ->
                         if (fragment.isAdded && fragment.isVisible) {
                             try {
-                                fragment.getOnRequestLogin()?.invoke()
+                                fragment.getOnRequestLogin()?.invoke(loginUrl)
                             } catch (e: Exception) {
                                 L.e(tag, "Error invoking login callback", e)
                             }
@@ -199,6 +199,17 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
                         }
                     } ?: run {
                         L.d(tag, "No active fragment for $webViewName")
+                    }
+                },
+                onSignOutSucceeded = {
+                    activeFragments[webViewName]?.get()?.let { fragment ->
+                        if (fragment.isAdded) {
+                            try {
+                                fragment.getOnSignOutSucceeded()?.invoke()
+                            } catch (e: Exception) {
+                                L.e(tag, "Error invoking signOut callback", e)
+                            }
+                        }
                     }
                 }
             )
@@ -212,5 +223,10 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
 
     protected abstract fun handleSchemeIntercept(uri: Uri, params: Map<String, String>)
     protected open fun getExtInfo(): Map<String, String>? = null
-    protected open fun getOnRequestLogin(): (() -> Unit)? = null
+
+    /** H5 请求登录（url 由 H5 给出，native 负责打开） */
+    protected open fun getOnRequestLogin(): ((url: String?) -> Unit)? = null
+
+    /** native 登出成功后的清理 */
+    protected open fun getOnSignOutSucceeded(): (() -> Unit)? = null
 }

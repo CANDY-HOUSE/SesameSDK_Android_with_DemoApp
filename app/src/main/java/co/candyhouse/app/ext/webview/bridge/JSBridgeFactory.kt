@@ -19,7 +19,8 @@ object JSBridgeFactory {
     fun needsJSBridge(scene: String): Boolean {
         return scene in setOf(
             "device-setting",
-            "me-index",
+            "me-homepage",
+            "login",
             "device-notify",
             "device-user",
             "ir-remote",
@@ -38,13 +39,15 @@ object JSBridgeFactory {
         context: Context,
         deviceModel: CHDeviceViewModel? = null,
         onHeightChanged: ((Float) -> Unit)? = null,
-        onRequestLogin: (() -> Unit)? = null,
+        onRequestLogin: ((url: String?) -> Unit)? = null,
         onRequestNotificationSettings: (() -> Unit)? = null,
         onRequestDestroySelf: (() -> Unit)? = null,
         onRequestRefreshApp: (() -> Unit)? = null,
         onRequestWifiConfig: (() -> Unit)? = null,
         onEnablePullRefresh: ((Boolean) -> Unit)? = null,
-        onRequestUpdateDeviceFWVersion: ((deviceId: String, currentFwVer: String) -> Unit)? = null
+        onRequestUpdateDeviceFWVersion: ((deviceId: String, currentFwVer: String) -> Unit)? = null,
+        onSignInSucceeded: (() -> Unit)? = null,
+        onSignOutSucceeded: (() -> Unit)? = null
     ): WebViewJSBridge? {
         if (!needsJSBridge(scene)) {
             return null
@@ -58,7 +61,9 @@ object JSBridgeFactory {
             onRequestRefreshApp = onRequestRefreshApp,
             onRequestWifiConfig = onRequestWifiConfig,
             onEnablePullRefresh = onEnablePullRefresh,
-            onRequestUpdateDeviceFWVersion = onRequestUpdateDeviceFWVersion
+            onRequestUpdateDeviceFWVersion = onRequestUpdateDeviceFWVersion,
+            onSignInSucceeded = onSignInSucceeded,
+            onSignOutSucceeded = onSignOutSucceeded
         )
 
         val jsBridge = WebViewJSBridge(webView, scope, config)

@@ -24,9 +24,6 @@
             android:id="@+id/to_SesameOpenSensorSettingFG"
             app:destination="@id/SesameOpenSensorSettingFG" />
         <action
-            android:id="@+id/action_register_to_LoginMailFG"
-            app:destination="@id/LoginMailFG" />
-        <action
             android:id="@+id/action_to_SSM2SettingFG"
             app:destination="@id/SSM2SettingFG" />
         <action
@@ -61,20 +58,6 @@
         android:name="co.candyhouse.app.tabs.devices.ssmopensensor.setting.SesameOpenSensorNoBLESettingFG"
         android:label="SesameButtonSettingFG"
         tools:layout="@layout/fg_sesame_opensensor_noble_setting" />
-    <fragment
-        android:id="@+id/LoginMailFG"
-        android:name="co.candyhouse.app.tabs.account.LoginMailFG"
-        android:label="LoginMailFG"
-        tools:layout="@layout/fg_login_mail">
-        <action
-            android:id="@+id/action_LoginMailFG_to_LoginVerifiCodeFG"
-            app:destination="@id/LoginVerifiCodeFG" />
-    </fragment>
-    <fragment
-        android:id="@+id/LoginVerifiCodeFG"
-        android:name="co.candyhouse.app.tabs.account.LoginVerifiCodeFG"
-        android:label="LoginVerifiCodeFG"
-        tools:layout="@layout/fg_verify_mail" />
     <fragment
         android:id="@+id/webViewFragment"
         android:name="co.candyhouse.app.ext.webview.SesameComposeWebView"

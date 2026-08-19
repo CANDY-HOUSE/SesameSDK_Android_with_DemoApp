@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -33,88 +32,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ScrollView
-            android:id="@+id/scroll_view"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <LinearLayout
+            <FrameLayout
+                android:id="@+id/meWebviewContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="20dp">
+                android:layout_height="match_parent" />
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+            <ProgressBar
+                android:id="@+id/meLoadingProgress"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
 
-                    <FrameLayout
-                        android:id="@+id/meWebviewContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp" />
-
-                    <ProgressBar
-                        android:id="@+id/meLoadingProgress"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_centerInParent="true"
-                        android:visibility="gone" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="450dp" />
-
-                <TextView
-                    android:id="@+id/login_state_txt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="@color/text_hint"
-                    android:textSize="13sp"
-                    tools:text="@string/logout" />
-
-                <TextView
-                    android:id="@+id/version"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="@color/text_hint"
-                    android:textSize="16sp"
-                    tools:text="1.1.18-aabbcc" />
-
-                <RelativeLayout
-                    android:id="@+id/logout_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:layout_marginTop="300dp"
-                    android:background="@color/status_bg">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true"
-                        android:gravity="center_vertical"
-                        android:text="@string/logout"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <TextView
-                    android:id="@+id/delAccount"
-                    android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:layout_marginTop="550dp"
-                    android:background="@color/status_bg"
-                    android:gravity="center"
-                    android:text="@string/delete_account"
-                    android:textColor="@color/red"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </ScrollView>
+        </RelativeLayout>
 
     </co.utils.SmartSwipeRefreshLayout>
 </LinearLayout>

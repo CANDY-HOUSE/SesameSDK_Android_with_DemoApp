@@ -2,22 +2,12 @@ package co.candyhouse.app.tabs.account
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
-import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.candyHouseApplication
 import co.candyhouse.app.databinding.FgMeBinding
@@ -37,20 +27,18 @@ import co.receiver.widget.AutoUnlockGeofenceManager
 import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
 import co.utils.UserUtils
-import co.utils.alertview.AlertView
-import co.utils.alertview.enums.AlertActionStyle
-import co.utils.alertview.enums.AlertStyle
-import co.utils.alertview.fragments.toastMSG
-import co.utils.alertview.objects.AlertAction
 import co.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
+/**
+ * 「我的」页：纯 H5 承载（me-homepage）。
+ * 页面 UI（含登录态、版本号、登出、删除账号）全由 H5 渲染，native 通过 bridge 提供能力。
+ */
 class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
 
     private val tag = "MeFG"
-    override val webViewName = "me-index"
+    override val webViewName = "me-homepage"
     override fun getViewBinder() = FgMeBinding.inflate(layoutInflater)
     override fun getWebViewContainer() = bind.meWebviewContainer
     override fun getLoadingView() = bind.meLoadingProgress
@@ -59,48 +47,12 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
     private val loginViewModel: CHLoginViewModel by activityViewModels()
     private val deviceViewModel: CHDeviceViewModel by activityViewModels()
 
-    override fun setupCustomUI() {
-        bind.version.apply {
-            val text =
-                BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")" + "-" + BuildConfig.GIT_HASH + "-" + BuildConfig.BUILD_TYPE + "-" + Build.MODEL + ":" + Build.VERSION.SDK_INT
-            val spannable = SpannableString(text)
-            val clickableSpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases/latest/download/Sesame_android_release.apk".toUri()
-                        )
-                    )
-                }
-
-                override fun updateDrawState(ds: TextPaint) {
-                    super.updateDrawState(ds)
-                    ds.isUnderlineText = false
-                    ds.color = Color.GRAY
-                }
-            }
-            spannable.setSpan(clickableSpan, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            this.text = spannable
-            movementMethod = LinkMovementMethod.getInstance()
-        }
-    }
-
-    override fun setupCustomListeners() {
-        bind.logoutZone.setOnClickListener {
-            // 登出
-            showLogoutConfirmation(0)
-        }
-        bind.delAccount.setOnClickListener {
-            // 删除
-            showLogoutConfirmation(1)
-        }
-    }
-
     override fun <T : View> observeViewModelData(view: T) {
         viewLifecycleOwner.lifecycleScope.launch {
             loginViewModel.gUserState.collect { loginState ->
-                updateUIForLoginState(loginState)
+                if (loginState == AWSLoginState.SIGNED_IN) {
+                    loadSignedInUserInfo()
+                }
             }
         }
     }
@@ -128,50 +80,27 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         }
     }
 
-    override fun getOnRequestLogin(): () -> Unit = {
-        safeNavigate(R.id.action_register_to_LoginMailFG)
+    /** 打开 H5 登录页（url 由 H5 给出，native 负责跳转） */
+    override fun getOnRequestLogin(): (url: String?) -> Unit = { loginUrl ->
+        loginUrl?.let { url ->
+            safeNavigate(
+                actionId = R.id.action_to_webViewFragment,
+                Bundle().apply {
+                    putString("scene", "login")
+                    putString("url", url)
+                }
+            )
+        }
     }
 
-    private fun showLogoutConfirmation(event: Int) {
-        // 退出登录确认对话框逻辑
-        val title: String = if (event == 0) {
-            getString(R.string.logout)
-        } else {
-            getString(R.string.delete_account)
-        }
-        AlertView(title, "", AlertStyle.IOS).apply {
-            addAction(
-                AlertAction(
-                    "OK",
-                    AlertActionStyle.NEGATIVE
-                ) { _ ->
-                    performLogout()
-                })
-            show(activity as AppCompatActivity)
-        }
+    /** 登出成功（native 已执行 signOut）后的本地清理 */
+    override fun getOnSignOutSucceeded(): () -> Unit = {
+        loginViewModel.gUserState.value = AWSLoginState.SIGNED_OUT
+        completeLogout()
     }
 
     @SuppressLint("ImplicitSamInstance")
-    private fun performLogout() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    AWSStatus.signOut()
-                }
-            } catch (error: Exception) {
-                L.e(tag, "Sign out failed", error)
-                toastMSG(error.localizedMessage ?: "Sign out failed")
-                return@launch
-            }
-
-            loginViewModel.gUserState.value = AWSLoginState.SIGNED_OUT
-            completeLogout()
-        }
-    }
-
     private fun completeLogout() {
-        bind.scrollView.scrollTo(0, 0)
-
         CHDeviceManager.getCandyDevices { result ->
             result.onSuccess { devices ->
                 devices.data.forEach { device ->
@@ -206,29 +135,11 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
         reloadRefresh()
     }
 
-    private fun updateUIForLoginState(loginState: AWSLoginState) {
-        bind.loginStateTxt.text = loginState.name
-
-        if (loginState == AWSLoginState.SIGNED_IN) {
-            handleSignedInState()
-        } else {
-            handleSignedOutState()
-        }
-    }
-
-    private fun handleSignedInState() {
-        bind.logoutZone.visibility = View.VISIBLE
-        bind.delAccount.visibility = View.VISIBLE
-
+    private fun loadSignedInUserInfo() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             loadUserName()
             UserUtils.loadUserUserId()
         }
-    }
-
-    private fun handleSignedOutState() {
-        bind.logoutZone.visibility = View.GONE
-        bind.delAccount.visibility = View.GONE
     }
 
     private suspend fun loadUserName() {
