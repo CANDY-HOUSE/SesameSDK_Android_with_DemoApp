@@ -8,6 +8,7 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.webkit.CookieManager
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -56,7 +57,8 @@ object WebViewCore {
         onPageStarted: ((String?) -> Unit)? = null,
         onPageFinished: ((String?) -> Unit)? = null,
         onError: ((String) -> Unit)? = null,
-        onLoadingChanged: ((Boolean) -> Unit)? = null
+        onLoadingChanged: ((Boolean) -> Unit)? = null,
+        onRenderProcessGone: ((WebView, RenderProcessGoneDetail) -> Boolean)? = null
     ): WebViewClient {
         return object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -135,6 +137,13 @@ object WebViewCore {
                 if (request?.isForMainFrame == true) {
                     onError?.invoke("HTTP ${errorResponse?.statusCode ?: ""}")
                 }
+            }
+
+            override fun onRenderProcessGone(
+                view: WebView,
+                detail: RenderProcessGoneDetail
+            ): Boolean {
+                return onRenderProcessGone?.invoke(view, detail) ?: false
             }
         }
     }

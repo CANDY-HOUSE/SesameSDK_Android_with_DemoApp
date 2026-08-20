@@ -30,7 +30,8 @@ object WebViewPoolManager {
         onSchemeIntercept: ((Uri, Map<String, String>) -> Unit)? = null,
         onPageFinished: (() -> Unit)? = null,
         onError: ((String) -> Unit)? = null,
-        onLoadingChanged: ((Boolean) -> Unit)? = null
+        onLoadingChanged: ((Boolean) -> Unit)? = null,
+        onRenderProcessGone: ((didCrash: Boolean) -> Unit)? = null
     ): WebView? {
         val state = stateMap.getOrPut(webViewName) { WebViewState() }
 
@@ -56,7 +57,22 @@ object WebViewPoolManager {
                 }
             },
             onError = onError,
-            onLoadingChanged = onLoadingChanged
+            onLoadingChanged = onLoadingChanged,
+            onRenderProcessGone = { affectedWebView, detail ->
+                val isPooledInstance = webViewMap[webViewName] === affectedWebView
+                if (isPooledInstance) {
+                    webViewMap.remove(webViewName)
+                    stateMap.remove(webViewName)
+                }
+
+                (affectedWebView.parent as? ViewGroup)?.removeView(affectedWebView)
+                affectedWebView.destroy()
+
+                if (isPooledInstance) {
+                    onRenderProcessGone?.invoke(detail.didCrash())
+                }
+                true
+            }
         )
         (webView.parent as? ViewGroup)?.removeView(webView)
         return webView

@@ -90,11 +90,10 @@ object CHAPIClientBiz {
     }
 
     private fun toApiException(error: Throwable): Throwable {
-        return if (error is CHApiException) {
-            error
-        } else {
-            CHApiException(0, error.localizedMessage, error)
-        }
+        if (error is CHApiException) return error
+        val underlying = error.cause ?: error
+        val message = underlying.localizedMessage ?: underlying.toString()
+        return CHApiException(0, message, error)
     }
 
     private suspend inline fun <reified T> apiGet(

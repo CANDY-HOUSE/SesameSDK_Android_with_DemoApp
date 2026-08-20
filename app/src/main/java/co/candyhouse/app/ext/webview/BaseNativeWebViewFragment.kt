@@ -1,9 +1,14 @@
 package co.candyhouse.app.ext.webview
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.lifecycle.Lifecycle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewbinding.ViewBinding
 import co.candyhouse.app.ext.webview.bridge.JSBridgeFactory.setupJSBridge
@@ -29,18 +34,24 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
     protected abstract fun getWebViewContainer(): ViewGroup
     protected abstract fun getLoadingView(): View
     protected abstract fun getSwipeRefreshLayout(): SwipeRefreshLayout?
-
     private var webView: WebView? = null
     private var jsBridge: WebViewJSBridge? = null
     private var isRefreshing = false
     private var isManualRefresh = false
+    private var isRendererRecoveryPending = false
+    private var connectivityManager: ConnectivityManager? = null
+    private var networkRecoveryCallback: ConnectivityManager.NetworkCallback? = null
 
     companion object {
         private val activeFragments = ConcurrentHashMap<String, WeakReference<BaseNativeWebViewFragment<*>>>()
     }
 
     override fun setupUI() {
-        setupWebView()
+        if (isRendererRecoveryPending) {
+            recoverWebViewWhenNetworkAvailable()
+        } else {
+            setupWebView()
+        }
         setupCustomUI()
     }
 
@@ -79,6 +90,18 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
             onLoadingChanged = { isLoading ->
                 if (isAdded && !isManualRefresh) {
                     getLoadingView().visibility = if (isLoading) View.VISIBLE else View.GONE
+                }
+            },
+            onRenderProcessGone = { didCrash ->
+                L.w(tag, "WebView renderer exited: scene=$webViewName, didCrash=$didCrash")
+                webView = null
+                jsBridge = null
+                isRendererRecoveryPending = true
+
+                if (isAdded && view != null &&
+                    lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                ) {
+                    recoverWebViewWhenNetworkAvailable()
                 }
             }
         )
@@ -132,6 +155,71 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
         )
     }
 
+    /**
+     * Renderer 退出后的恢复入口。网络未通过系统验证时只监听一次，
+     * 网络恢复后先注销监听，再重建 WebView 并重新请求页面 URL。
+     */
+    private fun recoverWebViewWhenNetworkAvailable() {
+        if (!isAdded || view == null || webView != null) return
+
+        val manager = connectivityManager ?: run {
+            val appContext = requireContext().applicationContext
+            (appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)
+                ?.also { connectivityManager = it }
+        } ?: return
+
+        if (hasValidatedNetwork(manager)) {
+            unregisterNetworkRecoveryCallback()
+            isRendererRecoveryPending = false
+            setupWebView()
+            return
+        }
+
+        if (networkRecoveryCallback != null) return
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+                if (!capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ||
+                    !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                ) {
+                    return
+                }
+
+                activity?.runOnUiThread {
+                    if (networkRecoveryCallback !== this) return@runOnUiThread
+                    unregisterNetworkRecoveryCallback()
+
+                    if (isAdded && view != null && webView == null &&
+                        lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                    ) {
+                        isRendererRecoveryPending = false
+                        setupWebView()
+                    }
+                }
+            }
+        }
+
+        networkRecoveryCallback = callback
+        runCatching { manager.registerDefaultNetworkCallback(callback) }
+            .onFailure {
+                networkRecoveryCallback = null
+                L.e(tag, "Failed to register network recovery callback", it)
+            }
+    }
+
+    private fun hasValidatedNetwork(manager: ConnectivityManager): Boolean {
+        val network = manager.activeNetwork ?: return false
+        val capabilities = manager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    private fun unregisterNetworkRecoveryCallback() {
+        val callback = networkRecoveryCallback ?: return
+        networkRecoveryCallback = null
+        runCatching { connectivityManager?.unregisterNetworkCallback(callback) }
+    }
+
     private fun performRefresh() {
         if (isRefreshing) return
         isRefreshing = true
@@ -150,6 +238,10 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
     override fun onResume() {
         super.onResume()
         activeFragments[webViewName] = WeakReference(this)
+
+        if (webView == null && view != null) {
+            recoverWebViewWhenNetworkAvailable()
+        }
 
         if (WebViewPoolManager.checkAndConsumePendingRefresh(webViewName)) {
             reloadRefresh()
@@ -171,6 +263,7 @@ abstract class BaseNativeWebViewFragment<T : ViewBinding> : HomeFragment<T>() {
     }
 
     override fun onDestroyView() {
+        unregisterNetworkRecoveryCallback()
         jsBridge = null
         getWebViewContainer().removeAllViews()
         webView = null
