@@ -124,7 +124,6 @@
     <string name="loginNeed">請登入。</string>
     <string name="OpenSensor_on">用 開關傳感器 上鎖</string>
     <string name="remoteNanoTriggerSettingHint">防誤觸之長按啟動時間</string>
-    <string name="VerificationCode">已發到您信箱的驗證碼</string>
     <string name="ResetWifiModule2">重置WiFi模組並丟棄鑰匙</string>
     <string name="TrashTheWifiModule2Key">刪除 WiFi模組</string>
 

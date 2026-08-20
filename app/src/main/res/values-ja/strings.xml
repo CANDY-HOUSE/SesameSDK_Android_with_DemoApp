@@ -116,7 +116,6 @@
     <string name="loginNeed">ログインをお願い。</string>
     <string name="OpenSensor_on">オープンセンサーで施錠</string>
     <string name="remoteNanoTriggerSettingHint">誤作動防止の為の長押して作動させる時間</string>
-    <string name="VerificationCode">メールで届いた認証コード</string>
     <string name="ResetWifiModule2">このWiFiモジュールを初期化、そして鍵を捨てる</string>
     <string name="TrashTheWifiModule2Key">このWiFiモジュールを削除する</string>
     <string name="addSesameTo">セサミを追加…</string>

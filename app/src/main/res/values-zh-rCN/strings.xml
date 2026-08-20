@@ -122,7 +122,6 @@
     <string name="loginNeed">请登入。</string>
     <string name="OpenSensor_on">用 开关传感器 上锁</string>
     <string name="remoteNanoTriggerSettingHint">防误触之长按启动时间</string>
-    <string name="VerificationCode">已发到您邮箱的验证码</string>
     <string name="ResetWifiModule2">重置WiFi模块并丢弃钥匙</string>
 
     <string name="TrashTheWifiModule2Key">删除WiFi模块</string>

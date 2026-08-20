@@ -115,7 +115,6 @@
     <string name="loginNeed">Please login.</string>
     <string name="OpenSensor_on">Lock with Open Sensor</string>
     <string name="remoteNanoTriggerSettingHint">Long press time to avoid mis-operation</string>
-    <string name="VerificationCode">Verification code sent to your email</string>
     <string name="ResetWifiModule2">Reset the WiFi Module and trash the key</string>
 
     <string name="TrashTheWifiModule2Key">Delete the WiFi Module</string>
