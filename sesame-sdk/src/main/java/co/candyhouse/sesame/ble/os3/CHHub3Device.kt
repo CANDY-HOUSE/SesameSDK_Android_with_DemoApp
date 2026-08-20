@@ -113,7 +113,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
 
     private fun subscribeRelayStatus() {
         val topic = "up/iot/device/${deviceId.toString().uppercase()}/cmd"
-        CHIotManager.subscribeTopic(topic) { result ->
+        CHIotManager.subscribeTopic(this, topic) { result ->
             result.onSuccess { data ->
                 runCatching {
                     val json = JSONObject(String(data.data, Charsets.UTF_8))

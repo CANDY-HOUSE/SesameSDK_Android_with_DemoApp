@@ -640,6 +640,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
         val targetDevice: CHDevices = ssmLockLiveData.value!!
         CHAPIClientBiz.removeKey(targetDevice.deviceId.toString()) {
             it.onSuccess {
+                CHIotManagerPublic.unsubscribeDevice(targetDevice.deviceId.toString())
                 myChDevices.value =
                     myChDevices.value.filter { device -> device.deviceId != targetDevice.deviceId } as ArrayList<CHDevices>
                 _neeRefresh.postValue(Event(BeanDevices()))
@@ -674,6 +675,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 clearBotScript(targetDevice)
                 targetDevice.reset {
                     it.onSuccess {
+                        CHIotManagerPublic.unsubscribeDevice(targetDevice.deviceId.toString())
                         refreshDevices()
                         viewModelScope.launch {
                             result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))

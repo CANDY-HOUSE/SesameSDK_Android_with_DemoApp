@@ -63,6 +63,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     }
     private var promotionBadgeView: View? = null
     private var authSubscriptionToken: SubscriptionToken? = null
+    private var restartIotOnNextSignIn = false
 
     protected lateinit var navController: NavController
 
@@ -221,6 +222,7 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
     protected fun setAWSUserStateListener() {
         authSubscriptionToken?.let(Amplify.Hub::unsubscribe)
         authSubscriptionToken = Amplify.Hub.subscribe(HubChannel.AUTH) { event ->
+            val sessionExpired = event.name == AuthChannelEventName.SESSION_EXPIRED.name
             val userState = when (event.name) {
                 AuthChannelEventName.SIGNED_IN.name -> AWSLoginState.SIGNED_IN
                 AuthChannelEventName.SIGNED_OUT.name,
@@ -228,6 +230,16 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                 else -> return@subscribe
             }
             lifecycleScope.launch {
+                if (sessionExpired) {
+                    restartIotOnNextSignIn = true
+                    CHIotManagerPublic.restartConnectionPool()
+                } else if (
+                    event.name == AuthChannelEventName.SIGNED_IN.name &&
+                    restartIotOnNextSignIn
+                ) {
+                    restartIotOnNextSignIn = false
+                    CHIotManagerPublic.restartConnectionPool()
+                }
                 handleAWSUserState(userState)
             }
         }
@@ -266,7 +278,6 @@ open class BaseActivity : AppCompatActivity(), EasyPermissions.PermissionCallbac
                 SharedPreferencesUtils.name = null
                 SharedPreferencesUtils.preferences.edit { remove("nickname") }
                 SharedPreferencesUtils.userId = null
-                CHIotManagerPublic.clearIotSubscriptionCache()
             }
 
             else -> {

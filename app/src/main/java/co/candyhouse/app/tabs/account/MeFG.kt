@@ -20,6 +20,7 @@ import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
+import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.receiver.widget.AutoUnlockForegroundService
@@ -95,6 +96,7 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
 
     /** 登出成功（native 已执行 signOut）后的本地清理 */
     override fun getOnSignOutSucceeded(): () -> Unit = {
+        CHIotManagerPublic.stopConnectionPool()
         loginViewModel.gUserState.value = AWSLoginState.SIGNED_OUT
         completeLogout()
     }
@@ -111,9 +113,18 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
                         }
                     }
                 }
-                CHDeviceManager.dropAllKeys(devices.data) {
-                    deviceViewModel.updateDevices()
+                CHDeviceManager.dropAllKeys(devices.data) { dropResult ->
+                    dropResult.onSuccess {
+                        CHIotManagerPublic.startConnection()
+                        deviceViewModel.updateDevices()
+                    }
+                    dropResult.onFailure { error ->
+                        L.e(tag, "Logout device cleanup failed", error)
+                    }
                 }
+            }
+            result.onFailure { error ->
+                L.e(tag, "Logout device query failed", error)
             }
         }
 

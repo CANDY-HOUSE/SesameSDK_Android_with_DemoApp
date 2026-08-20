@@ -360,7 +360,7 @@ internal class CHSesameBiometricDeviceImpl(
     private fun subscribeOpensensorTopic() {
         val topic = "$TOPIC_OPENSENSOR_PREFIX${deviceId.toString().uppercase()}"
         L.d(tag, "Subscribing to opensensor topic: $productModel || $topic")
-        CHIotManager.subscribeTopic(topic) { result ->
+        CHIotManager.subscribeTopic(this, topic) { result ->
             result
                 .onSuccess { data ->
                     processOpensensorData(data.data)

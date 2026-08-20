@@ -16,6 +16,20 @@ object CHIotManagerPublic {
     }
 
     /**
+     * 账号退出时停止连接池并清除全部Topic
+     */
+    fun stopConnectionPool() {
+        CHIotManager.stopConnectionPool()
+    }
+
+    /**
+     * Session过期时使用当前Amplify凭证重建连接池
+     */
+    fun restartConnectionPool() {
+        CHIotManager.restartConnectionPool()
+    }
+
+    /**
      * 回到前台时，如果IoT正在等待重试则立即重连
      */
     fun reconnectImmediatelyIfWaiting() {
@@ -30,10 +44,10 @@ object CHIotManagerPublic {
     }
 
     /**
-     * 退出登录后，清除IoT订阅缓存
+     * 删除设备后解除该设备关联的全部Topic
      */
-    fun clearIotSubscriptionCache() {
-        CHIotManager.clearIotSubscriptionCache()
+    fun unsubscribeDevice(deviceId: String) {
+        CHIotManager.unsubscribeDevice(deviceId)
     }
 
     /**
