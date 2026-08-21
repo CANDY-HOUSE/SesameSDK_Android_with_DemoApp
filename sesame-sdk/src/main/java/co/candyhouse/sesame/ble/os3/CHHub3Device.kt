@@ -21,6 +21,7 @@ import co.candyhouse.sesame.open.devices.CHWifiModule2MechSettings
 import co.candyhouse.sesame.open.devices.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.open.devices.base.NSError
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManager
@@ -112,6 +113,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     private fun subscribeRelayStatus() {
+        if (this.productModel != CHProductModel.Hub3_LTE) return
         val topic = "up/iot/device/${deviceId.toString().uppercase()}/cmd"
         CHIotManager.subscribeTopic(this, topic) { result ->
             result.onSuccess { data ->
