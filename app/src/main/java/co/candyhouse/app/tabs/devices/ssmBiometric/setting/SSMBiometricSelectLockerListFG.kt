@@ -41,7 +41,8 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                 CHProductModel.SS6,
                 CHProductModel.SS6Pro,
                 CHProductModel.SS6ProSlidingDoor,
-                CHProductModel.SSM_MIWA
+                CHProductModel.SSM_MIWA,
+                CHProductModel.Hub3_LTE
             )
 
             val currentProductModel = (mDeviceModel.ssmLockLiveData.value as CHSesameConnector).productModel
