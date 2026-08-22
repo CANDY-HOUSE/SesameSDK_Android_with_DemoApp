@@ -250,4 +250,15 @@
     <string name="dBm">dBm</string>
     <string name="set_switch_point_position">Switch point</string>
     <string name="dfu_busy">Updating another CANDY HOUSE product. Please wait...</string>
+
+    <string name="shortcut_choose_device">Choose a SESAME device</string>
+    <string name="shortcut_no_supported_devices">No supported SESAME devices are registered.</string>
+    <string name="shortcut_load_devices_failed">Could not load SESAME devices.</string>
+    <string name="shortcut_invalid_device">This device cannot be used for a shortcut.</string>
+    <string name="shortcut_execution_failed">Could not operate the SESAME device.</string>
+    <string name="shortcut_action_lock">Lock</string>
+    <string name="shortcut_action_unlock">Unlock</string>
+    <string name="shortcut_action_toggle">Toggle</string>
+    <string name="shortcut_action_click">Click</string>
+    <string name="shortcut_label_format">%1$s: %2$s</string>
 </resources>
