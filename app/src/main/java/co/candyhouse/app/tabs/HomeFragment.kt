@@ -1,8 +1,18 @@
 package co.candyhouse.app.tabs
 
+import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageView
+import android.widget.PopupWindow
+import android.widget.RelativeLayout
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -13,19 +23,13 @@ import co.candyhouse.app.tabs.menu.BarMenuItem
 import co.candyhouse.app.tabs.menu.CustomAdapter
 import co.candyhouse.app.tabs.menu.ItemUtils
 import co.utils.safeNavigate
-import com.skydoves.balloon.ArrowOrientation
-import com.skydoves.balloon.Balloon
-import com.skydoves.balloon.BalloonAnimation
-import com.skydoves.balloon.OnBalloonClickListener
-import com.skydoves.balloon.OnBalloonOutsideTouchListener
 
 abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
-
-    lateinit var customListBalloon: Balloon
+    private var customListPopup: PopupWindow? = null
     private val customAdapter by lazy {
         CustomAdapter(object : CustomAdapter.CustomViewHolder.Delegate {
             override fun onCustomItemClick(customItem: BarMenuItem) {
-                customListBalloon.dismiss()
+                customListPopup?.dismiss()
                 when (customItem.index) {
                     1 -> {
                         safeNavigate(R.id.to_regist)
@@ -48,7 +52,7 @@ abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeCustomListBalloon(view)
+        initializeCustomListPopup(view)
 
         // 每次视图创建都需要执行
         setupUI()
@@ -56,39 +60,93 @@ abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
         observeViewModelData(view)
     }
 
-    private fun initializeCustomListBalloon(view: View) {
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeCustomListPopup(view: View) {
         val menuBtn = view.findViewById<View>(R.id.right_icon).apply {
             setOnClickListener {
-                customListBalloon.showAlignBottom(it)
+                showCustomListPopup(it)
             }
         }
-        customListBalloon =
-            Balloon.Builder(menuBtn.context).setLayout(R.layout.layout_custom_list).setArrowSize(12)
-                .setArrowOrientation(ArrowOrientation.TOP).setArrowPosition(0.85f).setTextSize(12f)
-                .setCornerRadius(4f).setBalloonAnimation(BalloonAnimation.CIRCULAR)
-                .setBackgroundColorResource(R.color.menu_bg)
-                .setBalloonAnimation(BalloonAnimation.FADE).setDismissWhenClicked(true)
-                .setOnBalloonClickListener(object : OnBalloonClickListener {
-                    override fun onBalloonClick(view: View) {
-                    }
-                }).setDismissWhenClicked(true)
-                .setOnBalloonOutsideTouchListener(object : OnBalloonOutsideTouchListener {
-                    override fun onBalloonOutsideTouch(view: View, event: MotionEvent) {
-                        menuBtn.isClickable = false
-                        customListBalloon.dismiss()
-                        menuBtn.postDelayed({
-                            menuBtn.isClickable = true
-                        }, 300)
-                    }
-                }).build()
 
-        customListBalloon.getContentView().findViewById<RecyclerView>(R.id.list_recyclerView)
+        val popupView = LayoutInflater.from(menuBtn.context).inflate(R.layout.layout_balloon, null)
+        val arrowSize = (12 * resources.displayMetrics.density).toInt()
+        popupView.findViewById<ImageView>(R.id.balloon_arrow).apply {
+            layoutParams = RelativeLayout.LayoutParams(arrowSize, arrowSize).apply {
+                addRule(RelativeLayout.ALIGN_TOP, R.id.balloon_content)
+            }
+            rotation = 0f
+            ImageViewCompat.setImageTintList(
+                this,
+                ContextCompat.getColorStateList(context, R.color.menu_bg)
+            )
+        }
+        popupView.findViewById<CardView>(R.id.balloon_card).apply {
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.menu_bg))
+            radius = 4 * resources.displayMetrics.density
+        }
+        popupView.findViewById<View>(R.id.balloon_content).setPadding(
+            arrowSize - 2,
+            arrowSize - 2,
+            arrowSize - 2,
+            arrowSize - 2
+        )
+        val content = popupView.findViewById<android.view.ViewGroup>(R.id.balloon_detail).apply {
+            removeAllViews()
+            setPadding(0, 0, 0, 0)
+            LayoutInflater.from(context).inflate(R.layout.layout_custom_list, this, true)
+        }
+        content.findViewById<RecyclerView>(R.id.list_recyclerView)
             .apply {
                 setHasFixedSize(true)
                 adapter = customAdapter
                 customAdapter.addCustomItem(ItemUtils.getCustomSamples(requireContext()))
                 layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
             }
+
+        customListPopup = PopupWindow(
+            popupView,
+            RelativeLayout.LayoutParams.WRAP_CONTENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            elevation = 2 * resources.displayMetrics.density
+            animationStyle = R.style.Fade
+            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+            isOutsideTouchable = true
+            setTouchInterceptor { _, event ->
+                if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                    menuBtn.isClickable = false
+                    dismiss()
+                    menuBtn.postDelayed({ menuBtn.isClickable = true }, 300)
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+    }
+
+    private fun showCustomListPopup(anchor: View) {
+        val popup = customListPopup ?: return
+        if (popup.isShowing) {
+            popup.dismiss()
+            return
+        }
+
+        popup.contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        popup.width = popup.contentView.measuredWidth
+        popup.height = popup.contentView.measuredHeight
+        popup.contentView.findViewById<View>(R.id.balloon_arrow).apply {
+            layoutParams = (layoutParams as RelativeLayout.LayoutParams).apply {
+                leftMargin = (popup.width * 0.85f - measuredWidth / 2f).toInt()
+            }
+        }
+        popup.showAsDropDown(anchor, anchor.measuredWidth / 2 - popup.width / 2, 0)
+    }
+
+    override fun onDestroyView() {
+        customListPopup?.dismiss()
+        customListPopup = null
+        super.onDestroyView()
     }
 
 }
