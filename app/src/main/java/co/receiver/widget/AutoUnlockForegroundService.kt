@@ -44,11 +44,20 @@ class AutoUnlockForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        if (!hasBluetoothPermission()) {
-            stopSelf()
-            return
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!hasBluetoothPermission() || !startForegroundSafely()) {
+            stopSelf(startId)
+            return START_NOT_STICKY
         }
+
         isLive = true
+        loadDevicesAndMonitor()
+        return START_STICKY
+    }
+
+    private fun startForegroundSafely(): Boolean {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.small_icon)
@@ -67,20 +76,23 @@ class AutoUnlockForegroundService : Service() {
             )
             .build()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-            )
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+            true
+        } catch (e: RuntimeException) {
+            // Some devices reject foreground promotion even for geofence events.
+            // Keep the armed flag so Auto Unlock can be retried later.
+            L.d("AutoUnlockService", "Unable to promote connected-device service: ${e.message}")
+            false
         }
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        loadDevicesAndMonitor()
-        return START_STICKY
     }
 
     private fun loadDevicesAndMonitor() {
@@ -186,6 +198,11 @@ class AutoUnlockForegroundService : Service() {
             private set
 
         fun start(context: Context) {
+            if (!hasBluetoothPermission(context)) {
+                L.d("AutoUnlockService", "Skip connected-device service: Bluetooth permission is incomplete")
+                return
+            }
+
             val intent = Intent(context, AutoUnlockForegroundService::class.java)
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -198,6 +215,14 @@ class AutoUnlockForegroundService : Service() {
                 // If the OS still rejects this start, keep the armed flag for a later retry.
                 L.d("AutoUnlockService", "Unable to start connected-device service: ${e.message}")
             }
+        }
+
+        private fun hasBluetoothPermission(context: Context): Boolean {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) ==
+                    PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) ==
+                    PackageManager.PERMISSION_GRANTED
         }
     }
 }
