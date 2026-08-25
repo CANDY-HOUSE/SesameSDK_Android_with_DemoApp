@@ -12,7 +12,6 @@ import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
 import com.amplifyframework.auth.cognito.options.AuthFlowType
 import com.amplifyframework.auth.cognito.result.AWSCognitoAuthSignOutResult
-import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.auth.options.AuthUpdateUserAttributeOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.AmplifyConfiguration
@@ -154,13 +153,6 @@ class AWSStatus {
                 AuthUserAttribute(AuthUserAttributeKey.name(), name),
                 AuthUpdateUserAttributeOptions.defaults()
             )
-        }
-
-        suspend fun signUp(mail: String) {
-            val options = AuthSignUpOptions.builder()
-                .userAttribute(AuthUserAttributeKey.email(), mail)
-                .build()
-            KotlinAmplify.Auth.signUp(mail, "dummypwk", options)
         }
 
         suspend fun signIn(mail: String) =

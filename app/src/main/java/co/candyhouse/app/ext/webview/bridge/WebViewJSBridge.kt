@@ -13,7 +13,6 @@ import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.server.dto.AppPromotion
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import com.amplifyframework.auth.cognito.exceptions.service.UsernameExistsException
 import com.amplifyframework.auth.result.step.AuthSignInStep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -202,8 +201,6 @@ class WebViewJSBridge(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                runCatching { AWSStatus.signUp(email) }
-                    .onFailure { if (it !is UsernameExistsException) throw it }
                 val result = AWSStatus.signIn(email)
                 val needCode =
                     result.nextStep.signInStep == AuthSignInStep.CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE
