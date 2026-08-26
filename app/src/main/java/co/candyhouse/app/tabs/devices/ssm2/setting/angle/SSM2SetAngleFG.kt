@@ -2,17 +2,22 @@ package co.candyhouse.app.tabs.devices.ssm2.setting.angle
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSetAngleBinding
+import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.app.tabs.devices.ssm2.getLevel
+import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
+import co.candyhouse.sesame.server.CHAPIClientBiz
+import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import co.utils.vibrateDevice
@@ -21,13 +26,9 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     private val tag = "SSM2SetAngleFG"
     private var useSlidingDoorUi: Boolean = false
-    private var longPressRunnable: Runnable? = null
-    private var didTrigger2s: Boolean = false
-    private val LONG_PRESS_MS = 2000L
 
     override fun getViewBinder() = FgSetAngleBinding.inflate(layoutInflater)
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mDeviceModel.ssmLockLiveData.value.apply {
@@ -122,57 +123,57 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
                     }
                 }
             }
-            bind.magnetZone.setOnTouchListener { _, event ->
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> {
-                        didTrigger2s = false
-                        longPressRunnable?.let { bind.magnetZone.removeCallbacks(it) }
-
-                        val dev = this
-                        val ssm5 = (this as? CHSesame5)
-                        if (dev == null || ssm5 == null) return@setOnTouchListener false
-
-                        longPressRunnable = Runnable {
-                            didTrigger2s = true
-                            view.context.vibrateDevice(100)
-                            val (targetUiSliding, advType) = when (dev.productModel) {
-                                CHProductModel.SS6ProSlidingDoor -> false to 21.toByte()
-                                CHProductModel.SS6Pro -> true to 32.toByte()
-                                else -> return@Runnable
-                            }
-
-                            ssm5.sendAdvProductTypeCommand(data = byteArrayOf(advType)) { res ->
-                                res.onSuccess {
-                                    L.d(tag, "sendAdvProductTypeCommand success advType=$advType")
-                                    activity?.runOnUiThread {
-                                        useSlidingDoorUi = targetUiSliding
-                                        bind.ssmView.visibility = if (useSlidingDoorUi) View.GONE else View.VISIBLE
-                                        bind.slidingDoorView.visibility = if (useSlidingDoorUi) View.VISIBLE else View.GONE
-                                        setLockFromDevice(dev, useSlidingDoorUi)
-                                    }
-                                }
-                                res.onFailure { err ->
-                                    L.e("SSM2SetAngleFG", "切换失败（message=${err.message}）")
-                                }
-                            }
-                        }
-
-                        bind.magnetZone.postDelayed(longPressRunnable!!, LONG_PRESS_MS)
-                        true
-                    }
-
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        longPressRunnable?.let { bind.magnetZone.removeCallbacks(it) }
-                        longPressRunnable = null
-                        if (!didTrigger2s && event.actionMasked == MotionEvent.ACTION_UP) {
-                            bind.magnetZone.performClick()
-                        }
-                        didTrigger2s = false
-                        true
-                    }
-
-                    else -> true
+            bind.magnetZone.setOnLongClickListener {
+                val dev = this
+                val ssm5 = this as? CHSesame5 ?: return@setOnLongClickListener false
+                val (targetModel, advType) = when (dev.productModel) {
+                    CHProductModel.SS6ProSlidingDoor -> CHProductModel.SS6Pro to 21.toByte()
+                    CHProductModel.SS6Pro -> CHProductModel.SS6ProSlidingDoor to 32.toByte()
+                    else -> return@setOnLongClickListener true
                 }
+
+                view.context.vibrateDevice(100)
+                ssm5.sendAdvProductTypeCommand(data = byteArrayOf(advType)) { res ->
+                    res.onSuccess {
+                        L.d(tag, "sendAdvProductTypeCommand success advType=$advType")
+                        activity?.runOnUiThread {
+                            dev.productModel = targetModel
+                            mDeviceModel.ssmLockLiveData.value = dev
+                            useSlidingDoorUi = targetModel == CHProductModel.SS6ProSlidingDoor
+                            bind.ssmView.visibility = if (useSlidingDoorUi) View.GONE else View.VISIBLE
+                            bind.slidingDoorView.visibility = if (useSlidingDoorUi) View.VISIBLE else View.GONE
+                            setLockFromDevice(dev, useSlidingDoorUi)
+                            syncProductModel(dev, targetModel)
+                        }
+                    }
+                    res.onFailure { err ->
+                        L.e(tag, "切换失败（message=${err.message}）")
+                    }
+                }
+                true
+            }
+        }
+    }
+
+    private fun syncProductModel(device: CHDevices, productModel: CHProductModel) {
+        val deviceModel = productModel.deviceModel()
+        val updatedKey = device.getKey().copy(deviceModel = deviceModel)
+
+        CHDeviceManager.receiveCHDeviceKeys(updatedKey) { result ->
+            result.onFailure { err ->
+                L.e(tag, "save product model locally failed model=$deviceModel message=${err.message}")
+            }
+        }
+
+        val updatedUserKey = device.userKey?.copy(deviceModel = deviceModel)
+            ?: cheyKeyToUserKey(updatedKey, device.getLevel(), device.getNickname())
+        CHAPIClientBiz.putKey(updatedUserKey) { result ->
+            result.onSuccess {
+                L.d(tag, "sync product model success model=$deviceModel")
+                mDeviceModel.refreshDevices()
+            }
+            result.onFailure { err ->
+                L.e(tag, "sync product model failed model=$deviceModel message=${err.message}")
             }
         }
     }
@@ -221,9 +222,4 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
         }
     }
 
-    override fun onDestroyView() {
-        longPressRunnable?.let { bind.magnetZone.removeCallbacks(it) }
-        longPressRunnable = null
-        super.onDestroyView()
-    }
 }
