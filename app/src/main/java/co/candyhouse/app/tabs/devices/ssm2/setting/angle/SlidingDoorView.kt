@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -31,6 +32,12 @@ class SlidingDoorView @JvmOverloads constructor(
         strokeWidth = dp(4).toFloat()
         strokeCap = Paint.Cap.ROUND
     }
+    private val switchPointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.text_hint)
+        strokeWidth = dp(2).toFloat()
+        strokeCap = Paint.Cap.ROUND
+        pathEffect = DashPathEffect(floatArrayOf(dp(4).toFloat(), dp(3).toFloat()), 0f)
+    }
 
     private val paintIcon = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
 
@@ -39,9 +46,14 @@ class SlidingDoorView @JvmOverloads constructor(
     private var progress: Float = 0f
     private var lockProgress: Float = 0.5f
     private var unlockProgress: Float = 0.5f
+    private var switchPointProgress: Float = 0.5f
+    private var hasLockUnlockSwitchPointSetting = false
+    private var switchPointPos: Int? = null
 
     private var observedMin: Float? = null
     private var observedMax: Float? = null
+    private var scaleMin: Float = -10f
+    private var scaleMax: Float = 10f
 
     private var lastLockPos: Int? = null
     private var lastUnlockPos: Int? = null
@@ -102,6 +114,21 @@ class SlidingDoorView @JvmOverloads constructor(
         val iconX = innerRect.right + dp(18)
         drawIconByProgress(canvas, unlockImg, unlockProgress, iconX, trackTop, trackBottom, sliderH)
         drawIconByProgress(canvas, lockImg, lockProgress, iconX, trackTop, trackBottom, sliderH)
+        if (hasLockUnlockSwitchPointSetting) {
+            drawSwitchPoint(canvas, innerRect.right, trackTop, trackBottom, sliderH)
+        }
+    }
+
+    private fun drawSwitchPoint(
+        canvas: Canvas,
+        bodyRight: Float,
+        trackTop: Float,
+        trackBottom: Float,
+        sliderH: Float
+    ) {
+        val p = switchPointProgress.coerceIn(0f, 1f)
+        val y = trackTop + (trackBottom - trackTop) * (1f - p) + sliderH / 2f
+        canvas.drawLine(bodyRight + dp(8), y, bodyRight + dp(58), y, switchPointPaint)
     }
 
     private fun drawIconByProgress(
@@ -147,6 +174,8 @@ class SlidingDoorView @JvmOverloads constructor(
                 min = c - minSpan / 2f
                 max = c + minSpan / 2f
             }
+            scaleMin = min
+            scaleMax = max
 
             progress = normalize(p, min, max)
 
@@ -158,7 +187,26 @@ class SlidingDoorView @JvmOverloads constructor(
                 unlockProgress = normalize(up, min, max)
                 lastUnlockPos = unlockPos
             }
+            switchPointPos?.let {
+                switchPointProgress = normalize(it.toFloat(), min, max)
+            }
 
+            invalidate()
+        }
+    }
+
+    fun setSwitchPoint(pos: Int) {
+        post {
+            switchPointPos = pos
+            switchPointProgress = normalize(pos.toFloat(), scaleMin, scaleMax)
+            hasLockUnlockSwitchPointSetting = true
+            invalidate()
+        }
+    }
+
+    fun clearSwitchPoint() {
+        post {
+            hasLockUnlockSwitchPointSetting = false
             invalidate()
         }
     }

@@ -25,14 +25,23 @@ import co.utils.UserUtils
 import co.utils.vibrateDevice
 import java.text.NumberFormat
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     private val logTag = "SSM2SetAngleFG"
     private var useSlidingDoorUi: Boolean = false
-    private val sensorDetectIntervalValues = (0..1000 step 50).map { it.toShort() }
+    private val sensorDetectIntervalValues = (0..1000 step 50)
+        .groupBy { intervalMs ->
+            if (intervalMs == 0) 0 else (1000.0 / intervalMs).roundToInt()
+        }
+        .map { (frequency, intervalValues) ->
+            intervalValues.firstOrNull { intervalMs ->
+                intervalMs != 0 && 1000 % intervalMs == 0 && 1000 / intervalMs == frequency
+            } ?: intervalValues.first()
+        }
+        .map { it.toShort() }
     private var currentSensorDetectIntervalMs = CHDevices.UNSET_SENSOR_DETECT_INTERVAL_MS
-    private var isUpdatingSensorDetectIntervalSwitch = false
 
     override fun getViewBinder() = FgSetAngleBinding.inflate(layoutInflater)
 
@@ -192,7 +201,7 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
                     val selectedInterval = sensorDetectIntervalValues.getOrNull(selected) ?: return@setListener
                     targetDevice.setSensorDetectInterval(selectedInterval) { result ->
                         result.onSuccess {
-                            L.d(logTag, "设置传感器检测间隔成功：${sensorDetectIntervalSecondsText(selectedInterval)} 秒")
+                            L.d(logTag, "设置传感器检测间隔成功：${sensorDetectIntervalSecondsText(selectedInterval)} 秒 $selectedInterval")
                             bind.sensorDetectIntervalWheelview.post {
                                 updateSensorDetectIntervalState(targetDevice, selectedInterval)
                                 setSensorDetectIntervalWheelVisible(false)
@@ -208,16 +217,9 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
                 }
             }
 
-            bind.sensorDetectIntervalSwitch.setOnCheckedChangeListener(null)
             updateSensorDetectIntervalState(targetDevice, intervalMs)
-            bind.sensorDetectIntervalSwitch.setOnCheckedChangeListener { _, isChecked ->
-                if (isUpdatingSensorDetectIntervalSwitch) return@setOnCheckedChangeListener
-                setSensorDetectIntervalWheelVisible(isChecked)
-            }
             bind.sensorDetectIntervalStatus.setOnClickListener {
-                if (bind.sensorDetectIntervalSwitch.isEnabled &&
-                    bind.sensorDetectIntervalSwitch.isChecked
-                ) {
+                if (bind.sensorDetectIntervalStatus.isEnabled) {
                     setSensorDetectIntervalWheelVisible(
                         bind.sensorDetectIntervalWheelview.visibility != View.VISIBLE
                     )
@@ -230,7 +232,6 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     private fun setSensorDetectIntervalWheelVisible(visible: Boolean) {
         bind.sensorDetectIntervalWheelview.visibility = if (visible) View.VISIBLE else View.GONE
-        setSensorDetectIntervalSwitchChecked(visible)
         if (visible) {
             bind.scrollView.post {
                 bind.scrollView.smoothScrollTo(0, bind.content.height)
@@ -240,21 +241,14 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     private fun updateSensorDetectIntervalState(targetDevice: CHDevices, intervalMs: Short) {
         currentSensorDetectIntervalMs = intervalMs
-        bind.sensorDetectIntervalSwitch.isEnabled =
+        bind.sensorDetectIntervalStatus.isEnabled =
             targetDevice.deviceStatus.value == CHDeviceLoginStatus.logined
         bind.sensorDetectIntervalStatus.text = sensorDetectFrequencyText(intervalMs)
-        bind.sensorDetectIntervalStatus.visibility =
-            if (intervalMs == 0.toShort()) View.INVISIBLE else View.VISIBLE
-    }
-
-    private fun setSensorDetectIntervalSwitchChecked(checked: Boolean) {
-        isUpdatingSensorDetectIntervalSwitch = true
-        bind.sensorDetectIntervalSwitch.isChecked = checked
-        isUpdatingSensorDetectIntervalSwitch = false
+        bind.sensorDetectIntervalStatus.visibility = View.VISIBLE
     }
 
     override fun onUIDeviceStatus(status: CHDeviceStatus) {
-        bind.sensorDetectIntervalSwitch.isEnabled =
+        bind.sensorDetectIntervalStatus.isEnabled =
             status.value == CHDeviceLoginStatus.logined &&
                     currentSensorDetectIntervalMs != CHDevices.UNSET_SENSOR_DETECT_INTERVAL_MS
         if (status.value != CHDeviceLoginStatus.logined) {
@@ -266,7 +260,7 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
     private fun sensorDetectFrequencyText(intervalMs: Short): String {
         if (intervalMs == 0.toShort()) return getString(R.string.stop_sensor_detection)
 
-        return getString(R.string.times_per_second, formatDecimal(1000.0 / intervalMs.toInt()))
+        return getString(R.string.times_per_second, (1000.0 / intervalMs.toInt()).roundToInt())
     }
 
     private fun sensorDetectIntervalSecondsText(intervalMs: Short): String =
@@ -339,9 +333,11 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
         if (device.hasLockUnlockSwitchPointSetting) {
             bind.switchPointZone.visibility = View.VISIBLE
             bind.ssmView.setSwitchPoint(device.lockUnlockSwitchPoint.toInt())
+            bind.slidingDoorView.setSwitchPoint(device.lockUnlockSwitchPoint.toInt())
         } else {
             bind.switchPointZone.visibility = View.GONE
             bind.ssmView.clearSwitchPoint()
+            bind.slidingDoorView.clearSwitchPoint()
         }
     }
 
