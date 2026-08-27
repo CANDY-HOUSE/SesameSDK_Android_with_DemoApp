@@ -190,7 +190,7 @@
     <string name="TouchProPalmRename">手のひら静脈名を変更🖊️</string>
     <string name="DelPalm">手のひら静脈を削除</string>
 
-    <string name="judge_the_sesame">水平の調整</string>
+    <string name="judge_the_sesame">水平の校正</string>
     <string name="device_model">機種</string>
     <string name="battary">電池残量</string>
 
