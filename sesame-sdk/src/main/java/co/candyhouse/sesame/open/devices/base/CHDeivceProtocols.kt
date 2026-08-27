@@ -311,9 +311,7 @@ interface CHDevices {
     fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
     fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {}
     fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {}
-    fun getSensorDetectInterval(result: CHResult<Short>) {}
     fun setSensorDetectInterval(intervalMs: Short, result: CHResult<CHEmpty>) {}
-    fun getLockUnlockSwitchPoint(result: CHResult<Short>) {}
     fun setLockUnlockSwitchPoint(point: Short, result: CHResult<CHEmpty>) {}
     fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
         if ((this as CHDeviceUtil).sesame2KeyData == null) {

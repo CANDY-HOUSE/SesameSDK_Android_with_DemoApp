@@ -245,8 +245,9 @@
     <string name="registering">Registering</string>
 
     <string name="ble_tx_power">BLE TX power</string>
-    <string name="sensor_detect_interval">Sensor interval</string>
-    <string name="millisecond">ms</string>
+    <string name="sensor_detect_frequency">Sensor detection frequency</string>
+    <string name="times_per_second">%1$s times/sec</string>
+    <string name="stop_sensor_detection">Stop detection</string>
     <string name="dBm">dBm</string>
     <string name="set_switch_point_position">Switch point</string>
     <string name="dfu_busy">Updating another CANDY HOUSE product. Please wait...</string>

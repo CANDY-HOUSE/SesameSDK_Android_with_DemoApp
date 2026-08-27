@@ -480,6 +480,7 @@
                     android:background="@color/white">
 
                     <TextView
+                        android:id="@+id/radar_distance_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
@@ -491,11 +492,13 @@
 
                     <LinearLayout
                         android:id="@+id/rader_sens_zone"
-                        android:layout_width="270dp"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
                         android:layout_marginEnd="6dp"
+                        android:layout_toEndOf="@id/radar_distance_title"
                         android:gravity="end|center"
                         android:orientation="horizontal"
                         android:visibility="gone">
@@ -692,11 +695,13 @@
                         android:textSize="17sp" />
 
                     <LinearLayout
-                        android:layout_width="270dp"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
                         android:layout_marginEnd="6dp"
+                        android:layout_toEndOf="@id/ble_tx_power_title"
                         android:gravity="end|center"
                         android:orientation="horizontal">
 

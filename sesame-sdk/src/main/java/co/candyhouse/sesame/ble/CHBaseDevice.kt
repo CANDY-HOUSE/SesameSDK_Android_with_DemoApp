@@ -39,8 +39,10 @@ internal interface CHDeviceUtil {
     fun goIOT() {}//訂閱ＩＯＴ
     fun login(token: String? = null)
 }
+
 @Keep
-@SuppressLint("MissingPermission") internal open class CHBaseDevice {
+@SuppressLint("MissingPermission")
+internal open class CHBaseDevice {
     lateinit var productModel: CHProductModel
     val gattRxBuffer: SesameBleReceiver = SesameBleReceiver() //[數據層][收]
     var gattTxBuffer: SesameBleTransmit? = null //[數據層][傳]
@@ -48,9 +50,8 @@ internal interface CHDeviceUtil {
     var mCharacteristic: BluetoothGattCharacteristic? = null //用來發送資料給
     var delegate: CHDeviceStatusDelegate? = null
     val multicastDelegate = CHMulticastDelegate<CHWifiModule2Delegate>()
-
-    var deviceTimestamp:Long? = null
-    var loginTimestamp:Long? = null
+    var deviceTimestamp: Long? = null
+    var loginTimestamp: Long? = null
     var deviceId: UUID? = null
     var isRegistered: Boolean = true
     var rssi: Int? = 0
@@ -71,40 +72,31 @@ internal interface CHDeviceUtil {
                 delegate?.onBleTxPowerReceive(device, device.bleTxPower)
             }
         }
-
     var sensorDetectIntervalMs: Short = UNSET_SENSOR_DETECT_INTERVAL_MS
         set(value) {
-            if (field != value) {
-                field = value
-            }
+            if (field == value) return
+            field = value
             if (this is CHDevices) {
                 val device: CHDevices = this
                 delegate?.onSensorDetectIntervalReceive(device, device.sensorDetectIntervalMs)
             }
         }
-
-    var lockUnlockSwitchPoint: Short = UNSET_LOCK_UNLOCK_SWITCH_POINT
+    private var lockUnlockSwitchPointValue: Short = UNSET_LOCK_UNLOCK_SWITCH_POINT
+    var lockUnlockSwitchPoint: Short
+        get() = lockUnlockSwitchPointValue
         set(value) {
-            if (field != value) {
-                field = value
-            }
-            if (this is CHDevices) {
-                val device: CHDevices = this
-                delegate?.onLockUnlockSwitchPointReceive(device, device.lockUnlockSwitchPoint)
-            }
+            if (lockUnlockSwitchPointValue == value) return
+            lockUnlockSwitchPointValue = value
+            notifyLockUnlockSwitchPointChanged()
         }
-
-    var hasLockUnlockSwitchPointSetting: Boolean = false
+    private var hasLockUnlockSwitchPointSettingValue: Boolean = false
+    var hasLockUnlockSwitchPointSetting: Boolean
+        get() = hasLockUnlockSwitchPointSettingValue
         set(value) {
-            if (field != value) {
-                field = value
-            }
-            if (this is CHDevices) {
-                val device: CHDevices = this
-                delegate?.onLockUnlockSwitchPointReceive(device, device.lockUnlockSwitchPoint)
-            }
+            if (hasLockUnlockSwitchPointSettingValue == value) return
+            hasLockUnlockSwitchPointSettingValue = value
+            notifyLockUnlockSwitchPointChanged()
         }
-
     var mBluetoothGatt: BluetoothGatt? = null //[gatt] 控制藍芽連線的全局物件
     var isNeedAuthFromServer: Boolean? = false
     var mechStatus: CHSesameProtocolMechStatus? = null
@@ -115,6 +107,7 @@ internal interface CHDeviceUtil {
                 notifyMechStatusChanged()
             }
         }
+
     @Keep
     var deviceShadowStatus: CHDeviceStatus? = null
         set(value) {
@@ -173,7 +166,7 @@ internal interface CHDeviceUtil {
     }
 
     fun disconnect(result: CHResult<CHEmpty>) {
-      L.d("hcia", "[say] 主動要求斷開藍芽連接 :" + " bluetoothAdapter.isEnabled: " + bluetoothAdapter.isEnabled + " mBluetoothGatt:" + mBluetoothGatt)
+        L.d("hcia", "[say] 主動要求斷開藍芽連接 :" + " bluetoothAdapter.isEnabled: " + bluetoothAdapter.isEnabled + " mBluetoothGatt:" + mBluetoothGatt)
         // 在调用安卓的disconnect()断线之前，需要把原来enable的notify disable掉。否则会影响ESP32-C3 BLE 断线事件的触发。
         mBluetoothGatt?.let { gatt ->
             for (service in gatt.services) {
@@ -206,7 +199,19 @@ internal interface CHDeviceUtil {
         result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
     }
 
+    protected fun updateLockUnlockSwitchPointSetting(point: Short) {
+        if (hasLockUnlockSwitchPointSettingValue && lockUnlockSwitchPointValue == point) return
+        lockUnlockSwitchPointValue = point
+        hasLockUnlockSwitchPointSettingValue = true
+        notifyLockUnlockSwitchPointChanged()
+    }
 
+    private fun notifyLockUnlockSwitchPointChanged() {
+        if (this is CHDevices) {
+            val device: CHDevices = this
+            delegate?.onLockUnlockSwitchPointReceive(device, device.lockUnlockSwitchPoint)
+        }
+    }
 
 }
 
@@ -232,16 +237,19 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
     return object : CHDevices {
         override var mechStatus: CHSesameProtocolMechStatus?
             get() = this@toCHDevices.mechStatus
-            set(value) { this@toCHDevices.mechStatus = value }
-
+            set(value) {
+                this@toCHDevices.mechStatus = value
+            }
         override var deviceTimestamp: Long?
             get() = this@toCHDevices.deviceTimestamp
-            set(value) { this@toCHDevices.deviceTimestamp = value }
-
+            set(value) {
+                this@toCHDevices.deviceTimestamp = value
+            }
         override var loginTimestamp: Long?
             get() = this@toCHDevices.loginTimestamp
-            set(value) { this@toCHDevices.loginTimestamp = value }
-
+            set(value) {
+                this@toCHDevices.loginTimestamp = value
+            }
         override var delegate: CHDeviceStatusDelegate?
             get() = this@toCHDevices.delegate
             set(value) {
@@ -252,47 +260,59 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
 
         override var deviceStatus: CHDeviceStatus
             get() = this@toCHDevices.deviceStatus
-            set(value) { this@toCHDevices.deviceStatus = value }
-
+            set(value) {
+                this@toCHDevices.deviceStatus = value
+            }
         override var deviceShadowStatus: CHDeviceStatus?
             get() = this@toCHDevices.deviceShadowStatus
-            set(value) { this@toCHDevices.deviceShadowStatus = value }
-
+            set(value) {
+                this@toCHDevices.deviceShadowStatus = value
+            }
         override var rssi: Int?
             get() = this@toCHDevices.rssi
-            set(value) { this@toCHDevices.rssi = value }
-
+            set(value) {
+                this@toCHDevices.rssi = value
+            }
         override var bleTxPower: Byte
             get() = this@toCHDevices.bleTxPower
-            set(value) { this@toCHDevices.bleTxPower = value }
-
+            set(value) {
+                this@toCHDevices.bleTxPower = value
+            }
         override var sensorDetectIntervalMs: Short
             get() = this@toCHDevices.sensorDetectIntervalMs
-            set(value) { this@toCHDevices.sensorDetectIntervalMs = value }
-
+            set(value) {
+                this@toCHDevices.sensorDetectIntervalMs = value
+            }
         override var lockUnlockSwitchPoint: Short
             get() = this@toCHDevices.lockUnlockSwitchPoint
-            set(value) { this@toCHDevices.lockUnlockSwitchPoint = value }
-
+            set(value) {
+                this@toCHDevices.lockUnlockSwitchPoint = value
+            }
         override var hasLockUnlockSwitchPointSetting: Boolean
             get() = this@toCHDevices.hasLockUnlockSwitchPointSetting
-            set(value) { this@toCHDevices.hasLockUnlockSwitchPointSetting = value }
-
+            set(value) {
+                this@toCHDevices.hasLockUnlockSwitchPointSetting = value
+            }
         override var deviceId: UUID?
             get() = this@toCHDevices.deviceId
-            set(value) { this@toCHDevices.deviceId = value }
-
+            set(value) {
+                this@toCHDevices.deviceId = value
+            }
         override var isRegistered: Boolean
             get() = this@toCHDevices.isRegistered
-            set(value) { this@toCHDevices.isRegistered = value }
-
+            set(value) {
+                this@toCHDevices.isRegistered = value
+            }
         override var productModel: CHProductModel
             get() = this@toCHDevices.productModel
-            set(value) { this@toCHDevices.productModel = value }
-
+            set(value) {
+                this@toCHDevices.productModel = value
+            }
         override var batteryPercentage: Int?
             get() = this@toCHDevices.batteryPercentage
-            set(value) { this@toCHDevices.batteryPercentage = value }
+            set(value) {
+                this@toCHDevices.batteryPercentage = value
+            }
 
         override fun connect(result: CHResult<CHEmpty>) {
             // 实现 connect 方法
@@ -325,25 +345,23 @@ internal fun CHBaseDevice.toCHDevices(): CHDevices {
         override fun updateFirmware(onResponse: CHResult<BluetoothDevice>) {
             // 实现 updateFirmware 方法
         }
-
-        // 其他方法的实现...
     }
 }
 
 internal fun CHBaseDevice.notifyBleDeviceStatusChanged() {
-    multicastDelegate.invokeDelegates ({
+    multicastDelegate.invokeDelegates({
         it.onBleDeviceStatusChanged(this as CHDevices, this.deviceStatus, this.deviceShadowStatus)
     })
 }
 
 internal fun CHBaseDevice.notifyMechStatusChanged() {
-    multicastDelegate.invokeDelegates ({
+    multicastDelegate.invokeDelegates({
         it.onMechStatus(this as CHDevices)
     })
 }
 
 internal fun CHBaseDevice.notifySesameKeysChanged() {
-    multicastDelegate.invokeDelegates ({
+    multicastDelegate.invokeDelegates({
         it.onSSM2KeysChanged(this as CHWifiModule2, emptyMap())
     })
 }

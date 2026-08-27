@@ -77,6 +77,8 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
             if (res.cmdResultCode == SesameResultCode.success.value) {
                 sensorDetectIntervalMs = intervalMs
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } else {
+                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
         }
     }
@@ -85,9 +87,10 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
         if (!isBleAvailable(result)) return
         sendCommand(SesameOS3Payload(SesameItemCode.SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING.value, point.toReverseBytes()), DeviceSegmentType.cipher) { res ->
             if (res.cmdResultCode == SesameResultCode.success.value) {
-                hasLockUnlockSwitchPointSetting = true
-                lockUnlockSwitchPoint = point
+                updateLockUnlockSwitchPointSetting(point)
                 result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            } else {
+                result.invoke(Result.failure(NSError(res.cmdResultCode.toString(), "CBCentralManager", res.cmdResultCode.toInt())))
             }
         }
     }
@@ -200,16 +203,23 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
             }
 
             SesameItemCode.SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING.value -> {
-                val intervalMs = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
-                L.d("os3lock", "[sensorDetectIntervalMs] $intervalMs")
-                sensorDetectIntervalMs = intervalMs
+                if (receivePayload.payload.size >= 2) {
+                    val intervalMs = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
+                    L.d("os3lock", "[sensorDetectIntervalMs] $intervalMs")
+                    sensorDetectIntervalMs = intervalMs
+                } else {
+                    L.e("os3lock", "[sensorDetectIntervalMs] invalid payload size=${receivePayload.payload.size}")
+                }
             }
-            
+
             SesameItemCode.SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING.value -> {
-                val point = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
-                L.d("os3lock", "[lockUnlockSwitchPoint] $point")
-                hasLockUnlockSwitchPointSetting = true
-                lockUnlockSwitchPoint = point
+                if (receivePayload.payload.size >= 2) {
+                    val point = bytesToShort(receivePayload.payload[0], receivePayload.payload[1])
+                    L.d("os3lock", "[lockUnlockSwitchPoint] $point")
+                    updateLockUnlockSwitchPointSetting(point)
+                } else {
+                    L.e("os3lock", "[lockUnlockSwitchPoint] invalid payload size=${receivePayload.payload.size}")
+                }
             }
         }
 

@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.DashPathEffect
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.DisplayMetrics
@@ -29,11 +31,12 @@ class SesameView @JvmOverloads constructor(
         ContextCompat.getDrawable(context, R.drawable.ic_icon_lock_uncheck)!!.toBitmap()
     private var unlockImg: Bitmap =
         ContextCompat.getDrawable(context, R.drawable.ic_icon_unlock_uncheck)!!.toBitmap()
-    // 切换点标记：上锁与解锁图标各缩小到一半，并列显示在角度轨道对应位置
-    private var switchPointLockImg: Bitmap =
-        ContextCompat.getDrawable(context, R.drawable.ic_icon_lock_uncheck)!!.toBitmap()
-    private var switchPointUnlockImg: Bitmap =
-        ContextCompat.getDrawable(context, R.drawable.ic_icon_unlock_uncheck)!!.toBitmap()
+    private val switchPointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.text_hint)
+        strokeWidth = dp(2).toFloat()
+        strokeCap = Paint.Cap.ROUND
+        pathEffect = DashPathEffect(floatArrayOf(dp(4).toFloat(), dp(3).toFloat()), 0f)
+    }
 
     private var midx = 0f
     private var midy = 0f
@@ -107,51 +110,31 @@ class SesameView @JvmOverloads constructor(
         drawIcon(canvas, lockImg, lockAngle, iconSize)
         drawIcon(canvas, unlockImg, unlockAngle, iconSize)
         if (hasLockUnlockSwitchPointSetting) {
-            // 切换点标记：上锁/解锁图标各缩小一半，沿轨道切向方向并列显示在该角度位置。
-            // 切向方向 = (sin S, cos S)；沿轨道为“角度减小/顺时针”方向（与角度增大方向相反）。
-            val halfSize = iconSize / 2
-            val rad = Math.toRadians(switchPointAngle.toDouble())
-            val tx = sin(rad).toFloat()
-            val ty = cos(rad).toFloat()
-            val d = halfSize / 2f
-            val (forwardImg, backwardImg) = switchPointSidePair()
-            drawIcon(canvas, forwardImg, switchPointAngle.toFloat(), halfSize, offsetX = tx * d, offsetY = ty * d)
-            drawIcon(canvas, backwardImg, switchPointAngle.toFloat(), halfSize, offsetX = -tx * d, offsetY = -ty * d)
+            drawSwitchPoint(canvas)
         }
     }
 
-    /** 根据切换点相对于 lock/unlock 角度的位置，返回 [切向正向图标, 切向负向图标]。
-     *  切向正向(+offset)方向为 (sin S, cos S)，沿轨道是“角度减小/顺时针”的方向；
-     *  切向负向(-offset)为“角度增大/逆时针”的方向。
-     *  因此：若某角度从 S 顺时针(角度减小)可达，则其图标应画在 +offset 侧，即 norm360(A - S) > 180。 */
-    private fun switchPointSidePair(): Pair<Bitmap, Bitmap> {
-        val s = norm360(switchPointAngle.toFloat())
-        val la = norm360(lockAngle)
-        val ua = norm360(unlockAngle)
-        // 某角度落在 +offset(顺时针/角度减小)半区，当 norm360(A - S) ∈ (180, 360)。
-        val lockOnForward = norm360(la - s) > 180f
-        val unlockOnForward = norm360(ua - s) > 180f
-        // lock / unlock 应分处切换点两侧（lock 与 unlock 角度一般分居切换点两边）。
-        return if (lockOnForward == unlockOnForward) {
-            // 极端情况：两者落在同一侧，维持默认（lock 正向、unlock 负向）。
-            switchPointLockImg to switchPointUnlockImg
-        } else if (lockOnForward) {
-            switchPointLockImg to switchPointUnlockImg
-        } else {
-            switchPointUnlockImg to switchPointLockImg
-        }
+    private fun drawSwitchPoint(canvas: Canvas) {
+        val rad = Math.toRadians(switchPointAngle.toDouble())
+        val radialX = cos(rad).toFloat()
+        val radialY = -sin(rad).toFloat()
+        val centerX = midx + radialX * orbitRadius
+        val centerY = midy + radialY * orbitRadius
+        val halfLength = iconSize / 2f
+
+        canvas.drawLine(
+            centerX - radialX * halfLength,
+            centerY - radialY * halfLength,
+            centerX + radialX * halfLength,
+            centerY + radialY * halfLength,
+            switchPointPaint
+        )
     }
 
-    private fun norm360(deg: Float): Float {
-        var d = deg % 360f
-        if (d < 0f) d += 360f
-        return d
-    }
-
-    private fun drawIcon(canvas: Canvas, bmp: Bitmap, degFloat: Float, size: Int, offsetX: Float = 0f, offsetY: Float = 0f) {
+    private fun drawIcon(canvas: Canvas, bmp: Bitmap, degFloat: Float, size: Int) {
         val rad = Math.toRadians(degFloat.toDouble())
-        val cx = midx + cos(rad) * orbitRadius + offsetX
-        val cy = midy - sin(rad) * orbitRadius + offsetY
+        val cx = midx + cos(rad) * orbitRadius
+        val cy = midy - sin(rad) * orbitRadius
 
         val left = (cx - size / 2f).toInt()
         val top = (cy - size / 2f).toInt()
