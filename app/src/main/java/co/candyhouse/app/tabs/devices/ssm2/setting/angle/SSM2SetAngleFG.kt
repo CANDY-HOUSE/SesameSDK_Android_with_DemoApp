@@ -31,14 +31,14 @@ class SSM2SetAngleFG : BaseDeviceSettingFG<FgSetAngleBinding>() {
 
     private val logTag = "SSM2SetAngleFG"
     private var useSlidingDoorUi: Boolean = false
-    private val sensorDetectIntervalValues = (0..1000 step 50)
+    private val sensorDetectIntervalValues = (listOf(0) + (1000 downTo 50 step 50))
         .groupBy { intervalMs ->
             if (intervalMs == 0) 0 else (1000.0 / intervalMs).roundToInt()
         }
         .map { (frequency, intervalValues) ->
             intervalValues.firstOrNull { intervalMs ->
                 intervalMs != 0 && 1000 % intervalMs == 0 && 1000 / intervalMs == frequency
-            } ?: intervalValues.first()
+            } ?: intervalValues.last()
         }
         .map { it.toShort() }
     private var currentSensorDetectIntervalMs = CHDevices.UNSET_SENSOR_DETECT_INTERVAL_MS
