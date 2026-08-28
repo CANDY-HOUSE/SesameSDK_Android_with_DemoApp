@@ -238,7 +238,7 @@
     <string name="ble_tx_power">BLE送信出力</string>
     <string name="sensor_detect_frequency">角度の検知頻度</string>
     <string name="times_per_second">1秒あたり%1$s回</string>
-    <string name="stop_sensor_detection">検知を停止</string>
+    <string name="stop_sensor_detection">省エネモード</string>
     <string name="dBm">dBm</string>
     <string name="set_switch_point_position">施解錠の境界を固定する</string>
     <string name="dfu_busy">他のCANDY HOUSE製品を更新中、お待ち下さいませ。</string>

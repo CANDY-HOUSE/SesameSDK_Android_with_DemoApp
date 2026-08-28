@@ -252,7 +252,7 @@
     <string name="ble_tx_power">BLE 发射功率</string>
     <string name="sensor_detect_frequency">角度的检测频率</string>
     <string name="times_per_second">%1$s 次/秒</string>
-    <string name="stop_sensor_detection">停止检测</string>
+    <string name="stop_sensor_detection">省电模式</string>
     <string name="dBm">dBm</string>
     <string name="set_switch_point_position">设置上锁・解锁的分界</string>
     <string name="dfu_busy">其他CANDY HOUSE产品正在进行升级, 请稍候。</string>
