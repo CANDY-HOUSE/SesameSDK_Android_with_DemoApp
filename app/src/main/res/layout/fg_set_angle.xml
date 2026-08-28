@@ -188,11 +188,14 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:lines="1"
                     android:text="@string/set_switch_point_position"
                     android:textColor="@color/title"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:autoSizeMaxTextSize="20sp"
+                    app:autoSizeMinTextSize="17sp"
+                    app:autoSizeStepGranularity="1sp"
+                    app:autoSizeTextType="uniform" />
 
                 <View
                     android:layout_width="85dp"
