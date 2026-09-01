@@ -129,7 +129,7 @@ class AutoUnlockGeofenceReceiver : BroadcastReceiver() {
                 .putBoolean("nohandg$deviceId", true)
                 .apply()
         }
-        AutoUnlockForegroundService.start(context)
+        SesameConnectedDeviceService.startAutoUnlock(context)
         CHDeviceManager.getCandyDevices { result ->
             result.onSuccess { state ->
                 requestIds.forEach { deviceId ->

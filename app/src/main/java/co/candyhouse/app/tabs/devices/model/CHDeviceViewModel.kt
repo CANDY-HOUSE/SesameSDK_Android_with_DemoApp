@@ -2,7 +2,6 @@ package co.candyhouse.app.tabs.devices.model
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
@@ -22,7 +21,6 @@ import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.chDeviceOrderComparator
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
-import co.candyhouse.app.tabs.devices.ssm2.getIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
@@ -51,7 +49,6 @@ import co.candyhouse.sesame.utils.Event
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.isInternetAvailable
-import co.receiver.widget.AutoUnlockForegroundService
 import co.receiver.widget.AutoUnlockGeofenceManager
 import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
@@ -625,13 +622,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
                 CHDeviceManager.listDevices.addAll(devices)
             }
             AutoUnlockGeofenceManager.sync(CHDeviceManager.app, devices)
-            if (devices.none { it.getIsNOHand() && it.getIsNOHandG() } &&
-                AutoUnlockForegroundService.isLive
-            ) {
-                CHDeviceManager.app.stopService(
-                    Intent(CHDeviceManager.app, AutoUnlockForegroundService::class.java)
-                )
-            }
             updateWidgets()
         }
     }

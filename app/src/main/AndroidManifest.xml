@@ -86,12 +86,9 @@
             </intent-filter>
         </service>
         <service
-            android:name="co.receiver.widget.AutoUnlockForegroundService"
+            android:name="co.receiver.widget.SesameConnectedDeviceService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
-        <service
-            android:name="co.receiver.widget.MessagingIntentService"
-            android:exported="false" />
         <service
             android:name="co.receiver.SesameFirebaseMessagingService"
             android:exported="false">

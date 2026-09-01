@@ -3,9 +3,7 @@ package co.receiver.widget
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.PowerManager
@@ -42,13 +40,10 @@ object CHServiceManager {
     }
 
     fun widgetLock(locker: CHDevices, context: Context): Notification {
-        val intent = Intent(context, MessagingIntentService::class.java)
-        intent.action = "toggle_ssm" + locker.deviceId.hashCode()
-        val replyActionPendingIntent = PendingIntent.getService(
+        val replyActionPendingIntent = SesameConnectedDeviceService.widgetActionPendingIntent(
             context,
             locker.deviceId.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            SesameConnectedDeviceService.toggleAction(locker.deviceId.hashCode())
         )
         val notificationLayout = RemoteViews(context.packageName, R.layout.cell_weget_unlock)
         notificationLayout.setOnClickPendingIntent(R.id.toggle, replyActionPendingIntent)
@@ -103,21 +98,15 @@ object CHServiceManager {
     }
 
     fun connectedNotification(requestID: Int, context: Context): Notification {
-        val openIntent = Intent(context, MessagingIntentService::class.java)
-        openIntent.action = "open_all$requestID"
-        val replyActionPendingIntent = PendingIntent.getService(
+        val replyActionPendingIntent = SesameConnectedDeviceService.widgetActionPendingIntent(
             context,
             requestID,
-            openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            SesameConnectedDeviceService.openAllAction(requestID)
         )
-        val closeIntent = Intent(context, MessagingIntentService::class.java)
-        closeIntent.action = "close_all$requestID"
-        val replyCloseAllIntent = PendingIntent.getService(
+        val replyCloseAllIntent = SesameConnectedDeviceService.widgetActionPendingIntent(
             context,
             requestID,
-            closeIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            SesameConnectedDeviceService.closeAllAction(requestID)
         )
 
         val notificationLayout = RemoteViews(context.packageName, R.layout.cell_weget)

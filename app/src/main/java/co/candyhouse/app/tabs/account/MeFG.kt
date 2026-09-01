@@ -1,7 +1,6 @@
 package co.candyhouse.app.tabs.account
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -23,8 +22,8 @@ import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.widget.AutoUnlockForegroundService
 import co.receiver.widget.AutoUnlockGeofenceManager
+import co.receiver.widget.SesameConnectedDeviceService
 import co.receiver.widget.SesameWidgetNotificationManager
 import co.utils.GuestUploadFlag
 import co.utils.UserUtils
@@ -134,9 +133,7 @@ class MeFG : BaseNativeWebViewFragment<FgMeBinding>() {
             CHDeviceManager.app,
             CHDeviceManager.listDevices
         )
-        if (AutoUnlockForegroundService.isLive) {
-            CHDeviceManager.app.stopService(Intent(CHDeviceManager.app, AutoUnlockForegroundService::class.java))
-        }
+        SesameConnectedDeviceService.stop(CHDeviceManager.app)
         CHDeviceWrapperManager.clear()
         GuestUploadFlag.clear()
         WebViewPoolManager.clearWebView("contacts")

@@ -1,6 +1,7 @@
 package co.candyhouse.app.tabs
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
@@ -40,8 +41,8 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.widget.AutoUnlockForegroundService
 import co.receiver.widget.AutoUnlockGeofenceManager
+import co.receiver.widget.SesameConnectedDeviceService
 import co.utils.AnalyticsUtil
 import co.utils.UserUtils
 import co.utils.getParcelableExtraCompat
@@ -65,6 +66,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
     private var pendingAutoUnlockPermissionSync = false
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
         var activity: MainActivity? = null
     }
 
@@ -341,7 +343,7 @@ class MainActivity : BaseActivity(), OnSharedPreferenceChangeListener {
                 val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
                 nfcAdapter?.disableForegroundDispatch(this)
 
-                if (!AutoUnlockForegroundService.isLive) {
+                if (!SesameConnectedDeviceService.isLive) {
                     CHBleManager.disableScan {}
                 }
             } catch (e: IllegalStateException) {
