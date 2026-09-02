@@ -1,8 +1,11 @@
 package co.receiver.widget
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
@@ -12,6 +15,29 @@ import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 
 object SesameWidgetNotificationManager {
+    // Android 会丢弃超过每秒 5 次的通知更新，按低于上限的速率串行发送。
+    private const val NOTIFICATION_UPDATE_INTERVAL_MILLISECONDS = 300L
+    private val notificationHandler = Handler(Looper.getMainLooper())
+    private val pendingNotifications = linkedMapOf<Int, () -> Unit>()
+    private var notificationDispatchScheduled = false
+    private val notificationDispatchRunnable = object : Runnable {
+        override fun run() {
+            val notification = synchronized(pendingNotifications) {
+                val entry = pendingNotifications.entries.firstOrNull()
+                if (entry == null) {
+                    notificationDispatchScheduled = false
+                    null
+                } else {
+                    pendingNotifications.remove(entry.key)
+                    entry.value
+                }
+            } ?: return
+
+            notification.invoke()
+            notificationHandler.postDelayed(this, NOTIFICATION_UPDATE_INTERVAL_MILLISECONDS)
+        }
+    }
+
     fun update(context: Context, devices: List<CHDevices>, deviceId: String? = null) {
         val locks = devices.filterIsInstance<CHSesameLock>()
         val hasWidgets = locks.any { it.getIsWidget() }
@@ -38,41 +64,45 @@ object SesameWidgetNotificationManager {
             return
         }
 
-        val manager = NotificationManagerCompat.from(context)
+        val appContext = context.applicationContext
+        val manager = NotificationManagerCompat.from(appContext)
         val locks = devices.filterIsInstance<CHSesameLock>()
         if (deviceId == null) {
             locks.forEach { device ->
                 if (device.getIsWidget()) {
-                    manager.notify(
-                        device.deviceId.hashCode(),
-                        CHServiceManager.widgetLock(device, context)
-                    )
+                    val notificationId = device.deviceId.hashCode()
+                    enqueueNotification(notificationId) {
+                        manager.notify(
+                            notificationId,
+                            CHServiceManager.widgetLock(device, appContext)
+                        )
+                    }
                 } else {
-                    manager.cancel(device.deviceId.hashCode())
+                    cancelNotification(manager, device.deviceId.hashCode())
                 }
             }
         } else {
             locks.firstOrNull { it.deviceId.toString() == deviceId }?.let { device ->
                 if (device.getIsWidget()) {
-                    manager.notify(
-                        device.deviceId.hashCode(),
-                        CHServiceManager.widgetLock(device, context)
-                    )
+                    val notificationId = device.deviceId.hashCode()
+                    enqueueNotification(notificationId) {
+                        manager.notify(
+                            notificationId,
+                            CHServiceManager.widgetLock(device, appContext)
+                        )
+                    }
                 } else {
-                    manager.cancel(device.deviceId.hashCode())
+                    cancelNotification(manager, device.deviceId.hashCode())
                 }
             }
         }
 
-        val widgetCount = locks.count { it.getIsWidget() }
-        if (widgetCount > 1) {
-            manager.notify(
-                "all".hashCode(),
-                CHServiceManager.connectedNotification("all".hashCode(), context)
-            )
-        } else {
-            manager.cancel("all".hashCode())
-        }
+        refreshAggregateNotification(
+            manager,
+            appContext,
+            locks,
+            forceUpdate = deviceId == null
+        )
     }
 
     fun cancelAll(context: Context, devices: List<CHDevices>) {
@@ -86,8 +116,53 @@ object SesameWidgetNotificationManager {
 
         val manager = NotificationManagerCompat.from(context)
         devices.filterIsInstance<CHSesameLock>().forEach {
-            manager.cancel(it.deviceId.hashCode())
+            cancelNotification(manager, it.deviceId.hashCode())
         }
-        manager.cancel("all".hashCode())
+        cancelNotification(manager, "all".hashCode())
+    }
+
+    private fun enqueueNotification(notificationId: Int, notification: () -> Unit) {
+        synchronized(pendingNotifications) {
+            pendingNotifications[notificationId] = notification
+            if (!notificationDispatchScheduled) {
+                notificationDispatchScheduled = true
+                notificationHandler.post(notificationDispatchRunnable)
+            }
+        }
+    }
+
+    private fun refreshAggregateNotification(
+        manager: NotificationManagerCompat,
+        context: Context,
+        locks: List<CHSesameLock>,
+        forceUpdate: Boolean
+    ) {
+        val notificationId = "all".hashCode()
+        if (locks.count { it.getIsWidget() } <= 1) {
+            cancelNotification(manager, notificationId)
+            return
+        }
+
+        val isPending = synchronized(pendingNotifications) {
+            pendingNotifications.containsKey(notificationId)
+        }
+        val isActive = context.getSystemService(NotificationManager::class.java)
+            ?.activeNotifications
+            ?.any { it.id == notificationId } == true
+        if (forceUpdate || (!isPending && !isActive)) {
+            enqueueNotification(notificationId) {
+                manager.notify(
+                    notificationId,
+                    CHServiceManager.connectedNotification(notificationId, context)
+                )
+            }
+        }
+    }
+
+    private fun cancelNotification(manager: NotificationManagerCompat, notificationId: Int) {
+        synchronized(pendingNotifications) {
+            pendingNotifications.remove(notificationId)
+        }
+        manager.cancel(notificationId)
     }
 }

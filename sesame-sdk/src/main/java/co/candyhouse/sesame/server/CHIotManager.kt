@@ -35,6 +35,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Collections
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -77,9 +78,16 @@ internal object CHIotManager {
     @Volatile
     private var iotStatus = IotStatus.ConnectionLost
 
-    /** IoT 连接成功回调（用于连接后刷新服务端设备列表） */
-    @Volatile
-    internal var onReconnected: (() -> Unit)? = null
+    /** IoT 重连成功监听器。 */
+    private val reconnectedListeners = CopyOnWriteArraySet<() -> Unit>()
+
+    internal fun addOnReconnectedListener(listener: () -> Unit) {
+        reconnectedListeners.add(listener)
+    }
+
+    internal fun removeOnReconnectedListener(listener: () -> Unit) {
+        reconnectedListeners.remove(listener)
+    }
 
     private val iotScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val poolLock = Any()
@@ -383,7 +391,15 @@ internal object CHIotManager {
                     if (!isPoolGenerationActive(generation)) return@launch
                     updateDevicesOnConnect(generation)
                     if (isPoolGenerationActive(generation)) {
-                        onReconnected?.invoke()
+                        reconnectedListeners.forEach { listener ->
+                            try {
+                                listener.invoke()
+                            } catch (error: CancellationException) {
+                                throw error
+                            } catch (error: Exception) {
+                                L.e(tag, "IoT reconnect listener failed", error)
+                            }
+                        }
                     }
                 } finally {
                     synchronized(poolLock) {

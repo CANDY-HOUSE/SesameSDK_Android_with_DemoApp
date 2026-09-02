@@ -84,6 +84,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     val ssmosLockDelegates = delegateManager.createSsmosLockDelegateObj()
     private val deviceStatusCallbacks = mutableMapOf<CHDevices, (CHDevices) -> Unit>()
     private val botScriptInitInFlight = Collections.synchronizedSet(mutableSetOf<String>())
+    private val iotReconnectedListener = ::refreshDevices
 
     @Volatile
     private var isApplyingFullDeviceList = false
@@ -93,7 +94,7 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
 
     init {
         // IoT 重连成功后刷新服务端列表（含 stateInfo），对齐 iOS 重连后 getCHUserKeys
-        CHIotManagerPublic.setOnReconnected { refreshDevices() }
+        CHIotManagerPublic.addOnReconnectedListener(iotReconnectedListener)
     }
 
     // 更新搜索关键词
@@ -885,6 +886,6 @@ class CHDeviceViewModel : ViewModel(), CHWifiModule2Delegate, CHDeviceStatusDele
     override fun onCleared() {
         super.onCleared()
         syncJob?.cancel()
-        CHIotManagerPublic.setOnReconnected(null)
+        CHIotManagerPublic.removeOnReconnectedListener(iotReconnectedListener)
     }
 }

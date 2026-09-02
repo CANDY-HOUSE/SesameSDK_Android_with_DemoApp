@@ -51,9 +51,16 @@ object CHIotManagerPublic {
     }
 
     /**
-     * 设置 IoT 重连成功回调（用于重连后刷新服务端设备列表）
+     * 添加 IoT 重连成功监听。
      */
-    fun setOnReconnected(callback: (() -> Unit)?) {
-        CHIotManager.onReconnected = callback
+    fun addOnReconnectedListener(listener: () -> Unit) {
+        CHIotManager.addOnReconnectedListener(listener)
+    }
+
+    /**
+     * 移除 IoT 重连成功监听。
+     */
+    fun removeOnReconnectedListener(listener: () -> Unit) {
+        CHIotManager.removeOnReconnectedListener(listener)
     }
 }

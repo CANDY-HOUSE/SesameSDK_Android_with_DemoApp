@@ -6,8 +6,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.net.ConnectivityManager
@@ -37,7 +40,9 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
+import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManagerPublic
+import co.candyhouse.sesame.server.dto.ensureSafeStateInfo
 import co.candyhouse.sesame.utils.L
 import co.utils.UserUtils
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.Collections
 
@@ -55,6 +61,18 @@ class SesameConnectedDeviceService : Service() {
     private var isForeground = false
     private var connectivityManager: ConnectivityManager? = null
     private var validatedNetwork: Network? = null
+    private var bluetoothStateReceiverRegistered = false
+    private val iotReconnectedListener = ::restoreWidgetStatesAfterIotReconnect
+
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
+            when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
+                BluetoothAdapter.STATE_OFF,
+                BluetoothAdapter.STATE_ON -> refreshWidgetsAfterTransportChanged("Bluetooth")
+            }
+        }
+    }
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(
@@ -65,19 +83,26 @@ class SesameConnectedDeviceService : Service() {
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
                         networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
             if (!isValidated) {
-                if (validatedNetwork == network) validatedNetwork = null
+                if (validatedNetwork == network) {
+                    validatedNetwork = null
+                    refreshWidgetsAfterTransportChanged("Network unavailable")
+                }
                 return
             }
             if (validatedNetwork == network) return
 
             validatedNetwork = network
+            refreshWidgetsAfterTransportChanged("Network available")
             if (widgetModeActive) {
                 CHIotManagerPublic.reconnectImmediatelyIfWaiting()
             }
         }
 
         override fun onLost(network: Network) {
-            if (validatedNetwork == network) validatedNetwork = null
+            if (validatedNetwork == network) {
+                validatedNetwork = null
+                refreshWidgetsAfterTransportChanged("Network lost")
+            }
         }
     }
 
@@ -88,10 +113,6 @@ class SesameConnectedDeviceService : Service() {
             shadowStatus: CHDeviceStatus?
         ) {
             handleDeviceState(device)
-            refreshWidget(device)
-        }
-
-        override fun onMechStatus(device: CHDevices) {
             refreshWidget(device)
         }
     }
@@ -105,6 +126,18 @@ class SesameConnectedDeviceService : Service() {
         }.onFailure {
             L.e(LOG_TAG, "Unable to observe network recovery", it)
         }
+        runCatching {
+            ContextCompat.registerReceiver(
+                this,
+                bluetoothStateReceiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED),
+                ContextCompat.RECEIVER_EXPORTED
+            )
+            bluetoothStateReceiverRegistered = true
+        }.onFailure {
+            L.e(LOG_TAG, "Unable to observe Bluetooth state", it)
+        }
+        CHIotManagerPublic.addOnReconnectedListener(iotReconnectedListener)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -214,6 +247,48 @@ class SesameConnectedDeviceService : Service() {
             devices,
             device.deviceId.toString()
         )
+    }
+
+    private fun refreshWidgetsAfterTransportChanged(source: String) {
+        if (MainActivity.activity != null || !widgetModeActive) return
+        L.d(LOG_TAG, "Refreshing widgets after $source changed")
+        SesameWidgetNotificationManager.refresh(this, devices)
+    }
+
+    private fun restoreWidgetStatesAfterIotReconnect() {
+        if (MainActivity.activity != null) return
+
+        val widgetDevices = devices.filter { it is CHSesameLock && it.getIsWidget() }
+        if (widgetDevices.isEmpty()) return
+
+        L.d(LOG_TAG, "Restoring ${widgetDevices.size} widget states after IoT reconnect")
+        CHAPIClientBiz.getDevicesList { result ->
+            result.onSuccess { response ->
+                val stateById = response.data.associateBy {
+                    it.deviceUUID.lowercase()
+                }
+                widgetDevices.forEach { device ->
+                    stateById[device.deviceId.toString().lowercase()]?.let { userKey ->
+                        CHDeviceManager.applyServerState(
+                            device,
+                            userKey.ensureSafeStateInfo().stateInfo
+                        )
+                    }
+                }
+
+                if (serviceScope.isActive &&
+                    MainActivity.activity == null &&
+                    widgetModeActive
+                ) {
+                    SesameWidgetNotificationManager.refresh(this, devices)
+                }
+
+                L.d(LOG_TAG, "Widget states restored after IoT reconnect")
+            }
+            result.onFailure { error ->
+                L.e(LOG_TAG, "Unable to restore widget states after IoT reconnect", error)
+            }
+        }
     }
 
     private fun handleWidgetAction(action: String?, currentDevices: List<CHDevices>) {
@@ -365,6 +440,11 @@ class SesameConnectedDeviceService : Service() {
     }
 
     override fun onDestroy() {
+        CHIotManagerPublic.removeOnReconnectedListener(iotReconnectedListener)
+        if (bluetoothStateReceiverRegistered) {
+            runCatching { unregisterReceiver(bluetoothStateReceiver) }
+            bluetoothStateReceiverRegistered = false
+        }
         runCatching {
             connectivityManager?.unregisterNetworkCallback(networkCallback)
         }

@@ -517,7 +517,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
     private fun updataTargetDevice(isChecked: Boolean, targetDevice: CHDevices?) {
         targetDevice?.apply {
-            mDeviceModel.updateWidgets(this.deviceId.toString())
+            mDeviceModel.updateWidgets()
         }
     }
 
