@@ -17,6 +17,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.connecteddevice.AutoUnlockGeofenceManager
+import co.candyhouse.app.ext.connecteddevice.SesameWidgetNotificationManager
 import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.chDeviceOrderComparator
@@ -25,6 +27,12 @@ import co.candyhouse.app.tabs.devices.ssm2.getIsWidget
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.getOrderKey
+import co.candyhouse.app.util.GuestUploadFlag
+import co.candyhouse.app.util.UserUtils
+import co.candyhouse.app.util.alertview.AlertView
+import co.candyhouse.app.util.alertview.enums.AlertStyle
+import co.candyhouse.app.util.getHistoryTag
+import co.candyhouse.app.util.isLockDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHSesameBot2
@@ -49,14 +57,6 @@ import co.candyhouse.sesame.utils.Event
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.isInternetAvailable
-import co.receiver.widget.AutoUnlockGeofenceManager
-import co.receiver.widget.SesameWidgetNotificationManager
-import co.utils.GuestUploadFlag
-import co.utils.UserUtils
-import co.utils.alertview.AlertView
-import co.utils.alertview.enums.AlertStyle
-import co.utils.getHistoryTag
-import co.utils.isLockDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO

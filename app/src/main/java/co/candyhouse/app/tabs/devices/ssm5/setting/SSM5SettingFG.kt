@@ -15,11 +15,11 @@ import co.candyhouse.app.tabs.devices.ssm2.setting.opsFindSettingIndexByValue
 import co.candyhouse.app.tabs.devices.ssm2.setting.opsGetSeconds
 import co.candyhouse.app.tabs.devices.ssm2.setting.opsSecondSettingValue
 import co.candyhouse.app.tabs.devices.ssm2.setting.secondSettingValue
+import co.candyhouse.app.util.safeNavigate
 import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.utils.L
-import co.utils.safeNavigate
 
 class SSM5SettingFG : BaseDeviceSettingFG<FgLockSettingBinding>() {
     override fun getViewBinder() = FgLockSettingBinding.inflate(layoutInflater)

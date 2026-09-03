@@ -73,20 +73,20 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <co.utils.SmartSwipeRefreshLayout
+        <co.candyhouse.app.util.SmartSwipeRefreshLayout
             android:id="@+id/swiperefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <co.utils.recycle.EmptyRecyclerView
+            <co.candyhouse.app.util.recycle.EmptyRecyclerView
                 android:id="@+id/leaderboard_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-        </co.utils.SmartSwipeRefreshLayout>
+        </co.candyhouse.app.util.SmartSwipeRefreshLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

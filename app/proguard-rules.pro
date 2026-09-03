@@ -1,5 +1,3 @@
--dontobfuscate
-
 -keepattributes SourceFile,LineNumberTable
 -keepattributes Signature
 -keepattributes *Annotation*
@@ -16,6 +14,10 @@
 }
 
 -keep class co.candyhouse.**.*Bridge { *; }
+
+-keepclassmembers,allowoptimization class co.candyhouse.sesame.open.devices.sesameBiometric.parseData.OpenSensorData {
+    <fields>;
+}
 
 -keep class no.nordicsemi.android.dfu.** { *; }
 

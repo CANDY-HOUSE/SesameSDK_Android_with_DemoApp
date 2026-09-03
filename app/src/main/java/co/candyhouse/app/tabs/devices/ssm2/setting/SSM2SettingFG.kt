@@ -8,10 +8,10 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgLockSettingBinding
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
+import co.candyhouse.app.util.safeNavigate
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
-import co.utils.safeNavigate
 
 class SSM2SettingFG : BaseDeviceSettingFG<FgLockSettingBinding>() {
     override fun getViewBinder() = FgLockSettingBinding.inflate(layoutInflater)

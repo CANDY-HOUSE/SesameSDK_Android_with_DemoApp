@@ -70,10 +70,10 @@ import co.candyhouse.app.ext.webview.manager.WebViewCore.cleanupWebView
 import co.candyhouse.app.ext.webview.manager.WebViewSafeInitializer.isWebViewAvailable
 import co.candyhouse.app.ext.webview.manager.WebViewUrlLoader.rememberWebUrl
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
+import co.candyhouse.app.util.AnalyticsUtil
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.utils.AnalyticsUtil
 import java.io.File
 
 /**

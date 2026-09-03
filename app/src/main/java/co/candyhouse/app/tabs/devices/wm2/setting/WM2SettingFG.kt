@@ -16,6 +16,13 @@ import co.candyhouse.app.databinding.FgWm2SettingBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getIsJustRegister
 import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
+import co.candyhouse.app.util.alertview.AlertView
+import co.candyhouse.app.util.alertview.enums.AlertActionStyle
+import co.candyhouse.app.util.alertview.enums.AlertStyle
+import co.candyhouse.app.util.alertview.fragments.toastMSG
+import co.candyhouse.app.util.alertview.objects.AlertAction
+import co.candyhouse.app.util.recycle.GenericAdapter
+import co.candyhouse.app.util.safeNavigate
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleStatusDelegate
 import co.candyhouse.sesame.open.CHScanStatus
@@ -28,13 +35,6 @@ import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.utils.alertview.AlertView
-import co.utils.alertview.enums.AlertActionStyle
-import co.utils.alertview.enums.AlertStyle
-import co.utils.alertview.fragments.toastMSG
-import co.utils.alertview.objects.AlertAction
-import co.utils.recycle.GenericAdapter
-import co.utils.safeNavigate
 
 class WM2SettingFG : BaseDeviceFG<FgWm2SettingBinding>(), CHWifiModule2Delegate, BleStatusUpdate {
 

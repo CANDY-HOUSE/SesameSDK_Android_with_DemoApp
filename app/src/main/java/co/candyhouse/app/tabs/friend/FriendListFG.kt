@@ -6,7 +6,7 @@ import android.view.View
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgFriendListBinding
 import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
-import co.utils.safeNavigate
+import co.candyhouse.app.util.safeNavigate
 
 class FriendListFG : BaseNativeWebViewFragment<FgFriendListBinding>() {
 

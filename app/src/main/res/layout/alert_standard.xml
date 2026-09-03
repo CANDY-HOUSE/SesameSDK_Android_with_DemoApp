@@ -26,7 +26,7 @@
         tools:text="Titulo" />
 
 
-    <co.utils.materialtextfield.MaterialTextField
+    <co.candyhouse.app.util.materialtextfield.MaterialTextField
 
         android:id="@+id/etInput"
         android:layout_width="match_parent"
@@ -62,7 +62,7 @@
         android:textColor="@color/text_hint"
         android:textSize="12sp" />
 
-    <co.utils.materialtextfield.MaterialTextField
+    <co.candyhouse.app.util.materialtextfield.MaterialTextField
         android:layout_marginTop="10dp"
         android:id="@+id/etInput__2"
         android:layout_width="match_parent"

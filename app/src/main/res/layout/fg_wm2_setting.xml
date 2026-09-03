@@ -210,7 +210,6 @@
                                 android:id="@+id/aping_icon"
                                 android:layout_width="21dp"
                                 android:layout_height="21dp"
-                                android:src="@drawable/earth"
                                 android:visibility="invisible" />
                         </RelativeLayout>
 
@@ -265,7 +264,6 @@
 
                                 android:layout_width="21dp"
                                 android:layout_height="21dp"
-                                android:src="@drawable/earth"
                                 android:visibility="invisible" />
 
                             <View

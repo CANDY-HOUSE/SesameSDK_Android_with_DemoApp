@@ -1,7 +1,7 @@
 package co.candyhouse.app.ext.webview.data
 
 import android.os.Bundle
-import co.utils.getSerializableCompat
+import co.candyhouse.app.util.getSerializableCompat
 
 /**
  * WebView 参数配置

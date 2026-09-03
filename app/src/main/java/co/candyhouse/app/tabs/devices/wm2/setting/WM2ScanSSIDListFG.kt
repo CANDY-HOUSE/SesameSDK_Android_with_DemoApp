@@ -12,13 +12,13 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgWm2ScanListBinding
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.app.util.alerts.ext.alert
+import co.candyhouse.app.util.alerts.ext.inputTextAlert
+import co.candyhouse.app.util.recycle.GenericAdapter
+import co.candyhouse.app.util.safeNavigateBack
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.utils.L
-import co.utils.alerts.ext.alert
-import co.utils.alerts.ext.inputTextAlert
-import co.utils.recycle.GenericAdapter
-import co.utils.safeNavigateBack
 
 
 class WM2ScanSSIDListFG : BaseDeviceFG<FgWm2ScanListBinding>(), CHWifiModule2Delegate {

@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgNoHandBinding
+import co.candyhouse.app.ext.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.tabs.MainActivity
 import co.candyhouse.app.tabs.devices.ssm2.getIsNOHand
 import co.candyhouse.app.tabs.devices.ssm2.getNOHandLeft
@@ -18,8 +19,7 @@ import co.candyhouse.app.tabs.devices.ssm2.setIsNOHandG
 import co.candyhouse.app.tabs.devices.ssm2.setNOHandLeft
 import co.candyhouse.app.tabs.devices.ssm2.setNOHandRadius
 import co.candyhouse.app.tabs.devices.ssm2.setNOHandRight
-import co.receiver.widget.AutoUnlockGeofenceManager
-import co.utils.getLastKnownLocation
+import co.candyhouse.app.util.getLastKnownLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback

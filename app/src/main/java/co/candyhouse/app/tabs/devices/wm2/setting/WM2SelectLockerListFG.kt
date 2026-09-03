@@ -9,6 +9,7 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceFG
 import co.candyhouse.app.databinding.FgWm2SelectLockerListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
+import co.candyhouse.app.util.recycle.GenericAdapter
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.CHSesameBike
@@ -17,7 +18,6 @@ import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.open.devices.CHWifiModule2Delegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.utils.recycle.GenericAdapter
 
 class WM2SelectLockerListFG : BaseDeviceFG<FgWm2SelectLockerListBinding>(), CHWifiModule2Delegate {
 

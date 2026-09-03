@@ -16,7 +16,7 @@
 
     </RelativeLayout>
 
-    <co.utils.SmartSwipeRefreshLayout
+    <co.candyhouse.app.util.SmartSwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -258,5 +258,5 @@
                     tools:text="@string/drop_hint" />
             </LinearLayout>
         </ScrollView>
-    </co.utils.SmartSwipeRefreshLayout>
+    </co.candyhouse.app.util.SmartSwipeRefreshLayout>
 </LinearLayout>

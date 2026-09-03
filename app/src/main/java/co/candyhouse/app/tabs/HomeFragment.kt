@@ -22,7 +22,7 @@ import co.candyhouse.app.base.view.IBaseView
 import co.candyhouse.app.tabs.menu.BarMenuItem
 import co.candyhouse.app.tabs.menu.CustomAdapter
 import co.candyhouse.app.tabs.menu.ItemUtils
-import co.utils.safeNavigate
+import co.candyhouse.app.util.safeNavigate
 
 abstract class HomeFragment<T : ViewBinding> : BaseNFG<T>(), IBaseView {
     private var customListPopup: PopupWindow? = null

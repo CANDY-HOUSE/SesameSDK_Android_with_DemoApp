@@ -8,13 +8,13 @@ import androidx.preference.PreferenceManager
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.ext.AppLifecycleObserver
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.push.TopicSubscriptionManager
 import co.candyhouse.app.ext.webview.manager.WebViewSafeInitializer
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.AppIdentifyIdUtil
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.TopicSubscriptionManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

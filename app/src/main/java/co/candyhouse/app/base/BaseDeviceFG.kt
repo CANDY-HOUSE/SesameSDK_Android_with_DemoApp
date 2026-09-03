@@ -10,9 +10,9 @@ import co.candyhouse.app.R
 import co.candyhouse.app.ext.DfuCenter
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
+import co.candyhouse.app.util.applyBottomInsets
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.base.CHDevices
-import co.utils.applyBottomInsets
 import com.google.android.material.snackbar.Snackbar
 
 abstract class BaseDeviceFG<T : ViewBinding> : BaseNFG<T>(), DfuCenter.Delegate {

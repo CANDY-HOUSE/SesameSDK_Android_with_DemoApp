@@ -11,6 +11,8 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmTpCardListBinding
 import co.candyhouse.app.ext.BotScriptStore
+import co.candyhouse.app.util.alerts.ext.inputTextAlert
+import co.candyhouse.app.util.recycle.GenericAdapter
 import co.candyhouse.sesame.open.devices.Bot2Action
 import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.server.CHAPIClientBiz
@@ -18,8 +20,6 @@ import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.toHexString
-import co.utils.alerts.ext.inputTextAlert
-import co.utils.recycle.GenericAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.weigan.loopview.LoopView
 import java.util.Collections

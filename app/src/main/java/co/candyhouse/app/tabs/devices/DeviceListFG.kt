@@ -16,6 +16,10 @@ import co.candyhouse.app.tabs.HomeFragment
 import co.candyhouse.app.tabs.devices.internal.InternalTestBottomSheet
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.app.util.recycle.DeviceListAdapter
+import co.candyhouse.app.util.recycle.GenericAdapter
+import co.candyhouse.app.util.recycle.SimpleItemTouchHelperCallback
+import co.candyhouse.app.util.safeNavigate
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.base.CHDevices
@@ -23,10 +27,6 @@ import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.dto.IrRemote
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.observeEvent
-import co.utils.recycle.DeviceListAdapter
-import co.utils.recycle.GenericAdapter
-import co.utils.recycle.SimpleItemTouchHelperCallback
-import co.utils.safeNavigate
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import kotlinx.coroutines.Job

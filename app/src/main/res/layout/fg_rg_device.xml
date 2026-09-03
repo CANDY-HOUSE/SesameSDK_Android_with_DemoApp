@@ -20,7 +20,7 @@
         android:layout_height="53dp"
         android:layout_below="@+id/top_back_img" />
 
-    <co.utils.recycle.EmptyRecyclerView
+    <co.candyhouse.app.util.recycle.EmptyRecyclerView
         android:id="@+id/leaderboard_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

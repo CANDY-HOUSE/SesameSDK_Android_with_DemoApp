@@ -86,11 +86,11 @@
             </intent-filter>
         </service>
         <service
-            android:name="co.receiver.widget.SesameConnectedDeviceService"
+            android:name=".ext.connecteddevice.SesameConnectedDeviceService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
         <service
-            android:name="co.receiver.SesameFirebaseMessagingService"
+            android:name=".ext.push.SesameFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -99,10 +99,10 @@
 
         <!--注册广播-->
         <receiver
-            android:name="co.receiver.widget.AutoUnlockGeofenceReceiver"
+            android:name=".ext.connecteddevice.AutoUnlockGeofenceReceiver"
             android:exported="false" />
         <receiver
-            android:name="co.receiver.widget.AutoUnlockBootReceiver"
+            android:name=".ext.connecteddevice.AutoUnlockBootReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

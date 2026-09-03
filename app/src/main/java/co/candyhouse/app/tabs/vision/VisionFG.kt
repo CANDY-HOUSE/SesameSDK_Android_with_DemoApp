@@ -6,7 +6,7 @@ import android.view.View
 import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgVisionBinding
 import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
-import co.utils.safeNavigate
+import co.candyhouse.app.util.safeNavigate
 
 class VisionFG : BaseNativeWebViewFragment<FgVisionBinding>() {
 

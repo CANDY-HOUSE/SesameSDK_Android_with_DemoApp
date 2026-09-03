@@ -12,6 +12,7 @@ import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmBikeBot2settingBinding
 import co.candyhouse.app.ext.BotScriptStore
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.app.util.alertview.fragments.toastMSG
 import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.open.devices.base.CHDeviceLoginStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
@@ -21,7 +22,6 @@ import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.BotScriptRequest
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.utils.alertview.fragments.toastMSG
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

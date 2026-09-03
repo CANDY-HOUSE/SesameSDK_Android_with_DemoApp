@@ -75,13 +75,13 @@
         android:text="@string/TouchEmptyPasscodeHint"
         android:textSize="18sp" />
 
-    <co.utils.SmartSwipeRefreshLayout
+    <co.candyhouse.app.util.SmartSwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/empty_view">
 
-        <co.utils.recycle.EmptyRecyclerView
+        <co.candyhouse.app.util.recycle.EmptyRecyclerView
             android:id="@+id/leaderboard_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -91,6 +91,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-    </co.utils.SmartSwipeRefreshLayout>
+    </co.candyhouse.app.util.SmartSwipeRefreshLayout>
 
 </RelativeLayout>

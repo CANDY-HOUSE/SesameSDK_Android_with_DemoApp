@@ -18,12 +18,12 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FgWm2ScanListBinding
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
+import co.candyhouse.app.util.alerts.ext.inputTextAlert
+import co.candyhouse.app.util.recycle.GenericAdapter
 import co.candyhouse.sesame.open.devices.CHHub3
 import co.candyhouse.sesame.open.devices.CHHub3Delegate
 import co.candyhouse.sesame.open.devices.CHWifiModule2
 import co.candyhouse.sesame.utils.L
-import co.utils.alerts.ext.inputTextAlert
-import co.utils.recycle.GenericAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

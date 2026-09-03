@@ -4,7 +4,7 @@
     style="@style/MatchMatch"
     android:background="@color/black">
 
-    <cn.bingoogolapple.qrcode.zxing.ZXingView
+    <co.candyhouse.app.util.qrcode.zxing.ZXingView
         android:id="@+id/zxingview"
         style="@style/MatchMatch"
         android:visibility="gone"
@@ -86,5 +86,4 @@
     </FrameLayout>
 
 </RelativeLayout>
-
 

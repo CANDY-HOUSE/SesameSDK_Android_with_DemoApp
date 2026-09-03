@@ -13,21 +13,21 @@ import co.candyhouse.app.databinding.FgMeBinding
 import co.candyhouse.app.ext.CHDeviceWrapperManager
 import co.candyhouse.app.ext.aws.AWSLoginState
 import co.candyhouse.app.ext.aws.AWSStatus
+import co.candyhouse.app.ext.connecteddevice.AutoUnlockGeofenceManager
+import co.candyhouse.app.ext.connecteddevice.SesameConnectedDeviceService
+import co.candyhouse.app.ext.connecteddevice.SesameWidgetNotificationManager
 import co.candyhouse.app.ext.webview.BaseNativeWebViewFragment
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.model.CHLoginViewModel
+import co.candyhouse.app.util.GuestUploadFlag
+import co.candyhouse.app.util.UserUtils
+import co.candyhouse.app.util.safeNavigate
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.base.CHSesameLock
 import co.candyhouse.sesame.server.CHIotManagerPublic
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
-import co.receiver.widget.AutoUnlockGeofenceManager
-import co.receiver.widget.SesameConnectedDeviceService
-import co.receiver.widget.SesameWidgetNotificationManager
-import co.utils.GuestUploadFlag
-import co.utils.UserUtils
-import co.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

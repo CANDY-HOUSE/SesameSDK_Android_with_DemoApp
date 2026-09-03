@@ -16,8 +16,8 @@ import co.candyhouse.app.ext.webview.bridge.WebViewJSBridge
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.ext.webview.manager.WebViewUrlLoader
 import co.candyhouse.app.tabs.HomeFragment
+import co.candyhouse.app.util.alertview.fragments.toastMSG
 import co.candyhouse.sesame.utils.L
-import co.utils.alertview.fragments.toastMSG
 import kotlinx.coroutines.GlobalScope
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap

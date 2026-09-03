@@ -26,13 +26,13 @@ import co.candyhouse.app.R
 import co.candyhouse.app.databinding.FragmentInternalTestSheetBinding
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.app.util.FirmwareDir
+import co.candyhouse.app.util.UserUtils
 import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.utils.L
-import co.utils.FirmwareDir
-import co.utils.UserUtils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

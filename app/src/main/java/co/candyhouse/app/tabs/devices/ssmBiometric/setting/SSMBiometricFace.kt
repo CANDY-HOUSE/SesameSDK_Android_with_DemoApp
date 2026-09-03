@@ -11,6 +11,15 @@ import co.candyhouse.app.R
 import co.candyhouse.app.base.BaseDeviceSettingFG
 import co.candyhouse.app.databinding.FgSsmFaceFacesListBinding
 import co.candyhouse.app.tabs.devices.ssm2.modelName
+import co.candyhouse.app.util.UserUtils
+import co.candyhouse.app.util.alerts.ext.inputTextAlert
+import co.candyhouse.app.util.alertview.AlertView
+import co.candyhouse.app.util.alertview.enums.AlertActionStyle
+import co.candyhouse.app.util.alertview.enums.AlertStyle
+import co.candyhouse.app.util.alertview.fragments.toastMSG
+import co.candyhouse.app.util.alertview.objects.AlertAction
+import co.candyhouse.app.util.hexStringToByteArray
+import co.candyhouse.app.util.recycle.GenericAdapter
 import co.candyhouse.sesame.open.devices.CHSesameBiometricDevice
 import co.candyhouse.sesame.open.devices.base.CHDevices
 import co.candyhouse.sesame.open.devices.base.CHProductModel
@@ -21,15 +30,6 @@ import co.candyhouse.sesame.server.dto.AuthenticationData
 import co.candyhouse.sesame.server.dto.AuthenticationDataWrapper
 import co.candyhouse.sesame.server.dto.CHAuthenticationNameRequest
 import co.candyhouse.sesame.utils.L
-import co.utils.UserUtils
-import co.utils.alerts.ext.inputTextAlert
-import co.utils.alertview.AlertView
-import co.utils.alertview.enums.AlertActionStyle
-import co.utils.alertview.enums.AlertStyle
-import co.utils.alertview.fragments.toastMSG
-import co.utils.alertview.objects.AlertAction
-import co.utils.hexStringToByteArray
-import co.utils.recycle.GenericAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

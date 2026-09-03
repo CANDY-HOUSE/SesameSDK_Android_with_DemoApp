@@ -21,6 +21,10 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setIsJustRegister
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
+import co.candyhouse.app.util.alertview.fragments.toastMSG
+import co.candyhouse.app.util.getHistoryTag
+import co.candyhouse.app.util.recycle.GenericAdapter
+import co.candyhouse.app.util.safeNavigate
 import co.candyhouse.sesame.open.CHBleManager
 import co.candyhouse.sesame.open.CHBleManagerDelegate
 import co.candyhouse.sesame.open.CHBleStatusDelegate
@@ -40,10 +44,6 @@ import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.CHApiException
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
-import co.utils.alertview.fragments.toastMSG
-import co.utils.getHistoryTag
-import co.utils.recycle.GenericAdapter
-import co.utils.safeNavigate
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import pub.devrel.easypermissions.EasyPermissions
 

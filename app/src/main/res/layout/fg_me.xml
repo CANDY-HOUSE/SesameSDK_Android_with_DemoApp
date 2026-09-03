@@ -27,7 +27,7 @@
 
     </RelativeLayout>
 
-    <co.utils.SmartSwipeRefreshLayout
+    <co.candyhouse.app.util.SmartSwipeRefreshLayout
         android:id="@+id/me_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -50,5 +50,5 @@
 
         </RelativeLayout>
 
-    </co.utils.SmartSwipeRefreshLayout>
+    </co.candyhouse.app.util.SmartSwipeRefreshLayout>
 </LinearLayout>

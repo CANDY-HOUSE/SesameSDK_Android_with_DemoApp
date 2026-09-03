@@ -10,6 +10,8 @@ import co.candyhouse.app.ext.userKey
 import co.candyhouse.app.tabs.devices.model.bindLifecycle
 import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
+import co.candyhouse.app.util.UserUtils
+import co.candyhouse.app.util.vibrateDevice
 import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.CHSesame2
 import co.candyhouse.sesame.open.devices.CHSesame5
@@ -21,8 +23,6 @@ import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
-import co.utils.UserUtils
-import co.utils.vibrateDevice
 import java.text.NumberFormat
 import kotlin.math.abs
 import kotlin.math.roundToInt

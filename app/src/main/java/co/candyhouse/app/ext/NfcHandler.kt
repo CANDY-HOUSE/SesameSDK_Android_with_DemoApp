@@ -8,8 +8,8 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.nfc.tech.NfcA
+import co.candyhouse.app.util.getParcelableExtraCompat
 import co.candyhouse.sesame.utils.L
-import co.utils.getParcelableExtraCompat
 
 object NfcHandler {
     fun nfcCheckInetent(intent: Intent?) {

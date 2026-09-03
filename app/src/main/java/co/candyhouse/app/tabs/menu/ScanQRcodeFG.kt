@@ -12,7 +12,6 @@ import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import cn.bingoogolapple.qrcode.core.QRCodeView
 import co.candyhouse.app.R
 import co.candyhouse.app.base.setPage
 import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
@@ -23,6 +22,13 @@ import co.candyhouse.app.tabs.devices.ssm2.getLevel
 import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.tabs.devices.ssm2.setLevel
 import co.candyhouse.app.tabs.devices.ssm2.setNickname
+import co.candyhouse.app.util.alertview.fragments.toastMSG
+import co.candyhouse.app.util.base64decodeHex
+import co.candyhouse.app.util.getHistoryTag
+import co.candyhouse.app.util.hexStringToByteArray
+import co.candyhouse.app.util.noHashtoUUID
+import co.candyhouse.app.util.qrcode.core.QRCodeView
+import co.candyhouse.app.util.toHexString
 import co.candyhouse.sesame.BaseFG
 import co.candyhouse.sesame.db.model.CHDevice
 import co.candyhouse.sesame.open.CHDeviceManager
@@ -30,12 +36,6 @@ import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.CHAPIClientBiz
 import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
-import co.utils.alertview.fragments.toastMSG
-import co.utils.base64decodeHex
-import co.utils.getHistoryTag
-import co.utils.hexStringToByteArray
-import co.utils.noHashtoUUID
-import co.utils.toHexString
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.MultiFormatReader
