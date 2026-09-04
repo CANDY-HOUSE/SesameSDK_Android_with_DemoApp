@@ -15,8 +15,8 @@
 
 -keep class co.candyhouse.**.*Bridge { *; }
 
--keepclassmembers,allowoptimization class co.candyhouse.sesame.open.devices.sesameBiometric.parseData.OpenSensorData {
-    <fields>;
+-keep class co.candyhouse.sesame.open.devices.sesameBiometric.parseData.OpenSensorData {
+    *;
 }
 
 -keep class no.nordicsemi.android.dfu.** { *; }

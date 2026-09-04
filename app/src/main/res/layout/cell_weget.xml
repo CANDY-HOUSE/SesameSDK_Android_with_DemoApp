@@ -8,29 +8,27 @@
     <Button
         android:id="@+id/open_all"
         style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_marginStart="16dp"
-        android:text="@string/WigetOpenAll"
-
-
+        android:layout_marginEnd="6dp"
+        android:layout_weight="1"
         android:background="@drawable/round_red_unlock_all"
+        android:text="@string/WigetOpenAll"
         android:textColor="@color/lock_red"
         android:textSize="16sp" />
 
     <Button
         android:id="@+id/close_all"
         style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:layout_alignParentEnd="true"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="16dp"
+        android:layout_weight="1"
         android:background="@drawable/round_blue_lock_all"
-        android:textColor="@color/unlock_blue"
         android:text="@string/WigetCloseAll"
+        android:textColor="@color/unlock_blue"
         android:textSize="16sp" />
-
 
 </LinearLayout>
