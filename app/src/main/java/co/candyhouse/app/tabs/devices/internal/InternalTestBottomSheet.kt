@@ -32,6 +32,7 @@ import co.candyhouse.sesame.open.devices.CHSesame5
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
+import co.candyhouse.sesame.utils.AppIdentifyIdUtil
 import co.candyhouse.sesame.utils.L
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -124,6 +125,8 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
         refreshSubtitle()
         refreshStats()
         refreshButtonState()
+
+        binding.appIdentifyId.text = AppIdentifyIdUtil.get(requireContext())
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

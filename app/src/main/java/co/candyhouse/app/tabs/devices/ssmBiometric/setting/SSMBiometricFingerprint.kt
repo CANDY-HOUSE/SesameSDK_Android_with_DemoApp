@@ -33,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-
 data class FingerPrint(var id: String, var name: String, var type: Byte, var fingerPrintNameUUID: String)
 
 class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
@@ -43,6 +42,14 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
     private val tag = "SSMTouchProFingerprint"
     private val operationType = "fingerprint"
 
+    private fun runOnFingerprintUiThread(action: () -> Unit) {
+        val currentView = view ?: return
+        activity?.runOnUiThread {
+            if (isAdded && !isDetached && view === currentView) {
+                action()
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -101,9 +108,7 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
      * 更新模式UI
      */
     private fun updateModeUI(mode: Byte) {
-        if (!isAdded) return
-
-        view?.post {
+        runOnFingerprintUiThread {
             if (mode.toInt() == 2) {
                 bind.imgModeAdd.visibility = View.GONE
                 bind.imgModeVerify.visibility = View.VISIBLE
@@ -148,19 +153,19 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
     private fun executeFingerPrintNameSet(data: FingerPrint, name: String, deviceUUID: String) {
         val fingerPrintNameRequest = CHAuthenticationNameRequest.fingerPrint(
             fingerPrintNameUUID = data.fingerPrintNameUUID,
-            subUUID = UserUtils.getUserId() ?:"",
+            subUUID = UserUtils.getUserId() ?: "",
             stpDeviceUUID = deviceUUID,
             name = name,
             fingerPrintID = data.id,
             type = data.type,
         )
-        getFingerPrintCapable()?.getFingerPrintDataSyncCapable()?.updateAuthenticationName(fingerPrintNameRequest){result ->
+        getFingerPrintCapable()?.getFingerPrintDataSyncCapable()?.updateAuthenticationName(fingerPrintNameRequest) { result ->
             result.onSuccess {
                 val res = it.data
                 L.d(tag, "updateAuthenticationName: $res")
                 if (it.data == "Ok") {
                     data.name = name
-                    runOnUiThread { updateFingerprintList(data) }
+                    runOnFingerprintUiThread { updateFingerprintList(data) }
                 } else {
                     lifecycleScope.launch(Dispatchers.Main) { toastMSG(it.data) }
                 }
@@ -177,7 +182,7 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
     private fun createFingerPrintDelegate(): CHFingerPrintDelegate {
         return object : CHFingerPrintDelegate {
             override fun onFingerPrintReceiveStart(device: CHDevices) {
-                runOnUiThread {
+                runOnFingerprintUiThread {
                     mFingers.clear()
                     bind.swiperefresh.isRefreshing = true
                 }
@@ -190,7 +195,7 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
                 type: Byte
             ) {
                 // 直接显示从BLE得到的指纹。收完数据后，批量获取指纹名称
-                runOnUiThread {
+                runOnFingerprintUiThread {
                     mFingers.remove(mFingers.find { it.id == ID })
                     if ((hexName.length == 32) && hexName.isUUIDv4()) { // 是 uuid 格式的名字
                         mFingers.add(0, FingerPrint(ID, getString(R.string.default_fingerprint_name), type, hexName.noHashtoUUID().toString()))
@@ -203,7 +208,7 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
             }
 
             override fun onFingerPrintReceiveEnd(device: CHDevices) {
-                runOnUiThread {
+                runOnFingerprintUiThread {
                     bind.swiperefresh.isRefreshing = false
                     updateFingerPrintList()
                     isUpload = true
@@ -217,13 +222,13 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
                 hexName: String,
                 type: Byte
             ) {
-                val newFingerprint = if ((hexName.length == 32) && hexName.isUUIDv4()) {
-                    FingerPrint(ID, getString(R.string.default_fingerprint_name), type, hexName.noHashtoUUID().toString())
-                } else {
-                    val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
-                    FingerPrint(ID, matchName, type, matchName)
-                }
-                runOnUiThread {
+                runOnFingerprintUiThread {
+                    val newFingerprint = if ((hexName.length == 32) && hexName.isUUIDv4()) {
+                        FingerPrint(ID, getString(R.string.default_fingerprint_name), type, hexName.noHashtoUUID().toString())
+                    } else {
+                        val matchName = hexName.chunked(2).map { it.toInt(16).toByte() }.toByteArray().toString(Charsets.UTF_8)
+                        FingerPrint(ID, matchName, type, matchName)
+                    }
                     updateFingerprintList(newFingerprint)
                     addFingerprintToServer(ID, newFingerprint.fingerPrintNameUUID, type)
                 }
@@ -235,13 +240,13 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
 
             override fun onFingerDelete(device: CHDevices, ID: String) {
                 L.d("hcia", "onFingerDelete : $ID")
-                val fingerprint = mFingers.find { it.id.toInt(16) == ID.toInt(16) }
-                if (fingerprint != null) {
-                    runOnUiThread {
+                runOnFingerprintUiThread {
+                    val fingerprint = mFingers.find { it.id.toInt(16) == ID.toInt(16) }
+                    if (fingerprint != null) {
                         mFingers.remove(fingerprint)
                         updateFingerPrintList()
+                        deleteFingerprintFromServer(fingerprint)
                     }
-                    deleteFingerprintFromServer(fingerprint)
                 }
 
             }
@@ -321,7 +326,7 @@ class SSMTouchProFingerprint : BaseDeviceSettingFG<FgSsmTpFpListBinding>() {
                         resultFingerprintList.add(FingerPrint(it.credentialId, it.name, it.type, it.nameUUID))
                     }
                     if (res.isNotEmpty()) {
-                        runOnUiThread {
+                        runOnFingerprintUiThread {
                             mFingers.clear()
                             mFingers.addAll(resultFingerprintList)
                             updateFingerPrintList()

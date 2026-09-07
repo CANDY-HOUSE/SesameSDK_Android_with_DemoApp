@@ -17,13 +17,19 @@ class CHDataSynchronizeCapableImpl : CHDataSynchronizeCapable {
         request.operation += "_post"
         CHAPIClientBiz.postCredentialListToServer(request) { it ->
             it.onSuccess {
-                val res = it.data
-                val jsonString = Gson().toJson(res)
-                val responses = Gson().fromJson(jsonString, CredentialListResponse::class.java)
-                result.invoke(Result.success(CHResultState.CHResultStateNetworks(responses.data.items)))
+                val parsedResult = runCatching {
+                    val jsonString = Gson().toJson(it.data)
+                    val responses = Gson().fromJson(jsonString, CredentialListResponse::class.java)
+                    val items = requireNotNull(responses?.data?.items) {
+                        "Invalid credential list response: missing data.items"
+                    }
+                    CHResultState.CHResultStateNetworks(items)
+                }
+                result.invoke(parsedResult)
             }
             it.onFailure {
                 L.d("CHFaceCapableImpl", "Error: ${it.message}")
+                result.invoke(Result.failure(it))
             }
         }
     }

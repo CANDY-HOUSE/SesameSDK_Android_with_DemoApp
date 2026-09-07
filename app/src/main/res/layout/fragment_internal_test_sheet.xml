@@ -149,4 +149,19 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="AppIdentifyId"
+        android:textColor="#333333"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/appIdentifyId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
 </LinearLayout>
