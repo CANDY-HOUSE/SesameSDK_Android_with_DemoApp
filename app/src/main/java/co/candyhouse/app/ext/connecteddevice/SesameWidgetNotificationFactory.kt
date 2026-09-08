@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.PowerManager
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -74,11 +75,13 @@ object SesameWidgetNotificationFactory {
             R.id.wifi_img,
             if (locker.deviceShadowStatus?.value == CHDeviceLoginStatus.logined) R.drawable.ic_wifi_blue else R.drawable.ic_wifi_grey
         )
-        val autounlockResouse =
-            if (locker.getIsNOHandG()) R.drawable.ic_autounlock_active else R.drawable.ic_autounlock
         notificationLayout.setImageViewResource(
             R.id.hand_img,
-            if (locker.getIsNOHand()) autounlockResouse else R.drawable.ic_autounlock_no
+            if (locker.getIsNOHandG()) R.drawable.ic_autounlock_active else R.drawable.ic_autounlock
+        )
+        notificationLayout.setViewVisibility(
+            R.id.hand_img,
+            if (locker.getIsNOHand()) View.VISIBLE else View.GONE
         )
         if (!isScreenOn(context)) {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
