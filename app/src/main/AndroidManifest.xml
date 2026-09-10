@@ -63,8 +63,6 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -74,6 +72,25 @@
 
             <nav-graph android:value="@navigation/devices_ng" />
         </activity>
+
+        <activity
+            android:name=".shortcut.ShortcutCreateActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme.FlatDialog">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!--exported for MacroDroid-style automation apps to replay the saved shortcut Intent; SesameShortcutAuth's per-install KeyStore token is what actually gates execution.-->
+        <activity
+            android:name=".shortcut.ShortcutExecuteActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/AppTheme.ShortcutExecutor" />
 
         <!--注册服务-->
         <service

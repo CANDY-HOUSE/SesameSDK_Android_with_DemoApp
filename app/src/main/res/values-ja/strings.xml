@@ -242,4 +242,15 @@
     <string name="dBm">dBm</string>
     <string name="set_switch_point_position">施解錠の境界を固定する</string>
     <string name="dfu_busy">他のCANDY HOUSE製品を更新中、お待ち下さいませ。</string>
+
+    <string name="shortcut_choose_device">SESAMEデバイスを選択</string>
+    <string name="shortcut_no_supported_devices">ショートカットに対応するSESAMEデバイスがありません。</string>
+    <string name="shortcut_load_devices_failed">SESAMEデバイスを読み込めませんでした。</string>
+    <string name="shortcut_invalid_device">このデバイスはショートカットに使用できません。</string>
+    <string name="shortcut_execution_failed">SESAMEデバイスを操作できませんでした。</string>
+    <string name="shortcut_action_lock">施錠</string>
+    <string name="shortcut_action_unlock">解錠</string>
+    <string name="shortcut_action_toggle">トグル</string>
+    <string name="shortcut_action_click">クリック</string>
+    <string name="shortcut_label_format">%1$s：%2$s</string>
 </resources>
