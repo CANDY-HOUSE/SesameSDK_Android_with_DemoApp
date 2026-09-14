@@ -363,7 +363,8 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
             CHProductModel.Remote, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.SSMTouchPro,
             CHProductModel.SSMTouch2Pro, CHProductModel.SSMFace, CHProductModel.SSMFace2, CHProductModel.SSMFaceAI,
             CHProductModel.SSMFace2AI, CHProductModel.SSMFacePro, CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceProAI,
-            CHProductModel.SSMFace2ProAI -> safeNavigate(R.id.to_SesameConnectorSettingFG)
+            CHProductModel.SSMFace2ProAI, CHProductModel.SSMFace3 -> safeNavigate(R.id.to_SesameConnectorSettingFG)
+
         }
     }
 

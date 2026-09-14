@@ -232,7 +232,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                 this == CHProductModel.Remote || this == CHProductModel.RemoteNano || this == CHProductModel.SS5US || this == CHProductModel.SesameBot2 || this == CHProductModel.SesameBot3 ||
                 this == CHProductModel.SSMFacePro || this == CHProductModel.SSMFace2Pro || this == CHProductModel.SSMFaceProAI || this == CHProductModel.SSMFace2ProAI || this == CHProductModel.SSMFaceAI || this == CHProductModel.SSMFace2AI || this == CHProductModel.SS6 ||
                 this == CHProductModel.SS6Pro ||this == CHProductModel.SS6ProSlidingDoor || this == CHProductModel.Hub3 || this == CHProductModel.SSMFace || this == CHProductModel.SSMFace2 || this == CHProductModel.SSMOpenSensor2 || this == CHProductModel.SSMOpenSensor ||
-                this == CHProductModel.SSM_MIWA || this == CHProductModel.Hub3_LTE
+                this == CHProductModel.SSM_MIWA || this == CHProductModel.Hub3_LTE || this == CHProductModel.SSMFace3
     }
 
     override fun onDestroy() {
@@ -249,8 +249,8 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
             e.printStackTrace()
         }
     }
-
     private fun handleValidModel(keyData: ByteArray, level: String?, customName: String?) {
+        val devModel = CHProductModel.getByValue(keyData[0].toInt())
         val modelStr = CHProductModel.getByValue(keyData[0].toInt())?.deviceModel()!!
         val secretHex = keyData.sliceArray(1..16).toHexString()
         val pubHex = keyData.sliceArray(17..20).toHexString()
@@ -271,7 +271,7 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                     if (isAdded && !isDetached) {
                         findNavController().navigateUp()
                         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-                            ?.setPage(0)
+                            ?.setPage(if (devModel == CHProductModel.SSMFace3) 1 else 0)
                     }
                 }
             },
