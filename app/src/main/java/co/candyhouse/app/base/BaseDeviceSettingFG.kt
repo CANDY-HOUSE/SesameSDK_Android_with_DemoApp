@@ -202,7 +202,7 @@ abstract class BaseDeviceSettingFG<T : ViewBinding> : BaseDeviceFG<T>(), NfcSett
 
     @SuppressLint("SetTextI18n")
     private fun versionSet(targetDevice: CHDevices, bleStatusVersion: String) {
-        if (targetDevice.productModel != CHProductModel.Hub3 && targetDevice.productModel != CHProductModel.Hub3_LTE) {
+        if (targetDevice.productModel != CHProductModel.Hub3 && targetDevice.productModel != CHProductModel.Hub3Pro) {
             view?.findViewById<View>(R.id.device_version_txt)?.post {
                 val latestFwVer: String? = targetDevice.userKey?.stateInfo?.latestFwVer
                 val tempFlag = latestFwVer?.let {

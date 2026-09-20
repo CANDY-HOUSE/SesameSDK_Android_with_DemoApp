@@ -297,7 +297,7 @@ class DeviceListFG : HomeFragment<FgDevicelistBinding>() {
                 }
             }
 
-            CHProductModel.Hub3, CHProductModel.Hub3_LTE -> {
+            CHProductModel.Hub3, CHProductModel.Hub3Pro -> {
                 val config = WebViewConfig(
                     scene = "wifi-module",
                     params = mapOf(

@@ -42,7 +42,7 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                 CHProductModel.SS6Pro,
                 CHProductModel.SS6ProSlidingDoor,
                 CHProductModel.SSM_MIWA,
-                CHProductModel.Hub3_LTE
+                CHProductModel.Hub3Pro
             )
 
             val currentProductModel = (mDeviceModel.ssmLockLiveData.value as CHSesameConnector).productModel
@@ -56,12 +56,12 @@ class SSMBiometricSelectLockerListFG : BaseDeviceFG<FgSsmTpSelectLockerListBindi
                     }
 
                     val hasLockInSesame2Keys = sesame2KeyDevices.any { it.productModel in allLocks }
-                    val hasHub3InSesame2Keys = sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 || it.productModel == CHProductModel.Hub3_LTE }
+                    val hasHub3InSesame2Keys = sesame2KeyDevices.any { it.productModel == CHProductModel.Hub3 || it.productModel == CHProductModel.Hub3Pro }
 
                     val allowedProducts = when {
                         hasLockInSesame2Keys -> allLocks
-                        hasHub3InSesame2Keys -> listOf(CHProductModel.Hub3, CHProductModel.Hub3_LTE)
-                        else -> listOf(CHProductModel.Hub3, CHProductModel.Hub3_LTE) + allLocks
+                        hasHub3InSesame2Keys -> listOf(CHProductModel.Hub3, CHProductModel.Hub3Pro)
+                        else -> listOf(CHProductModel.Hub3, CHProductModel.Hub3Pro) + allLocks
                     }
 
                     mDeviceModel.myChDevices.value.filter { allowedProducts.contains(it.productModel) }

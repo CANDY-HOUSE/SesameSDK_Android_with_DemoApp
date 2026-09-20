@@ -92,7 +92,7 @@ class SSMCellView @JvmOverloads constructor(
 
     private fun lockState(sesame: CHDevices) {
 
-        if (sesame.productModel == CHProductModel.Hub3_LTE) {
+        if (sesame.productModel == CHProductModel.Hub3Pro) {
             dotPaint.alpha = 0
             invalidate()
             return

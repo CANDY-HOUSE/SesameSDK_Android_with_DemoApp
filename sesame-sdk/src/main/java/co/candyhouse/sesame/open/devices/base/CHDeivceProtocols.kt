@@ -232,10 +232,10 @@ enum class CHProductModel {
         override fun deviceModelName() = "Sesame Bot 3"
         override fun deviceFactory() = CHSesameBot2Device()
     },
-    Hub3_LTE {
+    Hub3Pro {
         override fun productType() = 36
-        override fun deviceModel() = "hub_3_lte" // <- 絕對不要動 ios/server/android必須一致
-        override fun deviceModelName() = "Hub 3 LTE"
+        override fun deviceModel() = "hub_3_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Hub 3 Pro"
         override fun deviceFactory() = CHHub3Device()
     },
     SSMFace3 {

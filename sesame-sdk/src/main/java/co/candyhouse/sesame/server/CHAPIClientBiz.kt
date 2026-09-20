@@ -35,6 +35,7 @@ import co.candyhouse.sesame.utils.base64Encode
 import co.candyhouse.sesame.utils.hexStringToByteArray
 import co.candyhouse.sesame.utils.toHexString
 import co.candyhouse.sesame.utils.toUInt24ByteArray
+import co.candyhouse.sesame.utils.hub3TopicId
 import com.amplifyframework.api.rest.RestOptions
 import com.amplifyframework.kotlin.core.Amplify
 import com.google.gson.Gson
@@ -393,7 +394,7 @@ object CHAPIClientBiz {
             )
         }
 
-    // 更新 Hub3_LTE 继电器开关状态
+    // 更新 Hub3 Pro 继电器开关状态
     fun updateRelay(historytag: ByteArray?, hub3: CHDevices, onResponse: CHResult<CHEmpty>) =
         makeApiCall(onResponse) {
             val sendMap: MutableMap<String, String> = mutableMapOf()
@@ -420,12 +421,10 @@ object CHAPIClientBiz {
             offset += deviceIdBytes.size
             payloadBytes[offset] = op
             val payload = Base64.encodeToString(payloadBytes, Base64.NO_WRAP)
-            val hub3DeviceIdLastSegment = hub3DeviceId.substringAfterLast('-')
-
             sendMap["action"] = "biz3OperateIoT"
             sendMap["op"] = "cmd"
             sendMap["payload"] = payload
-            sendMap["topic"] = "wm2${hub3DeviceIdLastSegment.uppercase()}cmd"
+            sendMap["topic"] = "wm2${hub3TopicId(hub3DeviceId)}cmd"
 
             apiPost<Unit>("/device/v1/wifi_module/$hub3DeviceId/switch", sendMap)
             CHEmpty()

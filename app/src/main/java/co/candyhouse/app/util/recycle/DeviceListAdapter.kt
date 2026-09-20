@@ -180,7 +180,7 @@ class DeviceListAdapter(
 
                 setBatteryStatus(device.userKey?.stateInfo?.batteryPercentage)
 
-                if (device.productModel == CHProductModel.Hub3_LTE) {
+                if (device.productModel == CHProductModel.Hub3Pro) {
                     ssmLockView.visibility = View.VISIBLE
                     ssmLockView.setLockImage(device)
                     ssmLockView.setOnClickListener {

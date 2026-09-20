@@ -37,8 +37,8 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
     override var productModel: CHProductModel? = CHProductModel.getByValue(advBytes.copyOfRange(0, 1).toBigLong().toInt())
 
     override var isRegistered: Boolean =
-            if (productModel == CHProductModel.Hub3 || productModel == CHProductModel.Hub3_LTE) {
-                (advBytes[1] and 1) > 0 // 1:registered 0:unregistered， Hub3 在Matter的二合一广播里，压缩去掉了机型的保留字。所以这里要用第二个字节advBytes[1]。
+            if (productModel == CHProductModel.Hub3) {
+                (advBytes[1] and 1) > 0 // 1:registered 0:unregistered
             } else {
                 (advBytes[2] and 1) > 0
             }
@@ -55,7 +55,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                     null
                 }
 
-                CHProductModel.Hub3, CHProductModel.Hub3_LTE -> return try {
+                CHProductModel.Hub3 -> return try {
 //                    L.d("hub3", "advBytes:" + advBytes.toHexString())
                     val hub3ID = ("00000000055afd810d00" + advBytes.copyOfRange(2, 8).toHexString()).noHashtoUUID()
 //                    L.d("hub3", "uuid:" + hub3ID)
@@ -74,7 +74,7 @@ internal class CHadv(scanResult: ScanResult) : CHBaseAdv {
                 }
 
                 CHProductModel.SS5, CHProductModel.SS5PRO, CHProductModel.SSMOpenSensor, CHProductModel.SSMTouchPro, CHProductModel.SSMTouch2Pro, CHProductModel.SSMTouch, CHProductModel.SSMTouch2, CHProductModel.BiKeLock2, CHProductModel.BiKeLock3, CHProductModel.BLEConnector, CHProductModel.Remote, CHProductModel.RemoteNano, CHProductModel.SS5US, CHProductModel.SesameBot2, CHProductModel.SesameBot3, CHProductModel.SSMFace, CHProductModel.SSMFace2, CHProductModel.SSMFacePro,
-                CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceAI,  CHProductModel.SSMFace2AI, CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI, CHProductModel.SS6, CHProductModel.SS6Pro, CHProductModel.SS6ProSlidingDoor, CHProductModel.SSMOpenSensor2, CHProductModel.SSM_MIWA -> return try {
+                CHProductModel.SSMFace2Pro, CHProductModel.SSMFaceAI,  CHProductModel.SSMFace2AI, CHProductModel.SSMFaceProAI, CHProductModel.SSMFace2ProAI, CHProductModel.SS6, CHProductModel.SS6Pro, CHProductModel.SS6ProSlidingDoor, CHProductModel.SSMOpenSensor2, CHProductModel.SSM_MIWA, CHProductModel.Hub3Pro -> return try {
 //                    L.d("hcia", "[ss5] isRegistered:" + isRegistered)
 //                    L.d("hcia", "[ss5] advBytes:" + advBytes.toHexString())
 //                    L.d("hcia", "[ss5] deviceName:" + deviceName)

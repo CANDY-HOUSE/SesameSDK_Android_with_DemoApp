@@ -15,6 +15,7 @@ import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
 import co.candyhouse.sesame.utils.SharedPreferencesUtils
 import co.candyhouse.sesame.utils.TokenManager
+import co.candyhouse.sesame.utils.hub3TopicId
 import com.amazonaws.services.iot.client.AWSIotMessage
 import com.amazonaws.services.iot.client.AWSIotMqttClient
 import com.amazonaws.services.iot.client.AWSIotQos
@@ -504,7 +505,7 @@ internal object CHIotManager {
         if (iotStatus != IotStatus.Connected) {
             return
         }
-        val topic = "\$aws/things/wm2/shadow/name/" + hub3.deviceId.toString().uppercase().substring(24, 36) + "/update/accepted"
+        val topic = "\$aws/things/wm2/shadow/name/" + hub3TopicId(hub3.deviceId.toString().uppercase()) + "/update/accepted"
         subscribeTopicInternal(hub3.deviceId.toString(), topic) { data ->
             onResponse.invoke(Result.success(CHResultState.CHResultStateNetworks(String(data))))
         }

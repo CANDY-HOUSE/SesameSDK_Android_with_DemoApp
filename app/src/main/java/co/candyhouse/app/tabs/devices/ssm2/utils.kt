@@ -333,7 +333,7 @@ fun CHProductModel.modelName(): String {
         CHProductModel.SSMFace2 -> CHDeviceManager.app.getString(R.string.SSMFace2)
         CHProductModel.SSMFace2Pro -> CHDeviceManager.app.getString(R.string.SSMFace2Pro)
         CHProductModel.SSM_MIWA -> CHDeviceManager.app.getString(R.string.SSM_MIWA)
-        CHProductModel.Hub3_LTE -> CHDeviceManager.app.getString(R.string.Hub3_lte)
+        CHProductModel.Hub3Pro -> CHDeviceManager.app.getString(R.string.Hub3_pro)
         CHProductModel.SSMFace3 -> CHDeviceManager.app.getString(R.string.SSMFace3)
     }
 }

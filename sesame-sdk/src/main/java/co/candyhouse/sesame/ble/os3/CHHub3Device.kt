@@ -113,7 +113,7 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
     }
 
     private fun subscribeRelayStatus() {
-        if (this.productModel != CHProductModel.Hub3_LTE) return
+        if (this.productModel != CHProductModel.Hub3Pro) return
         val topic = "up/iot/device/${deviceId.toString().uppercase()}/cmd"
         CHIotManager.subscribeTopic(this, topic) { result ->
             result.onSuccess { data ->

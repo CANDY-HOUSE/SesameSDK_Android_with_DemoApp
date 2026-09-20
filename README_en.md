@@ -165,7 +165,7 @@ The supported product range is defined by `CHProductModel` and grouped below by 
 | `CHSesameBike3Device` | Sesame Bike 3 (with fingerprint capability) |
 | `CHSesameBot2Device` | Sesame Bot 2, Sesame Bot 3 |
 | `CHSesameBiometricDeviceImpl` | Open Sensor 1/2, Remote, Remote Nano, Sesame Touch 1/1 Pro/2/2 Pro, Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI |
-| `CHHub3Device` | Hub 3, Hub 3 LTE |
+| `CHHub3Device` | Hub 3, Hub 3 Pro |
 
 > No longer maintained: Sesame 3 (`SS2`), WiFi Module 2 (`WM2`), Sesame Bot 1, Sesame Bike 1, and Sesame 4 (`SS4`).
 
