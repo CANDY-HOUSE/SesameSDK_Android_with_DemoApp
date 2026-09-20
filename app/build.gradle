@@ -127,6 +127,7 @@ dependencies {
 
     implementation libs.androidx.work.runtime
     implementation libs.androidx.core.ktx.v180
+    implementation libs.androidx.lifecycle.viewmodel.ktx.v286
     implementation libs.androidx.preference.ktx
     implementation libs.androidx.swiperefreshlayout
 
@@ -154,4 +155,6 @@ dependencies {
     implementation libs.firebase.analytics.ktx
     implementation libs.firebase.messaging.ktx
     implementation libs.firebase.crashlytics.ktx
+
+    testImplementation libs.junit
 }
