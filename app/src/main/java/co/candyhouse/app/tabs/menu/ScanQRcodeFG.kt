@@ -18,23 +18,13 @@ import co.candyhouse.app.databinding.ActivitySimpleScannerBinding
 import co.candyhouse.app.ext.aws.AWSStatus
 import co.candyhouse.app.ext.webview.manager.WebViewPoolManager
 import co.candyhouse.app.tabs.devices.model.CHDeviceViewModel
-import co.candyhouse.app.tabs.devices.ssm2.getLevel
-import co.candyhouse.app.tabs.devices.ssm2.getNickname
-import co.candyhouse.app.tabs.devices.ssm2.setLevel
-import co.candyhouse.app.tabs.devices.ssm2.setNickname
 import co.candyhouse.app.util.alertview.fragments.toastMSG
 import co.candyhouse.app.util.base64decodeHex
-import co.candyhouse.app.util.getHistoryTag
 import co.candyhouse.app.util.hexStringToByteArray
-import co.candyhouse.app.util.noHashtoUUID
 import co.candyhouse.app.util.qrcode.core.QRCodeView
-import co.candyhouse.app.util.toHexString
 import co.candyhouse.sesame.BaseFG
-import co.candyhouse.sesame.db.model.CHDevice
-import co.candyhouse.sesame.open.CHDeviceManager
 import co.candyhouse.sesame.open.devices.base.CHProductModel
 import co.candyhouse.sesame.server.CHAPIClientBiz
-import co.candyhouse.sesame.server.dto.cheyKeyToUserKey
 import co.candyhouse.sesame.utils.L
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.zxing.BinaryBitmap
@@ -200,23 +190,26 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         }
     }
 
-    // 分享钥匙(sk)：先向服务端兑换扫码全文(qrToken)，成功后用下发的新 URL 再走原发钥匙流程
+    // 分享钥匙(sk)：向服务端兑换扫码全文(qrToken)，钥匙归属由服务端完成，客户端只需重拉服务端列表
     private fun handleSkType(qrToken: String) {
         CHAPIClientBiz.redeemQR(qrToken) { result ->
             result.onSuccess { state ->
                 val receiveUri = state.data.replace("+", "%2B").toUri()
-                val sharedKey = receiveUri.getQueryParameter("sk")
-                val level = receiveUri.getQueryParameter("l")
-                val customName = receiveUri.getQueryParameter("n")
-
-                sharedKey?.let {
-                    val keyData = it.base64decodeHex().hexStringToByteArray()
-                    val devModel = CHProductModel.getByValue(keyData[0].toInt())
-                    L.d("handleSkType", "devModel:$devModel")
-                    if (devModel.isValidModel()) {
-                        handleValidModel(keyData, level, customName)
-                    } else {
-                        handleInvalidModel(keyData, level, customName)
+                val devModel = receiveUri.getQueryParameter("sk")
+                    ?.let { runCatching { it.base64decodeHex().hexStringToByteArray() }.getOrNull() }
+                    ?.firstOrNull()
+                    ?.let { CHProductModel.getByValue(it.toInt()) }
+                L.d("handleSkType", "devModel:$devModel")
+                if (devModel == null) {
+                    qrCodeError(getString(R.string.qrcodeNotSupport))
+                    return@onSuccess
+                }
+                mDeviceModel.refreshDevices()
+                view?.post {
+                    if (isAdded && !isDetached) {
+                        findNavController().navigateUp()
+                        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
+                            ?.setPage(if (devModel == CHProductModel.SSMFace3) 1 else 0)
                     }
                 }
             }
@@ -224,15 +217,6 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
                 qrCodeError(error.message ?: getString(R.string.qrcodeNotSupport))
             }
         }
-    }
-
-    private fun CHProductModel?.isValidModel(): Boolean {
-        return this == CHProductModel.SS5 || this == CHProductModel.BiKeLock2 || this == CHProductModel.BiKeLock3 || this == CHProductModel.SSMTouchPro || this == CHProductModel.SSMTouch2Pro ||
-                this == CHProductModel.SSMTouch || this == CHProductModel.SSMTouch2 || this == CHProductModel.SS5PRO || this == CHProductModel.BLEConnector ||
-                this == CHProductModel.Remote || this == CHProductModel.RemoteNano || this == CHProductModel.SS5US || this == CHProductModel.SesameBot2 || this == CHProductModel.SesameBot3 ||
-                this == CHProductModel.SSMFacePro || this == CHProductModel.SSMFace2Pro || this == CHProductModel.SSMFaceProAI || this == CHProductModel.SSMFace2ProAI || this == CHProductModel.SSMFaceAI || this == CHProductModel.SSMFace2AI || this == CHProductModel.SS6 ||
-                this == CHProductModel.SS6Pro ||this == CHProductModel.SS6ProSlidingDoor || this == CHProductModel.Hub3 || this == CHProductModel.SSMFace || this == CHProductModel.SSMFace2 || this == CHProductModel.SSMOpenSensor2 || this == CHProductModel.SSMOpenSensor ||
-                this == CHProductModel.SSM_MIWA || this == CHProductModel.Hub3Pro || this == CHProductModel.SSMFace3
     }
 
     override fun onDestroy() {
@@ -247,122 +231,6 @@ class ScanQRcodeFG : BaseFG<ActivitySimpleScannerBinding>(), QRCodeView.Delegate
         } catch (e: Exception) {
             // 处理异常
             e.printStackTrace()
-        }
-    }
-    private fun handleValidModel(keyData: ByteArray, level: String?, customName: String?) {
-        val devModel = CHProductModel.getByValue(keyData[0].toInt())
-        val modelStr = CHProductModel.getByValue(keyData[0].toInt())?.deviceModel()!!
-        val secretHex = keyData.sliceArray(1..16).toHexString()
-        val pubHex = keyData.sliceArray(17..20).toHexString()
-        val keyIndexHex = keyData.sliceArray(21..22).toHexString()
-        val uuidHex = keyData.sliceArray(23..38).toHexString()
-        val uuidStr = uuidHex.noHashtoUUID().toString().lowercase()
-
-        addDeviceWithKey(
-            uuidStr = uuidStr,
-            modelStr = modelStr,
-            keyIndexHex = keyIndexHex,
-            secretHex = secretHex,
-            pubHex = pubHex,
-            level = level,
-            customName = customName,
-            onSuccess = {
-                view?.post {
-                    if (isAdded && !isDetached) {
-                        findNavController().navigateUp()
-                        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-                            ?.setPage(if (devModel == CHProductModel.SSMFace3) 1 else 0)
-                    }
-                }
-            },
-            onFailure = { errorMsg ->
-                qrCodeError(errorMsg)
-            }
-        )
-    }
-
-    private fun handleInvalidModel(keyData: ByteArray, level: String?, customName: String?) {
-
-        L.d("handleInvalidModel", "l" + keyData.size)
-        val modelStr = CHProductModel.getByValue(keyData[0].toInt())?.deviceModel()!!
-        val secretHex = keyData.sliceArray(1..16).toHexString()
-        val pubHex = keyData.sliceArray(17..80).toHexString()
-        val keyIndexHex = keyData.sliceArray(81..82).toHexString()
-        val uuidHex = keyData.sliceArray(83..98).toHexString()
-        val uuidStr = uuidHex.noHashtoUUID().toString().lowercase()
-
-        addDeviceWithKey(
-            uuidStr = uuidStr,
-            modelStr = modelStr,
-            keyIndexHex = keyIndexHex,
-            secretHex = secretHex,
-            pubHex = pubHex,
-            level = level,
-            customName = customName,
-            onSuccess = {
-                view?.post {
-                    if (isAdded && !isDetached) {
-                        findNavController().navigateUp()
-                        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-                            ?.setPage(0)
-                    }
-                }
-            },
-            onFailure = { errorMsg ->
-                qrCodeError(errorMsg)
-            }
-        )
-    }
-
-    private fun addDeviceWithKey(
-        uuidStr: String,
-        modelStr: String,
-        keyIndexHex: String,
-        secretHex: String,
-        pubHex: String,
-        level: String?,
-        customName: String?,
-        onSuccess: () -> Unit = {},
-        onFailure: (String) -> Unit = {}
-    ) {
-        val keyLevel = level?.toIntOrNull()
-        if (keyLevel == null) {
-            onFailure(getString(R.string.qrcodeNotSupport))
-            return
-        }
-
-        val deviceModel = mDeviceModel
-        val addFailMessage = getString(R.string.addFail)
-        val receiveDevoiceKey = CHDevice(
-            uuidStr,
-            modelStr,
-            getHistoryTag(),
-            keyIndexHex,
-            secretHex,
-            pubHex
-        )
-
-        CHDeviceManager.receiveCHDeviceKeys(receiveDevoiceKey) { result ->
-            result.onSuccess { data ->
-                data.data.forEach { device ->
-                    device.setLevel(keyLevel)
-                    customName?.takeIf { it.isNotBlank() }?.let(device::setNickname)
-                    // 上传到云端（put 不带 orderKey）；put 成功后才重拉服务端列表刷新，
-                    // 避免 put 未落库就刷新导致新设备被"以服务端为准"丢弃
-                    CHAPIClientBiz.putKey(
-                        cheyKeyToUserKey(
-                            device.getKey(),
-                            device.getLevel(),
-                            device.getNickname()
-                        )
-                    ) { putResult -> putResult.onSuccess { deviceModel.refreshDevices() } }
-                }
-
-                onSuccess()
-            }
-            result.onFailure {
-                onFailure(addFailMessage)
-            }
         }
     }
 
