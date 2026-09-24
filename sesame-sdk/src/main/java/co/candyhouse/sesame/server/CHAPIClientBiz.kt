@@ -305,7 +305,11 @@ object CHAPIClientBiz {
      */
     fun redeemQR(qrToken: String, onResponse: CHResult<String>) =
         makeApiCall(onResponse) {
-            val resp = apiPost<Any>("/device/v1/redeem_qr", RedeemQRRequest(qrToken = qrToken))
+            val resp = apiPost<Any>(
+                "/device/v1/redeem_qr",
+                RedeemQRRequest(qrToken = qrToken),
+                identifyHeader()
+            )
             Gson().toJsonTree(resp).asJsonObject.get("data")?.takeIf { !it.isJsonNull }?.asString
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw Exception("Redeem QR failed")
