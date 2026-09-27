@@ -12,6 +12,7 @@ dfu = "2.5.0"
 easypermissions = "3.0.0"
 firebaseBom = "33.4.0"
 indicatorseekbar = "2.1.2"
+junit = "4.13.2"
 kotlinxCoroutinesAndroid = "1.7.3"
 lifecycleExtensions = "2.2.0"
 lifecycleRuntimeKtx = "2.8.6"
@@ -71,6 +72,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbinding", version.ref = "uiViewbinding" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+junit = { module = "junit:junit", version.ref = "junit" }
 loopview = { module = "com.weigan:loopView", version.ref = "loopview" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }

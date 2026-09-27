@@ -150,7 +150,7 @@ internal class CHSesame5Device : CHSesameOS3LockBase(), CHSesame5 {
             return
         }
         if (!isBleAvailable(result)) {
-            CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.unlock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         sendCommand(
@@ -171,7 +171,7 @@ internal class CHSesame5Device : CHSesameOS3LockBase(), CHSesame5 {
             return
         }
         if (!isBleAvailable(result)) {
-            CHAPIClientBiz.cmdSesame(SesameItemCode.toggle, this, sesame2KeyData!!.historyTagIOT(historytag), result)
+            CHAPIClientBiz.cmdSesame(SesameItemCode.lock, this, sesame2KeyData!!.historyTagIOT(historytag), result)
             return
         }
         sendCommand(
