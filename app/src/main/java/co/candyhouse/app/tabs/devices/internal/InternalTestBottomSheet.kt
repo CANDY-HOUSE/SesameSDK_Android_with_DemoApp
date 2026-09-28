@@ -29,6 +29,7 @@ import co.candyhouse.app.tabs.devices.ssm2.getNickname
 import co.candyhouse.app.util.FirmwareDir
 import co.candyhouse.app.util.UserUtils
 import co.candyhouse.sesame.open.devices.CHSesame5
+import co.candyhouse.sesame.open.devices.CHSesameBot2
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatus
 import co.candyhouse.sesame.open.devices.base.CHDeviceStatusDelegate
 import co.candyhouse.sesame.open.devices.base.CHDevices
@@ -252,7 +253,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
 
     private fun getAllSesame5Locks(): List<CHDevices> {
         val all: List<CHDevices> = mDeviceModel.myChDevices.value
-        return all.filter { it is CHSesame5 }
+        return all.filter { it is CHSesame5 || it is CHSesameBot2 }
     }
 
     private fun startTest() {
