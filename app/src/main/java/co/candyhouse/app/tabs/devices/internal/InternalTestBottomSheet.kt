@@ -67,6 +67,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
     private var isRunning = false
     private var toggleJob: Job? = null
     private var lastStatus: CHDeviceStatus? = null
+    private var testSessionId = 0
 
     private val prefs by lazy {
         requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -115,7 +116,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
         binding.btnReset.setOnClickListener { resetTest() }
         setupFirmwareDirSwitch()
 
-        val locks = getAllSesame5Locks()
+        val locks = getTestDevices()
         adapter.submitList(locks)
 
         restoreFromPrefs(locks)
@@ -168,6 +169,11 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
 
     private fun onDeviceSelected(device: CHDevices) {
         if (isRunning) return
+        if (selected?.deviceId != device.deviceId) {
+            toggleCount = 0
+            persistToggleCount(0)
+            refreshStats()
+        }
         selected = device
 
         intervalSec = adapter.getInterval(device)
@@ -197,7 +203,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
 
     @SuppressLint("SetTextI18n")
     private fun refreshSubtitle() {
-        val name = selected?.let { (it as? CHSesame5)?.getNickname() } ?: "未选择"
+        val name = selected?.getNickname() ?: "未选择"
         safeUi {
             binding.tvSubtitle.text = "$name, ${intervalSec}s toggle"
         }
@@ -251,14 +257,33 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    private fun getAllSesame5Locks(): List<CHDevices> {
+    private class TestAction(
+        val countOnStatusChange: Boolean,
+        val run: (ByteArray?, () -> Unit) -> Unit
+    )
+
+    private fun testActionFor(device: CHDevices): TestAction? = when (device) {
+        is CHSesame5 -> TestAction(countOnStatusChange = true) { historytag, _ ->
+            device.toggle(historytag = historytag) {}
+        }
+
+        is CHSesameBot2 -> TestAction(countOnStatusChange = false) { historytag, onSuccess ->
+            device.click(historytag = historytag) { result -> result.onSuccess { onSuccess() } }
+        }
+
+        else -> null
+    }
+
+    private fun getTestDevices(): List<CHDevices> {
         val all: List<CHDevices> = mDeviceModel.myChDevices.value
-        return all.filter { it is CHSesame5 || it is CHSesameBot2 }
+        return all.filter { testActionFor(it) != null }
     }
 
     private fun startTest() {
         if (isRunning) return
-        val device = selected as? CHSesame5 ?: return
+        val device = selected ?: return
+        val testAction = testActionFor(device) ?: return
+        val sessionId = ++testSessionId
 
         dialog?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -276,14 +301,13 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
                 status: CHDeviceStatus,
                 shadowStatus: CHDeviceStatus?
             ) {
+                if (!testAction.countOnStatusChange) return
                 if (!isRunning) return
                 if (status == lastStatus) return
                 lastStatus = status
 
                 if (status == CHDeviceStatus.Locked || status == CHDeviceStatus.Unlocked) {
-                    toggleCount += 1
-                    persistToggleCount(toggleCount)
-                    safeUi { refreshStats() }
+                    recordToggle(device, sessionId)
                 }
             }
         }
@@ -295,10 +319,21 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
             var next = SystemClock.elapsedRealtime()
             while (isActive && isRunning) {
                 next += intervalMs
-                device.toggle(historytag = UserUtils.getEnvironmentIdWithByte()) {}
+                testAction.run(UserUtils.getEnvironmentIdWithByte()) {
+                    recordToggle(device, sessionId)
+                }
                 val delayMs = next - SystemClock.elapsedRealtime()
                 if (delayMs > 0) delay(delayMs) else yield()
             }
+        }
+    }
+
+    private fun recordToggle(device: CHDevices, sessionId: Int) {
+        safeUi {
+            if (!isRunning || testSessionId != sessionId || selected !== device) return@safeUi
+            toggleCount += 1
+            persistToggleCount(toggleCount)
+            refreshStats()
         }
     }
 
@@ -308,11 +343,12 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         isRunning = false
+        testSessionId += 1
 
         toggleJob?.cancel()
         toggleJob = null
 
-        (selected as? CHSesame5)?.delegate = null
+        selected?.delegate = null
         lastStatus = null
 
         refreshButtonState()
@@ -321,7 +357,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
     private fun resetTest() {
         if (isRunning) return
 
-        val locks = getAllSesame5Locks()
+        val locks = getTestDevices()
 
         intervalSec = 1
         toggleCount = 0
@@ -442,7 +478,7 @@ class InternalTestBottomSheet : BottomSheetDialogFragment() {
             val isRunning = this.isRunning
             val interval = intervalMap[item.deviceId] ?: 1
 
-            holder.tvName.text = (item as? CHSesame5)?.getNickname() ?: "Unknown"
+            holder.tvName.text = item.getNickname()
 
             holder.rbSelected.setOnCheckedChangeListener(null)
             holder.rbSelected.isChecked = isSelected
