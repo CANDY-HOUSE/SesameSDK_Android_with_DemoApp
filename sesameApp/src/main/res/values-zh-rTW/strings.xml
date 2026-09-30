@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="Sesame">芝麻</string>
+    <string name="add_new_device">新增裝置</string>
+    <string name="scan_the_qr_code">掃描QR code</string>
+    <string name="add_contacts">添加聯絡人</string>
+    <string name="close">關閉</string>
+    <string name="back">返回</string>
+    <string name="gallery">圖庫</string>
+    <string name="qr_not_found">圖片中未發現 QR 碼</string>
+
+    <string name="widget_lock_all">全部上鎖</string>
+    <string name="widget_unlock_all">全部解鎖</string>
+    <string name="auto_unlock_service_notification">正在透過藍牙等待偵測已登記的芝麻</string>
+    <string name="auto_unlock_location_permission_title">允許背景位置資訊</string>
+    <string name="auto_unlock_location_permission_message">全自動解鎖會使用 Geofence API，即使應用程式關閉或在背景，也能偵測您是否離開所設定的區域。離開區域只會啟用一次自動解鎖；只有本手機透過附近的藍牙連線到已登記的芝麻後，門鎖才會解鎖。請在系統設定的位置權限中選擇「永遠允許」。您可以隨時關閉全自動解鎖。</string>
+    <string name="auto_unlock_location_permission_open_settings">開啟設定</string>
+    <string name="sesame_widget">通知列 Widget</string>
+</resources>

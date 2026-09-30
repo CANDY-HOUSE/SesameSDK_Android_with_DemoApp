@@ -25,7 +25,7 @@ CANDY HOUSE の Android アプリと Sesame SDK を収録したオープンソ�
 
 ```groovy
 dependencies {
-    implementation project(':sesame-sdk')
+    implementation project(':sesameSdk')
 }
 ```
 
@@ -69,17 +69,17 @@ dependencies {
 Sesame OS3 の登録やクラウド機能を利用するには、アプリ起動時に以下を初期化します。
 
 1. Amplify に `AWSCognitoAuthPlugin` と `AWSApiPlugin` を登録し、Cognito / API の設定で `Amplify.configure(...)` を実行する。
-2. `CHAPIClientBiz.initialize(applicationContext)` を実行する。
+2. `DeviceData.initialize(applicationContext)` を実行する。
 3. `CHBleManager(applicationContext)` を実行する。
 
-実装例は Demo App の [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/ext/aws/AWSStatus.kt) と [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt) を参照してください。
+実装例は Demo App の [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/data/auth/AWSStatus.kt) と [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt) を参照してください。
 
 ```kotlin
 override fun onCreate() {
     super.onCreate()
 
     // Amplify の Auth / API 設定後に初期化する
-    CHAPIClientBiz.initialize(applicationContext)
+    DeviceData.initialize(applicationContext)
     CHBleManager(applicationContext)
 }
 ```
@@ -129,9 +129,9 @@ CHBleManager.enableScan { result ->
 | モジュール | 内容 |
 | --- | --- |
 | `app` | デバイス、アカウント、フレンドなどを含む Android Demo App |
-| `sesame-sdk` | BLE、OS3 デバイス実装、ローカル DB、クラウド通信 |
-| `sesame-sdk/.../open` | 公開デバイス API、製品モデル、デバイス管理 |
-| `sesame-sdk/.../ble/os3` | 現在メンテナンスしている OS3 プロトコルとデバイス実装 |
+| `sesameSdk` | BLE、OS3 デバイス実装、ホストサービスのインターフェース（DB と AWS は app/data） |
+| `sesameSdk/.../ble` | 公開デバイス API、製品モデル、デバイス管理 |
+| `sesameSdk/.../ble/os3` | 現在メンテナンスしている OS3 プロトコルとデバイス実装 |
 
 ## OS3 デバイス構成
 
@@ -195,3 +195,5 @@ flowchart TB
 - 新製品は `CHProductModel` に追加し、対応する OS3 Device 実装へマッピングします。
 - 共通処理は基底クラスへ集約し、製品差分は個別実装または Capability の組み合わせで対応します。
 - `co.candyhouse.sesame.ble.os2` は互換性維持のための旧コードであり、現在のメンテナンス対象外です。
+
+H5 ブランチの構成は [Android アーキテクチャ](docs/androidH5Architecture.md) を参照してください。SDK 単独利用時は BLE 起動前に `CHBleSupport` へ `CHBleHost`、`CHKeyPersistence`、ゲートウェイのテナント識別子を設定します。上記 JitPack 座標は既存リリース用で、このブランチは未公開です。

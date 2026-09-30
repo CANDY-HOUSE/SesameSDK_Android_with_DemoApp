@@ -1,0 +1,19 @@
+package co.candyhouse.sesame.ble.os3.bike2
+
+import co.candyhouse.sesame.ble.CHSesameLock
+import co.candyhouse.sesame.ble.CHSesameProtocolMechStatus
+import co.candyhouse.sesame.ble.os3.sesame5.CHSesame5MechSettings
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+
+interface CHSesameBike2 : CHSesameLock {
+    var mechSetting: CHSesame5MechSettings?
+    fun unlock(historytag: ByteArray? = null, result: CHResult<CHEmpty>)
+    fun onHistoryReceived(historyData: ByteArray) {}
+}
+
+class CHSesameBike2MechStatus(override val data: ByteArray) : CHSesameProtocolMechStatus {
+    private val flags = data[2].toInt()
+    override var isInLockRange: Boolean = flags and 2 > 0
+    override var isStop: Boolean? = flags and 4 > 0
+}

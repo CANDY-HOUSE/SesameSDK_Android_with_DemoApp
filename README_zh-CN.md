@@ -25,7 +25,7 @@ CANDY HOUSE Android 应用与 Sesame SDK 开源项目。当前项目聚焦于 `c
 
 ```groovy
 dependencies {
-    implementation project(':sesame-sdk')
+    implementation project(':sesameSdk')
 }
 ```
 
@@ -69,17 +69,17 @@ dependencies {
 使用 Sesame OS3 注册和云端功能时，需要在应用启动阶段完成以下初始化：
 
 1. 向 Amplify 注册 `AWSCognitoAuthPlugin` 和 `AWSApiPlugin`，通过 Cognito/API 配置执行 `Amplify.configure(...)`。
-2. 调用 `CHAPIClientBiz.initialize(applicationContext)`。
+2. 调用 `DeviceData.initialize(applicationContext)`。
 3. 调用 `CHBleManager(applicationContext)`。
 
-具体实现可参考 Demo App 中的 [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/ext/aws/AWSStatus.kt) 和 [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt)。
+具体实现可参考 Demo App 中的 [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/data/auth/AWSStatus.kt) 和 [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt)。
 
 ```kotlin
 override fun onCreate() {
     super.onCreate()
 
     // 完成 Amplify Auth/API 配置后再初始化
-    CHAPIClientBiz.initialize(applicationContext)
+    DeviceData.initialize(applicationContext)
     CHBleManager(applicationContext)
 }
 ```
@@ -129,9 +129,9 @@ CHBleManager.enableScan { result ->
 | 模块 | 说明 |
 | --- | --- |
 | `app` | Android Demo App，包含设备、账户、好友等界面与业务流程 |
-| `sesame-sdk` | Sesame SDK，包含 BLE、OS3 设备实现、本地数据库及云端通信 |
-| `sesame-sdk/.../open` | 对外设备接口、产品型号与设备管理入口 |
-| `sesame-sdk/.../ble/os3` | 当前维护的 Sesame OS3 协议与设备实现 |
+| `sesameSdk` | BLE、OS3 设备实现与宿主服务接口；本地数据与 AWS 实现在 app/data |
+| `sesameSdk/.../ble` | 对外设备接口、产品型号与设备管理入口 |
+| `sesameSdk/.../ble/os3` | 当前维护的 Sesame OS3 协议与设备实现 |
 
 ## OS3 设备架构
 
@@ -195,3 +195,5 @@ flowchart TB
 - 新产品需先在 `CHProductModel` 中登记，并映射到对应的 OS3 Device 实现。
 - 共性行为优先收敛到基础类；产品差异通过独立实现或 Capability 组合完成。
 - `co.candyhouse.sesame.ble.os2` 仅为历史兼容代码，不属于当前维护范围。
+
+当前 H5 分支的模块边界、初始化和验证范围见 [Android H5 架构](docs/androidH5Architecture.md)。独立接入源码 SDK 时，须先为 `CHBleSupport` 注入 `CHBleHost`、`CHKeyPersistence` 与网关租户标识，再启动 BLE。JitPack 示例坐标对应已有发布版本，本分支尚未发布。

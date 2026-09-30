@@ -25,7 +25,7 @@ To use the source module in the same project:
 
 ```groovy
 dependencies {
-    implementation project(':sesame-sdk')
+    implementation project(':sesameSdk')
 }
 ```
 
@@ -69,17 +69,17 @@ Add the required permissions to your app's `AndroidManifest.xml`. Request locati
 To use Sesame OS3 registration and cloud features, complete the following initialization when your application starts:
 
 1. Add `AWSCognitoAuthPlugin` and `AWSApiPlugin` to Amplify, then call `Amplify.configure(...)` with your Cognito and API configuration.
-2. Call `CHAPIClientBiz.initialize(applicationContext)`.
+2. Call `DeviceData.initialize(applicationContext)`.
 3. Call `CHBleManager(applicationContext)`.
 
-See [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/ext/aws/AWSStatus.kt) and [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt) in the Demo App for complete examples.
+See [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/data/auth/AWSStatus.kt) and [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt) in the Demo App for complete examples.
 
 ```kotlin
 override fun onCreate() {
     super.onCreate()
 
     // Initialize after configuring Amplify Auth and API
-    CHAPIClientBiz.initialize(applicationContext)
+    DeviceData.initialize(applicationContext)
     CHBleManager(applicationContext)
 }
 ```
@@ -129,9 +129,9 @@ CHBleManager.enableScan { result ->
 | Module | Description |
 | --- | --- |
 | `app` | Android Demo App with device, account, and friend-related screens and flows |
-| `sesame-sdk` | BLE, OS3 device implementations, local database, and cloud communication |
-| `sesame-sdk/.../open` | Public device APIs, product models, and device management |
-| `sesame-sdk/.../ble/os3` | Currently maintained OS3 protocol and device implementations |
+| `sesameSdk` | BLE, OS3 device implementations, and host service contracts |
+| `sesameSdk/.../ble` | Public device APIs, product models, and device management |
+| `sesameSdk/.../ble/os3` | Currently maintained OS3 protocol and device implementations |
 
 ## OS3 device architecture
 
@@ -195,3 +195,5 @@ Related APIs: `CHCardCapable`, `CHPassCodeCapable`, `CHFingerPrintCapable`, `CHP
 - Add new products to `CHProductModel` and map them to the corresponding OS3 Device implementation.
 - Keep shared behavior in base classes; implement product differences through dedicated implementations or Capability composition.
 - `co.candyhouse.sesame.ble.os2` contains legacy compatibility code and is outside the current maintenance scope.
+
+For this H5 branch, see [Android architecture](docs/androidH5Architecture.md). Standalone SDK hosts must initialize `CHBleSupport` with `CHBleHost`, `CHKeyPersistence`, and the gateway tenant ID before starting BLE. The JitPack coordinates above refer to existing releases; this branch is not published.

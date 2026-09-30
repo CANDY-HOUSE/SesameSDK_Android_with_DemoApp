@@ -1,0 +1,312 @@
+package co.candyhouse.sesame.ble
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.content.pm.PackageManager
+import androidx.annotation.Keep
+import co.candyhouse.sesame.ble.CHBleManager.appContext
+import co.candyhouse.sesame.ble.CHBleManager.bluetoothAdapter
+import co.candyhouse.sesame.ble.CHDevices.Companion.UNSET_BLE_TX_POWER_VALUE
+import co.candyhouse.sesame.ble.CHDevices.Companion.UNSET_LOCK_UNLOCK_SWITCH_POINT
+import co.candyhouse.sesame.ble.CHDevices.Companion.UNSET_SENSOR_DETECT_INTERVAL_MS
+import co.candyhouse.sesame.ble.os2.sesame2.CHError
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.utils.L
+import java.util.UUID
+
+internal interface CHDeviceUtil {
+    var advertisement: CHadv?//廣播
+    var sesame2KeyData: CHDevice?//鑰匙的資料
+    fun login(token: String? = null)
+}
+
+@Keep
+@SuppressLint("MissingPermission")
+internal open class CHBaseDevice {
+    lateinit var productModel: CHProductModel
+    val gattRxBuffer: SesameBleReceiver = SesameBleReceiver() //[數據層][收]
+    var gattTxBuffer: SesameBleTransmit? = null //[數據層][傳]
+    lateinit var mSesameToken: ByteArray//第一次連線的時候從設備收亂數token準備驗證
+    var mCharacteristic: BluetoothGattCharacteristic? = null //用來發送資料給
+    var delegate: CHDeviceStatusDelegate? = null
+    var deviceTimestamp: Long? = null
+    var loginTimestamp: Long? = null
+    var deviceId: UUID? = null
+    var isRegistered: Boolean = true
+    var rssi: Int? = 0
+    var batteryPercentage: Int? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                delegate?.onMechStatus(this as CHDevices)
+            }
+        }
+    var bleTxPower: Byte = UNSET_BLE_TX_POWER_VALUE.toByte()
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+            if (this is CHDevices) {
+                val device: CHDevices = this
+                delegate?.onBleTxPowerReceive(device, device.bleTxPower)
+            }
+        }
+    var sensorDetectIntervalMs: Short = UNSET_SENSOR_DETECT_INTERVAL_MS
+        set(value) {
+            if (field == value) return
+            field = value
+            if (this is CHDevices) {
+                val device: CHDevices = this
+                delegate?.onSensorDetectIntervalReceive(device, device.sensorDetectIntervalMs)
+            }
+        }
+    private var lockUnlockSwitchPointValue: Short = UNSET_LOCK_UNLOCK_SWITCH_POINT
+    var lockUnlockSwitchPoint: Short
+        get() = lockUnlockSwitchPointValue
+        set(value) {
+            if (lockUnlockSwitchPointValue == value) return
+            lockUnlockSwitchPointValue = value
+            notifyLockUnlockSwitchPointChanged()
+        }
+    private var hasLockUnlockSwitchPointSettingValue: Boolean = false
+    var hasLockUnlockSwitchPointSetting: Boolean
+        get() = hasLockUnlockSwitchPointSettingValue
+        set(value) {
+            if (hasLockUnlockSwitchPointSettingValue == value) return
+            hasLockUnlockSwitchPointSettingValue = value
+            notifyLockUnlockSwitchPointChanged()
+        }
+    var mBluetoothGatt: BluetoothGatt? = null //[gatt] 控制藍芽連線的全局物件
+    var isNeedAuthFromServer: Boolean? = false
+    var mechStatus: CHSesameProtocolMechStatus? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                delegate?.onMechStatus(this as CHDevices)
+            }
+        }
+
+    var deviceStatus: CHDeviceStatus = CHDeviceStatus.NoBleSignal
+        set(value) {
+            if (field != value) {
+                field = value
+
+                if (this is CHDevices) {
+                    val device: CHDevices = this
+                    delegate?.onBleDeviceStatusChanged(device, device.deviceStatus)
+                }
+            }
+        }
+    var sesame2KeyData: CHDevice? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                sesame2KeyData?.let {
+                    deviceId = UUID.fromString(it.deviceUUID)!!
+                    isNeedAuthFromServer = it.secretKey.contains("000000")
+                }
+            }
+        }
+
+    fun dropKey(result: CHResult<CHEmpty>) {
+        CHBleSupport.keys.deleteByDeviceId(deviceId.toString()) { deleteResult ->
+            when {
+                deleteResult.isSuccess -> {
+                    val deletedCount = deleteResult.getOrNull() ?: 0
+                    if (deletedCount > 0) {
+                        delegate = null
+                        deviceStatus = CHDeviceStatus.NoBleSignal
+                        (this as CHDevices).disconnect {}
+                        this.sesame2KeyData = null
+                    }
+                    result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+                }
+
+                deleteResult.isFailure -> {
+                    result.invoke(Result.failure(deleteResult.exceptionOrNull()!!))
+                }
+            }
+        }
+    }
+
+    fun disconnect(result: CHResult<CHEmpty>) {
+        L.d("hcia", "[say] 主動要求斷開藍芽連接 :" + " bluetoothAdapter.isEnabled: " + bluetoothAdapter.isEnabled + " mBluetoothGatt:" + mBluetoothGatt)
+        // 在调用安卓的disconnect()断线之前，需要把原来enable的notify disable掉。否则会影响ESP32-C3 BLE 断线事件的触发。
+        mBluetoothGatt?.let { gatt ->
+            for (service in gatt.services) {
+                L.d("[say]", "[onServicesDiscovered] service 01 : ${service.uuid}")
+                if (service.uuid == Sesame2Chracs.uuidService01) {
+                    for (charc in service.characteristics) {
+                        L.d("[say]", "[onServicesDiscovered] charc: ${charc.uuid}")
+                        if (charc.uuid == Sesame2Chracs.uuidChr03) {
+                            gatt.setCharacteristicNotification(charc, true)
+                            val descriptor = charc.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+                            descriptor?.let {
+                                it.value = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+                                val check = gatt.writeDescriptor(it)
+                                L.d("[say]", "[disconnect][NOTIFICATION]【disable】 $check")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (bluetoothAdapter.isEnabled) {
+            L.d("[say]", "[disconnect][start]")
+            mBluetoothGatt?.disconnect()
+        } else {
+            mBluetoothGatt?.disconnect()
+            (this as CHDeviceUtil).advertisement = null
+            CHBleManager.connectR.remove(mBluetoothGatt?.device?.address)
+        }
+        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+    }
+
+    protected fun updateLockUnlockSwitchPointSetting(point: Short) {
+        if (hasLockUnlockSwitchPointSettingValue && lockUnlockSwitchPointValue == point) return
+        lockUnlockSwitchPointValue = point
+        hasLockUnlockSwitchPointSettingValue = true
+        notifyLockUnlockSwitchPointChanged()
+    }
+
+    private fun notifyLockUnlockSwitchPointChanged() {
+        if (this is CHDevices) {
+            val device: CHDevices = this
+            delegate?.onLockUnlockSwitchPointReceive(device, device.lockUnlockSwitchPoint)
+        }
+    }
+
+}
+
+internal fun <T> CHDevices.isBleAvailable(result: CHResult<T>): Boolean {
+    if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return false
+        }
+    }
+    if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+        result.invoke(Result.failure(CHError.BlePoweroff.value))
+        return false
+    }
+    if (deviceStatus.value == CHDeviceLoginStatus.unlogined) {
+        result.invoke(Result.failure(CHError.SesameUnlogin.value))
+        return false
+    }
+    return true
+}
+
+internal fun CHBaseDevice.toCHDevices(): CHDevices {
+    return object : CHDevices {
+        override var mechStatus: CHSesameProtocolMechStatus?
+            get() = this@toCHDevices.mechStatus
+            set(value) {
+                this@toCHDevices.mechStatus = value
+            }
+        override var deviceTimestamp: Long?
+            get() = this@toCHDevices.deviceTimestamp
+            set(value) {
+                this@toCHDevices.deviceTimestamp = value
+            }
+        override var loginTimestamp: Long?
+            get() = this@toCHDevices.loginTimestamp
+            set(value) {
+                this@toCHDevices.loginTimestamp = value
+            }
+        override var delegate: CHDeviceStatusDelegate?
+            get() = this@toCHDevices.delegate
+            set(value) {
+                this@toCHDevices.delegate = value
+            }
+
+        override var deviceStatus: CHDeviceStatus
+            get() = this@toCHDevices.deviceStatus
+            set(value) {
+                this@toCHDevices.deviceStatus = value
+            }
+        override var rssi: Int?
+            get() = this@toCHDevices.rssi
+            set(value) {
+                this@toCHDevices.rssi = value
+            }
+        override var bleTxPower: Byte
+            get() = this@toCHDevices.bleTxPower
+            set(value) {
+                this@toCHDevices.bleTxPower = value
+            }
+        override var sensorDetectIntervalMs: Short
+            get() = this@toCHDevices.sensorDetectIntervalMs
+            set(value) {
+                this@toCHDevices.sensorDetectIntervalMs = value
+            }
+        override var lockUnlockSwitchPoint: Short
+            get() = this@toCHDevices.lockUnlockSwitchPoint
+            set(value) {
+                this@toCHDevices.lockUnlockSwitchPoint = value
+            }
+        override var hasLockUnlockSwitchPointSetting: Boolean
+            get() = this@toCHDevices.hasLockUnlockSwitchPointSetting
+            set(value) {
+                this@toCHDevices.hasLockUnlockSwitchPointSetting = value
+            }
+        override var deviceId: UUID?
+            get() = this@toCHDevices.deviceId
+            set(value) {
+                this@toCHDevices.deviceId = value
+            }
+        override var isRegistered: Boolean
+            get() = this@toCHDevices.isRegistered
+            set(value) {
+                this@toCHDevices.isRegistered = value
+            }
+        override var productModel: CHProductModel
+            get() = this@toCHDevices.productModel
+            set(value) {
+                this@toCHDevices.productModel = value
+            }
+        override var batteryPercentage: Int?
+            get() = this@toCHDevices.batteryPercentage
+            set(value) {
+                this@toCHDevices.batteryPercentage = value
+            }
+
+        override fun connect(result: CHResult<CHEmpty>) {
+            // 实现 connect 方法
+        }
+
+        override fun disconnect(result: CHResult<CHEmpty>) {
+            this@toCHDevices.disconnect(result)
+        }
+
+        override fun getKey(): CHDevice {
+            return (this@toCHDevices as CHDeviceUtil).sesame2KeyData!!.copy(historyTag = null)
+        }
+
+        override fun dropKey(result: CHResult<CHEmpty>) {
+            this@toCHDevices.dropKey(result)
+        }
+
+        override fun getVersionTag(result: CHResult<String>) {
+
+        }
+
+        override fun register(result: CHResult<CHEmpty>) {
+            // 实现 register 方法
+        }
+
+        override fun reset(result: CHResult<CHEmpty>) {
+            // 实现 reset 方法
+        }
+
+        override fun updateFirmware(onResponse: CHResult<BluetoothDevice>) {
+            // 实现 updateFirmware 方法
+        }
+    }
+}

@@ -1,0 +1,131 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+}
+
+android {
+    namespace 'co.candyhouse.app'
+    compileSdk = rootProject.ext.compileSdkVersion
+
+    signingConfigs {
+        release {
+            def passStore = System.getenv("storePassword")
+            def passKey = System.getenv("keyPassword")
+            def ssmKeyAlias = System.getenv("keyAlias")
+            storeFile file('keystore/Sesame.jks')
+            storePassword "$passStore"
+            keyPassword "$passKey"
+            keyAlias "$ssmKeyAlias"
+
+            // 处理 CI 环境中的签名文件
+            if (System.getenv("CI") == "true") {
+                println("CI signing...")
+                // CI 环境中跳过签名配置检查，因为签名将由 GitHub Actions 处理
+                storeFile = null
+                storePassword = null
+                keyPassword = null
+                keyAlias = null
+            }
+        }
+    }
+
+    defaultConfig {
+        manifestPlaceholders.googleMapsApiKey = rootProject.ext['google.maps.apiKey']
+        def getGitHash = providers.exec {
+            commandLine 'git', 'rev-parse', '--short=9', 'HEAD'
+        }.standardOutput.asText.get().trim()
+        applicationId 'co.candyhouse.sesame2'
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        versionCode 901
+        versionName '3.0.266'
+        buildConfigField("String", "GIT_HASH", "\"${getGitHash}\"")
+        // AWS Cognito 配置
+        buildConfigField("String", "AWS_IDENTITY_POOL_ID", "\"${rootProject.ext['aws.cognito.identityPoolId']}\"")
+        buildConfigField("String", "AWS_USER_POOL_ID", "\"${rootProject.ext['aws.cognito.userPoolId']}\"")
+        buildConfigField("String", "AWS_APP_CLIENT_ID", "\"${rootProject.ext['aws.cognito.appClientId']}\"")
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("String", "WEB_ORIGIN", "\"${rootProject.ext['candyhouse.sesame.web.dev']}\"")
+            manifestPlaceholders.crashlyticsCollectionEnabled = "false"
+            firebaseCrashlytics { mappingFileUploadEnabled false }
+            minifyEnabled false
+        }
+
+        release {
+            buildConfigField("String", "WEB_ORIGIN", "\"${rootProject.ext['candyhouse.sesame.web.prod']}\"")
+            manifestPlaceholders.crashlyticsCollectionEnabled = "true"
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (signingConfigs.release.storeFile != null) {
+                println("Local signing...")
+                signingConfig signingConfigs.release
+            }
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
+        }
+
+        ci {
+            initWith release
+            matchingFallbacks = ['release']
+        }
+
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packaging {
+        resources {
+            excludes += '/META-INF/DEPENDENCIES'
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("ci")) { variant ->
+        if (System.getenv("CI") == "true") {
+            def versionCode = System.getenv("VERSION_CODE")
+            if (versionCode != null) {
+                variant.outputs.forEach { output ->
+                    output.versionCode.set(Integer.parseInt(versionCode))
+                    println "Set CI version: ${versionCode}"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation project(':sesameSdk')
+
+    coreLibraryDesugaring libs.desugar.jdk.libs
+    implementation libs.amplify.aws.auth.cognito
+    implementation libs.amplify.core.kotlin
+    implementation libs.androidx.activity
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    ksp libs.androidx.room.compiler
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.core
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.messaging
+    implementation libs.firebase.analytics
+    implementation libs.firebase.crashlytics
+    implementation libs.dfu
+    implementation libs.play.services.location
+    implementation libs.play.services.maps
+}

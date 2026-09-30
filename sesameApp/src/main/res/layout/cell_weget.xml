@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/lock_all"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="6dp"
+        android:layout_weight="1"
+        android:background="@drawable/round_red_lock_all"
+        android:text="@string/widget_lock_all"
+        android:textColor="#CD4842"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/unlock_all"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_weight="1"
+        android:background="@drawable/round_blue_unlock_all"
+        android:text="@string/widget_unlock_all"
+        android:textColor="#28ADB2"
+        android:textSize="16sp" />
+
+</LinearLayout>

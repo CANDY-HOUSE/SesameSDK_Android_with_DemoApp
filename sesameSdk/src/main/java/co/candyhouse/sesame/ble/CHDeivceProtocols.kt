@@ -1,0 +1,402 @@
+package co.candyhouse.sesame.ble
+
+import android.bluetooth.BluetoothDevice
+import co.candyhouse.sesame.ble.os2.bike.CHSesameBikeDevice
+import co.candyhouse.sesame.ble.os2.bot.CHSesameBotDevice
+import co.candyhouse.sesame.ble.os2.sesame2.CHError
+import co.candyhouse.sesame.ble.os2.sesame2.CHSesame2Device
+import co.candyhouse.sesame.ble.os3.bike2.CHSesameBike2Device
+import co.candyhouse.sesame.ble.os3.bike2.CHSesameBike3Device
+import co.candyhouse.sesame.ble.os3.biometric.BiometricDeviceType
+import co.candyhouse.sesame.ble.os3.biometric.CHSesameBiometricDeviceImpl
+import co.candyhouse.sesame.ble.os3.biometric.DeviceProfiles
+import co.candyhouse.sesame.ble.os3.bot2.CHSesameBot2Device
+import co.candyhouse.sesame.ble.os3.hub3.CHHub3Device
+import co.candyhouse.sesame.ble.os3.sesame5.CHSesame5Device
+import co.candyhouse.sesame.ble.os3.wm2.CHWifiModule2Device
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import java.util.UUID
+
+enum class CHProductModel {
+    SS2 {
+        override fun productType() = 0 // 設備藍芽廣播
+        override fun deviceModel() = "sesame_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 3"
+        override fun deviceFactory() = CHSesame2Device()
+    },
+    WM2 {
+        override fun productType() = 1 // 設備藍芽廣播
+        override fun deviceModel() = "wm_2"// <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "WiFi Module 2"
+        override fun deviceFactory() = CHWifiModule2Device()
+    },
+    SesameBot1 {
+        override fun productType() = 2 // 設備藍芽廣播
+        override fun deviceModel() = "ssmbot_1" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bot 1"
+        override fun deviceFactory() = CHSesameBotDevice()
+    },
+    BiKeLock {
+        override fun productType() = 3
+        override fun deviceModel() = "bike_1" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bike 1"
+        override fun deviceFactory() = CHSesameBikeDevice()
+    },
+    SS4 {
+        override fun productType() = 4 // 設備藍芽廣播
+        override fun deviceModel() = "sesame_4" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 4"
+        override fun deviceFactory() = CHSesame2Device()
+    },
+    SS5 {
+        override fun productType() = 5
+        override fun deviceModel() = "sesame_5" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 5"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    BiKeLock2 {
+        override fun productType() = 6
+        override fun deviceModel() = "bike_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bike 2"
+        override fun deviceFactory() = CHSesameBike2Device()
+    },
+    SS5PRO {
+        override fun productType() = 7
+        override fun deviceModel() = "sesame_5_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 5 Pro"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    SSMOpenSensor {
+        override fun productType() = 8
+        override fun deviceModel() = "open_sensor_1" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Open Sensor 1"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.OPEN_SENSOR, setOf())
+    },
+    SSMTouchPro {
+        override fun productType() = 9
+        override fun deviceModel() = "ssm_touch_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Touch 1 Pro"
+        override fun deviceFactory() =
+            CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH_PRO, DeviceProfiles.SESAME_TOUCH_PRO)
+    },
+    SSMTouch {
+        override fun productType() = 10
+        override fun deviceModel() = "ssm_touch" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Touch 1"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH, DeviceProfiles.SESAME_TOUCH)
+    },
+    BLEConnector {
+        override fun productType() = 11
+        override fun deviceModel() = "BLE_Connector_1" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "BLE Connector 1"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    Hub3 {
+        override fun productType() = 13
+        override fun deviceModel() = "hub_3" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Hub 3"
+        override fun deviceFactory() = CHHub3Device()
+    },
+    Remote {
+        override fun productType() = 14
+        override fun deviceModel() = "remote" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Remote"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.REMOTE, setOf())
+    },
+    RemoteNano {
+        override fun productType() = 15
+        override fun deviceModel() = "remote_nano" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Remote Nano"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.REMOTE, setOf())
+    },
+    SS5US {
+        override fun productType() = 16
+        override fun deviceModel() = "sesame_5_us" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 5 US"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    SesameBot2 {
+        override fun productType() = 17
+        override fun deviceModel() = "bot_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bot 2"
+        override fun deviceFactory() = CHSesameBot2Device()
+    },
+    SSMFacePro {
+        override fun productType() = 18
+        override fun deviceModel() = "sesame_face_Pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 1 Pro"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO, DeviceProfiles.SESAME_FACE_PRO)
+    },
+    SSMFace {
+        override fun productType() = 19
+        override fun deviceModel() = "sesame_face" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 1"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE, DeviceProfiles.SESAME_FACE)
+    },
+    SS6 {
+        override fun productType() = 20
+        override fun deviceModel() = "sesame_6" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 6"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    SS6Pro {
+        override fun productType() = 21
+        override fun deviceModel() = "sesame_6_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 6 Pro"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    SSMFaceProAI {
+        override fun productType() = 22
+        override fun deviceModel() = "sesame_face_pro_ai" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 1 Pro AI"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO_AI, DeviceProfiles.SESAME_FACE_PRO_AI)
+    },
+    SSMFaceAI {
+        override fun productType() = 23
+        override fun deviceModel() = "sesame_face_ai" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 1 AI"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_AI, DeviceProfiles.SESAME_FACE_AI)
+    },
+    SSMOpenSensor2 {
+        override fun productType() = 24
+        override fun deviceModel() = "open_sensor_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Open Sensor 2"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.OPEN_SENSOR_2, setOf())
+    },
+    SSMTouch2 {
+        override fun productType() = 25
+        override fun deviceModel() = "ssm_touch_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Touch 2"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH, DeviceProfiles.SESAME_TOUCH)
+    },
+    SSMTouch2Pro {
+        override fun productType() = 26
+        override fun deviceModel() = "ssm_touch_2_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Touch 2 Pro"
+        override fun deviceFactory() =
+            CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_TOUCH_PRO, DeviceProfiles.SESAME_TOUCH_PRO)
+    },
+    SSMFace2 {
+        override fun productType() = 27
+        override fun deviceModel() = "sesame_face_2" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 2"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE, DeviceProfiles.SESAME_FACE)
+    },
+    SSMFace2Pro {
+        override fun productType() = 28
+        override fun deviceModel() = "ssm_face_2_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 2 Pro"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO, DeviceProfiles.SESAME_FACE_PRO)
+    },
+    SSM_MIWA {
+        override fun productType() = 29
+        override fun deviceModel() = "sesame_miwa" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame miwa"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    SSMFace2AI {
+        override fun productType() = 30
+        override fun deviceModel() = "sesame_face_2_ai" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 2 AI"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_AI, DeviceProfiles.SESAME_FACE_AI)
+    },
+    SSMFace2ProAI {
+        override fun productType() = 31
+        override fun deviceModel() = "sesame_face_2_pro_ai" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 2 Pro AI"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE_PRO_AI, DeviceProfiles.SESAME_FACE_PRO_AI)
+    },
+    SS6ProSlidingDoor {
+        override fun productType() = 32
+        override fun deviceModel() = "sesame_6_pro_slidingdoor" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame 6 Pro SlidingDoor"
+        override fun deviceFactory() = CHSesame5Device()
+    },
+    BiKeLock3 {
+        override fun productType() = 33
+        override fun deviceModel() = "bike_3" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bike 3"
+        override fun deviceFactory() = CHSesameBike3Device()
+    },
+    SesameBot3 {
+        override fun productType() = 35
+        override fun deviceModel() = "bot_3" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Bot 3"
+        override fun deviceFactory() = CHSesameBot2Device()
+    },
+    Hub3Pro {
+        override fun productType() = 36
+        override fun deviceModel() = "hub_3_pro" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Hub 3 Pro"
+        override fun deviceFactory() = CHHub3Device()
+    },
+    SSMFace3 {
+        override fun productType() = 37
+        override fun deviceModel() = "sesame_face_3" // <- 絕對不要動 ios/server/android必須一致
+        override fun deviceModelName() = "Sesame Face 3"
+        override fun deviceFactory() = CHSesameBiometricDeviceImpl(BiometricDeviceType.SESAME_FACE, DeviceProfiles.SESAME_FACE)
+    };
+
+    abstract fun productType(): Int
+    abstract fun deviceModel(): String
+    abstract fun deviceModelName(): String
+    internal abstract fun deviceFactory(): CHDevices
+
+    companion object {
+        private val values = values()
+        fun getByValue(value: Int) = values.firstOrNull { it.productType() == value }
+        fun getByModel(value: String) = values.firstOrNull { it.deviceModel() == value }
+    }
+}
+
+interface CHDevices {
+    /*
+        ble tx power 根据BLE规范， 固件里可能的设置是-70~20dBm。
+        实际应用的默认 SS5类的锁是 -4dBm, 刷卡机类的设备是 0dBm。
+        APP 里该变量默认设置为21， 表示固件没有给这个设置的值。
+        若该设备的 bee tx power 是 21， 可以认为是旧固件。
+
+        以下内容来自固件， 供参考：
+        /// Inquiry TX power level (in dBm) HCI:7.3.62
+        #define INQ_TX_PWR_DBM_MIN    -70
+        #define INQ_TX_PWR_DBM_DFT    0
+        #define INQ_TX_PWR_DBM_MAX    +20
+    */
+    companion object {
+        const val UNSET_BLE_TX_POWER_VALUE = 21
+
+        // 固件未上报 sensor 检测间隔时的默认值（毫秒）。非 0 的哨兵值， 0 是合法的间隔。
+        const val UNSET_SENSOR_DETECT_INTERVAL_MS: Short = -1
+
+        // 切换点角度的默认值。注意：不要用此值判断“固件是否上报”， -1 可能是合法角度；
+        // 是否上报由 hasLockUnlockSwitchPointSetting 布尔标志决定。
+        const val UNSET_LOCK_UNLOCK_SWITCH_POINT: Short = 45
+    }
+
+    var mechStatus: CHSesameProtocolMechStatus?
+    var deviceTimestamp: Long?
+    var loginTimestamp: Long?
+    var delegate: CHDeviceStatusDelegate?
+    var deviceStatus: CHDeviceStatus
+    var rssi: Int?
+
+    // 为了解决门和墙密封较好的情况下， 蓝牙信号受影响， 门外的刷卡机与门内的锁经常断线的问题， 添加此参数。
+    // 让用户可以自己设置一个合适的蓝牙信号强度阈值， 以保持BLE长连接。
+    var bleTxPower: Byte
+
+    // sensor 检测间隔（毫秒）。由固件通过 SSM3_ITEM_CODE_SENSOR_DETECT_INTERVAL_SETTING 上报；未上报时为 UNSET_SENSOR_DETECT_INTERVAL_MS，
+    // 表示固件不支持该能力， UI 据此决定是否显示相关设置项。
+    var sensorDetectIntervalMs: Short
+
+    // 开锁/上锁切换点角度（度）。由固件通过 SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING 上报。
+    // 是否上报过由 hasLockUnlockSwitchPointSetting 布尔标志决定（不要用 UNSET_LOCK_UNLOCK_SWITCH_POINT 判断， -1 可能是合法角度）。
+    var lockUnlockSwitchPoint: Short
+
+    // 固件是否上报过 SSM3_ITEM_CODE_LOCK_UNLOCK_SWITCH_POINT_SETTING。UI 据此决定是否显示切换点设置项与角度视图标记。
+    var hasLockUnlockSwitchPointSetting: Boolean
+    var deviceId: UUID?
+    var isRegistered: Boolean
+    var productModel: CHProductModel
+    var batteryPercentage: Int?
+
+    fun connect(result: CHResult<CHEmpty>)
+    fun disconnect(result: CHResult<CHEmpty>)
+    fun getKey(): CHDevice {
+        return (this as CHDeviceUtil).sesame2KeyData!!.copy(historyTag = null)
+    }
+
+    fun dropKey(result: CHResult<CHEmpty>)
+    fun getVersionTag(result: CHResult<String>)
+    fun register(result: CHResult<CHEmpty>)
+    fun reset(result: CHResult<CHEmpty>)
+    fun updateFirmware(onResponse: CHResult<BluetoothDevice>)
+    fun updateFirmwareBleOnly(onResponse: CHResult<BluetoothDevice>) {}
+    fun setBleTxPower(txPower: Byte, result: CHResult<CHEmpty>) {}
+    fun setSensorDetectInterval(intervalMs: Short, result: CHResult<CHEmpty>) {}
+    fun setLockUnlockSwitchPoint(point: Short, result: CHResult<CHEmpty>) {}
+    fun setHistoryTag(tag: ByteArray, result: CHResult<CHEmpty>) {
+        if ((this as CHDeviceUtil).sesame2KeyData == null) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return
+        }
+        sesame2KeyData!!.historyTag = tag.copyOf()
+        CHBleSupport.keys.insert(sesame2KeyData!!.copy(historyTag = tag.copyOf())) {
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+        }
+    }
+
+    fun getHistoryTag(): ByteArray? {
+        return (this as CHDeviceUtil).sesame2KeyData?.historyTag
+    }
+}
+
+interface CHSesameConnector : CHDevices {
+    var ssm2KeysMap: MutableMap<String, ByteArray>
+    fun insertSesame(sesame: CHDevices, result: CHResult<CHEmpty>)
+    fun removeSesame(tag: String, result: CHResult<CHEmpty>)
+    fun setRadarSensitivity(payload: ByteArray, result: CHResult<CHEmpty>) {}
+}
+
+interface CHSesameLock : CHDevices {
+
+}
+
+interface CHSesameProtocolMechStatus {
+    val position: Short
+        get() = 0
+    val target: Short?
+        get() = 0
+    val isBatteryCritical: Boolean
+        get() = false
+    val isInLockRange: Boolean
+        get() = false
+    val isInUnlockRange: Boolean
+        get() = !isInLockRange
+    val isStop: Boolean?
+        get() = null
+    val isCritical: Boolean?
+        get() = null
+
+    val data: ByteArray
+}
+
+interface CHDeviceStatusDelegate {
+    fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus) {}
+    fun onMechStatus(device: CHDevices) {}
+    fun onBleTxPowerReceive(device: CHDevices, txPower: Byte) {}
+    fun onSensorDetectIntervalReceive(device: CHDevices, intervalMs: Short) {}
+    fun onLockUnlockSwitchPointReceive(device: CHDevices, point: Short) {}
+}
+
+enum class CHDeviceStatus(val value: CHDeviceLoginStatus) {
+    NoBleSignal(CHDeviceLoginStatus.unlogined),
+    ReceivedAdV(CHDeviceLoginStatus.unlogined),
+    BleConnecting(CHDeviceLoginStatus.unlogined),
+    Reset(CHDeviceLoginStatus.unlogined),
+    WaitingGatt(CHDeviceLoginStatus.unlogined),
+    BleLogining(CHDeviceLoginStatus.unlogined),
+    ReadyToRegister(CHDeviceLoginStatus.unlogined),
+    WaitingForAuth(CHDeviceLoginStatus.unlogined),
+    Registering(CHDeviceLoginStatus.unlogined),
+    DfuMode(CHDeviceLoginStatus.unlogined),
+    DiscoverServices(CHDeviceLoginStatus.unlogined),
+
+    Locked(CHDeviceLoginStatus.logined),
+    Unlocked(CHDeviceLoginStatus.logined),
+    Moved(CHDeviceLoginStatus.logined),
+    NoSettings(CHDeviceLoginStatus.logined),
+
+    //WM2
+    WaitApConnect(CHDeviceLoginStatus.logined),
+    Busy(CHDeviceLoginStatus.unlogined),
+    IotConnected(CHDeviceLoginStatus.logined),
+    IotDisconnected(CHDeviceLoginStatus.logined)
+}
+
+enum class CHDeviceLoginStatus {
+    logined, unlogined
+}
+
+class NSError(message: String, var domain: String, var code: Int) : Error(message)

@@ -1,0 +1,265 @@
+package co.candyhouse.sesame.ble
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.ParcelUuid
+import co.candyhouse.sesame.ble.os2.sesame2.CHError
+import co.candyhouse.sesame.utils.CHEmpty
+import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.CHResultState
+import co.candyhouse.sesame.utils.L
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.Locale
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.Duration.Companion.milliseconds
+
+enum class CHBleStatus {
+    opened, closed,
+}
+
+enum class CHScanStatus(val value: CHBleStatus) {
+    Enable(CHBleStatus.opened), Disable(CHBleStatus.opened), BleClose(CHBleStatus.closed), Error(CHBleStatus.opened),
+}
+
+internal enum class CHDevicesServices(val value: ParcelUuid) {
+    CandyHouseService(ParcelUuid(UUID.fromString("0000FD81-0000-1000-8000-00805f9b34fb"))),
+}
+
+interface CHBleManagerDelegate {
+    fun didDiscoverUnRegisteredCHDevices(devices: List<CHDevices>) {}
+}
+
+interface CHBleStatusDelegate {
+    fun didScanChange(ss: CHScanStatus) {}
+}
+
+@SuppressLint("MissingPermission")
+object CHBleManager {
+    fun restoreDevice(key: CHDevice): CHDevices? = with(key) {
+        if (runCatching { UUID.fromString(deviceUUID) }.isFailure) return null
+
+        val productModel = CHProductModel.getByModel(deviceModel) ?: return null
+        val normalizedUUID = deviceUUID.lowercase(Locale.getDefault())
+
+        val device = chDeviceMap.getOrPut(normalizedUUID) {
+            productModel.deviceFactory()
+        }
+        val deviceUtil = device as? CHDeviceUtil ?: return null
+        device.productModel = productModel
+        deviceUtil.sesame2KeyData = if (deviceUtil.sesame2KeyData == null) {
+            this
+        } else {
+            this.copy(historyTag = deviceUtil.sesame2KeyData?.historyTag)
+        }
+        return device
+    }
+
+    internal lateinit var appContext: Context
+
+    init {
+        CoroutineScope(IO).launch {
+            while (true) {
+                delay(1000.milliseconds)
+                delegate?.didDiscoverUnRegisteredCHDevices(chDeviceMap.map { it.value }.filter { !it.isRegistered })
+            }
+        }
+    }
+
+    operator fun invoke(appContext: Context) {
+        CHBleManager.appContext = appContext
+        try {
+            bluetoothManager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothAdapter = bluetoothManager.adapter
+        } catch (e: Exception) {
+            // 為了google 自動審查虛擬機器報錯
+            L.d("hcia", "no support ble")
+            return
+        }
+        mScanning = if (bluetoothAdapter.isEnabled) CHScanStatus.Disable else CHScanStatus.BleClose
+        appContext.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                try {
+                    val action = intent.action
+                    if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                        when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
+                            BluetoothAdapter.STATE_OFF -> {
+                                disConnectAll {}
+                                connectR.clear()
+                                mScanning = CHScanStatus.BleClose
+
+                                if (bluetoothAdapter.isEnabled) {
+                                    bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
+                                }
+                            }
+
+                            BluetoothAdapter.STATE_ON -> {
+                                mScanning = CHScanStatus.Disable
+                                enableScan {}
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    L.e("CHBleManager", "Operation failed", e)
+                }
+            }
+        }, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+    }
+
+    var statusDelegate: CHBleStatusDelegate? = null
+    var delegate: CHBleManagerDelegate? = null
+    lateinit var bluetoothManager: BluetoothManager
+    lateinit var bluetoothAdapter: BluetoothAdapter
+    internal val connectR: MutableList<String> = ArrayList()
+    internal var chDeviceMap: MutableMap<String?, CHDevices> = ConcurrentHashMap()
+
+    var mScanning: CHScanStatus = CHScanStatus.BleClose
+        set(value) {
+            field = value
+            statusDelegate?.didScanChange(value)
+        }
+    private val bleScanner = object : ScanCallback() {
+
+        override fun onScanFailed(errorCode: Int) {
+            super.onScanFailed(errorCode)
+            if (errorCode != SCAN_FAILED_ALREADY_STARTED) {
+                L.d("hcia", "掃描錯誤 onScanFailed  errorCode:" + errorCode)
+                mScanning = CHScanStatus.Error
+            }
+        }
+
+        override fun onScanResult(callbackType: Int, scanResult: ScanResult) {
+            if (mScanning == CHScanStatus.BleClose) {
+                return
+            }
+            try {
+                CHadv(scanResult).apply {
+                    this.productModel?.let {
+                        chDeviceMap.getOrPut(this.deviceID.toString()) { it.deviceFactory() }.let { device ->
+                            device.productModel = this.productModel!!
+                            (device as? CHDeviceUtil)?.advertisement = this
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                L.e("CHBleManager", "Operation failed", e)
+                L.d("hcia", "藍芽協議不符合 e:" + e)
+            }
+        }
+    }
+
+    fun getConnectRSize(): Int {
+        return connectR.size
+    }
+
+    fun disableScan(result: CHResult<CHEmpty>) {
+        if (!::bluetoothManager.isInitialized || !::bluetoothAdapter.isInitialized) {
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val canScan =
+                appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+            val canConnect =
+                appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+            if (!canScan || !canConnect) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
+            }
+        }
+        try {
+            if (bluetoothAdapter.isEnabled) {
+                bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
+                mScanning = CHScanStatus.Disable
+            } else {
+                mScanning = CHScanStatus.BleClose
+            }
+        } catch (_: SecurityException) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return
+        }
+        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+    }
+
+    fun enableScan(openble: Boolean = false, result: CHResult<CHEmpty>) {
+        // 检查权限
+        if (appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
+            }
+            if (appContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                result.invoke(Result.failure(CHError.BleUnauth.value))
+                return
+            }
+        }
+
+        // 检查 BluetoothAdapter
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            result.invoke(Result.failure(CHError.BleUnauth.value))
+            return
+        }
+
+        // 开启蓝牙
+        if (openble) {
+            bluetoothAdapter.enable()
+        }
+
+        // 检查蓝牙是否开启
+        if (!bluetoothAdapter.isEnabled) {
+            result.invoke(Result.failure(CHError.BlePoweroff.value))
+            return
+        }
+
+        // 检查扫描状态
+        if (mScanning == CHScanStatus.Enable) {
+            result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+            return
+        }
+
+        // 停止之前的扫描
+        bluetoothAdapter.bluetoothLeScanner?.stopScan(bleScanner)
+        mScanning = CHScanStatus.Enable
+
+        // 开始新的扫描
+        val scanFilter = ScanFilter.Builder().setServiceUuid(CHDevicesServices.CandyHouseService.value).build()
+        val scanSettings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+        bluetoothAdapter.bluetoothLeScanner?.startScan(mutableListOf(scanFilter), scanSettings, bleScanner)
+
+        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+    }
+
+
+    fun disConnectAll(result: CHResult<CHEmpty>) {
+        chDeviceMap.forEach {
+            try {
+                it.value.disconnect { }
+            } catch (e: Exception) {
+                L.e("CHBleManager", "Operation failed", e)
+            }
+
+        }
+        result.invoke(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
+    }
+
+}
