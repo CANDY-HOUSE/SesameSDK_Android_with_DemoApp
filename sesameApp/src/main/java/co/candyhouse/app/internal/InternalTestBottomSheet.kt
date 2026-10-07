@@ -21,7 +21,6 @@ import androidx.core.view.WindowInsetsCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.SesameApp
 import co.candyhouse.app.ble.BleController
-import co.candyhouse.app.util.WebResourceSettings
 import co.candyhouse.app.util.dp
 import co.candyhouse.sesame.ble.CHDeviceStatus
 import co.candyhouse.sesame.ble.CHDeviceStatusDelegate
@@ -88,20 +87,6 @@ class InternalTestBottomSheet(context: Context, private val scope: CoroutineScop
             setOnCheckedChangeListener { _, checked ->
                 firmware.edit().putString("firmware_dir", if (checked) "prod" else "dev").apply()
                 showFirmware(checked)
-            }
-        }
-        fun showWebResources(bundled: Boolean) {
-            content.findViewById<TextView>(R.id.tvWebOffline).alpha = if (bundled) 1f else 0.45f
-            content.findViewById<TextView>(R.id.tvWebOnline).alpha = if (bundled) 0.45f else 1f
-        }
-        content.findViewById<Switch>(R.id.switchWebResources).apply {
-            isChecked = WebResourceSettings.isBundled(context)
-            showWebResources(isChecked)
-            thumbTintList = ColorStateList.valueOf(0xff28aeb1.toInt())
-            trackTintList = ColorStateList.valueOf(0xffbfe8e9.toInt())
-            setOnCheckedChangeListener { _, checked ->
-                WebResourceSettings.setBundled(context, checked)
-                showWebResources(checked)
             }
         }
         content.findViewById<TextView>(R.id.appIdentifyId).apply {

@@ -101,12 +101,16 @@ class WebViewBridge(
     }
 
     fun reset() {
-        pending.values.forEach { it.completeExceptionally(IllegalStateException("Web page changed")) }
+        // Completing a deferred can immediately resume requestCloud's finally and mutate pending.
+        val abandoned = pending.values.toList()
         pending.clear()
         generation++
-        documentScope?.cancel()
+        val oldScope = documentScope
+        val oldPort = port
         documentScope = null
-        port?.close()
         port = null
+        oldScope?.cancel()
+        oldPort?.close()
+        abandoned.forEach { it.completeExceptionally(IllegalStateException("Web page changed")) }
     }
 }

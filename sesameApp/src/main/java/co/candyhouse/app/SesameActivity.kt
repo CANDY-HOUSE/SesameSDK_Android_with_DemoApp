@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.nfc.NdefMessage
@@ -31,7 +30,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
@@ -50,16 +48,12 @@ import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.internal.InternalTestBottomSheet
 import co.candyhouse.app.push.PushNotification
+import co.candyhouse.app.ui.QrScanner
 import co.candyhouse.app.ui.AppMenu
 import co.candyhouse.app.ui.AppToolbar
 import co.candyhouse.app.util.AppEnvironment
-import co.candyhouse.app.util.BundledWebResources
-import co.candyhouse.app.util.WebResourceSettings
 import co.candyhouse.app.util.dp
 import co.candyhouse.app.util.openExternalUrl
-import co.candyhouse.app.util.qrcode.core.QRCodeView
-import co.candyhouse.app.util.qrcode.zxing.QRCodeDecoder
-import co.candyhouse.app.util.qrcode.zxing.ZXingView
 import co.candyhouse.app.util.toKeyJson
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHDeviceLoginStatus
@@ -71,7 +65,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.json.JSONArray
 import org.json.JSONObject
@@ -96,8 +89,7 @@ class SesameActivity : ComponentActivity() {
     private lateinit var ble: BleController
     private val bleObserver: (JSONArray) -> Unit = { if (::bridge.isInitialized) emit("snapshot", it) }
     private lateinit var registration: BleRegistrationController
-    private var scanner: ZXingView? = null
-    private var scannerOverlay: FrameLayout? = null
+    private val qrScanner by lazy { QrScanner(this, root, scope, ::emit) }
     private var testSheet: InternalTestBottomSheet? = null
     private var returnUrl: String? = null
     private val actionMenu by lazy { AppMenu(this, { navigate("/app/register") }, ::scanQr, { navigate("/contact-add") }) }
@@ -147,13 +139,7 @@ class SesameActivity : ComponentActivity() {
         ViewCompat.requestApplyInsets(root)
         toolbar = AppToolbar(this, ::handleBack, ::showMenu) {
             testSheet?.dismiss()
-            val wasBundled = WebResourceSettings.isBundled(this)
-            testSheet = InternalTestBottomSheet(this, scope, ble).also { sheet ->
-                sheet.setOnDismissListener {
-                    if (!isFinishing && wasBundled != WebResourceSettings.isBundled(this)) recreate()
-                }
-                sheet.show()
-            }
+            testSheet = InternalTestBottomSheet(this, scope, ble).also { it.show() }
         }
         webContainer = FrameLayout(this)
         val content = LinearLayout(this).apply {
@@ -224,12 +210,7 @@ class SesameActivity : ComponentActivity() {
             mediaPlaybackRequiresUserGesture = true
         }
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
-        L.i("WebResources", "mode=${if (WebResourceSettings.isBundled(this)) "APK_BUNDLE" else "ONLINE"}; origin=$origin")
-        val bundledResources = if (WebResourceSettings.isBundled(this)) BundledWebResources(assets, origin) else null
         web.webViewClient = object : WebViewClient() {
-            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
-                bundledResources?.intercept(request)
-
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 if (!request.isForMainFrame) return false
                 val uri = request.url
@@ -326,57 +307,7 @@ class SesameActivity : ComponentActivity() {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.CAMERA), 12); return
         }
-        if (scanner != null) return
-        val qrView = layoutInflater.inflate(R.layout.view_qr_scanner, root, false) as ZXingView
-        scanner = qrView
-        val overlay = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
-        scannerOverlay = overlay
-        overlay.addView(qrView, FrameLayout.LayoutParams(-1, -1))
-        fun control(icon: Int, description: Int, gravityValue: Int, action: () -> Unit): ImageView {
-            val button = ImageView(this).apply {
-                setImageResource(icon); scaleType = ImageView.ScaleType.FIT_CENTER
-                setPadding(dp(22), dp(22), dp(22), dp(22))
-                contentDescription = getString(description)
-                setOnClickListener { action() }
-            }
-            overlay.addView(button, FrameLayout.LayoutParams(dp(80), dp(80), gravityValue))
-            return button
-        }
-        control(R.drawable.ic_icons_filled_close_white, R.string.close, Gravity.TOP or Gravity.END) {
-            closeScanner(); emit("qrCancelled")
-        }
-        val gallery = control(R.drawable.ic_icons_filled_album, R.string.gallery, Gravity.TOP or Gravity.CENTER_HORIZONTAL) {
-            startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply { type = "image/*"; addCategory(Intent.CATEGORY_OPENABLE) }, 21)
-        }
-        qrView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            val box = qrView.scanBoxView
-            val params = gallery.layoutParams as FrameLayout.LayoutParams
-            val textBottom = box.topOffset + box.rectHeight + box.tipTextMargin + (box.tipTextSl?.height ?: box.tipTextSize)
-            val top = (textBottom + dp(8)).coerceAtMost((overlay.height - dp(80)).coerceAtLeast(0))
-            if (params.topMargin != top) {
-                params.topMargin = top
-                gallery.layoutParams = params
-            }
-        }
-        root.addView(overlay, FrameLayout.LayoutParams(-1, -1))
-        qrView.apply {
-            setDelegate(object : QRCodeView.Delegate {
-                override fun onScanQRCodeSuccess(result: String) {
-                    closeScanner(); emit("qr", result)
-                }
-
-                override fun onCameraAmbientBrightnessChanged(isDark: Boolean) {}
-                override fun onScanQRCodeOpenCameraError() {
-                    closeScanner(); emit("error", "Unable to open camera")
-                }
-            })
-            startCamera(); startSpotAndShowRect()
-        }
-    }
-
-    private fun closeScanner() {
-        scanner?.onDestroy(); scanner = null
-        scannerOverlay?.let { root.removeView(it) }; scannerOverlay = null
+        qrScanner.open()
     }
 
     private fun openWebPage(url: String) {
@@ -491,32 +422,6 @@ class SesameActivity : ComponentActivity() {
         }
     }
 
-    private fun decodeQrImage(uri: Uri) {
-        val currentScanner = scanner ?: return
-        scope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                    contentResolver.openInputStream(uri).use { BitmapFactory.decodeStream(it, null, bounds) }
-                    val options = BitmapFactory.Options().apply {
-                        inSampleSize = 1
-                        while (bounds.outWidth / inSampleSize > 2048 || bounds.outHeight / inSampleSize > 2048) inSampleSize *= 2
-                    }
-                    val bitmap = contentResolver.openInputStream(uri).use { BitmapFactory.decodeStream(it, null, options) }
-                        ?: error("Invalid image")
-                    try {
-                        QRCodeDecoder.syncDecodeQRCode(bitmap) ?: error("No QR code found")
-                    } finally {
-                        bitmap.recycle()
-                    }
-                }
-            }
-            if (scanner !== currentScanner) return@launch
-            result.onSuccess { closeScanner(); emit("qr", it) }
-                .onFailure { emit("error", getString(R.string.qr_not_found)) }
-        }
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, results)
         if (requestCode == 14) {
@@ -533,7 +438,7 @@ class SesameActivity : ComponentActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 21 && resultCode == RESULT_OK) data?.data?.let { decodeQrImage(it) }
+        if (requestCode == 21 && resultCode == RESULT_OK) data?.data?.let { qrScanner.decodeImage(it) }
         if (requestCode == 20) {
             files?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data)); files = null
         }
@@ -542,7 +447,7 @@ class SesameActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume(); if (::web.isInitialized) {
-            scanner?.apply { startCamera(); startSpotAndShowRect() }
+            qrScanner.resume()
             autoUnlockMap.resume()
             NfcAdapter.getDefaultAdapter(this)?.enableForegroundDispatch(
                 this,
@@ -563,14 +468,14 @@ class SesameActivity : ComponentActivity() {
         autoUnlockMap.pause()
         actionMenu.dismiss()
         testSheet?.dismiss(); testSheet = null
-        scanner?.stopCamera(); if (::ble.isInitialized) {
+        qrScanner.pause(); if (::ble.isInitialized) {
             registration.stop(); ble.pause(); web.onPause()
         }; super.onPause()
     }
 
     private fun handleBack() {
-        if (scanner != null) {
-            closeScanner(); emit("qrCancelled")
+        if (qrScanner.isOpen) {
+            qrScanner.close(); emit("qrCancelled")
         } else if (returnUrl != null) {
             val history = web.copyBackForwardList()
             val previous = history.getItemAtIndex(history.currentIndex - 1)?.url
@@ -583,7 +488,7 @@ class SesameActivity : ComponentActivity() {
         autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++
-        testSheet?.setOnDismissListener(null); testSheet?.dismiss(); closeScanner(); registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset(); files?.onReceiveValue(
+        testSheet?.setOnDismissListener(null); testSheet?.dismiss(); qrScanner.close(); registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset(); files?.onReceiveValue(
             null
         )
         webContainer.removeView(web); web.destroy(); scope.cancel()

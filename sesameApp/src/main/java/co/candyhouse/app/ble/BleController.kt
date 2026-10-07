@@ -5,6 +5,7 @@ import android.util.Log
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
+import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.data.BleBackend
 import co.candyhouse.app.data.local.DeviceKeyDatabase
 import co.candyhouse.sesame.ble.CHBleManager
@@ -84,11 +85,9 @@ class BleController(
         private set
     val observers = mutableSetOf<(JSONArray) -> Unit>()
     fun allDevices(): List<CHDevices> = devices.values.toList()
-    suspend fun restoreSaved() {
-        if (devices.isNotEmpty() || receivedCloudList) return
-        val keys = suspendCancellableCoroutine<List<CHDevice>> { continuation ->
-            DeviceKeyDatabase.Keys.getAllDB { if (continuation.isActive) continuation.resumeWith(it) }
-        }
+    suspend fun restoreSaved() = updates.withLock {
+        if (devices.isNotEmpty() || receivedCloudList) return@withLock
+        val keys = KeyHandoff(DeviceKeyDatabase.context).saved()
         keys.forEach { key ->
             CHBleManager.restoreDevice(key)?.let { device ->
                 appliedKeys[key.deviceUUID.uppercase()] = key
@@ -222,6 +221,7 @@ class BleController(
                 val incoming = keys.map { it.deviceUUID.uppercase() }.toSet()
                 receivedCloudList = true
                 cloudRows = rows
+                KeyHandoff(DeviceKeyDatabase.context).remember(rows)
                 // Keep unsent keys on disk; an H5 empty list must not erase legacy guest keys.
                 devices.keys.filter { it !in incoming }.forEach { id ->
                     peripheralSettings.forget(id)

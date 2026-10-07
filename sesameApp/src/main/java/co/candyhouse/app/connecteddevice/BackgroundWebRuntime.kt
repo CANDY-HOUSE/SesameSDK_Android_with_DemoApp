@@ -11,8 +11,6 @@ import co.candyhouse.app.ble.BleRegistrationController
 import co.candyhouse.app.bridge.NativeRequestHandler
 import co.candyhouse.app.bridge.WebViewBridge
 import co.candyhouse.app.data.KeyHandoff
-import co.candyhouse.app.util.BundledWebResources
-import co.candyhouse.app.util.WebResourceSettings
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,10 +45,8 @@ class BackgroundWebRuntime(private val app: SesameApp) {
             bridge.requestCloud(op, body, id)
         }
         web.settings.apply { javaScriptEnabled = true; domStorageEnabled = true; allowFileAccess = false; userAgentString += " SesameAndroid/1" }
-        val resources = if (WebResourceSettings.isBundled(app)) BundledWebResources(app.assets, BuildConfig.WEB_ORIGIN) else null
         web.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = !bridge.isTrusted(request.url)
-            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest) = resources?.intercept(request)
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                 bridge.reset()
             }

@@ -80,6 +80,13 @@ class NativeRequestHandler(
                     reply(true)
                 }
 
+                "home.offlineDevices" -> {
+                    ble.restoreSaved()
+                    requestBle()
+                    reply(true, JSONObject().put("devices", keyHandoff.offlineDevices()).put("language", language()))
+                    ble.snapshot()
+                }
+
                 "home.localKeys" -> reply(true, JSONArray().apply {
                     keyHandoff.pending().forEach { put(it.toKeyJson().put("deviceName", keyHandoff.name(it)).put("keyLevel", keyHandoff.level(it))) }
                 })

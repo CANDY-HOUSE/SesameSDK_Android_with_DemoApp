@@ -2,26 +2,26 @@
 
 # SesameOS3 Android
 
-[日本語](README.md) | [简体中文](README_zh-CN.md) | English
+[日本語](README.md) | [简体中文](README_zh-CN.md) | [English](README_en.md)
 
-An open-source project containing the CANDY HOUSE Android app and Sesame SDK. The project currently focuses on `co.candyhouse.sesame.ble.os3` and provides BLE connectivity, registration, control, state synchronization, and firmware updates for Sesame OS3 devices.
+Android Web App host and standalone Sesame BLE SDK. Biz3 owns pages, accounts and cloud business logic; Android supplies WebView, Bluetooth and platform capabilities.
 
-- [CANDY HOUSE official website](https://jp.candyhouse.co/)
-- [Google Play](https://play.google.com/store/apps/details?id=co.candyhouse.sesame2)
-- [GitHub Releases](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases)
+```mermaid
+flowchart LR
+  Biz[Biz3 React UI / Business] <-->|MessagePort| App[sesameApp Android]
+  App --> SDK[sesameSdk BLE]
+  SDK <--> Device[SESAME]
+  App --> DB[(Room keys)]
+  Biz <-->|WebSocket| AWS[Cloud services]
+```
 
-## Integrating the SDK
+## Public SDK integration
 
-### Requirements
+Integrate `sesameSdk` into your Android application for BLE discovery, connection, registration, device control and status callbacks. Biz and Web App integration are not required. Your application chooses its UI, accounts, backend and storage.
 
-- Android Studio
-- JDK 17
-- Android SDK 36
-- minSdk 24
+Android Studio, JDK 17, Android SDK 36; minSdk 24.
 
 ### 1. Add the dependency
-
-To use the source module in the same project:
 
 ```groovy
 dependencies {
@@ -29,7 +29,7 @@ dependencies {
 }
 ```
 
-To use JitPack, add the repository to `settings.gradle`:
+To use JitPack, add the repository in `settings.gradle`:
 
 ```groovy
 dependencyResolutionManagement {
@@ -41,97 +41,93 @@ dependencyResolutionManagement {
 }
 ```
 
-Then add the SDK to your app's `build.gradle`. Replace `<version>` with the desired tag from [Releases](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases).
+Then add the SDK dependency in the application’s `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesame-sdk:<version>'
+    implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>'
 }
 ```
 
-### 2. Configure permissions
+Replace `<version>` with the desired release tag. Use the version and module coordinates listed on the [JitPack page](https://jitpack.io/#CANDY-HOUSE/SesameSDK_Android_with_DemoApp); tags are available in [Releases](https://github.com/CANDY-HOUSE/SesameSDK_Android_with_DemoApp/releases).
 
-Add the required permissions to your app's `AndroidManifest.xml`. Request location and Bluetooth runtime permissions before starting a BLE scan.
+### 2. Permissions
 
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-<uses-permission android:name="android.permission.INTERNET" />
+The SDK manifest declares Bluetooth permissions. Request the runtime permissions required for scanning and connecting on the target Android version; configure location permission where required for scanning on older Android versions. Start scanning after permissions are granted and Bluetooth is enabled.
 
-<uses-feature
-    android:name="android.hardware.bluetooth_le"
-    android:required="false" />
-```
+### 3. Initialize
 
-### 3. Initialize CANDY HOUSE services
-
-To use Sesame OS3 registration and cloud features, complete the following initialization when your application starts:
-
-1. Add `AWSCognitoAuthPlugin` and `AWSApiPlugin` to Amplify, then call `Amplify.configure(...)` with your Cognito and API configuration.
-2. Call `DeviceData.initialize(applicationContext)`.
-3. Call `CHBleManager(applicationContext)`.
-
-See [`AWSStatus.kt`](app/src/main/java/co/candyhouse/app/data/auth/AWSStatus.kt) and [`BaseApp.kt`](app/src/main/java/co/candyhouse/app/base/BaseApp.kt) in the Demo App for complete examples.
+Initialize `CHBleSupport` and `CHBleManager` in your Application. `backend` implements `CHBleHost` for registration, restricted-key signing and device-data callbacks. `keyStore` implements `CHKeyPersistence` to save and delete keys; `gatewayTenantId` identifies the gateway tenant. The SDK does not prescribe a backend provider, transport or database. See [CHBleSupport.kt](sesameSdk/src/main/java/co/candyhouse/sesame/ble/CHBleSupport.kt) for the interfaces.
 
 ```kotlin
-override fun onCreate() {
-    super.onCreate()
-
-    // Initialize after configuring Amplify Auth and API
-    DeviceData.initialize(applicationContext)
-    CHBleManager(applicationContext)
-}
+CHBleSupport.initialize(backend, keyStore, gatewayTenantId)
+CHBleManager(applicationContext)
 ```
 
-The public Demo configuration for CANDY HOUSE services is intended for evaluation and may be subject to request or usage limits. For production, use your own Firebase, AWS, and Google Maps configuration, and never commit credentials to the repository.
+### 4. Discover, connect and register
 
-The Demo App also requires the following local configuration files:
-
-- `app.properties`: CANDY HOUSE API, AWS Cognito/IoT, and Google Maps configuration
-- `app/google-services.json`: Firebase configuration
-
-### 4. Discover and register a device
-
-After permissions are granted, start scanning and listen for unregistered devices. Connect to a device and call `register` when its state becomes `ReadyToRegister`.
+Display unregistered devices from the discovery callback. Connect to the device selected by the user and register after it reaches `ReadyToRegister`. Registration keys are saved through `CHKeyPersistence`.
 
 ```kotlin
+import co.candyhouse.sesame.ble.*
+
 CHBleManager.delegate = object : CHBleManagerDelegate {
     override fun didDiscoverUnRegisteredCHDevices(devices: List<CHDevices>) {
-        val device = devices.firstOrNull() ?: return
+        // Display discovered devices for the user to select.
+    }
+}
+CHBleManager.enableScan { result ->
+    result.onFailure { /* Handle permission or Bluetooth errors. */ }
+}
 
-        device.delegate = object : CHDeviceStatusDelegate {
-            override fun onBleDeviceStatusChanged(
-                device: CHDevices,
-                status: CHDeviceStatus,
-                shadowStatus: CHDeviceStatus?
-            ) {
-                if (status == CHDeviceStatus.ReadyToRegister) {
-                    device.register { result ->
-                        result.onSuccess { /* Registration succeeded */ }
-                        result.onFailure { /* Registration failed */ }
-                    }
+fun registerDevice(device: CHDevices) {
+    var registering = false
+    device.delegate = object : CHDeviceStatusDelegate {
+        override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus) {
+            if (status == CHDeviceStatus.ReadyToRegister && !registering) {
+                registering = true
+                device.register { result ->
+                    result.onSuccess { /* Registration completed. */ }
+                    result.onFailure { /* Handle registration failure. */ }
                 }
             }
         }
-
-        device.connect { }
     }
-}
-
-CHBleManager.enableScan { result ->
-    result.onFailure { /* Check permissions or Bluetooth state */ }
+    device.connect { result ->
+        result.onFailure { /* Handle connection failure. */ }
+    }
 }
 ```
 
+### 5. Restore keys and control devices
+
+Read a `CHDevice` from your own storage (`savedKey` below), restore it with `restoreDevice`, and assign a `CHDeviceStatusDelegate` (`statusDelegate` below) for connection and mechanical-state updates. Keep scanning enabled and wait for BLE authentication before sending commands.
+
+```kotlin
+val device = CHBleManager.restoreDevice(savedKey)
+device?.delegate = statusDelegate
+device?.connect { result ->
+    result.onFailure { /* Handle connection failure. */ }
+}
+
+// After BLE authentication completes, for a CHSesame5-compatible device:
+(device as? co.candyhouse.sesame.ble.os3.sesame5.CHSesame5)?.toggle { result ->
+    result.onFailure { /* Handle command failure. */ }
+}
+```
+
+Use the interface for the actual device: `CHSesame5` for compatible locks, or the relevant Bike, Bot, Biometric or Hub interface. Full keys support offline BLE operation; restricted-key authentication requires a signing service. Call `CHBleManager.disableScan` when scanning is no longer needed.
+
 ## Project structure
 
-| Module | Description |
+| Module / path | Responsibility |
 | --- | --- |
-| `app` | Android Demo App with device, account, and friend-related screens and flows |
-| `sesameSdk` | BLE, OS3 device implementations, and host service contracts |
-| `sesameSdk/.../ble` | Public device APIs, product models, and device management |
-| `sesameSdk/.../ble/os3` | Currently maintained OS3 protocol and device implementations |
+| `sesameApp` | Android application: WebView host, BLE bridge and platform capabilities |
+| `sesameSdk` | Standalone BLE SDK: discovery, connection, registration, control and status callbacks |
+| `sesameSdk/src/main/java/co/candyhouse/sesame/ble` | Public device interfaces, product models and BLE management |
+| `sesameSdk/src/main/java/co/candyhouse/sesame/ble/os3` | Sesame OS3 protocols and device implementations |
+| `sesameApp/src/main/java/co/candyhouse/app/data` | Application-side key persistence |
+| `app.properties` | Shared application configuration and Web App environment URLs |
 
 ## OS3 device architecture
 
@@ -184,16 +180,61 @@ The supported product range is defined by `CHProductModel` and grouped below by 
 
 Related APIs: `CHCardCapable`, `CHPassCodeCapable`, `CHFingerPrintCapable`, `CHPalmCapable`, `CHFaceCapable`, and `CHRemoteNanoCapable`.
 
-## Build
+## Internal development
 
-```bash
-./gradlew :app:assembleDebug
+Keep shared project configuration in `app.properties`, loaded by the root `build.gradle` and managed in the private repository. Use ignored `local.properties` only for developer-specific settings such as `sdk.dir`. Use your Firebase configuration in `sesameApp/google-services.json`.
+
+```properties
+aws.cognito.identityPoolId=<YOUR_IDENTITY_POOL_ID>
+aws.cognito.userPoolId=<YOUR_USER_POOL_ID>
+aws.cognito.appClientId=<YOUR_APP_CLIENT_ID>
+google.maps.apiKey=<YOUR_MAPS_KEY>
+candyhouse.sesame.web.dev=http://localhost:3000
+candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
 ```
 
-## Maintenance policy
+`candyhouse.sesame.web.dev` selects the Debug page URL; `candyhouse.sesame.web.prod` selects the Release/CI page URL. These settings select the Biz staging or production environment independently of the Android branch name. The Biz staging branch can be deployed independently; production is `https://biz.candyhouse.co`. Rebuild Android after changing its page URL.
 
-- Add new products to `CHProductModel` and map them to the corresponding OS3 Device implementation.
-- Keep shared behavior in base classes; implement product differences through dedicated implementations or Capability composition.
-- `co.candyhouse.sesame.ble.os2` contains legacy compatibility code and is outside the current maintenance scope.
+```bash
+# Biz3
+cd ../Biz3
+yarn install
+yarn dev
+# Android
+adb reverse tcp:3000 tcp:3000
+cd ../SesameOS3_Android
+./gradlew :sesameApp:assembleDebug
+```
 
-For this H5 branch, see [Android architecture](docs/androidH5Architecture.md). Standalone SDK hosts must initialize `CHBleSupport` with `CHBleHost`, `CHKeyPersistence`, and the gateway tenant ID before starting BLE. The JitPack coordinates above refer to existing releases; this branch is not published.
+## Responsibilities
+
+```mermaid
+flowchart TB
+  Activity[SesameActivity lifecycle] --> Bridge[WebViewBridge trusted origin]
+  Activity --> QR[QrScanner camera / gallery]
+  Bridge --> Handler[NativeRequestHandler]
+  Handler --> BLE[BleController / Registration]
+  Handler --> Platform[NFC / Push / AutoUnlock / Firmware]
+  BLE --> Backend[BleBackend]
+  Backend --> Biz[Biz WebSocket runtime]
+```
+
+Amplify Auth remains for legacy session handoff; core-kotlin supplies the suspend APIs currently used. There is no Amplify API plugin. The background WebView reuses Biz cloud transport; native components handle NFC, notifications, auto-unlock, firmware transfer and scanning.
+
+## Startup and offline operation
+
+```mermaid
+flowchart LR
+  Start[Cold start] --> Page{Network HTML available?}
+  Page -->|Yes| Online[Latest Biz page]
+  Page -->|No| Cache[Previously cached page]
+  Online --> Local[Local device list / BLE]
+  Cache --> Local
+  Local -->|Cloud ready| Cloud[Updated device list]
+```
+
+The APK contains no Biz page bundle. A Service Worker loads HTML from the network first and publishes the cached entry after its assets are cached successfully. Offline starts reuse that page. A first installation, new origin or cleared WebView storage needs one online visit. The OS may evict caches; a never-online start is not guaranteed.
+
+Offline devices come from the local database, without waiting for Cognito or WebSocket. Only display metadata crosses the offline bridge; keys stay native. A complete online list updates local visibility so signed-out accounts do not reappear; pending keys survive. Restricted keys still require online signing. Cloud actions, registration and firmware downloads need connectivity.
+
+An in-place update with the same applicationId, compatible signing and permitted versionCode preserves the database and preferences unless data is cleared. LegacySession bridges previous logins; KeyHandoff queues guest keys for synchronization.
