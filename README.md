@@ -6,6 +6,8 @@
 
 Android Web App のホストと独立した Sesame BLE SDK です。画面・アカウント・クラウド業務は Biz3、WebView・Bluetooth・OS 機能は Android が担当します。
 
+**Biz は業務ロジック、Android はネイティブ機能、Bridge は通信を担当します。**
+
 ```mermaid
 flowchart LR
   Biz[Biz3 React UI / Business] <-->|MessagePort| App[sesameApp Android]
@@ -19,7 +21,7 @@ flowchart LR
 
 `sesameSdk` を Android アプリに組み込むことで、BLE スキャン・接続・登録・デバイス操作・状態通知を利用できます。Biz や Web App の導入は不要です。画面、アカウント、バックエンド、保存方式は導入側で選択します。
 
-Android Studio、JDK 17、Android SDK 36。minSdk は 24 です。
+ソースのビルドには Android Studio とリポジトリの Gradle wrapper を使用します。`gradle/gradle-daemon-jvm.properties` は Gradle daemon に JDK 21 を指定し、両モジュールの Java ソースとバイトコードの互換レベルは 17 です。compileSdk は 36、アプリの targetSdk は 36、minSdk は 24 です。
 
 ### 1. 依存関係の追加
 
@@ -53,7 +55,7 @@ dependencies {
 
 ### 2. 権限
 
-SDK の Manifest に Bluetooth 権限を宣言しています。対象 Android バージョンに応じてスキャン・接続の実行時権限を取得してください。旧 Android のスキャンに必要な位置情報権限は導入側で設定します。権限取得と Bluetooth 有効化の後にスキャンを開始します。
+SDK の Manifest に Bluetooth 権限を宣言しています。現在の `CHBleManager.enableScan` は対応するすべての Android バージョンで `ACCESS_FINE_LOCATION` を確認するため、ホスト側で宣言・取得してください。Android 12（API 31）以降は `BLUETOOTH_SCAN` と `BLUETOOTH_CONNECT` も必要です。これは現在の SDK 実装の要件であり、位置情報権限は旧 Android だけの要件ではありません。権限取得と Bluetooth 有効化の後にスキャンを開始します。
 
 ### 3. 初期化
 
@@ -160,10 +162,10 @@ flowchart TB
 | `CHSesameBike2Device` | Sesame Bike 2 |
 | `CHSesameBike3Device` | Sesame Bike 3（指紋機能を組み合わせ） |
 | `CHSesameBot2Device` | Sesame Bot 2、Sesame Bot 3 |
-| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2、Remote、Remote Nano、Sesame Touch 1/1 Pro/2/2 Pro、Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI |
+| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2、Remote、Remote Nano、Sesame Touch 1/1 Pro/2/2 Pro、Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI/3 |
 | `CHHub3Device` | Hub 3、Hub 3 Pro |
 
-> メンテナンス終了：Sesame 3（`SS2`）、WiFi Module 2（`WM2`）、Sesame Bot 1、Sesame Bike 1、Sesame 4（`SS4`）。
+> メンテナンス終了：Sesame 3（`SS2`）、WiFi Module 2（`WM2`）、Sesame Bot 1、Sesame Bike 1、Sesame 4（`SS4`）。これらの旧モデルは `CHProductModel` と各実装に残っています。上記の OS3 製品表には含めていません。
 
 ### 生体認証機能
 
@@ -195,18 +197,28 @@ candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
 
 Debug のページ URL は `candyhouse.sesame.web.dev`、Release/CI は `candyhouse.sesame.web.prod` で指定します。Android のブランチ名とは独立して、Biz のステージング環境または本番環境を選択できます。Biz のステージングブランチは個別に配信でき、本番 URL は `https://biz.candyhouse.co` です。APP のページ URL を変更した場合は Android を再ビルドします。
 
+現在の `app.properties` の Release/CI URL は、本番ではなくステージングを指しています。
+
+Web APP ルートから、それぞれ別のターミナルで実行します。Biz の開発サーバーは起動したままにします。
+
 ```bash
-# Biz3
-cd ../Biz3
-yarn install
+# Terminal 1: Biz3
+cd Biz3
+nvm use
+yarn install --frozen-lockfile
 yarn dev
-# Android
+```
+
+```bash
+# Terminal 2: Android
+cd SesameOS3_Android
 adb reverse tcp:3000 tcp:3000
-cd ../SesameOS3_Android
 ./gradlew :sesameApp:assembleDebug
 ```
 
 ## 役割分担
+
+Biz は業務ルール・状態管理・画面操作・クラウド要求を実装します。Android は WebView・BLE・権限・永続化・OS 機能を提供します。Bridge は信頼元の検証と要求・応答・イベントの通信を担当し、業務ロジックを持ちません。
 
 ```mermaid
 flowchart TB
@@ -235,6 +247,6 @@ flowchart LR
 
 APK に Biz の画面資源を同梱しません。Service Worker は HTML をネットワーク優先で取得し、必要な資源のキャッシュ成功後にオフライン入口を保存します。初回インストール・ドメイン変更・WebView データ削除後は一度オンラインで起動してください。OS によるキャッシュ削除があるため、未接続の初回起動は保証しません。
 
-オフライン一覧はローカル DB から取得し、Cognito・WebSocket を待ちません。画面には表示情報のみを渡し、鍵はネイティブに保持します。完全なオンライン一覧で表示範囲を更新し、ログアウトしたアカウントの再表示を防ぎます。未同期鍵は保持します。制限付き鍵の署名、クラウド操作、登録、ファームウェア取得には通信が必要です。
+オフライン一覧はローカル DB から取得し、Cognito・WebSocket を待ちません。`offlineDevices` は名前・モデル・UUID・権限レベルのみを返し、鍵は返しません。オンラインの登録、鍵の同期・共有、制限付き鍵の署名では、必要な鍵情報が信頼された Bridge を通過します。オフライン一覧の制限は、すべての鍵が Biz を通らないことを意味しません。完全なオンライン一覧で表示範囲を更新し、ログアウトしたアカウントの再表示を防ぎます。未同期鍵は保持します。制限付き鍵の署名、クラウド操作、登録、ファームウェア取得には通信が必要です。
 
 同じ applicationId・互換署名・許可される versionCode による上書き更新では、データを消去しなければ DB と設定を引き継ぎます。LegacySession が旧ログインを、KeyHandoff がゲスト鍵の同期を担当します。

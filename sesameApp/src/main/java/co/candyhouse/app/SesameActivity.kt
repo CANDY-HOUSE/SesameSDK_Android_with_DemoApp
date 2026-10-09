@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -48,9 +49,9 @@ import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.internal.InternalTestBottomSheet
 import co.candyhouse.app.push.PushNotification
-import co.candyhouse.app.ui.QrScanner
 import co.candyhouse.app.ui.AppMenu
 import co.candyhouse.app.ui.AppToolbar
+import co.candyhouse.app.ui.QrScanner
 import co.candyhouse.app.util.AppEnvironment
 import co.candyhouse.app.util.dp
 import co.candyhouse.app.util.openExternalUrl
@@ -148,7 +149,10 @@ class SesameActivity : ComponentActivity() {
             addView(webContainer, LinearLayout.LayoutParams(-1, 0, 1f))
         }
         root.addView(content, FrameLayout.LayoutParams(-1, -1))
-        pageProgress = ProgressBar(this).apply { visibility = View.GONE }
+        pageProgress = ProgressBar(this).apply {
+            visibility = View.GONE
+            indeterminateTintList = ColorStateList.valueOf(0xff28aeb1.toInt())
+        }
         root.addView(pageProgress, FrameLayout.LayoutParams(dp(40), dp(40), Gravity.CENTER))
     }
 

@@ -39,7 +39,7 @@ android {
         applicationId 'co.candyhouse.sesame2'
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
-        versionCode 901
+        versionCode 910
         versionName '3.0.266'
         buildConfigField("String", "GIT_HASH", "\"${getGitHash}\"")
         // AWS Cognito 配置

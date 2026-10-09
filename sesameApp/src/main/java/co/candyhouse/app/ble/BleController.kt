@@ -5,8 +5,8 @@ import android.util.Log
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
-import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.data.BleBackend
+import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.data.local.DeviceKeyDatabase
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHBleStatusDelegate
@@ -489,8 +489,8 @@ class BleController(
             devices.forEach { (id, device) ->
                 val connected = device.deviceStatus.value == CHDeviceLoginStatus.logined
                 val row = JSONObject().put("deviceUUID", id).put("bleConnected", connected)
-                    .put("scanStatus", CHBleManager.mScanning.name).put("connectionCount", CHBleManager.getConnectRSize())
-                    .put("bleStatus", device.deviceStatus.name).put("showBle", device is CHSesameLock)
+                    .put("bluetoothOff", CHBleManager.mScanning == CHScanStatus.BleClose)
+                    .put("bleState", device.deviceStatus.webBleState()).put("showBle", device is CHSesameLock)
                     .put("position", if (connected && (device is CHSesame2 || device is CHSesame5)) device.mechStatus?.position else JSONObject.NULL)
                     .put("batteryPercentage", if (connected) device.batteryPercentage else JSONObject.NULL)
                 row.put("settings", LockSettings.snapshot(device))

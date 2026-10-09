@@ -6,6 +6,8 @@
 
 Android Web App host and standalone Sesame BLE SDK. Biz3 owns pages, accounts and cloud business logic; Android supplies WebView, Bluetooth and platform capabilities.
 
+**Biz owns business logic, Android provides native capabilities, and Bridge handles communication.**
+
 ```mermaid
 flowchart LR
   Biz[Biz3 React UI / Business] <-->|MessagePort| App[sesameApp Android]
@@ -19,7 +21,7 @@ flowchart LR
 
 Integrate `sesameSdk` into your Android application for BLE discovery, connection, registration, device control and status callbacks. Biz and Web App integration are not required. Your application chooses its UI, accounts, backend and storage.
 
-Android Studio, JDK 17, Android SDK 36; minSdk 24.
+Build the source with Android Studio and the repository Gradle wrapper. `gradle/gradle-daemon-jvm.properties` selects JDK 21 for the Gradle daemon; both modules use Java 17 source and bytecode compatibility. compileSdk is 36, application targetSdk is 36, and minSdk is 24.
 
 ### 1. Add the dependency
 
@@ -53,7 +55,7 @@ Replace `<version>` with the desired release tag. Use the version and module coo
 
 ### 2. Permissions
 
-The SDK manifest declares Bluetooth permissions. Request the runtime permissions required for scanning and connecting on the target Android version; configure location permission where required for scanning on older Android versions. Start scanning after permissions are granted and Bluetooth is enabled.
+The SDK manifest declares Bluetooth permissions. The current `CHBleManager.enableScan` checks `ACCESS_FINE_LOCATION` on every supported Android version, so the host must declare and request it. Android 12 (API 31) and later also require `BLUETOOTH_SCAN` and `BLUETOOTH_CONNECT`. This is a requirement of the current SDK implementation; location permission is not limited to older Android versions. Start scanning after permissions are granted and Bluetooth is enabled.
 
 ### 3. Initialize
 
@@ -160,10 +162,10 @@ The supported product range is defined by `CHProductModel` and grouped below by 
 | `CHSesameBike2Device` | Sesame Bike 2 |
 | `CHSesameBike3Device` | Sesame Bike 3 (with fingerprint capability) |
 | `CHSesameBot2Device` | Sesame Bot 2, Sesame Bot 3 |
-| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2, Remote, Remote Nano, Sesame Touch 1/1 Pro/2/2 Pro, Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI |
+| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2, Remote, Remote Nano, Sesame Touch 1/1 Pro/2/2 Pro, Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI/3 |
 | `CHHub3Device` | Hub 3, Hub 3 Pro |
 
-> No longer maintained: Sesame 3 (`SS2`), WiFi Module 2 (`WM2`), Sesame Bot 1, Sesame Bike 1, and Sesame 4 (`SS4`).
+> No longer maintained: Sesame 3 (`SS2`), WiFi Module 2 (`WM2`), Sesame Bot 1, Sesame Bike 1, and Sesame 4 (`SS4`). These legacy models remain in `CHProductModel` with their implementations; they are not listed in the OS3 table above.
 
 ### Biometric capabilities
 
@@ -195,18 +197,28 @@ candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
 
 `candyhouse.sesame.web.dev` selects the Debug page URL; `candyhouse.sesame.web.prod` selects the Release/CI page URL. These settings select the Biz staging or production environment independently of the Android branch name. The Biz staging branch can be deployed independently; production is `https://biz.candyhouse.co`. Rebuild Android after changing its page URL.
 
+The current Release/CI URL in `app.properties` still points to staging, not the production domain.
+
+Run these in two terminals, each starting at the Web APP root. Keep the Biz dev server running:
+
 ```bash
-# Biz3
-cd ../Biz3
-yarn install
+# Terminal 1: Biz3
+cd Biz3
+nvm use
+yarn install --frozen-lockfile
 yarn dev
-# Android
+```
+
+```bash
+# Terminal 2: Android
+cd SesameOS3_Android
 adb reverse tcp:3000 tcp:3000
-cd ../SesameOS3_Android
 ./gradlew :sesameApp:assembleDebug
 ```
 
 ## Responsibilities
+
+Biz implements business rules, state management, page interactions and cloud requests. Android provides WebView, BLE, permissions, persistence and platform capabilities. Bridge validates trusted origins and carries requests, responses and events without owning business logic.
 
 ```mermaid
 flowchart TB
@@ -235,6 +247,6 @@ flowchart LR
 
 The APK contains no Biz page bundle. A Service Worker loads HTML from the network first and publishes the cached entry after its assets are cached successfully. Offline starts reuse that page. A first installation, new origin or cleared WebView storage needs one online visit. The OS may evict caches; a never-online start is not guaranteed.
 
-Offline devices come from the local database, without waiting for Cognito or WebSocket. Only display metadata crosses the offline bridge; keys stay native. A complete online list updates local visibility so signed-out accounts do not reappear; pending keys survive. Restricted keys still require online signing. Cloud actions, registration and firmware downloads need connectivity.
+Offline devices come from the local database, without waiting for Cognito or WebSocket. `offlineDevices` returns only names, models, UUIDs and permission levels, without keys. Online registration, key synchronization/sharing and restricted-key signing still pass required key material through the trusted Bridge; the offline-list restriction does not mean keys never pass through Biz. A complete online list updates local visibility so signed-out accounts do not reappear; pending keys survive. Restricted keys still require online signing. Cloud actions, registration and firmware downloads need connectivity.
 
 An in-place update with the same applicationId, compatible signing and permitted versionCode preserves the database and preferences unless data is cleared. LegacySession bridges previous logins; KeyHandoff queues guest keys for synchronization.

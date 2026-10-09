@@ -28,8 +28,14 @@ class QrScanner(
     private var scanner: ZXingView? = null
     private var scannerOverlay: FrameLayout? = null
     val isOpen get() = scanner != null
-    fun resume() { scanner?.apply { startCamera(); startSpotAndShowRect() } }
-    fun pause() { scanner?.stopCamera() }
+    fun resume() {
+        scanner?.apply { startCamera(); startSpotAndShowRect() }
+    }
+
+    fun pause() {
+        scanner?.stopCamera()
+    }
+
     fun open() {
         if (scanner != null) return
         val qrView = activity.layoutInflater.inflate(R.layout.view_qr_scanner, root, false) as ZXingView

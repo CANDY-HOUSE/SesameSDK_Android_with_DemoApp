@@ -56,8 +56,10 @@ class KeyHandoff(context: Context) {
 
     suspend fun offlineDevices() = JSONArray().apply {
         saved().forEach { key ->
-            put(JSONObject().put("deviceUUID", key.deviceUUID.uppercase()).put("deviceModel", key.deviceModel)
-                .put("deviceName", name(key)).put("keyLevel", level(key)))
+            put(
+                JSONObject().put("deviceUUID", key.deviceUUID.uppercase()).put("deviceModel", key.deviceModel)
+                    .put("deviceName", name(key)).put("keyLevel", level(key))
+            )
         }
     }
 

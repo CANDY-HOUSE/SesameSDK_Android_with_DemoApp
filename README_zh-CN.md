@@ -6,6 +6,8 @@
 
 Android Web App 宿主与独立 Sesame BLE SDK。页面、账号和云端业务由 Biz3 实现；Android 提供 WebView、蓝牙及系统能力。
 
+**Biz 负责业务逻辑，Android 负责原生能力，Bridge 负责通信。**
+
 ```mermaid
 flowchart LR
   Biz[Biz3 React UI / Business] <-->|MessagePort| App[sesameApp Android]
@@ -19,7 +21,7 @@ flowchart LR
 
 将 `sesameSdk` 集成到自己的 Android 应用即可使用蓝牙扫描、连接、注册、设备控制和状态回调，无需接入 Biz 或 Web App。界面、账号、服务端和数据存储由接入方选择。
 
-Android Studio、JDK 17、Android SDK 36；minSdk 24。
+源码构建使用 Android Studio 和仓库内的 Gradle wrapper。`gradle/gradle-daemon-jvm.properties` 指定 Gradle daemon 使用 JDK 21；两个模块的 Java 源码兼容级别和字节码目标为 17。compileSdk 为 36，应用 targetSdk 为 36，minSdk 为 24。
 
 ### 1. 添加依赖
 
@@ -53,7 +55,7 @@ dependencies {
 
 ### 2. 权限
 
-SDK Manifest 已声明蓝牙权限。宿主应按 Android 版本申请蓝牙扫描、连接所需的运行时权限；旧版 Android 扫描所需的定位权限由宿主配置。授权并开启蓝牙后再开始扫描。
+SDK Manifest 已声明蓝牙权限。当前 `CHBleManager.enableScan` 在所有支持的 Android 版本上都会检查 `ACCESS_FINE_LOCATION`，宿主必须自行声明并申请该权限；Android 12（API 31）及以上还需申请 `BLUETOOTH_SCAN` 和 `BLUETOOTH_CONNECT`。这是当前 SDK 实现的要求，不能只在旧版 Android 申请定位。授权并开启蓝牙后再开始扫描。
 
 ### 3. 初始化
 
@@ -160,10 +162,10 @@ flowchart TB
 | `CHSesameBike2Device` | Sesame Bike 2 |
 | `CHSesameBike3Device` | Sesame Bike 3（组合指纹能力） |
 | `CHSesameBot2Device` | Sesame Bot 2、Sesame Bot 3 |
-| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2、Remote、Remote Nano、Sesame Touch 1/1 Pro/2/2 Pro、Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI |
+| `CHSesameBiometricDeviceImpl` | Open Sensor 1/2、Remote、Remote Nano、Sesame Touch 1/1 Pro/2/2 Pro、Sesame Face 1/1 Pro/1 AI/1 Pro AI/2/2 Pro/2 AI/2 Pro AI/3 |
 | `CHHub3Device` | Hub 3、Hub 3 Pro |
 
-> 不再维护：Sesame 3（`SS2`）、WiFi Module 2（`WM2`）、Sesame Bot 1、Sesame Bike 1、Sesame 4（`SS4`）。
+> 不再维护：Sesame 3（`SS2`）、WiFi Module 2（`WM2`）、Sesame Bot 1、Sesame Bike 1、Sesame 4（`SS4`）。这些历史型号仍保留在 `CHProductModel` 和对应实现中；它们未列入上方 OS3 产品表。
 
 ### 生物识别能力
 
@@ -195,18 +197,28 @@ candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
 
 Debug 页面地址由 `candyhouse.sesame.web.dev` 指定；Release/CI 页面地址由 `candyhouse.sesame.web.prod` 指定。APP 通过这些配置选择 Biz 预发或正式环境，与 Android 的分支名称无关。Biz 预发分支可独立发布；正式环境地址为 `https://biz.candyhouse.co`。修改 APP 页面地址后重新构建 Android。
 
+当前 `app.properties` 的 Release/CI 地址仍指向预发，并非正式域名。
+
+在两个终端中分别运行，以下均从 Web APP 根目录开始；保持 Biz 开发服务运行：
+
 ```bash
-# Biz3
-cd ../Biz3
-yarn install
+# Terminal 1: Biz3
+cd Biz3
+nvm use
+yarn install --frozen-lockfile
 yarn dev
-# Android
+```
+
+```bash
+# Terminal 2: Android
+cd SesameOS3_Android
 adb reverse tcp:3000 tcp:3000
-cd ../SesameOS3_Android
 ./gradlew :sesameApp:assembleDebug
 ```
 
 ## 职责分工
+
+Biz 实现业务规则、状态管理、页面交互和云端请求；Android 提供 WebView、BLE、权限、持久化及系统能力；Bridge 负责可信来源校验、请求／响应和事件通信，不承载业务逻辑。
 
 ```mermaid
 flowchart TB
@@ -235,6 +247,6 @@ flowchart LR
 
 APK 不内置 Biz 页面。Service Worker 联网优先加载 HTML，并在资源成功缓存后保存离线入口；无网络使用已缓存页面。首次安装/首次切换域名/清除 WebView 数据后必须联网加载一次。页面缓存可能被系统清理，不能保证从未联网也能启动。
 
-离线设备读取本地数据库，不等待 Cognito 或 WebSocket。名单只暴露名称、型号、UUID 和权限等级；钥匙留在原生。在线收到完整设备清单后更新可见范围，避免退出后恢复旧账号设备；未上传钥匙保留。受限钥匙仍需云端签名，无法承诺离线开锁；云端操作、注册和固件下载需要网络。
+离线设备读取本地数据库，不等待 Cognito 或 WebSocket。`offlineDevices` 只返回名称、型号、UUID 和权限等级，不返回钥匙。在线注册、钥匙同步／分享及受限钥匙签名流程仍会通过可信 Bridge 传递所需钥匙材料，不能将离线名单的限制理解为所有钥匙都不经过 Biz。在线收到完整设备清单后更新可见范围，避免退出后恢复旧账号设备；未上传钥匙保留。受限钥匙仍需云端签名，无法承诺离线开锁；云端操作、注册和固件下载需要网络。
 
 同 applicationId、兼容签名、允许的 versionCode 覆盖安装且不清数据时保留数据库和偏好。旧用户会话由 LegacySession 衔接，游客钥匙经 KeyHandoff 待同步。

@@ -67,12 +67,12 @@ class BleRegistrationController(
     }
 
     private fun publishDevices() {
-        publish(JSONObject().put("status", CHBleManager.mScanning.name).put("devices", JSONArray().apply {
+        publish(JSONObject().put("bluetoothOff", CHBleManager.mScanning == CHScanStatus.BleClose).put("devices", JSONArray().apply {
             devices.values.sortedByDescending { it.rssi }.forEach { device ->
                 put(
                     JSONObject().put("deviceUUID", device.deviceId.toString().uppercase())
                         .put("name", device.productModel.deviceModelName()).put("rssi", device.rssi)
-                        .put("status", device.deviceStatus.name)
+                        .put("bleState", device.deviceStatus.webBleState())
                 )
             }
         }))
