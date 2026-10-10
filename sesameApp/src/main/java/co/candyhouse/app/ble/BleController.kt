@@ -1,7 +1,6 @@
 package co.candyhouse.app.ble
 
 import android.os.SystemClock
-import android.util.Log
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
@@ -30,6 +29,7 @@ import co.candyhouse.sesame.ble.os3.wm2.CHWifiModule2MechSettings
 import co.candyhouse.sesame.ble.os3.wm2.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
+import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -326,7 +326,7 @@ class BleController(
     private fun hubTrace(id: String, event: String) {
         if (BuildConfig.DEBUG) {
             val elapsed = hubWatchStarted[id]?.let { SystemClock.elapsedRealtime() - it } ?: 0
-            Log.d("Hub3Timing", "hub=${id.takeLast(8)} watch_ms=$elapsed $event")
+            L.d("Hub3Timing", "hub=${id.takeLast(8)} watch_ms=$elapsed $event")
         }
     }
 
