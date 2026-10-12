@@ -22,6 +22,7 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.webkit.PermissionRequest
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -97,6 +98,8 @@ class SesameActivity : ComponentActivity() {
     private val keyHandoff by lazy { KeyHandoff(this) }
     private lateinit var bridge: WebViewBridge
     private var files: ValueCallback<Array<Uri>>? = null
+    private var pendingAudioRequest: PermissionRequest? = null
+    private var retryAudioAfterPermissionGrant = false
     private var registeredKey: JSONObject? = null
     private var discovering = false
     private val origin = BuildConfig.WEB_ORIGIN
@@ -263,6 +266,7 @@ class SesameActivity : ComponentActivity() {
             }
 
             override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                cancelPendingAudioRequest()
                 bridge.reset()
                 webContainer.removeView(view); view.destroy()
                 returnUrl = null
@@ -273,6 +277,28 @@ class SesameActivity : ComponentActivity() {
             }
         }
         web.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: PermissionRequest) {
+                val wantsAudio = request.resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)
+                if (!bridge.isTrusted(request.origin) || !wantsAudio) {
+                    request.deny()
+                    return
+                }
+                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                    request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
+                } else {
+                    cancelPendingAudioRequest()
+                    pendingAudioRequest = request
+                    requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 15)
+                }
+            }
+
+            override fun onPermissionRequestCanceled(request: PermissionRequest) {
+                if (pendingAudioRequest === request) {
+                    pendingAudioRequest = null
+                    retryAudioAfterPermissionGrant = true
+                }
+            }
+
             override fun onShowFileChooser(view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams): Boolean {
                 files?.onReceiveValue(null); files = callback
                 return runCatching { startActivityForResult(params.createIntent(), 20); true }.getOrElse {
@@ -428,6 +454,20 @@ class SesameActivity : ComponentActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, results)
+        if (requestCode == 15) {
+            val request = pendingAudioRequest
+            pendingAudioRequest = null
+            val granted = results.firstOrNull() == PackageManager.PERMISSION_GRANTED
+            val shouldRetry = retryAudioAfterPermissionGrant
+            retryAudioAfterPermissionGrant = false
+            if (granted) {
+                if (request != null) request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
+                else if (shouldRetry && ::web.isInitialized && !isFinishing && !isDestroyed) web.reload()
+            } else {
+                request?.deny()
+            }
+            return
+        }
         if (requestCode == 14) {
             autoUnlockMap.permissionResult(); return
         }
@@ -489,6 +529,7 @@ class SesameActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        cancelPendingAudioRequest()
         autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++
@@ -501,5 +542,12 @@ class SesameActivity : ComponentActivity() {
             if (SesameConnectedDeviceService.live != null) ensureBackgroundWeb() else ble.close()
         }
         super.onDestroy()
+    }
+
+    private fun cancelPendingAudioRequest() {
+        val request = pendingAudioRequest
+        pendingAudioRequest = null
+        retryAudioAfterPermissionGrant = false
+        request?.deny()
     }
 }
