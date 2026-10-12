@@ -192,7 +192,7 @@ aws.cognito.userPoolId=<YOUR_USER_POOL_ID>
 aws.cognito.appClientId=<YOUR_APP_CLIENT_ID>
 google.maps.apiKey=<YOUR_MAPS_KEY>
 candyhouse.sesame.web.dev=http://localhost:3000
-candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
+candyhouse.sesame.web.prod=https://biz.candyhouse.co
 ```
 
 Debug 页面地址由 `candyhouse.sesame.web.dev` 指定；Release/CI 页面地址由 `candyhouse.sesame.web.prod` 指定。APP 通过这些配置选择 Biz 预发或正式环境，与 Android 的分支名称无关。Biz 预发分支可独立发布；正式环境地址为 `https://biz.candyhouse.co`。修改 APP 页面地址后重新构建 Android。

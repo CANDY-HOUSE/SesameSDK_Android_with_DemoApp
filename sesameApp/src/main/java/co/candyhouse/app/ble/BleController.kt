@@ -204,9 +204,12 @@ class BleController(
         }
     }
 
-    fun accept(rows: JSONArray, historyTag: String?) {
-        scope.launch {
+    fun accept(rows: JSONArray, historyTag: String?): Job {
+        val keyHandoff = KeyHandoff(DeviceKeyDatabase.context)
+        val revision = keyHandoff.scopeRevision()
+        return scope.launch {
             updates.withLock {
+                if (revision != keyHandoff.scopeRevision()) return@withLock
                 val keys = runCatching {
                     (0 until rows.length()).map { index ->
                         val row = rows.getJSONObject(index)
@@ -221,7 +224,7 @@ class BleController(
                 val incoming = keys.map { it.deviceUUID.uppercase() }.toSet()
                 receivedCloudList = true
                 cloudRows = rows
-                KeyHandoff(DeviceKeyDatabase.context).remember(rows)
+                keyHandoff.remember(rows)
                 // Keep unsent keys on disk; an H5 empty list must not erase legacy guest keys.
                 devices.keys.filter { it !in incoming }.forEach { id ->
                     peripheralSettings.forget(id)

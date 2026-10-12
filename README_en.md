@@ -192,7 +192,7 @@ aws.cognito.userPoolId=<YOUR_USER_POOL_ID>
 aws.cognito.appClientId=<YOUR_APP_CLIENT_ID>
 google.maps.apiKey=<YOUR_MAPS_KEY>
 candyhouse.sesame.web.dev=http://localhost:3000
-candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
+candyhouse.sesame.web.prod=https://biz.candyhouse.co
 ```
 
 `candyhouse.sesame.web.dev` selects the Debug page URL; `candyhouse.sesame.web.prod` selects the Release/CI page URL. These settings select the Biz staging or production environment independently of the Android branch name. The Biz staging branch can be deployed independently; production is `https://biz.candyhouse.co`. Rebuild Android after changing its page URL.

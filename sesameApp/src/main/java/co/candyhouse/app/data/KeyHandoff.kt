@@ -37,13 +37,30 @@ class KeyHandoff(context: Context) {
     fun name(key: CHDevice) = legacy.getString(key.deviceUUID.lowercase(), key.deviceModel) ?: key.deviceModel
     fun level(key: CHDevice) = legacy.getInt("l${key.deviceUUID.lowercase()}", 0)
     suspend fun saved(): List<CHDevice> {
+        val keys = all()
+        // Read the scope after the database suspension: sign-out may have cleared it meanwhile.
         val ids = preferences.getStringSet("visible", null)
-        return all().filter { ids == null || it.deviceUUID.lowercase() in ids || it.deviceUUID.lowercase() in pendingIds() }
+        return keys.filter { ids == null || it.deviceUUID.lowercase() in ids || it.deviceUUID.lowercase() in pendingIds() }
+    }
+
+    fun scopeRevision() = preferences.getLong("scopeRevision", 0)
+
+    // The offline snapshot belongs to the last active session, not to every login.
+    // Keep unsent registration keys; they use the existing pending-key handoff.
+    fun clearSavedScope() {
+        preferences.edit {
+            putLong("scopeRevision", scopeRevision() + 1)
+            putStringSet("visible", emptySet())
+            remove("visibleOrder")
+        }
     }
 
     fun remember(rows: JSONArray) {
-        val ids = (0 until rows.length()).map { rows.getJSONObject(it).getString("deviceUUID").lowercase() }.toSet()
-        preferences.edit { putStringSet("visible", ids) }
+        val orderedIds = (0 until rows.length()).map { rows.getJSONObject(it).getString("deviceUUID").lowercase() }
+        preferences.edit {
+            putStringSet("visible", orderedIds.toSet())
+            putString("visibleOrder", JSONArray(orderedIds).toString())
+        }
         legacy.edit {
             for (index in 0 until rows.length()) {
                 val row = rows.getJSONObject(index)
@@ -55,7 +72,10 @@ class KeyHandoff(context: Context) {
     }
 
     suspend fun offlineDevices() = JSONArray().apply {
-        saved().forEach { key ->
+        val keys = saved()
+        val order = runCatching { JSONArray(preferences.getString("visibleOrder", "[]")) }.getOrElse { JSONArray() }
+        val positions = (0 until order.length()).associate { order.getString(it) to it }
+        keys.sortedBy { positions[it.deviceUUID.lowercase()] ?: Int.MAX_VALUE }.forEach { key ->
             put(
                 JSONObject().put("deviceUUID", key.deviceUUID.uppercase()).put("deviceModel", key.deviceModel)
                     .put("deviceName", name(key)).put("keyLevel", level(key))

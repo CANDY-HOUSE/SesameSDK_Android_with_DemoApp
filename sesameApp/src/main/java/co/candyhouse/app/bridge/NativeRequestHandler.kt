@@ -71,6 +71,9 @@ class NativeRequestHandler(
                 }
 
                 "home.retireSession" -> {
+                    keyHandoff.clearSavedScope()
+                    // Drain the previous account's BLE list before acknowledging the switch.
+                    ble.accept(JSONArray(), null).join()
                     LegacySession.retire(); reply(true)
                 }
 

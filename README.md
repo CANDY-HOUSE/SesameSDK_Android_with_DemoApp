@@ -192,7 +192,7 @@ aws.cognito.userPoolId=<YOUR_USER_POOL_ID>
 aws.cognito.appClientId=<YOUR_APP_CLIENT_ID>
 google.maps.apiKey=<YOUR_MAPS_KEY>
 candyhouse.sesame.web.dev=http://localhost:3000
-candyhouse.sesame.web.prod=https://pre-app-h5.d36dwtby1bef9y.amplifyapp.com
+candyhouse.sesame.web.prod=https://biz.candyhouse.co
 ```
 
 Debug のページ URL は `candyhouse.sesame.web.dev`、Release/CI は `candyhouse.sesame.web.prod` で指定します。Android のブランチ名とは独立して、Biz のステージング環境または本番環境を選択できます。Biz のステージングブランチは個別に配信でき、本番 URL は `https://biz.candyhouse.co` です。APP のページ URL を変更した場合は Android を再ビルドします。
