@@ -98,8 +98,9 @@ class SesameActivity : ComponentActivity() {
     private val keyHandoff by lazy { KeyHandoff(this) }
     private lateinit var bridge: WebViewBridge
     private var files: ValueCallback<Array<Uri>>? = null
-    private var pendingAudioRequest: PermissionRequest? = null
-    private var retryAudioAfterPermissionGrant = false
+    private var pendingMediaRequest: PermissionRequest? = null
+    private var pendingMediaResources = emptyArray<String>()
+    private var retryMediaAfterPermissionGrant = false
     private var registeredKey: JSONObject? = null
     private var discovering = false
     private val origin = BuildConfig.WEB_ORIGIN
@@ -266,7 +267,7 @@ class SesameActivity : ComponentActivity() {
             }
 
             override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
-                cancelPendingAudioRequest()
+                cancelPendingMediaRequest()
                 bridge.reset()
                 webContainer.removeView(view); view.destroy()
                 returnUrl = null
@@ -278,24 +279,40 @@ class SesameActivity : ComponentActivity() {
         }
         web.webChromeClient = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
-                val wantsAudio = request.resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)
-                if (!bridge.isTrusted(request.origin) || !wantsAudio) {
+                val mediaResources = request.resources.filter {
+                    it == PermissionRequest.RESOURCE_AUDIO_CAPTURE ||
+                        it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
+                }.toTypedArray()
+                if (!bridge.isTrusted(request.origin) || mediaResources.size != request.resources.size) {
                     request.deny()
                     return
                 }
-                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                    request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
+
+                val missingPermissions = buildList {
+                    if (
+                        mediaResources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE) &&
+                        checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
+                    ) add(Manifest.permission.RECORD_AUDIO)
+                    if (
+                        mediaResources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE) &&
+                        checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                    ) add(Manifest.permission.CAMERA)
+                }
+                if (missingPermissions.isEmpty()) {
+                    request.grant(mediaResources)
                 } else {
-                    cancelPendingAudioRequest()
-                    pendingAudioRequest = request
-                    requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 15)
+                    cancelPendingMediaRequest()
+                    pendingMediaRequest = request
+                    pendingMediaResources = mediaResources
+                    requestPermissions(missingPermissions.toTypedArray(), 15)
                 }
             }
 
             override fun onPermissionRequestCanceled(request: PermissionRequest) {
-                if (pendingAudioRequest === request) {
-                    pendingAudioRequest = null
-                    retryAudioAfterPermissionGrant = true
+                if (pendingMediaRequest === request) {
+                    pendingMediaRequest = null
+                    pendingMediaResources = emptyArray()
+                    retryMediaAfterPermissionGrant = true
                 }
             }
 
@@ -455,13 +472,15 @@ class SesameActivity : ComponentActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, results)
         if (requestCode == 15) {
-            val request = pendingAudioRequest
-            pendingAudioRequest = null
-            val granted = results.firstOrNull() == PackageManager.PERMISSION_GRANTED
-            val shouldRetry = retryAudioAfterPermissionGrant
-            retryAudioAfterPermissionGrant = false
+            val request = pendingMediaRequest
+            val resources = pendingMediaResources
+            pendingMediaRequest = null
+            pendingMediaResources = emptyArray()
+            val granted = results.isNotEmpty() && results.all { it == PackageManager.PERMISSION_GRANTED }
+            val shouldRetry = retryMediaAfterPermissionGrant
+            retryMediaAfterPermissionGrant = false
             if (granted) {
-                if (request != null) request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
+                if (request != null) request.grant(resources)
                 else if (shouldRetry && ::web.isInitialized && !isFinishing && !isDestroyed) web.reload()
             } else {
                 request?.deny()
@@ -529,7 +548,7 @@ class SesameActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        cancelPendingAudioRequest()
+        cancelPendingMediaRequest()
         autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++
@@ -544,10 +563,11 @@ class SesameActivity : ComponentActivity() {
         super.onDestroy()
     }
 
-    private fun cancelPendingAudioRequest() {
-        val request = pendingAudioRequest
-        pendingAudioRequest = null
-        retryAudioAfterPermissionGrant = false
+    private fun cancelPendingMediaRequest() {
+        val request = pendingMediaRequest
+        pendingMediaRequest = null
+        pendingMediaResources = emptyArray()
+        retryMediaAfterPermissionGrant = false
         request?.deny()
     }
 }
