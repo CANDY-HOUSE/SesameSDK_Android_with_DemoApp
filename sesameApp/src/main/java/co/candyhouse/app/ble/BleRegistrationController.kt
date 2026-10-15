@@ -79,6 +79,9 @@ class BleRegistrationController(
     }
 
     fun register(id: String, reply: (Boolean, String?) -> Unit) {
+        if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+            reply(false, "Bluetooth disconnected"); return
+        }
         if (registering != null) {
             reply(false, "Registration in progress"); return
         }
@@ -89,6 +92,9 @@ class BleRegistrationController(
         var started = false
         fun attempt() {
             if (started || device.deviceStatus != CHDeviceStatus.ReadyToRegister || registering !== device) return
+            if (CHBleManager.mScanning == CHScanStatus.BleClose) {
+                finish(false, "Bluetooth disconnected"); return
+            }
             started = true
             device.register { result ->
                 result.onSuccess { registered(device) }

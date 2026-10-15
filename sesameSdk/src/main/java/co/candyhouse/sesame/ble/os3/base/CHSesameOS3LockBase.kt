@@ -105,7 +105,9 @@ internal abstract class CHSesameOS3LockBase : CHSesameOS3(), CHSesameLock, CHDev
 
         CHBleSupport.backend.registerOs3(deviceId.toString(), productModel.productType().toString(), serverSecret) { apiResult ->
             apiResult.exceptionOrNull()?.let { e ->
-                L.d("os3lock", "[register][server] failed: ${e.message}")
+                if (deviceStatus == CHDeviceStatus.Registering) deviceStatus = CHDeviceStatus.ReadyToRegister
+                result.invoke(Result.failure(e))
+                return@registerOs3
             }
 
             sendCommand(

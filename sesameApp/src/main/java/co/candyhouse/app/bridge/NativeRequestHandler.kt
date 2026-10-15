@@ -1,6 +1,8 @@
 package co.candyhouse.app.bridge
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.SesameApp
@@ -39,7 +41,7 @@ class NativeRequestHandler(
     private val openExternal: (String) -> Unit,
     private val autoUnlockMap: (JSONObject) -> JSONObject = { error("Map requires an Activity") },
     private val watchNfc: (String?) -> Unit = {},
-    private val haptic: () -> Unit = {},
+    private val haptic: (Long) -> Unit = {},
     private val uiReady: () -> Unit = {}
 ) {
     suspend fun handle(json: JSONObject, respond: (Boolean, Any?, String?) -> Unit) {
@@ -143,7 +145,7 @@ class NativeRequestHandler(
 
                 "home.autoUnlockMap" -> reply(true, autoUnlockMap(json))
                 "home.haptic" -> {
-                    haptic(); reply(true)
+                    haptic(json.optLong("duration", 0).coerceIn(0, 100)); reply(true)
                 }
 
                 "home.dropDevice" -> {
@@ -167,9 +169,14 @@ class NativeRequestHandler(
                     stopDiscovery(); reply(true)
                 }
 
-                "home.register" -> registration.register(json.getString("deviceUUID")) { ok, error ->
-                    if (ok) ble.peripheralSettings.registered(json.getString("deviceUUID"))
-                    reply(ok, registeredKey(), error)
+                "home.register" -> {
+                    val network = context.getSystemService(ConnectivityManager::class.java)
+                    if (network.getNetworkCapabilities(network.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) != true) {
+                        reply(false, error = "Registration requires network")
+                    } else registration.register(json.getString("deviceUUID")) { ok, error ->
+                        if (ok) ble.peripheralSettings.registered(json.getString("deviceUUID"))
+                        reply(ok, registeredKey(), error)
+                    }
                 }
 
                 "home.scanQr" -> {

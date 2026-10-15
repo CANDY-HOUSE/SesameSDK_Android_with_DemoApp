@@ -18,6 +18,9 @@ import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
@@ -204,7 +207,14 @@ class SesameActivity : ComponentActivity() {
             openExternal = { openExternalUrl(it.toUri()) },
             autoUnlockMap = autoUnlockMap::handle,
             watchNfc = { nfcDevice = it },
-            haptic = { web.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK) },
+            haptic = { duration ->
+                if (duration > 0) {
+                    val vibrator = if (Build.VERSION.SDK_INT >= 31) getSystemService(VibratorManager::class.java).defaultVibrator
+                    else getSystemService(Vibrator::class.java)
+                    if (Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
+                    else vibrator.vibrate(duration)
+                } else web.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            },
             uiReady = { if (!startupDocumentFailed) startupCover.ready(web) }
         )
         bridge = WebViewBridge(origin, scope, requests::handle)

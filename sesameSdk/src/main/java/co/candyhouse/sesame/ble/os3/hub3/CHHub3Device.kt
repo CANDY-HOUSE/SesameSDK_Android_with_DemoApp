@@ -89,7 +89,9 @@ internal class CHHub3Device : CHSesameOS3(), CHHub3, CHDeviceUtil {
             productModel.productType().toString(), serverSecret
         ) { apiResult ->
             apiResult.exceptionOrNull()?.let { e ->
-                L.d("hcia", "[ss5][register][server] failed: ${e.message}")
+                if (deviceStatus == CHDeviceStatus.Registering) deviceStatus = CHDeviceStatus.ReadyToRegister
+                result.invoke(Result.failure(e))
+                return@registerOs3
             }
             sendCommand(
                 SesameOS3Payload(
