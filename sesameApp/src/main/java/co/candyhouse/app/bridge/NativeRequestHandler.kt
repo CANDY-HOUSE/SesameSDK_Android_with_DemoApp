@@ -39,12 +39,17 @@ class NativeRequestHandler(
     private val openExternal: (String) -> Unit,
     private val autoUnlockMap: (JSONObject) -> JSONObject = { error("Map requires an Activity") },
     private val watchNfc: (String?) -> Unit = {},
-    private val haptic: () -> Unit = {}
+    private val haptic: () -> Unit = {},
+    private val uiReady: () -> Unit = {}
 ) {
     suspend fun handle(json: JSONObject, respond: (Boolean, Any?, String?) -> Unit) {
         fun reply(ok: Boolean, data: Any? = null, error: String? = null) = respond(ok, data, error)
         runCatching {
             when (json.optString("action")) {
+                "home.uiReady" -> {
+                    uiReady(); reply(true)
+                }
+
                 "home.ready" -> {
                     ble.snapshot(); reply(true)
                 }

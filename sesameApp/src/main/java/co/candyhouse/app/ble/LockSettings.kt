@@ -56,7 +56,11 @@ object LockSettings {
         val device = requireNotNull(ble.device(json.getString("deviceUUID")))
         require(device.deviceStatus.value == CHDeviceLoginStatus.logined)
         val operation = json.getString("operation")
-        require(device is CHSesame2 || device is CHSesame5 || (device is CHSesameLock && operation == "txPower"))
+        // Version reads also serve Bot devices after OTA; lock-specific settings stay restricted.
+        require(
+            device is CHSesame2 || device is CHSesame5 ||
+                    (device is CHSesameLock && (operation == "txPower" || operation == "version"))
+        )
         when (operation) {
             "txPower" -> {
                 require(device.bleTxPower.toInt() != CHDevices.UNSET_BLE_TX_POWER_VALUE)

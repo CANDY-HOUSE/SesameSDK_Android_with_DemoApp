@@ -53,6 +53,7 @@ import co.candyhouse.app.push.PushNotification
 import co.candyhouse.app.ui.AppMenu
 import co.candyhouse.app.ui.AppToolbar
 import co.candyhouse.app.ui.QrScanner
+import co.candyhouse.app.ui.StartupCover
 import co.candyhouse.app.util.AppEnvironment
 import co.candyhouse.app.util.dp
 import co.candyhouse.app.util.openExternalUrl
@@ -77,9 +78,12 @@ class SesameActivity : ComponentActivity() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var root: FrameLayout
     private lateinit var web: WebView
+    private lateinit var webChrome: WebChromeClient
     private lateinit var toolbar: AppToolbar
     private lateinit var webContainer: FrameLayout
     private lateinit var pageProgress: ProgressBar
+    private lateinit var startupCover: StartupCover
+    private var startupDocumentFailed = false
     private lateinit var autoUnlockMap: AutoUnlockMap
     private var nfcDevice: String? = null
     private var nfcIntent: Intent? = null
@@ -93,7 +97,7 @@ class SesameActivity : ComponentActivity() {
     private lateinit var registration: BleRegistrationController
     private val qrScanner by lazy { QrScanner(this, root, scope, ::emit) }
     private var testSheet: InternalTestBottomSheet? = null
-    private var returnUrl: String? = null
+    private var childWeb: WebView? = null
     private val actionMenu by lazy { AppMenu(this, { navigate("/app/register") }, ::scanQr, { navigate("/contact-add") }) }
     private val keyHandoff by lazy { KeyHandoff(this) }
     private lateinit var bridge: WebViewBridge
@@ -114,6 +118,13 @@ class SesameActivity : ComponentActivity() {
         (application as SesameApp).apply { activityPresent = true; stopBackgroundWeb() }
         initializeBle()
         createLayout()
+        startupCover = StartupCover(this, root) {
+            startupDocumentFailed = false
+            bridge.reset()
+            webReady = false
+            web.stopLoading()
+            web.loadUrl(entry)
+        }
         autoUnlockMap = AutoUnlockMap(this, webContainer, { web }) { emit("devicePreferences", it) }
         connectBridge()
         createWebView()
@@ -176,7 +187,7 @@ class SesameActivity : ComponentActivity() {
                     nfcDevice = null; autoUnlockMap.close()
                 }
                 currentRoute = it
-                toolbar.showPage(root = it in tabPaths, home = it == "/")
+                toolbar.showPage(root = childWeb == null && it in tabPaths, home = childWeb == null && it == "/")
                 updateToolbarVisibility()
             },
             pushInfo = {
@@ -193,7 +204,8 @@ class SesameActivity : ComponentActivity() {
             openExternal = { openExternalUrl(it.toUri()) },
             autoUnlockMap = autoUnlockMap::handle,
             watchNfc = { nfcDevice = it },
-            haptic = { web.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK) }
+            haptic = { web.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK) },
+            uiReady = { if (!startupDocumentFailed) startupCover.ready(web) }
         )
         bridge = WebViewBridge(origin, scope, requests::handle)
         (application as SesameApp).bleBackend.requestCloud = bridge::requestCloud
@@ -223,22 +235,26 @@ class SesameActivity : ComponentActivity() {
                 if (!request.isForMainFrame) return false
                 val uri = request.url
                 if (bridge.isTrusted(uri)) return false
-                if (returnUrl != null && uri.scheme == "https") return false
                 if (uri.scheme in setOf("https", "http", "mailto", "tel")) runCatching { openExternalUrl(uri) }
                 return true
             }
 
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+                if (view !== web) return
+                startupDocumentFailed = false
+                startupCover.begin()
                 autoUnlockMap.close()
                 ble.peripheralSettings.close()
-                if (returnUrl != null || pageLoading) beginPageLoading()
                 webReady = false
                 bridge.reset()
                 registration.close(); discovering = false
             }
 
             override fun onPageCommitVisible(view: WebView, url: String?) {
-                if (!pageLoading || view.url != url) return
+                if (view === web && view.url == url && startupCover.active && !startupDocumentFailed && bridge.isTrusted((url ?: "").toUri())) {
+                    bridge.connect(view, url)
+                }
+                if (childWeb != null || !pageLoading || view.url != url) return
                 val generation = pageLoadGeneration
                 view.postVisualStateCallback(generation, object : WebView.VisualStateCallback() {
                     override fun onComplete(requestId: Long) {
@@ -248,18 +264,25 @@ class SesameActivity : ComponentActivity() {
             }
 
             override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-                if (request.isForMainFrame && view === web) finishPageLoading()
+                if (request.isForMainFrame && view === web) {
+                    startupDocumentFailed = true
+                    startupCover.fail()
+                    finishPageLoading()
+                }
             }
 
             override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
-                if (request.isForMainFrame && view === web) finishPageLoading()
+                if (request.isForMainFrame && view === web) {
+                    startupDocumentFailed = true
+                    startupCover.fail()
+                    finishPageLoading()
+                }
             }
 
             override fun onPageFinished(view: WebView, url: String?) {
                 if (view !== web || view.url != url) return
                 webReady = true
                 if (bridge.isTrusted((url ?: "").toUri())) {
-                    returnUrl = null
                     bridge.connect(view, url)
                     nfcIntent?.let { handleNfc(it); nfcIntent = null }
                 }
@@ -267,21 +290,23 @@ class SesameActivity : ComponentActivity() {
             }
 
             override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                if (view !== web) return true
+                startupCover.begin()
                 cancelPendingMediaRequest()
                 bridge.reset()
+                returnToApp()
                 webContainer.removeView(view); view.destroy()
-                returnUrl = null
                 toolbar.showPage(root = true, home = false)
                 createWebView()
                 finishPageLoading()
                 return true
             }
         }
-        web.webChromeClient = object : WebChromeClient() {
+        webChrome = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
                 val mediaResources = request.resources.filter {
                     it == PermissionRequest.RESOURCE_AUDIO_CAPTURE ||
-                        it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
+                            it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
                 }.toTypedArray()
                 if (!bridge.isTrusted(request.origin) || mediaResources.size != request.resources.size) {
                     request.deny()
@@ -323,6 +348,7 @@ class SesameActivity : ComponentActivity() {
                 }
             }
         }
+        web.webChromeClient = webChrome
         webContainer.addView(web, FrameLayout.LayoutParams(-1, -1))
         web.loadUrl(entry)
     }
@@ -357,35 +383,82 @@ class SesameActivity : ComponentActivity() {
         qrScanner.open()
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun openWebPage(url: String) {
         require(url.toUri().scheme == "https")
-        if (returnUrl == null) returnUrl = web.url?.takeIf { bridge.isTrusted(it.toUri()) } ?: entry
-        bridge.reset()
-        beginPageLoading()
+        // Keep the Biz document and bridge alive underneath a separate, unprivileged page.
+        returnToApp()
+        autoUnlockMap.close()
+        val page = WebView(this)
+        childWeb = page
+        page.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = false
+            allowContentAccess = true
+        }
+        page.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                if (!request.isForMainFrame) return false
+                if (request.url.scheme == "https") return false
+                if (request.url.scheme in setOf("http", "mailto", "tel")) {
+                    runCatching { openExternalUrl(request.url) }
+                }
+                return true
+            }
+
+            override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+                if (view === childWeb) beginPageLoading()
+            }
+
+            override fun onPageFinished(view: WebView, url: String?) {
+                if (view === childWeb && view.url == url) finishPageLoading()
+            }
+
+            override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+                if (view === childWeb && request.isForMainFrame) finishPageLoading()
+            }
+
+            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
+                if (view === childWeb && request.isForMainFrame) finishPageLoading()
+            }
+
+            override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                if (view === childWeb) returnToApp()
+                return true
+            }
+        }
+        page.webChromeClient = webChrome
+        web.visibility = View.INVISIBLE
+        webContainer.addView(page, FrameLayout.LayoutParams(-1, -1))
         toolbar.showPage(root = false, home = false)
-        web.loadUrl(url)
+        beginPageLoading()
+        page.loadUrl(url)
     }
 
     private fun returnToApp() {
-        val target = returnUrl ?: entry
-        returnUrl = null
-        beginPageLoading()
+        val page = childWeb ?: return
+        childWeb = null
+        webContainer.removeView(page)
+        page.stopLoading()
+        page.destroy()
+        pageLoadGeneration++
         toolbar.showPage(root = currentRoute in tabPaths, home = currentRoute == "/")
-        web.loadUrl(target)
+        finishPageLoading()
     }
 
     private fun beginPageLoading() {
         pageLoadGeneration++
         pageLoading = true
-        toolbar.visibility = View.INVISIBLE
-        web.visibility = View.INVISIBLE
+        toolbar.visibility = if (childWeb == null) View.INVISIBLE else View.VISIBLE
+        (childWeb ?: web).visibility = View.INVISIBLE
         pageProgress.visibility = View.VISIBLE
     }
 
     private fun finishPageLoading() {
         pageLoading = false
         pageProgress.visibility = View.GONE
-        web.visibility = View.VISIBLE
+        (childWeb ?: web).visibility = View.VISIBLE
         updateToolbarVisibility()
     }
 
@@ -399,7 +472,7 @@ class SesameActivity : ComponentActivity() {
             "/device-setting/credentials"
         ) || currentRoute == "/biz/devices/list-item" || currentRoute == "/device-history" ||
                 currentRoute == "/biz/access-control/region" || currentRoute == "/biz/wifi-module" || currentRoute == "/biz/wifi-module/index"
-        toolbar.visibility = if (returnUrl == null && h5Header) View.GONE else if (pageLoading) View.INVISIBLE else View.VISIBLE
+        toolbar.visibility = if (childWeb != null) View.VISIBLE else if (h5Header) View.GONE else if (pageLoading) View.INVISIBLE else View.VISIBLE
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -522,16 +595,19 @@ class SesameActivity : ComponentActivity() {
                 ), null, null
             )
             SesameConnectedDeviceService.sync(this)
+            childWeb?.onResume()
             web.onResume(); if (askedBle) requestBle(); emit("resume")
         }
     }
 
     override fun onPause() {
+        if (::web.isInitialized) emit("pause")
         NfcAdapter.getDefaultAdapter(this)?.disableForegroundDispatch(this)
         autoUnlockMap.pause()
         actionMenu.dismiss()
         testSheet?.dismiss(); testSheet = null
         qrScanner.pause(); if (::ble.isInitialized) {
+            childWeb?.onPause()
             registration.stop(); ble.pause(); web.onPause()
         }; super.onPause()
     }
@@ -539,15 +615,15 @@ class SesameActivity : ComponentActivity() {
     private fun handleBack() {
         if (qrScanner.isOpen) {
             qrScanner.close(); emit("qrCancelled")
-        } else if (returnUrl != null) {
-            val history = web.copyBackForwardList()
-            val previous = history.getItemAtIndex(history.currentIndex - 1)?.url
-            if (previous != null && !bridge.isTrusted(previous.toUri())) web.goBack() else returnToApp()
+        } else if (childWeb != null) {
+            val page = childWeb!!
+            if (page.canGoBack()) page.goBack() else returnToApp()
         } else if (currentRoute !in tabPaths) emit("back")
         else finish()
     }
 
     override fun onDestroy() {
+        if (::startupCover.isInitialized) startupCover.close()
         cancelPendingMediaRequest()
         autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
@@ -555,6 +631,7 @@ class SesameActivity : ComponentActivity() {
         testSheet?.setOnDismissListener(null); testSheet?.dismiss(); qrScanner.close(); registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset(); files?.onReceiveValue(
             null
         )
+        returnToApp()
         webContainer.removeView(web); web.destroy(); scope.cancel()
         (application as SesameApp).apply {
             activityPresent = false

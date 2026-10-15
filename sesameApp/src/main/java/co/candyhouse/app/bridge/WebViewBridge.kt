@@ -71,7 +71,21 @@ class WebViewBridge(
             }
         }, Handler(Looper.getMainLooper()))
         val nonce = UUID.randomUUID().toString()
-        view.evaluateJavascript("window.__sesamePortNonce = ${JSONObject.quote(nonce)}") {
+        // onPageCommitVisible may precede the Biz bundle. Buffer the trusted port until
+        // its listener is installed.
+        val bootstrap = """
+            (() => {
+                const nonce = ${JSONObject.quote(nonce)};
+                window.__sesamePortNonce = nonce;
+                const capture = event => {
+                    if (event.data !== nonce || event.ports.length !== 1) return;
+                    window.removeEventListener('message', capture);
+                    if (window.__sesamePortNonce === nonce) window.__sesamePendingBridgeEvent = event;
+                };
+                window.addEventListener('message', capture);
+            })();
+        """.trimIndent()
+        view.evaluateJavascript(bootstrap) {
             if (epoch == generation && isTrusted((view.url ?: "").toUri())) {
                 view.postWebMessage(WebMessage(nonce, arrayOf(channel[1])), originUri)
             } else {
