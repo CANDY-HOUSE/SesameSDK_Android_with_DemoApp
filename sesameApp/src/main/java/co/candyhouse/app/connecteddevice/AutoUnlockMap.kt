@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import co.candyhouse.app.R
 import co.candyhouse.app.SesameApp
+import co.candyhouse.app.ui.RequestCode
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -96,7 +97,7 @@ class AutoUnlockMap(private val activity: ComponentActivity, private val contain
             } else {
                 pendingEnable = true
                 if (activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    activity.requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 14)
+                    activity.requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), RequestCode.AUTO_UNLOCK_LOCATION)
                 } else showDisclosure()
             }
         }
@@ -171,7 +172,7 @@ class AutoUnlockMap(private val activity: ComponentActivity, private val contain
 
     private fun locate() {
         if (activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            activity.requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 14); return
+            activity.requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), RequestCode.AUTO_UNLOCK_LOCATION); return
         }
         map?.isMyLocationEnabled = true
         val uuid = id ?: return

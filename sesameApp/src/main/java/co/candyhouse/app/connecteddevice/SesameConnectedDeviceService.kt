@@ -25,15 +25,12 @@ import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.SesameActivity
 import co.candyhouse.app.SesameApp
-import co.candyhouse.app.ble.LockSettings
 import co.candyhouse.sesame.ble.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.CHDeviceStatus
 import co.candyhouse.sesame.ble.CHDevices
 import co.candyhouse.sesame.ble.CHSesameLock
 import co.candyhouse.sesame.ble.os2.bot.CHSesameBot
 import co.candyhouse.sesame.ble.os3.bot2.CHSesameBot2
-import co.candyhouse.sesame.utils.CHEmpty
-import co.candyhouse.sesame.utils.CHResultState
 import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +41,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.json.JSONArray
-import org.json.JSONObject
 import kotlin.time.Duration.Companion.milliseconds
 
 class SesameConnectedDeviceService : Service() {
@@ -131,17 +127,7 @@ class SesameConnectedDeviceService : Service() {
         pendingCommands++
         try {
             withTimeout(30000.milliseconds) {
-                runCatching {
-                    val device = requireNotNull(app.ble.device(id))
-                    if (device.deviceStatus.value == CHDeviceLoginStatus.logined) {
-                        LockSettings.awaitResult<CHEmpty> { result ->
-                            app.ble.handle("home.command", JSONObject().put("deviceUUID", id).put("operation", operation)) { ok, error ->
-                                if (ok) result(Result.success(CHResultState.CHResultStateBLE(CHEmpty())))
-                                else result(Result.failure(IllegalStateException(error)))
-                            }
-                        }
-                    } else requireNotNull(app.bleBackend.requestCloud)("widgetCommand", JSONObject().put("operation", operation), id)
-                }.onFailure { L.e("SesameWidget", "Command failed device=$id", it) }
+                runCatching { app.ble.quickCommand(id, operation) }.onFailure { L.e("SesameWidget", "Command failed device=$id", it) }
             }
         } finally {
             pendingCommands--; refresh()

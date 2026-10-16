@@ -57,7 +57,7 @@ class QrScanner(
             close(); emit("qrCancelled", org.json.JSONObject())
         }
         val gallery = control(R.drawable.ic_icons_filled_album, R.string.gallery, Gravity.TOP or Gravity.CENTER_HORIZONTAL) {
-            activity.startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply { type = "image/*"; addCategory(Intent.CATEGORY_OPENABLE) }, 21)
+            activity.startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply { type = "image/*"; addCategory(Intent.CATEGORY_OPENABLE) }, RequestCode.QR_IMAGE)
         }
         qrView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             val box = qrView.scanBoxView

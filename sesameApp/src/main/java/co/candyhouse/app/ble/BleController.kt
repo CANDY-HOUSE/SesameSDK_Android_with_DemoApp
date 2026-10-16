@@ -1,7 +1,5 @@
 package co.candyhouse.app.ble
 
-import android.os.SystemClock
-import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.BleBackend
@@ -26,24 +24,19 @@ import co.candyhouse.sesame.ble.os3.hub3.CHHub3Delegate
 import co.candyhouse.sesame.ble.os3.sesame5.CHSesame5
 import co.candyhouse.sesame.ble.os3.wm2.CHWifiModule2
 import co.candyhouse.sesame.ble.os3.wm2.CHWifiModule2MechSettings
-import co.candyhouse.sesame.ble.os3.wm2.CHWifiModule2NetWorkStatus
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
-import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 
 /** BLE state and commands only; the web app owns lists, ordering and navigation. */
 class BleController(
@@ -52,33 +45,11 @@ class BleController(
 ) {
     private val devices = linkedMapOf<String, CHDevices>()
     val peripheralSettings = PeripheralSettings(this, scope)
-    private val hubSessions = mutableMapOf<String, String>()
-
-    private class HubWifiScan {
-        val results = linkedMapOf<String, Short>()
-        val startedAt = SystemClock.elapsedRealtime()
-        var scanning = true
-        var failed = false
-        var commandPending = true
-        var endReceived = false
-        var timeout: Job? = null
-    }
-
-    private val hubWifi = mutableMapOf<String, HubWifiScan>()
-    private val hubDisconnects = mutableMapOf<String, Job>()
-    private val hubWatchStarted = mutableMapOf<String, Long>()
-    private var hubWifiUpdate: Job? = null
-
-    private class HubOta {
-        var progress = 0
-        var receivedProgress = false
-        var timeout: Job? = null
-    }
-
-    private val hubOta = mutableMapOf<String, HubOta>()
+    val hubSettings = HubSettings(this, scope)
     private val updates = Mutex()
     private val appliedKeys = mutableMapOf<String, CHDevice>()
-    private var foreground = false
+    var foreground = false
+        private set
     private var receivedCloudList = false
     var background = false
     var cloudRows = JSONArray()
@@ -113,11 +84,7 @@ class BleController(
     private val delegate = object : CHHub3Delegate {
         override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus) {
             scope.launch(Dispatchers.Main) {
-                if (device is CHWifiModule2) {
-                    val id = device.deviceId.toString().uppercase()
-                    hubTrace(id, "ble_status=${status.name}")
-                    if (status.value != CHDeviceLoginStatus.logined) clearHubScan(id)
-                }
+                if (device is CHWifiModule2) hubSettings.statusChanged(device, status)
                 peripheralSettings.statusChanged(device, status)
                 connect(device)
                 if (device is CHSesameBot2 && status.value == CHDeviceLoginStatus.logined) {
@@ -148,55 +115,19 @@ class BleController(
         }
 
         override fun onScanWifiSID(device: CHWifiModule2, ssid: String, rssi: Short) {
-            scope.launch(Dispatchers.Main) {
-                val id = device.deviceId.toString().uppercase()
-                val scan = hubWifi[id]?.takeIf { it.scanning } ?: return@launch
-                val first = scan.results.isEmpty()
-                val old = scan.results[ssid]
-                if (old != null && old >= rssi) return@launch
-                scan.results[ssid] = rssi
-                if (first) {
-                    hubTrace(id, "wifi_first elapsed_ms=${SystemClock.elapsedRealtime() - scan.startedAt}")
-                    snapshot()
-                } else if (hubWifiUpdate == null) {
-                    hubWifiUpdate = scope.launch(Dispatchers.Main) {
-                        delay(100.milliseconds)
-                        hubWifiUpdate = null
-                        snapshot()
-                    }
-                }
-            }
+            scope.launch(Dispatchers.Main) { hubSettings.wifiFound(device, ssid, rssi) }
         }
 
         override fun onWifiScanStarted(device: CHHub3) {
-            scope.launch(Dispatchers.Main) {
-                hubTrace(device.deviceId.toString().uppercase(), "wifi_start_marker")
-            }
+            scope.launch(Dispatchers.Main) { hubSettings.wifiScanStarted(device) }
         }
 
         override fun onWifiScanFinished(device: CHHub3) {
-            scope.launch(Dispatchers.Main) {
-                val id = device.deviceId.toString().uppercase()
-                hubWifi[id]?.takeIf { it.scanning }?.let { scan ->
-                    scan.endReceived = true
-                    hubTrace(id, "wifi_end_marker")
-                    if (!scan.commandPending) finishHubScan(id, scan, false, "end_marker")
-                }
-            }
+            scope.launch(Dispatchers.Main) { hubSettings.wifiScanFinished(device) }
         }
 
         override fun onOTAProgress(device: CHWifiModule2, percent: Byte) {
-            scope.launch(Dispatchers.Main) {
-                val id = device.deviceId.toString().uppercase()
-                val progress = percent.toInt() and 255
-                if (progress !in 0..100) return@launch
-                val ota = hubOta[id] ?: if (progress < 100) HubOta().also { hubOta[id] = it } else return@launch
-                ota.progress = progress
-                ota.receivedProgress = true
-                armHubOtaTimeout(id, ota)
-                hubTrace(id, "ota_progress=$progress")
-                snapshot()
-            }
+            scope.launch(Dispatchers.Main) { hubSettings.otaProgress(device, percent) }
         }
 
         override fun onMechStatus(device: CHDevices) {
@@ -228,8 +159,7 @@ class BleController(
                 // Keep unsent keys on disk; an H5 empty list must not erase legacy guest keys.
                 devices.keys.filter { it !in incoming }.forEach { id ->
                     peripheralSettings.forget(id)
-                    clearHubSession(id)
-                    hubOta.remove(id)?.timeout?.cancel()
+                    hubSettings.forget(id)
                     appliedKeys.remove(id)
                     devices.remove(id)?.let { it.delegate = null; it.disconnect {} }
                 }
@@ -268,8 +198,8 @@ class BleController(
         }
     }
 
-    private fun connect(device: CHDevices) {
-        if ((foreground || background) && !BleFirmwareUpdate.active(device.deviceId.toString()) && (device is CHSesameLock || (foreground && peripheralSettings.shouldConnect(device)) || (foreground && device is CHWifiModule2 && hubSessions.containsKey(
+    fun connect(device: CHDevices) {
+        if ((foreground || background) && !BleFirmwareUpdate.active(device.deviceId.toString()) && (device is CHSesameLock || (foreground && peripheralSettings.shouldConnect(device)) || (foreground && device is CHWifiModule2 && hubSettings.watching(
                 device.deviceId.toString().uppercase()
             ))) && device.deviceStatus == CHDeviceStatus.ReceivedAdV
         ) device.connect {}
@@ -296,20 +226,14 @@ class BleController(
 
     fun pause() {
         foreground = false; if (!background) CHBleManager.disableScan {}
-        // A grace connection is only useful while the app stays in the foreground.
-        hubDisconnects.keys.toList().forEach { id ->
-            clearHubSession(id)
-            devices[id]?.disconnect {}
-        }
+        hubSettings.endGrace()
     }
 
     fun close() {
         peripheralSettings.close()
         if (CHBleManager.statusDelegate === scanDelegate) CHBleManager.statusDelegate = null
         background = false
-        (hubSessions.keys + hubDisconnects.keys + hubWifi.keys).toSet().forEach(::clearHubSession)
-        hubWifiUpdate?.cancel(); hubWifiUpdate = null
-        hubOta.values.forEach { it.timeout?.cancel() }; hubOta.clear()
+        hubSettings.close()
         pause(); devices.values.forEach { it.delegate = null; it.disconnect {} }; devices.clear(); appliedKeys.clear()
         receivedCloudList = false; cloudRows = JSONArray(); backend.gatewayDevices = emptySet()
     }
@@ -326,163 +250,6 @@ class BleController(
 
     fun device(id: String): CHDevices? = devices[id.uppercase()]
 
-    private fun hubTrace(id: String, event: String) {
-        if (BuildConfig.DEBUG) {
-            val elapsed = hubWatchStarted[id]?.let { SystemClock.elapsedRealtime() - it } ?: 0
-            L.d("Hub3Timing", "hub=${id.takeLast(8)} watch_ms=$elapsed $event")
-        }
-    }
-
-    private fun clearHubScan(id: String) {
-        hubWifi.remove(id)?.timeout?.cancel()
-    }
-
-    private fun clearHubSession(id: String) {
-        hubDisconnects.remove(id)?.cancel()
-        hubSessions.remove(id)
-        hubWatchStarted.remove(id)
-        clearHubScan(id)
-    }
-
-    private fun finishHubScan(id: String, scan: HubWifiScan, failed: Boolean, reason: String) {
-        if (hubWifi[id] !== scan || !scan.scanning) return
-        scan.scanning = false
-        scan.failed = failed
-        scan.timeout?.cancel()
-        scan.timeout = null
-        hubTrace(id, "wifi_finished reason=$reason count=${scan.results.size} elapsed_ms=${SystemClock.elapsedRealtime() - scan.startedAt}")
-        snapshot()
-    }
-
-    private fun scanHubWifi(id: String, hub: CHWifiModule2, refresh: Boolean) {
-        check(hubSessions.containsKey(id) && hub.deviceStatus.value == CHDeviceLoginStatus.logined)
-        if (hubOta[id]?.progress?.let { it in 0..99 } == true) return
-        val previous = hubWifi[id]
-        if (previous?.scanning == true || previous?.commandPending == true || (!refresh && previous != null && !previous.failed &&
-                    SystemClock.elapsedRealtime() - previous.startedAt < 30000)
-        ) {
-            hubTrace(id, "wifi_reused scanning=${previous?.scanning}")
-            return
-        }
-        val scan = HubWifiScan()
-        hubWifi[id] = scan
-        hubTrace(id, "wifi_requested refresh=$refresh")
-        snapshot()
-        // Older firmware may not publish an end marker. Never start a second scan meanwhile.
-        scan.timeout = scope.launch(Dispatchers.Main) {
-            delay(15000.milliseconds)
-            finishHubScan(id, scan, scan.results.isEmpty() || scan.commandPending, "timeout")
-            if (scan.commandPending) {
-                // Reset an unacknowledged SDK command before allowing another physical scan.
-                hubTrace(id, "wifi_ack_timeout_disconnect")
-                hub.disconnect {}
-            }
-        }
-        hub.scanWifiSSID { result ->
-            scope.launch(Dispatchers.Main) {
-                if (hubWifi[id] !== scan) return@launch
-                scan.commandPending = false
-                hubTrace(id, "wifi_ack success=${result.isSuccess} elapsed_ms=${SystemClock.elapsedRealtime() - scan.startedAt}")
-                if (result.isFailure) finishHubScan(id, scan, true, "rejected")
-                else if (scan.endReceived) finishHubScan(id, scan, false, "end_marker")
-            }
-        }
-    }
-
-    private fun armHubOtaTimeout(id: String, ota: HubOta) {
-        ota.timeout?.cancel()
-        ota.timeout = null
-        if (ota.progress !in 0..99) return
-        ota.timeout = scope.launch(Dispatchers.Main) {
-            delay(180000.milliseconds)
-            if (hubOta[id] !== ota) return@launch
-            ota.progress = -7
-            hubTrace(id, "ota_timeout")
-            snapshot()
-        }
-    }
-
-    suspend fun hubSettings(json: JSONObject): JSONObject = withTimeoutOrNull(8000.milliseconds) {
-        val id = json.getString("deviceUUID").uppercase()
-        val hub = device(id) as? CHWifiModule2 ?: error("Unsupported WiFi device")
-        when (json.getString("operation")) {
-            "watch" -> {
-                hubDisconnects.remove(id)?.cancel()
-                hubSessions[id] = json.getString("session")
-                hubWatchStarted[id] = SystemClock.elapsedRealtime()
-                hubTrace(id, "watch connected=${hub.deviceStatus.value == CHDeviceLoginStatus.logined}")
-                connect(hub)
-            }
-
-            "unwatch" -> if (hubSessions[id] == json.getString("session")) {
-                hubSessions.remove(id)
-                hubDisconnects.remove(id)?.cancel()
-                hubTrace(id, "unwatch grace_ms=${if (foreground) 10000 else 0}")
-                hubDisconnects[id] = scope.launch(Dispatchers.Main) {
-                    if (foreground) delay(10000.milliseconds)
-                    hubTrace(id, "disconnect_after_unwatch")
-                    clearHubSession(id)
-                    hub.disconnect {}
-                }
-            }
-
-            "scan" -> scanHubWifi(id, hub, json.optBoolean("refresh"))
-            "ssid" -> {
-                check(hub.deviceStatus.value == CHDeviceLoginStatus.logined)
-                LockSettings.awaitResult<CHEmpty> { hub.setWifiSSID(json.getString("ssid"), it) }
-            }
-
-            "password" -> {
-                check(hub.deviceStatus.value == CHDeviceLoginStatus.logined)
-                LockSettings.awaitResult<CHEmpty> { hub.setWifiPassword(json.getString("password"), it) }
-            }
-
-            "connectWifi" -> {
-                require(hub.productModel == CHProductModel.WM2)
-                check(hub.deviceStatus.value == CHDeviceLoginStatus.logined)
-                LockSettings.awaitResult<CHEmpty>(hub::connectWifi)
-            }
-
-            "firmware" -> {
-                require(hub is CHHub3)
-                check(hub.deviceStatus.value == CHDeviceLoginStatus.logined)
-                if (hubOta[id]?.progress?.let { it in 0..99 } != true) {
-                    // WiFi scanning must not compete with OTA or disconnect it on a scan timeout.
-                    clearHubScan(id)
-                    val ota = HubOta()
-                    hubOta[id] = ota
-                    armHubOtaTimeout(id, ota)
-                    hubTrace(id, "ota_requested")
-                    // Like the original bridge, dispatch the command and follow OTA notifications.
-                    // A reboot can drop the command reply while the Hub continues downloading.
-                    hub.updateFirmwareBleOnly { result ->
-                        scope.launch(Dispatchers.Main) {
-                            if (hubOta[id] !== ota || ota.receivedProgress) return@launch
-                            if (result.isFailure) {
-                                ota.progress = -7
-                                armHubOtaTimeout(id, ota)
-                                hubTrace(id, "ota_rejected")
-                                snapshot()
-                            }
-                        }
-                    }
-                }
-            }
-
-            "firmwareFinish" -> if (hubOta[id]?.progress == 100) hubOta.remove(id)?.timeout?.cancel()
-            "version" -> {
-                check(hub.deviceStatus.value == CHDeviceLoginStatus.logined)
-                val version = LockSettings.awaitResult(hub::getVersionTag)
-                hubTrace(id, "version_read")
-                return@withTimeoutOrNull JSONObject().put("version", version)
-            }
-
-            else -> error("Unsupported Hub operation")
-        }
-        snapshot()
-        JSONObject()
-    } ?: error("Hub operation timed out")
-
     fun testDevices(): List<CHDevices> = devices.values.toList()
     fun deviceName(device: CHDevices): String = appliedKeys[device.deviceId.toString().uppercase()]?.historyTag?.toString(Charsets.UTF_8) ?: device.productModel.deviceModelName()
     fun historyTag(): ByteArray = history.copyOf()
@@ -498,28 +265,7 @@ class BleController(
                     .put("batteryPercentage", if (connected) device.batteryPercentage else JSONObject.NULL)
                 row.put("settings", LockSettings.snapshot(device))
                 row.put("peripheral", peripheralSettings.snapshot(device))
-                if (device is CHWifiModule2) {
-                    val hub = JSONObject()
-                    if (connected) {
-                        device.mechSetting?.let { hub.put("wifiSsid", it.wifiSSID).put("wifiPwd", it.wifiPassWord) }
-                        (device.mechStatus as? CHWifiModule2NetWorkStatus)?.let {
-                            hub.put(
-                                "network", JSONObject().put("isAPWork", it.isAPWork == true)
-                                    .put("isNetwork", it.isNetWork == true).put("isIoTWork", it.isIOTWork == true)
-                                    .put("isBindingAPWork", it.isAPConnecting).put("isConnectingNetwork", it.isConnectingNet)
-                                    .put("isConnectingIoT", it.isConnectingIOT)
-                            )
-                        }
-                    }
-                    hubWifi[id]?.let { scan ->
-                        hub.put("wifiScanning", scan.scanning).put("wifiScanFailed", scan.failed)
-                        hub.put("wifiScan", JSONArray().apply {
-                            scan.results.forEach { (ssid, rssi) -> put(JSONObject().put("ssid", ssid).put("rssi", rssi.toInt())) }
-                        })
-                    }
-                    hubOta[id]?.let { hub.put("otaProgress", it.progress) }
-                    row.put("hub", hub)
-                }
+                if (device is CHWifiModule2) row.put("hub", hubSettings.snapshot(id, device, connected))
                 if (device is CHSesameBot2) {
                     row.put("scriptIndex", device.scripts.curIdx.toInt())
                     row.put("scripts", JSONArray().apply {
@@ -538,8 +284,7 @@ class BleController(
     suspend fun drop(id: String) {
         updates.withLock {
             peripheralSettings.forget(id.uppercase())
-            clearHubSession(id.uppercase())
-            hubOta.remove(id.uppercase())?.timeout?.cancel()
+            hubSettings.forget(id.uppercase())
             val device = devices.remove(id.uppercase())
             appliedKeys.remove(id.uppercase())
             if (device != null) {
@@ -548,6 +293,16 @@ class BleController(
         }
         cloudRows = JSONArray((0 until cloudRows.length()).map { cloudRows.getJSONObject(it) }.filterNot { it.optString("deviceUUID").equals(id, true) })
         snapshot()
+    }
+
+    /** Native shortcuts (NFC, widget, notification) run without a Biz page: BLE when logged in, else the cloud gateway. */
+    suspend fun quickCommand(id: String, operation: String) {
+        val device = requireNotNull(device(id))
+        if (device.deviceStatus.value == CHDeviceLoginStatus.logined) suspendCancellableCoroutine { continuation ->
+            handle("home.command", JSONObject().put("deviceUUID", id).put("operation", operation)) { ok, error ->
+                if (continuation.isActive) continuation.resumeWith(if (ok) Result.success(Unit) else Result.failure(IllegalStateException(error)))
+            }
+        } else requireNotNull(backend.requestCloud)("widgetCommand", JSONObject().put("operation", operation), id)
     }
 
     fun handle(action: String, json: JSONObject, reply: (Boolean, String?) -> Unit) {

@@ -25,29 +25,29 @@ flowchart LR
 
 ### 1. 添加依赖
 
-```groovy
+```kotlin
 dependencies {
-    implementation project(':sesameSdk')
+    implementation(project(":sesameSdk"))
 }
 ```
 
-通过 JitPack 接入时，在 `settings.gradle` 中添加仓库：
+通过 JitPack 接入时，在 `settings.gradle.kts` 中添加仓库：
 
-```groovy
+```kotlin
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
 
-然后在应用的 `build.gradle` 中添加 SDK 依赖：
+然后在应用的 `build.gradle.kts` 中添加 SDK 依赖：
 
-```groovy
+```kotlin
 dependencies {
-    implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>'
+    implementation("com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>")
 }
 ```
 
@@ -184,7 +184,7 @@ flowchart TB
 
 ## 内部开发
 
-项目共用配置保留在 `app.properties`，由根目录 `build.gradle` 读取，并随私有仓库管理。`local.properties` 仅用于 `sdk.dir` 等开发者本机配置，不提交 Git。Firebase 文件为 `sesameApp/google-services.json`，使用自己的项目配置。
+项目共用配置保留在 `app.properties`，由根目录 `build.gradle.kts` 读取，并随私有仓库管理。`local.properties` 仅用于 `sdk.dir` 等开发者本机配置，不提交 Git。Firebase 文件为 `sesameApp/google-services.json`，使用自己的项目配置。
 
 ```properties
 aws.cognito.identityPoolId=<YOUR_IDENTITY_POOL_ID>

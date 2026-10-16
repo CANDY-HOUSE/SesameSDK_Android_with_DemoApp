@@ -2,7 +2,6 @@ package co.candyhouse.app
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,20 +9,9 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
-import android.nfc.NdefMessage
-import android.nfc.NdefRecord
-import android.nfc.NfcAdapter
-import android.nfc.Tag
-import android.nfc.tech.Ndef
-import android.nfc.tech.NdefFormatable
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
-import android.provider.Settings
 import android.view.Gravity
-import android.view.HapticFeedbackConstants
 import android.view.View
 import android.webkit.PermissionRequest
 import android.webkit.RenderProcessGoneDetail
@@ -52,29 +40,31 @@ import co.candyhouse.app.connecteddevice.AutoUnlockMap
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.internal.InternalTestBottomSheet
+import co.candyhouse.app.nfc.NfcTags
 import co.candyhouse.app.push.PushNotification
 import co.candyhouse.app.ui.AppMenu
+import co.candyhouse.app.ui.AppRoute
 import co.candyhouse.app.ui.AppToolbar
+import co.candyhouse.app.ui.ExternalPage
 import co.candyhouse.app.ui.QrScanner
+import co.candyhouse.app.ui.RequestCode
 import co.candyhouse.app.ui.StartupCover
+import co.candyhouse.app.ui.WebMediaAccess
 import co.candyhouse.app.util.AppEnvironment
 import co.candyhouse.app.util.dp
+import co.candyhouse.app.util.haptic
 import co.candyhouse.app.util.openExternalUrl
+import co.candyhouse.app.util.openNotificationSettings
 import co.candyhouse.app.util.toKeyJson
 import co.candyhouse.sesame.ble.CHBleManager
-import co.candyhouse.sesame.ble.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.CHScanStatus
-import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.time.Duration.Companion.milliseconds
 
 /** One browser surface with native menu, QR scanner and internal BLE test controls. */
 class SesameActivity : ComponentActivity() {
@@ -88,26 +78,23 @@ class SesameActivity : ComponentActivity() {
     private lateinit var startupCover: StartupCover
     private var startupDocumentFailed = false
     private lateinit var autoUnlockMap: AutoUnlockMap
-    private var nfcDevice: String? = null
+    private val nfc by lazy { NfcTags(this, scope, ble, ::requestBle, ::emit) }
     private var nfcIntent: Intent? = null
     private var webReady = false
     private var pageLoading = false
     private var pageLoadGeneration = 0L
-    private var currentRoute = "/"
-    private val tabPaths = setOf("/", "/vision", "/contacts", "/me/homepage")
+    private var currentRoute = AppRoute.HOME
     private lateinit var ble: BleController
     private val bleObserver: (JSONArray) -> Unit = { if (::bridge.isInitialized) emit("snapshot", it) }
     private lateinit var registration: BleRegistrationController
     private val qrScanner by lazy { QrScanner(this, root, scope, ::emit) }
     private var testSheet: InternalTestBottomSheet? = null
-    private var childWeb: WebView? = null
+    private val externalPage by lazy { ExternalPage(this, webContainer, { webChrome }, ::beginPageLoading, ::finishPageLoading, ::returnToApp) }
+    private val childWeb get() = externalPage.view
     private val actionMenu by lazy { AppMenu(this, { navigate("/app/register") }, ::scanQr, { navigate("/contact-add") }) }
     private val keyHandoff by lazy { KeyHandoff(this) }
     private lateinit var bridge: WebViewBridge
-    private var files: ValueCallback<Array<Uri>>? = null
-    private var pendingMediaRequest: PermissionRequest? = null
-    private var pendingMediaResources = emptyArray<String>()
-    private var retryMediaAfterPermissionGrant = false
+    private val media by lazy { WebMediaAccess(this, { bridge.isTrusted(it) }) { if (::web.isInitialized && !isFinishing && !isDestroyed) web.reload() } }
     private var registeredKey: JSONObject? = null
     private var discovering = false
     private val origin = BuildConfig.WEB_ORIGIN
@@ -186,35 +173,23 @@ class SesameActivity : ComponentActivity() {
             registeredKey = { registeredKey },
             scanQr = ::scanQr,
             showRoute = {
-                if (it != currentRoute) {
-                    nfcDevice = null; autoUnlockMap.close()
+                if (it.path != currentRoute.path) {
+                    nfc.binding = null; autoUnlockMap.close()
                 }
                 currentRoute = it
-                toolbar.showPage(root = childWeb == null && it in tabPaths, home = childWeb == null && it == "/")
+                toolbar.showPage(root = childWeb == null && it.tab, home = childWeb == null && it.home)
                 updateToolbarVisibility()
             },
             pushInfo = {
                 JSONObject().put("pushToken", push.token()).put("appIdentifyId", push.installationId).put("env", JSONArray(AppEnvironment.collect(this)))
                     .put("language", resources.configuration.locales[0].toLanguageTag()).put("enabled", NotificationManagerCompat.from(this).areNotificationsEnabled())
             },
-            notificationSettings = {
-                val settings = if (Build.VERSION.SDK_INT >= 26) {
-                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                } else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:$packageName".toUri())
-                startActivity(settings)
-            },
+            notificationSettings = ::openNotificationSettings,
             openWebPage = ::openWebPage,
             openExternal = { openExternalUrl(it.toUri()) },
             autoUnlockMap = autoUnlockMap::handle,
-            watchNfc = { nfcDevice = it },
-            haptic = { duration ->
-                if (duration > 0) {
-                    val vibrator = if (Build.VERSION.SDK_INT >= 31) getSystemService(VibratorManager::class.java).defaultVibrator
-                    else getSystemService(Vibrator::class.java)
-                    if (Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
-                    else vibrator.vibrate(duration)
-                } else web.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-            },
+            watchNfc = { nfc.binding = it },
+            haptic = { haptic(web, it) },
             uiReady = { if (!startupDocumentFailed) startupCover.ready(web) }
         )
         bridge = WebViewBridge(origin, scope, requests::handle)
@@ -224,7 +199,7 @@ class SesameActivity : ComponentActivity() {
     private fun observePush() {
         scope.launch { (application as SesameApp).subscriptionManager.changes.collect { emit("push") } }
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 13)
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), RequestCode.NOTIFICATIONS)
         }
     }
 
@@ -294,7 +269,7 @@ class SesameActivity : ComponentActivity() {
                 webReady = true
                 if (bridge.isTrusted((url ?: "").toUri())) {
                     bridge.connect(view, url)
-                    nfcIntent?.let { handleNfc(it); nfcIntent = null }
+                    nfcIntent?.let { nfc.handle(it); nfcIntent = null }
                 }
                 openPendingNotification()
             }
@@ -302,7 +277,7 @@ class SesameActivity : ComponentActivity() {
             override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
                 if (view !== web) return true
                 startupCover.begin()
-                cancelPendingMediaRequest()
+                media.cancel()
                 bridge.reset()
                 returnToApp()
                 webContainer.removeView(view); view.destroy()
@@ -313,50 +288,9 @@ class SesameActivity : ComponentActivity() {
             }
         }
         webChrome = object : WebChromeClient() {
-            override fun onPermissionRequest(request: PermissionRequest) {
-                val mediaResources = request.resources.filter {
-                    it == PermissionRequest.RESOURCE_AUDIO_CAPTURE ||
-                            it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
-                }.toTypedArray()
-                if (!bridge.isTrusted(request.origin) || mediaResources.size != request.resources.size) {
-                    request.deny()
-                    return
-                }
-
-                val missingPermissions = buildList {
-                    if (
-                        mediaResources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE) &&
-                        checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
-                    ) add(Manifest.permission.RECORD_AUDIO)
-                    if (
-                        mediaResources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE) &&
-                        checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                    ) add(Manifest.permission.CAMERA)
-                }
-                if (missingPermissions.isEmpty()) {
-                    request.grant(mediaResources)
-                } else {
-                    cancelPendingMediaRequest()
-                    pendingMediaRequest = request
-                    pendingMediaResources = mediaResources
-                    requestPermissions(missingPermissions.toTypedArray(), 15)
-                }
-            }
-
-            override fun onPermissionRequestCanceled(request: PermissionRequest) {
-                if (pendingMediaRequest === request) {
-                    pendingMediaRequest = null
-                    pendingMediaResources = emptyArray()
-                    retryMediaAfterPermissionGrant = true
-                }
-            }
-
-            override fun onShowFileChooser(view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams): Boolean {
-                files?.onReceiveValue(null); files = callback
-                return runCatching { startActivityForResult(params.createIntent(), 20); true }.getOrElse {
-                    files?.onReceiveValue(null); files = null; false
-                }
-            }
+            override fun onPermissionRequest(request: PermissionRequest) = media.request(request)
+            override fun onPermissionRequestCanceled(request: PermissionRequest) = media.cancelled(request)
+            override fun onShowFileChooser(view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams) = media.chooseFile(callback, params)
         }
         web.webChromeClient = webChrome
         webContainer.addView(web, FrameLayout.LayoutParams(-1, -1))
@@ -375,85 +309,38 @@ class SesameActivity : ComponentActivity() {
             else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (permissions.any { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }) {
             if (!askedBle || discovering) {
-                askedBle = true; requestPermissions(permissions, 10)
+                askedBle = true; requestPermissions(permissions, RequestCode.BLE_PERMISSIONS)
             }
             return
         }
         ble.resume()
         if (discovering) {
-            if (CHBleManager.mScanning == CHScanStatus.BleClose) startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 11)
+            if (CHBleManager.mScanning == CHScanStatus.BleClose) startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), RequestCode.BLE_ENABLE)
             else registration.start()
         }
     }
 
     private fun scanQr() {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), 12); return
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), RequestCode.CAMERA); return
         }
         qrScanner.open()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     private fun openWebPage(url: String) {
         require(url.toUri().scheme == "https")
-        // Keep the Biz document and bridge alive underneath a separate, unprivileged page.
         returnToApp()
         autoUnlockMap.close()
-        val page = WebView(this)
-        childWeb = page
-        page.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            allowFileAccess = false
-            allowContentAccess = true
-        }
-        page.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                if (!request.isForMainFrame) return false
-                if (request.url.scheme == "https") return false
-                if (request.url.scheme in setOf("http", "mailto", "tel")) {
-                    runCatching { openExternalUrl(request.url) }
-                }
-                return true
-            }
-
-            override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-                if (view === childWeb) beginPageLoading()
-            }
-
-            override fun onPageFinished(view: WebView, url: String?) {
-                if (view === childWeb && view.url == url) finishPageLoading()
-            }
-
-            override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-                if (view === childWeb && request.isForMainFrame) finishPageLoading()
-            }
-
-            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
-                if (view === childWeb && request.isForMainFrame) finishPageLoading()
-            }
-
-            override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
-                if (view === childWeb) returnToApp()
-                return true
-            }
-        }
-        page.webChromeClient = webChrome
+        externalPage.open(url)
         web.visibility = View.INVISIBLE
-        webContainer.addView(page, FrameLayout.LayoutParams(-1, -1))
         toolbar.showPage(root = false, home = false)
         beginPageLoading()
-        page.loadUrl(url)
     }
 
     private fun returnToApp() {
-        val page = childWeb ?: return
-        childWeb = null
-        webContainer.removeView(page)
-        page.stopLoading()
-        page.destroy()
+        if (!externalPage.close()) return
         pageLoadGeneration++
-        toolbar.showPage(root = currentRoute in tabPaths, home = currentRoute == "/")
+        toolbar.showPage(root = currentRoute.tab, home = currentRoute.home)
         finishPageLoading()
     }
 
@@ -473,22 +360,13 @@ class SesameActivity : ComponentActivity() {
     }
 
     private fun updateToolbarVisibility() {
-        val h5Header = currentRoute in setOf(
-            "/device-setting",
-            "/device-setting/rename",
-            "/device-setting/angle",
-            "/device-setting/auto-unlock",
-            "/device-setting/bot-script",
-            "/device-setting/credentials"
-        ) || currentRoute == "/biz/devices/list-item" || currentRoute == "/device-history" ||
-                currentRoute == "/biz/access-control/region" || currentRoute == "/biz/wifi-module" || currentRoute == "/biz/wifi-module/index"
-        toolbar.visibility = if (childWeb != null) View.VISIBLE else if (h5Header) View.GONE else if (pageLoading) View.INVISIBLE else View.VISIBLE
+        toolbar.visibility = if (childWeb != null) View.VISIBLE else if (currentRoute.pageHeader) View.GONE else if (pageLoading) View.INVISIBLE else View.VISIBLE
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleNfc(intent)
+        nfc.handle(intent)
         emit("push")
         openPendingNotification()
     }
@@ -498,112 +376,31 @@ class SesameActivity : ComponentActivity() {
         PushNotification.consumeUrl(intent)?.let { runCatching { openWebPage(it) } }
     }
 
-    private fun handleNfc(intent: Intent) {
-        if (intent.action !in setOf(
-                NfcAdapter.ACTION_TAG_DISCOVERED,
-                NfcAdapter.ACTION_NDEF_DISCOVERED,
-                NfcAdapter.ACTION_TECH_DISCOVERED
-            )
-        ) return
-        @Suppress("DEPRECATION") val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
-        val tagId = tag.id.joinToString("") { "%02x".format(it.toInt() and 255) }
-        val app = application as SesameApp
-        nfcDevice?.let { id ->
-            app.devicePreferences.setNfc(id, tagId); emit("devicePreferences", app.devicePreferences.snapshot(id))
-            if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED) scope.launch(Dispatchers.IO) {
-                runCatching {
-                    val message = NdefMessage(arrayOf(NdefRecord.createTextRecord(null, "candynfc")))
-                    val ndef = Ndef.get(tag)
-                    if (ndef != null) {
-                        try {
-                            ndef.connect(); ndef.writeNdefMessage(message)
-                        } finally {
-                            ndef.close()
-                        }
-                    } else NdefFormatable.get(tag)?.let { format ->
-                        try {
-                            format.connect(); format.format(message)
-                        } finally {
-                            format.close()
-                        }
-                    }
-                }.onFailure { L.e("SesameNfc", "Tag formatting failed", it) }
-            }
-            return
-        }
-        scope.launch {
-            ble.restoreSaved(); requestBle()
-            ble.allDevices().filter { app.devicePreferences.nfc(it.deviceId.toString()).equals(tagId, true) }.forEach { device ->
-                launch {
-                    runCatching {
-                        withTimeout(12000.milliseconds) {
-                            while (device.deviceStatus.value != CHDeviceLoginStatus.logined && device.deviceId.toString()
-                                    .uppercase() !in app.bleBackend.gatewayDevices
-                            ) delay(500.milliseconds)
-                            if (device.deviceStatus.value == CHDeviceLoginStatus.logined) ble.handle(
-                                "home.command",
-                                JSONObject().put("deviceUUID", device.deviceId.toString())
-                            ) { _, _ -> }
-                            else app.bleBackend.requestCloud?.invoke("widgetCommand", JSONObject().put("operation", "toggle"), device.deviceId.toString())
-                        }
-                    }.onFailure { L.e("SesameNfc", "Tag operation failed", it) }
-                }
-            }
-        }
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, results)
-        if (requestCode == 15) {
-            val request = pendingMediaRequest
-            val resources = pendingMediaResources
-            pendingMediaRequest = null
-            pendingMediaResources = emptyArray()
-            val granted = results.isNotEmpty() && results.all { it == PackageManager.PERMISSION_GRANTED }
-            val shouldRetry = retryMediaAfterPermissionGrant
-            retryMediaAfterPermissionGrant = false
-            if (granted) {
-                if (request != null) request.grant(resources)
-                else if (shouldRetry && ::web.isInitialized && !isFinishing && !isDestroyed) web.reload()
-            } else {
-                request?.deny()
-            }
-            return
-        }
-        if (requestCode == 14) {
-            autoUnlockMap.permissionResult(); return
-        }
-        if (requestCode == 13) {
-            SesameConnectedDeviceService.sync(this); return
+        when (requestCode) {
+            RequestCode.WEB_MEDIA -> return media.permissionResult(results)
+            RequestCode.AUTO_UNLOCK_LOCATION -> return autoUnlockMap.permissionResult()
+            RequestCode.NOTIFICATIONS -> return SesameConnectedDeviceService.sync(this)
         }
         if (results.isEmpty() || results.any { it != PackageManager.PERMISSION_GRANTED }) {
             emit("error", "Permission denied"); return
         }
-        if (requestCode == 10) requestBle() else if (requestCode == 12) scanQr()
+        if (requestCode == RequestCode.BLE_PERMISSIONS) requestBle() else if (requestCode == RequestCode.CAMERA) scanQr()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 21 && resultCode == RESULT_OK) data?.data?.let { qrScanner.decodeImage(it) }
-        if (requestCode == 20) {
-            files?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data)); files = null
-        }
-        if (requestCode == 11 && resultCode == RESULT_OK) requestBle()
+        if (requestCode == RequestCode.QR_IMAGE && resultCode == RESULT_OK) data?.data?.let { qrScanner.decodeImage(it) }
+        if (requestCode == RequestCode.FILE_CHOOSER) media.fileResult(resultCode, data)
+        if (requestCode == RequestCode.BLE_ENABLE && resultCode == RESULT_OK) requestBle()
     }
 
     override fun onResume() {
         super.onResume(); if (::web.isInitialized) {
             qrScanner.resume()
             autoUnlockMap.resume()
-            NfcAdapter.getDefaultAdapter(this)?.enableForegroundDispatch(
-                this,
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    Intent(this, SesameActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                ), null, null
-            )
+            nfc.enable()
             SesameConnectedDeviceService.sync(this)
             childWeb?.onResume()
             web.onResume(); if (askedBle) requestBle(); emit("resume")
@@ -612,7 +409,7 @@ class SesameActivity : ComponentActivity() {
 
     override fun onPause() {
         if (::web.isInitialized) emit("pause")
-        NfcAdapter.getDefaultAdapter(this)?.disableForegroundDispatch(this)
+        nfc.disable()
         autoUnlockMap.pause()
         actionMenu.dismiss()
         testSheet?.dismiss(); testSheet = null
@@ -626,21 +423,18 @@ class SesameActivity : ComponentActivity() {
         if (qrScanner.isOpen) {
             qrScanner.close(); emit("qrCancelled")
         } else if (childWeb != null) {
-            val page = childWeb!!
-            if (page.canGoBack()) page.goBack() else returnToApp()
-        } else if (currentRoute !in tabPaths) emit("back")
+            if (!externalPage.back()) returnToApp()
+        } else if (!currentRoute.tab) emit("back")
         else finish()
     }
 
     override fun onDestroy() {
         if (::startupCover.isInitialized) startupCover.close()
-        cancelPendingMediaRequest()
+        media.close()
         autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++
-        testSheet?.setOnDismissListener(null); testSheet?.dismiss(); qrScanner.close(); registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset(); files?.onReceiveValue(
-            null
-        )
+        testSheet?.setOnDismissListener(null); testSheet?.dismiss(); qrScanner.close(); registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset()
         returnToApp()
         webContainer.removeView(web); web.destroy(); scope.cancel()
         (application as SesameApp).apply {
@@ -648,13 +442,5 @@ class SesameActivity : ComponentActivity() {
             if (SesameConnectedDeviceService.live != null) ensureBackgroundWeb() else ble.close()
         }
         super.onDestroy()
-    }
-
-    private fun cancelPendingMediaRequest() {
-        val request = pendingMediaRequest
-        pendingMediaRequest = null
-        pendingMediaResources = emptyArray()
-        retryMediaAfterPermissionGrant = false
-        request?.deny()
     }
 }

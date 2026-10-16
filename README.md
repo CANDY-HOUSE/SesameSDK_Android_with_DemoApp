@@ -25,29 +25,29 @@ flowchart LR
 
 ### 1. 依存関係の追加
 
-```groovy
+```kotlin
 dependencies {
-    implementation project(':sesameSdk')
+    implementation(project(":sesameSdk"))
 }
 ```
 
-JitPack を利用する場合は `settings.gradle` にリポジトリを追加します。
+JitPack を利用する場合は `settings.gradle.kts` にリポジトリを追加します。
 
-```groovy
+```kotlin
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
 
-続いてアプリの `build.gradle` に SDK の依存関係を追加します。
+続いてアプリの `build.gradle.kts` に SDK の依存関係を追加します。
 
-```groovy
+```kotlin
 dependencies {
-    implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>'
+    implementation("com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>")
 }
 ```
 
@@ -184,7 +184,7 @@ flowchart TB
 
 ## 内部開発
 
-プロジェクト共通設定は `app.properties` に保持し、ルートの `build.gradle` で読み込み、プライベートリポジトリで管理します。`local.properties` は `sdk.dir` など開発者のローカル設定専用とし、Git にコミットしません。Firebase 設定は `sesameApp/google-services.json` です。
+プロジェクト共通設定は `app.properties` に保持し、ルートの `build.gradle.kts` で読み込み、プライベートリポジトリで管理します。`local.properties` は `sdk.dir` など開発者のローカル設定専用とし、Git にコミットしません。Firebase 設定は `sesameApp/google-services.json` です。
 
 ```properties
 aws.cognito.identityPoolId=<YOUR_IDENTITY_POOL_ID>

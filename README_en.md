@@ -25,29 +25,29 @@ Build the source with Android Studio and the repository Gradle wrapper. `gradle/
 
 ### 1. Add the dependency
 
-```groovy
+```kotlin
 dependencies {
-    implementation project(':sesameSdk')
+    implementation(project(":sesameSdk"))
 }
 ```
 
-To use JitPack, add the repository in `settings.gradle`:
+To use JitPack, add the repository in `settings.gradle.kts`:
 
-```groovy
+```kotlin
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
 
-Then add the SDK dependency in the application’s `build.gradle`:
+Then add the SDK dependency in the application’s `build.gradle.kts`:
 
-```groovy
+```kotlin
 dependencies {
-    implementation 'com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>'
+    implementation("com.github.CANDY-HOUSE.SesameSDK_Android_with_DemoApp:sesameSdk:<version>")
 }
 ```
 
@@ -184,7 +184,7 @@ Related APIs: `CHCardCapable`, `CHPassCodeCapable`, `CHFingerPrintCapable`, `CHP
 
 ## Internal development
 
-Keep shared project configuration in `app.properties`, loaded by the root `build.gradle` and managed in the private repository. Use ignored `local.properties` only for developer-specific settings such as `sdk.dir`. Use your Firebase configuration in `sesameApp/google-services.json`.
+Keep shared project configuration in `app.properties`, loaded by the root `build.gradle.kts` and managed in the private repository. Use ignored `local.properties` only for developer-specific settings such as `sdk.dir`. Use your Firebase configuration in `sesameApp/google-services.json`.
 
 ```properties
 aws.cognito.identityPoolId=<YOUR_IDENTITY_POOL_ID>

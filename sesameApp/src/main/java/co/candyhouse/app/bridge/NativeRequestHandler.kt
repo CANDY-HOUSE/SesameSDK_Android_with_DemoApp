@@ -16,6 +16,7 @@ import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.data.auth.LegacySession
+import co.candyhouse.app.ui.AppRoute
 import co.candyhouse.app.util.toKeyJson
 import co.candyhouse.sesame.utils.L
 import kotlinx.coroutines.CancellationException
@@ -34,7 +35,7 @@ class NativeRequestHandler(
     private val stopDiscovery: () -> Unit,
     private val registeredKey: () -> JSONObject?,
     private val scanQr: () -> Unit,
-    private val showRoute: (String) -> Unit,
+    private val showRoute: (AppRoute) -> Unit,
     private val pushInfo: suspend () -> JSONObject,
     private val notificationSettings: () -> Unit,
     private val openWebPage: (String) -> Unit,
@@ -158,7 +159,7 @@ class NativeRequestHandler(
                 }
 
                 "home.peripheralSettings" -> reply(true, ble.peripheralSettings.handle(json))
-                "home.hubSettings" -> reply(true, ble.hubSettings(json))
+                "home.hubSettings" -> reply(true, ble.hubSettings.handle(json))
                 "home.botSettings" -> reply(true, BotSettings.handle(ble, json))
                 "home.lockSettings" -> reply(true, LockSettings.handle(ble, json))
                 "home.scanStart" -> {
@@ -184,7 +185,7 @@ class NativeRequestHandler(
                 }
 
                 "home.route" -> {
-                    showRoute(json.optString("path")); reply(true)
+                    showRoute(AppRoute.from(json)); reply(true)
                 }
 
                 "home.pushInfo" -> reply(true, pushInfo())
