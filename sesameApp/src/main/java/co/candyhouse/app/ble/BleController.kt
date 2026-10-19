@@ -161,7 +161,12 @@ class BleController(
                     peripheralSettings.forget(id)
                     hubSettings.forget(id)
                     appliedKeys.remove(id)
-                    devices.remove(id)?.let { it.delegate = null; it.disconnect {} }
+                    devices.remove(id)?.let {
+                        if (it.isRegistered) {
+                            it.delegate = null
+                            it.disconnect {}
+                        }
+                    }
                 }
                 if (!historyTag.isNullOrBlank()) {
                     history = historyBytes(historyTag)
