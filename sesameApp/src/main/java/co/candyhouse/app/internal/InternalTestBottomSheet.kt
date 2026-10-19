@@ -18,6 +18,7 @@ import android.widget.TextView
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import co.candyhouse.app.BuildConfig
 import co.candyhouse.app.R
 import co.candyhouse.app.SesameApp
 import co.candyhouse.app.ble.BleController
@@ -33,7 +34,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlin.time.Duration.Companion.milliseconds
 
 /** Native-only internal stress test. Keeps the existing counter and per-lock interval preferences. */
@@ -43,6 +48,7 @@ class InternalTestBottomSheet(context: Context, private val scope: CoroutineScop
     private var selected = locks.find { it.deviceId.toString() == prefs.getString("selected_id", null) } ?: locks.firstOrNull()
     private var count = prefs.getInt("toggle_count", 0)
     private var job: Job? = null
+    private var bizInfoJob: Job? = null
     private var testSessionId = 0
     private var previous: CHDeviceStatusDelegate? = null
     private var testDelegate: CHDeviceStatusDelegate? = null
@@ -93,7 +99,35 @@ class InternalTestBottomSheet(context: Context, private val scope: CoroutineScop
             text = (context.applicationContext as SesameApp).subscriptionManager.installationId
             setTextIsSelectable(true)
         }
+        showBizInfo()
         render()
+    }
+
+    /** Same source as Biz3's bottom-left BuildInfoBar: `${WEB_ORIGIN}/version.json`. */
+    private fun showBizInfo() {
+        val origin = BuildConfig.WEB_ORIGIN
+        val view = content.findViewById<TextView>(R.id.tvBizInfo).apply { setTextIsSelectable(true) }
+        fun show(build: String) { view.text = "Base URL: $origin\n$build" }
+        show("Build: 加载中…")
+        bizInfoJob = scope.launch {
+            val info = withContext(Dispatchers.IO) {
+                runCatching {
+                    val connection = URL("$origin/version.json").openConnection() as HttpURLConnection
+                    try {
+                        connection.connectTimeout = 3000
+                        connection.readTimeout = 3000
+                        connection.useCaches = false
+                        JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+                    } finally {
+                        connection.disconnect()
+                    }
+                }
+            }
+            show(info.fold(
+                onSuccess = { "Build: ${it.optString("buildTime", "--")} ${it.optString("gitHash", "--")}\nVersion: ${it.optString("version", "--")}" },
+                onFailure = { "Build: 获取失败 (${it.javaClass.simpleName})" }
+            ))
+        }
     }
 
     override fun show() {
@@ -220,6 +254,6 @@ class InternalTestBottomSheet(context: Context, private val scope: CoroutineScop
     }
 
     override fun dismiss() {
-        stopTest(); super.dismiss()
+        stopTest(); bizInfoJob?.cancel(); super.dismiss()
     }
 }

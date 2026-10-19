@@ -7,6 +7,7 @@ import co.candyhouse.sesame.ble.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.CHDeviceStatus
 import co.candyhouse.sesame.ble.CHDeviceStatusDelegate
 import co.candyhouse.sesame.ble.CHDevices
+import co.candyhouse.sesame.ble.CHProductModel
 import co.candyhouse.sesame.ble.CHScanStatus
 import co.candyhouse.sesame.ble.os2.sesame2.CHSesame2
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +38,8 @@ class BleRegistrationController(
             scope.launch(Dispatchers.Main) {
                 if (!active) return@launch
                 devices.clear()
-                found.filter { it.deviceId != null && it.rssi != null }.forEach { devices[it.deviceId.toString().uppercase()] = it }
+                // Face3 只能由 Hub3 等设备经 BLE 添加；手机 App 只能扫 Face3 屏幕上的二维码添加
+                found.filter { it.deviceId != null && it.rssi != null && it.productModel != CHProductModel.SSMFace3 }.forEach { devices[it.deviceId.toString().uppercase()] = it }
                 if (registering == null) {
                     devices.values.maxByOrNull { it.rssi ?: Int.MIN_VALUE }?.let { nearest ->
                         if (nearest.deviceStatus == CHDeviceStatus.ReceivedAdV) nearest.connect { }
