@@ -217,7 +217,9 @@ class HubSettings(private val ble: BleController, private val scope: CoroutineSc
         }
     }
 
-    suspend fun handle(json: JSONObject): JSONObject = withTimeoutOrNull(8000.milliseconds) {
+    suspend fun handle(json: JSONObject): JSONObject = withTimeoutOrNull(
+        if (json.optString("operation") == "connectWifi") 25000.milliseconds else 8000.milliseconds
+    ) {
         val id = json.getString("deviceUUID").uppercase()
         val hub = ble.device(id) as? CHWifiModule2 ?: error("Unsupported WiFi device")
         when (json.getString("operation")) {

@@ -1,5 +1,6 @@
 package co.candyhouse.app.ble
 
+import android.os.SystemClock
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHBleManagerDelegate
 import co.candyhouse.sesame.ble.CHBleStatusDelegate
@@ -17,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
 /** Discovery and registration only; all rows, progress and errors are rendered by Biz. */
@@ -28,6 +30,10 @@ class BleRegistrationController(
 ) {
     private val devices = linkedMapOf<String, CHDevices>()
     private var active = false
+    private var sessionStartedAt = 0L
+
+    /** Biz 传入的已删除但未复位设备，设备端仍为已注册时也列出，供 Biz 置灰显示。 */
+    var removedDevices: Set<String> = emptySet()
     private var previousScanDelegate: CHBleStatusDelegate? = null
     private var registering: CHDevices? = null
     private var previousDelegate: CHDeviceStatusDelegate? = null
@@ -39,9 +45,11 @@ class BleRegistrationController(
                 if (!active) return@launch
                 devices.clear()
                 // Face3 只能由 Hub3 等设备经 BLE 添加；手机 App 只能扫 Face3 屏幕上的二维码添加
-                found.filter { it.deviceId != null && it.rssi != null && it.productModel != CHProductModel.SSMFace3 }.forEach { devices[it.deviceId.toString().uppercase()] = it }
+                val removed = removedDevices.mapNotNull { id -> runCatching { UUID.fromString(id) }.getOrNull()?.let(CHBleManager::scannedDevice) }.filter { it.isRegistered }
+                (found + removed).filter { it.deviceId != null && it.rssi != null && it.productModel != CHProductModel.SSMFace3 && seenThisSession(it) }
+                    .forEach { devices[it.deviceId.toString().uppercase()] = it }
                 if (registering == null) {
-                    devices.values.maxByOrNull { it.rssi ?: Int.MIN_VALUE }?.let { nearest ->
+                    devices.values.filter { !it.isRegistered }.maxByOrNull { it.rssi ?: Int.MIN_VALUE }?.let { nearest ->
                         if (nearest.deviceStatus == CHDeviceStatus.ReceivedAdV) nearest.connect { }
                     }
                 }
@@ -56,9 +64,14 @@ class BleRegistrationController(
         }
     }
 
+    // 只列出本次 scanStart 之后收到过广播的设备；已连接的设备可能停止广播，按连接状态保留
+    private fun seenThisSession(device: CHDevices): Boolean =
+        device.deviceStatus in connectedStatuses || (CHBleManager.lastAdvertisedAt(device.deviceId) ?: 0L) >= sessionStartedAt
+
     fun start() {
         if (registering != null) return
         val restarting = active
+        sessionStartedAt = SystemClock.elapsedRealtime()
         if (!restarting) previousScanDelegate = CHBleManager.statusDelegate
         active = true
         CHBleManager.delegate = scanner
@@ -74,7 +87,7 @@ class BleRegistrationController(
                 put(
                     JSONObject().put("deviceUUID", device.deviceId.toString().uppercase())
                         .put("name", device.productModel.deviceModelName()).put("rssi", device.rssi)
-                        .put("bleState", device.deviceStatus.webBleState())
+                        .put("bleState", device.deviceStatus.webBleState()).put("registered", device.isRegistered)
                 )
             }
         }))
@@ -87,7 +100,7 @@ class BleRegistrationController(
         if (registering != null) {
             reply(false, "Registration in progress"); return
         }
-        val device = devices[id.uppercase()] ?: run { reply(false, "Device no longer available; scan again"); return }
+        val device = devices[id.uppercase()]?.takeIf { !it.isRegistered } ?: run { reply(false, "Device no longer available; scan again"); return }
         registering = device
         complete = reply
         previousDelegate = device.delegate
@@ -145,5 +158,12 @@ class BleRegistrationController(
 
     fun close() {
         stop(); finish(false, "Registration page closed")
+    }
+
+    private companion object {
+        val connectedStatuses = setOf(
+            CHDeviceStatus.BleConnecting, CHDeviceStatus.WaitingGatt, CHDeviceStatus.DiscoverServices, CHDeviceStatus.BleLogining,
+            CHDeviceStatus.ReadyToRegister, CHDeviceStatus.WaitingForAuth, CHDeviceStatus.Registering
+        )
     }
 }

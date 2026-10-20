@@ -11,6 +11,7 @@ import co.candyhouse.app.ble.BleFirmwareUpdate
 import co.candyhouse.app.ble.BleRegistrationController
 import co.candyhouse.app.ble.BotSettings
 import co.candyhouse.app.ble.DeviceLocation
+import co.candyhouse.app.ble.InternalTest
 import co.candyhouse.app.ble.LockSettings
 import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
@@ -34,7 +35,6 @@ class NativeRequestHandler(
     private val startDiscovery: () -> Unit,
     private val stopDiscovery: () -> Unit,
     private val registeredKey: () -> JSONObject?,
-    private val scanQr: () -> Unit,
     private val showRoute: (AppRoute) -> Unit,
     private val pushInfo: suspend () -> JSONObject,
     private val notificationSettings: () -> Unit,
@@ -86,7 +86,7 @@ class NativeRequestHandler(
                 }
 
                 "home.devices" -> {
-                    ble.accept(json.getJSONArray("devices"), json.optString("historyTag"))
+                    ble.accept(json.getJSONArray("devices"), json.optString("historyTag"), json.optString("historyName"))
                     if (json.getJSONArray("devices").length() > 0) requestBle()
                     reply(true)
                 }
@@ -127,7 +127,7 @@ class NativeRequestHandler(
                 "home.firmwareInfo" -> reply(
                     true,
                     JSONObject().put("productType", requireNotNull(ble.device(json.getString("deviceUUID"))).productModel.productType())
-                        .put("firmwareDir", context.getSharedPreferences("firmware_dir_prefs", Context.MODE_PRIVATE).getString("firmware_dir", "prod"))
+                        .put("firmwareDir", InternalTest.firmwareDir(context))
                 )
 
                 "home.devicePreferences" -> {
@@ -163,6 +163,8 @@ class NativeRequestHandler(
                 "home.botSettings" -> reply(true, BotSettings.handle(ble, json))
                 "home.lockSettings" -> reply(true, LockSettings.handle(ble, json))
                 "home.scanStart" -> {
+                    registration.removedDevices =
+                        json.optJSONArray("removedDevices")?.let { list -> (0 until list.length()).map { list.getString(it).uppercase() }.toSet() } ?: emptySet()
                     startDiscovery(); reply(true)
                 }
 
@@ -180,9 +182,7 @@ class NativeRequestHandler(
                     }
                 }
 
-                "home.scanQr" -> {
-                    scanQr(); reply(true)
-                }
+                "home.internalTest" -> InternalTest.handle(context, ble, json, ::reply)
 
                 "home.route" -> {
                     showRoute(AppRoute.from(json)); reply(true)

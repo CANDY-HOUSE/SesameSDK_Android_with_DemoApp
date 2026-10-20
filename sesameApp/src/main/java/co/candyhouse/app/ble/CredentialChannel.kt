@@ -46,6 +46,10 @@ internal abstract class CredentialChannel(protected val device: CHDevices) {
     open fun rename(id: String, name: String, result: CHResult<CHEmpty>): Unit = error("Name is managed in Biz")
     abstract fun delete(id: String, result: CHResult<CHEmpty>)
 
+    /** Manual entry and JSON import exist for NFC cards and passcodes only. */
+    open fun add(id: ByteArray, name: String, result: CHResult<CHEmpty>): Unit = error("Manual add unsupported")
+    open fun batchAdd(data: ByteArray, progress: (Int, Int) -> Unit, result: CHResult<CHEmpty>): Unit = error("Batch add unsupported")
+
     companion object {
         fun of(device: CHDevices, kind: String): CredentialChannel = when (kind) {
             "card" -> Card(device)
@@ -80,6 +84,8 @@ private class Card(device: CHDevices) : CredentialChannel(device) {
 
     override fun rename(id: String, name: String, result: CHResult<CHEmpty>) = capable.cardChange(id, name, result)
     override fun delete(id: String, result: CHResult<CHEmpty>) = capable.cardDelete(id, result)
+    override fun add(id: ByteArray, name: String, result: CHResult<CHEmpty>) = capable.cardAdd(id, name, result)
+    override fun batchAdd(data: ByteArray, progress: (Int, Int) -> Unit, result: CHResult<CHEmpty>) = capable.cardBatchAdd(data, progress, result)
 }
 
 private class FingerPrint(device: CHDevices) : CredentialChannel(device) {
@@ -127,6 +133,8 @@ private class PassCode(device: CHDevices) : CredentialChannel(device) {
 
     override fun rename(id: String, name: String, result: CHResult<CHEmpty>) = capable.keyBoardPassCodeChange(id, name, result)
     override fun delete(id: String, result: CHResult<CHEmpty>) = capable.keyBoardPassCodeDelete(id, device.deviceId.toString(), result)
+    override fun add(id: ByteArray, name: String, result: CHResult<CHEmpty>) = capable.keyBoardPassCodeAdd(id, name, result)
+    override fun batchAdd(data: ByteArray, progress: (Int, Int) -> Unit, result: CHResult<CHEmpty>) = capable.keyBoardPassCodeBatchAdd(data, progress, result)
 }
 
 private fun byteId(value: Byte) = "%02x".format(value.toInt() and 255)

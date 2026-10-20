@@ -108,10 +108,10 @@ object LockSettings {
                 require(seconds in listOf(0, 3, 5, 7, 10, 15, 30, 60, 120, 180, 240, 300, 600, 900, 1800, 3600))
                 when (device) {
                     is CHSesame5 -> awaitResult { device.autolock(seconds, it) }
-                    is CHSesame2 -> if (seconds == 0) awaitResult { device.disableAutolock(ble.historyTag(), it) } else awaitResult {
+                    is CHSesame2 -> if (seconds == 0) awaitResult { device.disableAutolock(ble.os2HistoryTag(), it) } else awaitResult {
                         device.enableAutolock(
                             seconds,
-                            ble.historyTag(),
+                            ble.os2HistoryTag(),
                             it
                         )
                     }

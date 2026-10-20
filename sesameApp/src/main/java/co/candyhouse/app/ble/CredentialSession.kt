@@ -31,15 +31,31 @@ internal class CredentialSession(
     private var loadTimer: Job? = null
     private var modeRead: Job? = null
     private var detach: () -> Unit = {}
+    private var importing = false
+    private var importProgress = 0
+    private var importRevision = 0
+    private var importError: String? = null
     fun snapshot() = JSONObject().put("kind", kind).put("session", token).put("revision", revision)
         .put("complete", complete).put("loading", loading).put("loadFailed", loadFailed).put("mode", mode).put("failureRevision", failureRevision)
+        .put("importing", importing).put("importProgress", importProgress).put("importRevision", importRevision).put("importError", importError ?: JSONObject.NULL)
         .put("items", JSONArray(items.values.toList()))
+
+    private var pendingChange: Job? = null
 
     private fun update(block: () -> Unit) {
         scope.launch(Dispatchers.Main.immediate) {
             if (!closed) {
-                block(); onChange()
+                block(); scheduleChange()
             }
+        }
+    }
+
+    /** A device streams hundreds of items within a fraction of a second; one snapshot per 100 ms keeps the page responsive. */
+    private fun scheduleChange() {
+        if (pendingChange?.isActive == true) return
+        pendingChange = scope.launch(Dispatchers.Main) {
+            delay(100.milliseconds)
+            if (!closed) onChange()
         }
     }
 
@@ -99,6 +115,14 @@ internal class CredentialSession(
         if (op == "credentialMode") {
             setMode(json.getInt("value")); return
         }
+        if (op == "credentialAdd") {
+            // Biz encodes the card ID / passcode digits; the device reports the new item as a change.
+            LockSettings.awaitResult<CHEmpty> { channel.add(bytes(json.getString("value")), json.getString("name"), it) }
+            return
+        }
+        if (op == "credentialImport") {
+            startImport(bytes(json.getString("data"))); return
+        }
         val id = json.getString("id"); require(items.containsKey(id))
         if (op == "credentialRename") {
             val name = json.getString("nameUUID").replace("-", "")
@@ -112,9 +136,29 @@ internal class CredentialSession(
         }
     }
 
+    private fun bytes(hex: String): ByteArray {
+        require(hex.isNotEmpty() && hex.length % 2 == 0 && hex.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' })
+        return hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+    }
+
+    /** The SDK sends 209-byte packets 4 s apart, longer than a bridge request; progress and result go out in the snapshot. */
+    private fun startImport(data: ByteArray) {
+        check(!importing)
+        require(data.size <= Short.MAX_VALUE)
+        importing = true; importProgress = 0; importError = null
+        channel.batchAdd(data, { current, total -> update { if (importing) importProgress = current * 100 / total } }) { result ->
+            update {
+                importing = false
+                importError = result.exceptionOrNull()?.let { it.message ?: it.javaClass.simpleName }
+                if (result.isSuccess) importProgress = 100
+                importRevision++
+            }
+        }
+    }
+
     fun close(): Job? {
         if (closed) return null
-        closed = true; loadTimer?.cancel(); modeRead?.cancel(); detach()
+        closed = true; loadTimer?.cancel(); modeRead?.cancel(); pendingChange?.cancel(); detach()
         return if (device.deviceStatus.value == CHDeviceLoginStatus.logined) scope.launch {
             runCatching { withTimeout(4000.milliseconds) { setMode(channel.idleMode.toInt()) } }
         } else null

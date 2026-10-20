@@ -3,7 +3,6 @@ agp = "9.4.1"
 ksp = "2.3.7"
 androidxActivity = "1.9.0"
 amplifyAndroid = "2.38.1"
-core = "3.3.3"
 desugarJdkLibs = "2.1.5"
 kotlinxCoroutinesAndroid = "1.7.3"
 lifecycleRuntimeKtx = "2.8.6"
@@ -32,7 +31,6 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 amplify-aws-auth-cognito = { module = "com.amplifyframework:aws-auth-cognito", version.ref = "amplifyAndroid" }
 amplify-core-kotlin = { module = "com.amplifyframework:core-kotlin", version.ref = "amplifyAndroid" }
-core = { module = "com.google.zxing:core", version.ref = "core" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 dfu = { module = "no.nordicsemi.android:dfu", version.ref = "dfu" }

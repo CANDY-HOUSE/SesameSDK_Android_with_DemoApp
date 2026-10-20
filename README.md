@@ -223,7 +223,7 @@ Biz は業務ルール・状態管理・画面操作・クラウド要求を実�
 ```mermaid
 flowchart TB
   Activity[SesameActivity lifecycle] --> Bridge[WebViewBridge trusted origin]
-  Activity --> QR[QrScanner camera / gallery]
+  Activity --> Media[WebMediaAccess camera / file chooser]
   Bridge --> Handler[NativeRequestHandler]
   Handler --> BLE[BleController / Registration]
   Handler --> Platform[NFC / Push / AutoUnlock / Firmware]
@@ -231,7 +231,7 @@ flowchart TB
   Backend --> Biz[Biz WebSocket runtime]
 ```
 
-Amplify Auth は旧ログインの引き継ぎ、core-kotlin は現在の suspend API 用です。Amplify API プラグインはありません。バックグラウンド WebView も Biz のクラウド接続を利用し、NFC・通知・自動解錠・ファームウェア転送・QR は各ネイティブ機能が担当します。
+Amplify Auth は旧ログインの引き継ぎ、core-kotlin は現在の suspend API 用です。Amplify API プラグインはありません。バックグラウンド WebView も Biz のクラウド接続を利用し、NFC・通知・自動解錠・ファームウェア転送は各ネイティブ機能が担当します。ヘッダー・メニュー・QR スキャン画面・内部テストは Biz が描画し、Android はカメラと写真選択の権限のみを提供します。
 
 ## 起動とオフライン
 

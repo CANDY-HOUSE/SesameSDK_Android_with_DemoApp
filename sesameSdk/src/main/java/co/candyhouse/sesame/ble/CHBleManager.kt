@@ -15,6 +15,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelUuid
+import android.os.SystemClock
 import co.candyhouse.sesame.ble.os2.sesame2.CHError
 import co.candyhouse.sesame.utils.CHEmpty
 import co.candyhouse.sesame.utils.CHResult
@@ -127,6 +128,13 @@ object CHBleManager {
     lateinit var bluetoothAdapter: BluetoothAdapter
     internal val connectR: MutableList<String> = ArrayList()
     internal var chDeviceMap: MutableMap<String?, CHDevices> = ConcurrentHashMap()
+    private val lastAdvertisedAt: MutableMap<UUID, Long> = ConcurrentHashMap()
+
+    /** 最后一次收到该设备广播的时间（SystemClock.elapsedRealtime），从未收到返回 null。 */
+    fun lastAdvertisedAt(deviceId: UUID?): Long? = deviceId?.let { lastAdvertisedAt[it] }
+
+    /** 按 UUID 取已扫描到的设备（含已注册设备），未扫描到返回 null。 */
+    fun scannedDevice(deviceId: UUID): CHDevices? = chDeviceMap[deviceId.toString()]
 
     var mScanning: CHScanStatus = CHScanStatus.BleClose
         set(value) {
@@ -153,6 +161,7 @@ object CHBleManager {
                         chDeviceMap.getOrPut(this.deviceID.toString()) { it.deviceFactory() }.let { device ->
                             device.productModel = this.productModel!!
                             (device as? CHDeviceUtil)?.advertisement = this
+                            this.deviceID?.let { id -> lastAdvertisedAt[id] = SystemClock.elapsedRealtime() }
                         }
                     }
                 }

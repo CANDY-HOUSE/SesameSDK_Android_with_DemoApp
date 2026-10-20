@@ -223,7 +223,7 @@ Biz 实现业务规则、状态管理、页面交互和云端请求；Android �
 ```mermaid
 flowchart TB
   Activity[SesameActivity lifecycle] --> Bridge[WebViewBridge trusted origin]
-  Activity --> QR[QrScanner camera / gallery]
+  Activity --> Media[WebMediaAccess camera / file chooser]
   Bridge --> Handler[NativeRequestHandler]
   Handler --> BLE[BleController / Registration]
   Handler --> Platform[NFC / Push / AutoUnlock / Firmware]
@@ -231,7 +231,7 @@ flowchart TB
   Backend --> Biz[Biz WebSocket runtime]
 ```
 
-Amplify Auth 保留用于旧登录会话衔接；core-kotlin 提供当前挂起 API。没有 Amplify API 插件。背景 WebView 复用 Biz 云端连接；NFC、通知、自动开锁、固件传输与扫码由各原生能力组件承接。
+Amplify Auth 保留用于旧登录会话衔接；core-kotlin 提供当前挂起 API。没有 Amplify API 插件。背景 WebView 复用 Biz 云端连接；NFC、通知、自动开锁与固件传输由各原生能力组件承接。顶栏、菜单、扫码页面和内测页由 Biz 绘制，Android 只提供摄像头与图片选择的系统授权。
 
 ## 启动与离线
 

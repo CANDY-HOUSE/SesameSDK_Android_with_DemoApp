@@ -223,7 +223,7 @@ class PeripheralSettings(private val ble: BleController, private val scope: Coro
                     }
                 }
 
-                "credentialMode", "credentialRename", "credentialDelete" -> {
+                "credentialMode", "credentialRename", "credentialDelete", "credentialAdd", "credentialImport" -> {
                     val session = requireNotNull(credentials[id])
                     require(session.token == json.getString("session"))
                     session.command(op, json)

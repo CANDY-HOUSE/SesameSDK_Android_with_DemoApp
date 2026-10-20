@@ -81,6 +81,9 @@ class BleController(
     }.getOrDefault(ByteArray(16) { 0xff.toByte() })
 
     private var history = historyBytes(localPreferences.getString("environmentId", null))
+
+    // OS2 devices (Sesame 3/4, Bike 1, Bot 1) record a text tag; like the native app it is the account name supplied by Biz.
+    private var os2History: ByteArray? = localPreferences.getString("historyName", null)?.takeIf { it.isNotEmpty() }?.toByteArray()
     private val delegate = object : CHHub3Delegate {
         override fun onBleDeviceStatusChanged(device: CHDevices, status: CHDeviceStatus) {
             scope.launch(Dispatchers.Main) {
@@ -135,7 +138,7 @@ class BleController(
         }
     }
 
-    fun accept(rows: JSONArray, historyTag: String?): Job {
+    fun accept(rows: JSONArray, historyTag: String?, historyName: String? = null): Job {
         val keyHandoff = KeyHandoff(DeviceKeyDatabase.context)
         val revision = keyHandoff.scopeRevision()
         return scope.launch {
@@ -174,6 +177,13 @@ class BleController(
                 } else if (rows.length() == 0) {
                     history = historyBytes(null)
                     localPreferences.edit().remove("environmentId").apply()
+                }
+                if (!historyName.isNullOrEmpty()) {
+                    os2History = historyName.toByteArray()
+                    localPreferences.edit().putString("historyName", historyName).apply()
+                } else if (rows.length() == 0) {
+                    os2History = null
+                    localPreferences.edit().remove("historyName").apply()
                 }
                 backend.gatewayDevices = (0 until rows.length()).map { rows.getJSONObject(it) }
                     .filter { it.optJSONObject("stateInfo")?.optBoolean("wm2State") == true }
@@ -258,6 +268,7 @@ class BleController(
     fun testDevices(): List<CHDevices> = devices.values.toList()
     fun deviceName(device: CHDevices): String = appliedKeys[device.deviceId.toString().uppercase()]?.historyTag?.toString(Charsets.UTF_8) ?: device.productModel.deviceModelName()
     fun historyTag(): ByteArray = history.copyOf()
+    fun os2HistoryTag(): ByteArray? = os2History?.copyOf()
 
     fun snapshot() {
         val rows = JSONArray().apply {
@@ -331,14 +342,14 @@ class BleController(
             }
 
             is CHSesame2 -> when (json.optString("operation")) {
-                "lock" -> device.lock(result = result)
-                "unlock" -> device.unlock(result = result)
-                else -> device.toggle(result = result)
+                "lock" -> device.lock(historytag = os2HistoryTag(), result = result)
+                "unlock" -> device.unlock(historytag = os2HistoryTag(), result = result)
+                else -> device.toggle(historytag = os2HistoryTag(), result = result)
             }
 
-            is CHSesameBike -> device.unlock(result = result)
+            is CHSesameBike -> device.unlock(historytag = os2HistoryTag(), result = result)
             is CHSesameBike2 -> device.unlock(historytag = history, result = result)
-            is CHSesameBot -> device.click(result = result)
+            is CHSesameBot -> device.click(historyTag = os2HistoryTag(), result = result)
             is CHSesameBot2 -> {
                 val cloud = (0 until cloudRows.length()).map { cloudRows.getJSONObject(it) }.firstOrNull { it.optString("deviceUUID").equals(device.deviceId.toString(), true) }
                 val scripts = cloud?.optJSONObject("stateInfo")?.optJSONArray("scriptList")

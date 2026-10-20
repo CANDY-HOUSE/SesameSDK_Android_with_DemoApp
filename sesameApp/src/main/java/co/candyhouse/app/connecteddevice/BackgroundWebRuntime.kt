@@ -30,7 +30,7 @@ class BackgroundWebRuntime(private val app: SesameApp) {
     private val requests = NativeRequestHandler(
         app, app.ble, registration, KeyHandoff(app),
         language = { app.resources.configuration.locales[0].toLanguageTag() }, requestBle = {}, startDiscovery = {}, stopDiscovery = {},
-        registeredKey = { null }, scanQr = {}, showRoute = {}, pushInfo = { JSONObject() }, notificationSettings = {}, openWebPage = {}, openExternal = {})
+        registeredKey = { null }, showRoute = {}, pushInfo = { JSONObject() }, notificationSettings = {}, openWebPage = {}, openExternal = {})
     private val bridge = WebViewBridge(BuildConfig.WEB_ORIGIN, scope) { json, reply ->
         requests.handle(json, reply)
         if (json.optString("action") == "home.devices") ready.complete(Unit)

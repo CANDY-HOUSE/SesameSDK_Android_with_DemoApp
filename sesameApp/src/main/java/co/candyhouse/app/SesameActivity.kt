@@ -39,14 +39,11 @@ import co.candyhouse.app.bridge.WebViewBridge
 import co.candyhouse.app.connecteddevice.AutoUnlockMap
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
-import co.candyhouse.app.internal.InternalTestBottomSheet
 import co.candyhouse.app.nfc.NfcTags
 import co.candyhouse.app.push.PushNotification
-import co.candyhouse.app.ui.AppMenu
 import co.candyhouse.app.ui.AppRoute
 import co.candyhouse.app.ui.AppToolbar
 import co.candyhouse.app.ui.ExternalPage
-import co.candyhouse.app.ui.QrScanner
 import co.candyhouse.app.ui.RequestCode
 import co.candyhouse.app.ui.StartupCover
 import co.candyhouse.app.ui.WebMediaAccess
@@ -66,7 +63,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** One browser surface with native menu, QR scanner and internal BLE test controls. */
+/** One browser surface; Biz draws every page, menu, QR scanner and internal test of its own. */
 class SesameActivity : ComponentActivity() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var root: FrameLayout
@@ -87,11 +84,8 @@ class SesameActivity : ComponentActivity() {
     private lateinit var ble: BleController
     private val bleObserver: (JSONArray) -> Unit = { if (::bridge.isInitialized) emit("snapshot", it) }
     private lateinit var registration: BleRegistrationController
-    private val qrScanner by lazy { QrScanner(this, root, scope, ::emit) }
-    private var testSheet: InternalTestBottomSheet? = null
     private val externalPage by lazy { ExternalPage(this, webContainer, { webChrome }, ::beginPageLoading, ::finishPageLoading, ::returnToApp) }
     private val childWeb get() = externalPage.view
-    private val actionMenu by lazy { AppMenu(this, { navigate("/app/register") }, ::scanQr, { navigate("/contact-add") }) }
     private val keyHandoff by lazy { KeyHandoff(this) }
     private lateinit var bridge: WebViewBridge
     private val media by lazy { WebMediaAccess(this, { bridge.isTrusted(it) }) { if (::web.isInitialized && !isFinishing && !isDestroyed) web.reload() } }
@@ -143,10 +137,7 @@ class SesameActivity : ComponentActivity() {
         }
         setContentView(root)
         ViewCompat.requestApplyInsets(root)
-        toolbar = AppToolbar(this, ::handleBack, ::showMenu) {
-            testSheet?.dismiss()
-            testSheet = InternalTestBottomSheet(this, scope, ble).also { it.show() }
-        }
+        toolbar = AppToolbar(this, ::handleBack).apply { visibility = View.GONE }
         webContainer = FrameLayout(this)
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -171,14 +162,11 @@ class SesameActivity : ComponentActivity() {
             startDiscovery = { discovering = true; requestBle() },
             stopDiscovery = { discovering = false; registration.stop() },
             registeredKey = { registeredKey },
-            scanQr = ::scanQr,
             showRoute = {
                 if (it.path != currentRoute.path) {
                     nfc.binding = null; autoUnlockMap.close()
                 }
                 currentRoute = it
-                toolbar.showPage(root = childWeb == null && it.tab, home = childWeb == null && it.home)
-                updateToolbarVisibility()
             },
             pushInfo = {
                 JSONObject().put("pushToken", push.token()).put("appIdentifyId", push.installationId).put("env", JSONArray(AppEnvironment.collect(this)))
@@ -284,7 +272,6 @@ class SesameActivity : ComponentActivity() {
                 bridge.reset()
                 returnToApp()
                 webContainer.removeView(view); view.destroy()
-                toolbar.showPage(root = true, home = false)
                 createWebView()
                 finishPageLoading()
                 return true
@@ -303,7 +290,6 @@ class SesameActivity : ComponentActivity() {
     private fun emit(type: String, data: Any = JSONObject()) = bridge.emit(type, data)
 
     private fun navigate(path: String) = emit("navigate", path)
-    private fun showMenu() = actionMenu.show(toolbar.menu)
 
     private var askedBle = false
     private fun requestBle() {
@@ -323,34 +309,25 @@ class SesameActivity : ComponentActivity() {
         }
     }
 
-    private fun scanQr() {
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), RequestCode.CAMERA); return
-        }
-        qrScanner.open()
-    }
-
     private fun openWebPage(url: String) {
         require(url.toUri().scheme == "https")
         returnToApp()
         autoUnlockMap.close()
         externalPage.open(url)
         web.visibility = View.INVISIBLE
-        toolbar.showPage(root = false, home = false)
         beginPageLoading()
     }
 
     private fun returnToApp() {
         if (!externalPage.close()) return
         pageLoadGeneration++
-        toolbar.showPage(root = currentRoute.tab, home = currentRoute.home)
         finishPageLoading()
     }
 
     private fun beginPageLoading() {
         pageLoadGeneration++
         pageLoading = true
-        toolbar.visibility = if (childWeb == null) View.INVISIBLE else View.VISIBLE
+        updateToolbarVisibility()
         (childWeb ?: web).visibility = View.INVISIBLE
         pageProgress.visibility = View.VISIBLE
     }
@@ -363,7 +340,7 @@ class SesameActivity : ComponentActivity() {
     }
 
     private fun updateToolbarVisibility() {
-        toolbar.visibility = if (childWeb != null) View.VISIBLE else if (currentRoute.pageHeader) View.GONE else if (pageLoading) View.INVISIBLE else View.VISIBLE
+        toolbar.visibility = if (childWeb != null) View.VISIBLE else View.GONE
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -396,19 +373,17 @@ class SesameActivity : ComponentActivity() {
         if (results.isEmpty() || results.any { it != PackageManager.PERMISSION_GRANTED }) {
             emit("error", "Permission denied"); return
         }
-        if (requestCode == RequestCode.BLE_PERMISSIONS) requestBle() else if (requestCode == RequestCode.CAMERA) scanQr()
+        if (requestCode == RequestCode.BLE_PERMISSIONS) requestBle()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RequestCode.QR_IMAGE && resultCode == RESULT_OK) data?.data?.let { qrScanner.decodeImage(it) }
         if (requestCode == RequestCode.FILE_CHOOSER) media.fileResult(resultCode, data)
         if (requestCode == RequestCode.BLE_ENABLE && resultCode == RESULT_OK) requestBle()
     }
 
     override fun onResume() {
         super.onResume(); if (::web.isInitialized) {
-            qrScanner.resume()
             autoUnlockMap.resume()
             nfc.enable()
             SesameConnectedDeviceService.sync(this)
@@ -421,20 +396,16 @@ class SesameActivity : ComponentActivity() {
         if (::web.isInitialized) emit("pause")
         nfc.disable()
         autoUnlockMap.pause()
-        actionMenu.dismiss()
-        testSheet?.dismiss(); testSheet = null
-        qrScanner.pause(); if (::ble.isInitialized) {
+        if (::ble.isInitialized) {
             childWeb?.onPause()
             registration.stop(); ble.pause(); web.onPause()
         }; super.onPause()
     }
 
     private fun handleBack() {
-        if (qrScanner.isOpen) {
-            qrScanner.close(); emit("qrCancelled")
-        } else if (childWeb != null) {
+        if (childWeb != null) {
             if (!externalPage.back()) returnToApp()
-        } else if (!currentRoute.tab) emit("back")
+        } else if (!currentRoute.exits) emit("back")
         else finish()
     }
 
@@ -444,7 +415,7 @@ class SesameActivity : ComponentActivity() {
         autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++
-        testSheet?.setOnDismissListener(null); testSheet?.dismiss(); qrScanner.close(); registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset()
+        registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset()
         returnToApp()
         webContainer.removeView(web); web.destroy(); scope.cancel()
         (application as SesameApp).apply {

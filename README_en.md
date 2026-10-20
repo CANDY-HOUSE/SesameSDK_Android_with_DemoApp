@@ -223,7 +223,7 @@ Biz implements business rules, state management, page interactions and cloud req
 ```mermaid
 flowchart TB
   Activity[SesameActivity lifecycle] --> Bridge[WebViewBridge trusted origin]
-  Activity --> QR[QrScanner camera / gallery]
+  Activity --> Media[WebMediaAccess camera / file chooser]
   Bridge --> Handler[NativeRequestHandler]
   Handler --> BLE[BleController / Registration]
   Handler --> Platform[NFC / Push / AutoUnlock / Firmware]
@@ -231,7 +231,7 @@ flowchart TB
   Backend --> Biz[Biz WebSocket runtime]
 ```
 
-Amplify Auth remains for legacy session handoff; core-kotlin supplies the suspend APIs currently used. There is no Amplify API plugin. The background WebView reuses Biz cloud transport; native components handle NFC, notifications, auto-unlock, firmware transfer and scanning.
+Amplify Auth remains for legacy session handoff; core-kotlin supplies the suspend APIs currently used. There is no Amplify API plugin. The background WebView reuses Biz cloud transport; native components handle NFC, notifications, auto-unlock and firmware transfer. Biz draws the header, menu, QR scanner page and internal test page; Android only grants camera and photo-picker access.
 
 ## Startup and offline operation
 
