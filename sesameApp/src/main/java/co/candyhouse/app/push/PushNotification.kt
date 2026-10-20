@@ -20,7 +20,7 @@ import java.net.URL
 
 /** Platform notification rendering; promotion content and destination are supplied by the server. */
 object PushNotification {
-    fun show(context: Context, title: String, body: String?, url: String?, imageUrl: String?, action: String?, announcement: Boolean) {
+    fun show(context: Context, title: String, body: String?, url: String?, imageUrl: String?, action: String?, announcement: Boolean, route: String? = null) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val channel = if (announcement) "announcement_channel" else "sesame_notifications"
         if (Build.VERSION.SDK_INT >= 26) manager.createNotificationChannel(
@@ -32,6 +32,7 @@ object PushNotification {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra("pushUrl", url)
             putExtra("messageAction", action)
+            putExtra("pushRoute", route)
         }
         val pending = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val builder = NotificationCompat.Builder(context, channel)
@@ -49,6 +50,14 @@ object PushNotification {
             )
             manager.notify(id, builder.build())
         }
+    }
+
+    /** Biz in-app route (e.g. Face3 doorbell -> /vision?deviceUUID=..&live=1). Opened inside the main
+     *  WebView instead of an external page, so it works on whatever origin this build loads. */
+    fun consumeRoute(intent: Intent): String? {
+        val route = intent.getStringExtra("pushRoute")
+        intent.removeExtra("pushRoute")
+        return route?.takeIf { it.startsWith("/") && !it.startsWith("//") }
     }
 
     /** Supports our data pushes, Firebase background notification extras, and old pending intents. */

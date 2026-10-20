@@ -19,7 +19,7 @@ class SesameFirebaseMessagingService : FirebaseMessagingService() {
         PushNotification.show(
             this, title, data["body"] ?: message.notification?.body, data["url"],
             if (announcement) data["imageUrl"] ?: message.notification?.imageUrl?.toString() else null,
-            data["messageAction"], announcement
+            data["messageAction"], announcement, data["route"]
         )
     }
 }

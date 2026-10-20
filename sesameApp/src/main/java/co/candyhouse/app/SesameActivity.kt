@@ -212,7 +212,10 @@ class SesameActivity : ComponentActivity() {
             domStorageEnabled = true
             allowFileAccess = false
             allowContentAccess = true
-            mediaPlaybackRequiresUserGesture = true
+            // Only our trusted Biz origin loads here (external pages use ExternalPage's own WebView).
+            // Face3 live view opened from a doorbell push must start with the user's saved speaker
+            // setting; requiring a gesture forced it muted behind "tap to play".
+            mediaPlaybackRequiresUserGesture = false
         }
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         web.webViewClient = object : WebViewClient() {
@@ -373,6 +376,13 @@ class SesameActivity : ComponentActivity() {
 
     private fun openPendingNotification() {
         if (!webReady) return
+        PushNotification.consumeRoute(intent)?.let { route ->
+            // The same push also carries url for older apps; drop it so no external page opens too.
+            PushNotification.consumeUrl(intent)
+            returnToApp()
+            navigate(route)
+            return
+        }
         PushNotification.consumeUrl(intent)?.let { runCatching { openWebPage(it) } }
     }
 
