@@ -14,7 +14,6 @@ import co.candyhouse.app.util.dp
 class AppToolbar(context: Context, onBack: () -> Unit) : FrameLayout(context) {
     private val back = ImageView(context).apply {
         setImageResource(R.drawable.ic_arrow); rotation = 180f; scaleType = ImageView.ScaleType.CENTER
-        contentDescription = context.getString(R.string.back)
         setOnClickListener { onBack() }
     }
 

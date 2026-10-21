@@ -14,6 +14,7 @@ import co.candyhouse.app.ble.DeviceLocation
 import co.candyhouse.app.ble.InternalTest
 import co.candyhouse.app.ble.LockSettings
 import co.candyhouse.app.connecteddevice.AutoUnlockGeofenceManager
+import co.candyhouse.app.connecteddevice.AutoUnlockSettings
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.data.auth.LegacySession
@@ -40,7 +41,8 @@ class NativeRequestHandler(
     private val notificationSettings: () -> Unit,
     private val openWebPage: (String) -> Unit,
     private val openExternal: (String) -> Unit,
-    private val autoUnlockMap: (JSONObject) -> JSONObject = { error("Map requires an Activity") },
+    private val requestLocationPermission: () -> Unit = { error("Location permission requires an Activity") },
+    private val openAppSettings: () -> Unit = { error("App settings require an Activity") },
     private val watchNfc: (String?) -> Unit = {},
     private val haptic: (Long) -> Unit = {},
     private val uiReady: () -> Unit = {}
@@ -144,7 +146,7 @@ class NativeRequestHandler(
                     reply(true, app.devicePreferences.snapshot(id))
                 }
 
-                "home.autoUnlockMap" -> reply(true, autoUnlockMap(json))
+                "home.autoUnlock" -> reply(true, AutoUnlockSettings.handle(context, json, requestLocationPermission, openAppSettings))
                 "home.haptic" -> {
                     haptic(json.optLong("duration", 0).coerceIn(0, 100)); reply(true)
                 }

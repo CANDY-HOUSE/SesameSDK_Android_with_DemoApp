@@ -14,7 +14,6 @@ googleServices = "4.4.2"
 firebaseCrashlytics = "3.0.3"
 dfu = "2.5.0"
 playServicesLocation = "21.3.0"
-playServicesMaps = "19.0.0"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "androidxActivity" }
@@ -35,7 +34,6 @@ desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref 
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 dfu = { module = "no.nordicsemi.android:dfu", version.ref = "dfu" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

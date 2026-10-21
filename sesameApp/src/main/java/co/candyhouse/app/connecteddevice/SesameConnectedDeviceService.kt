@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import co.candyhouse.app.R
 import co.candyhouse.app.SesameActivity
 import co.candyhouse.app.SesameApp
+import co.candyhouse.app.util.vibrate
 import co.candyhouse.sesame.ble.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.CHDeviceStatus
 import co.candyhouse.sesame.ble.CHDevices
@@ -109,6 +110,8 @@ class SesameConnectedDeviceService : Service() {
         } catch (e: RuntimeException) {
             L.e("SesameWidget", "Unable to start connected service", e); stopSelf(); return START_NOT_STICKY
         }
+        // Widget button press: vibrate immediately, same 100ms as the device list switch.
+        if (intent?.getStringExtra("operation") != null) runCatching { vibrate(100) }
         scope.launch {
             app.ble.restoreSaved(); app.ensureBackgroundWeb(); app.ble.startBackground()
             val id = intent?.getStringExtra("deviceUUID");
@@ -199,7 +202,7 @@ class SesameConnectedDeviceService : Service() {
             "nosettings" -> R.drawable.icon_nosetting
             else -> R.drawable.icon_nosignal
         }
-        val views = RemoteViews(packageName, R.layout.cell_weget_unlock).apply {
+        val views = RemoteViews(packageName, R.layout.notification_widget_device).apply {
             setTextViewText(R.id.title, cloud?.optString("deviceName") ?: app.ble.deviceName(device))
             setImageViewResource(R.id.toggle, icon)
             setTextColor(
@@ -216,7 +219,7 @@ class SesameConnectedDeviceService : Service() {
     }
 
     private fun allNotification(): Notification {
-        val views = RemoteViews(packageName, R.layout.cell_weget).apply {
+        val views = RemoteViews(packageName, R.layout.notification_widget_all).apply {
             setOnClickPendingIntent(R.id.lock_all, action(null, "lock")); setOnClickPendingIntent(
             R.id.unlock_all,
             action(null, "unlock")

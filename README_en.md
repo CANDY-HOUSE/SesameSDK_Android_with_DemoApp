@@ -190,7 +190,6 @@ Keep shared project configuration in `app.properties`, loaded by the root `build
 aws.cognito.identityPoolId=<YOUR_IDENTITY_POOL_ID>
 aws.cognito.userPoolId=<YOUR_USER_POOL_ID>
 aws.cognito.appClientId=<YOUR_APP_CLIENT_ID>
-google.maps.apiKey=<YOUR_MAPS_KEY>
 candyhouse.sesame.web.dev=http://localhost:3000
 candyhouse.sesame.web.prod=https://biz.candyhouse.co
 ```

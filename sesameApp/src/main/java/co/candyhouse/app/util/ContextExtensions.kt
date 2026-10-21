@@ -28,10 +28,13 @@ fun Context.openNotificationSettings() {
 
 /** Vibrates for [duration] ms, or plays a light tick on [view] when no duration is given. */
 fun Context.haptic(view: View, duration: Long) {
-    if (duration > 0) {
-        val vibrator = if (Build.VERSION.SDK_INT >= 31) getSystemService(VibratorManager::class.java).defaultVibrator
-        else getSystemService(Vibrator::class.java)
-        if (Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
-        else vibrator.vibrate(duration)
-    } else view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+    if (duration > 0) vibrate(duration) else view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+}
+
+/** Vibrates for [duration] ms; usable without a View (e.g. from a Service). */
+fun Context.vibrate(duration: Long) {
+    val vibrator = if (Build.VERSION.SDK_INT >= 31) getSystemService(VibratorManager::class.java).defaultVibrator
+    else getSystemService(Vibrator::class.java)
+    if (Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
+    else vibrator.vibrate(duration)
 }

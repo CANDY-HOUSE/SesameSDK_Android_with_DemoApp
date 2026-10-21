@@ -36,7 +36,6 @@ android {
     }
 
     defaultConfig {
-        manifestPlaceholders["googleMapsApiKey"] = "${rootExtra["google.maps.apiKey"]}"
         val gitHash = providers.exec {
             commandLine("git", "rev-parse", "--short=9", "HEAD")
         }.standardOutput.asText.get().trim()
@@ -131,5 +130,4 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.dfu)
     implementation(libs.play.services.location)
-    implementation(libs.play.services.maps)
 }

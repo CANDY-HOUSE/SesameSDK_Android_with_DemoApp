@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.webkit.PermissionRequest
@@ -36,7 +37,6 @@ import co.candyhouse.app.ble.BleController
 import co.candyhouse.app.ble.BleRegistrationController
 import co.candyhouse.app.bridge.NativeRequestHandler
 import co.candyhouse.app.bridge.WebViewBridge
-import co.candyhouse.app.connecteddevice.AutoUnlockMap
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.nfc.NfcTags
@@ -74,7 +74,6 @@ class SesameActivity : ComponentActivity() {
     private lateinit var pageProgress: ProgressBar
     private lateinit var startupCover: StartupCover
     private var startupDocumentFailed = false
-    private lateinit var autoUnlockMap: AutoUnlockMap
     private val nfc by lazy { NfcTags(this, scope, ble, ::requestBle, ::emit) }
     private var nfcIntent: Intent? = null
     private var webReady = false
@@ -109,7 +108,6 @@ class SesameActivity : ComponentActivity() {
             web.stopLoading()
             web.loadUrl(entry)
         }
-        autoUnlockMap = AutoUnlockMap(this, webContainer, { web }) { emit("devicePreferences", it) }
         connectBridge()
         createWebView()
         observePush()
@@ -164,7 +162,7 @@ class SesameActivity : ComponentActivity() {
             registeredKey = { registeredKey },
             showRoute = {
                 if (it.path != currentRoute.path) {
-                    nfc.binding = null; autoUnlockMap.close()
+                    nfc.binding = null
                 }
                 currentRoute = it
             },
@@ -175,7 +173,10 @@ class SesameActivity : ComponentActivity() {
             notificationSettings = ::openNotificationSettings,
             openWebPage = ::openWebPage,
             openExternal = { openExternalUrl(it.toUri()) },
-            autoUnlockMap = autoUnlockMap::handle,
+            requestLocationPermission = {
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), RequestCode.AUTO_UNLOCK_LOCATION)
+            },
+            openAppSettings = { startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))) },
             watchNfc = { nfc.binding = it },
             haptic = { haptic(web, it) },
             uiReady = { if (!startupDocumentFailed) startupCover.ready(web) }
@@ -219,7 +220,6 @@ class SesameActivity : ComponentActivity() {
                 if (view !== web) return
                 startupDocumentFailed = false
                 startupCover.begin()
-                autoUnlockMap.close()
                 ble.peripheralSettings.close()
                 webReady = false
                 bridge.reset()
@@ -292,13 +292,14 @@ class SesameActivity : ComponentActivity() {
     private fun navigate(path: String) = emit("navigate", path)
 
     private var askedBle = false
+    private var promptedBle = false
     private fun requestBle() {
         val permissions =
             if (Build.VERSION.SDK_INT >= 31) arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.ACCESS_FINE_LOCATION)
             else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (permissions.any { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }) {
-            if (!askedBle || discovering) {
-                askedBle = true; requestPermissions(permissions, RequestCode.BLE_PERMISSIONS)
+            if (!promptedBle || discovering) {
+                askedBle = true; promptedBle = true; requestPermissions(permissions, RequestCode.BLE_PERMISSIONS)
             }
             return
         }
@@ -312,7 +313,6 @@ class SesameActivity : ComponentActivity() {
     private fun openWebPage(url: String) {
         require(url.toUri().scheme == "https")
         returnToApp()
-        autoUnlockMap.close()
         externalPage.open(url)
         web.visibility = View.INVISIBLE
         beginPageLoading()
@@ -367,8 +367,11 @@ class SesameActivity : ComponentActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, results)
         when (requestCode) {
             RequestCode.WEB_MEDIA -> return media.permissionResult(results)
-            RequestCode.AUTO_UNLOCK_LOCATION -> return autoUnlockMap.permissionResult()
+            RequestCode.AUTO_UNLOCK_LOCATION -> return emit("locationPermission")
             RequestCode.NOTIFICATIONS -> return SesameConnectedDeviceService.sync(this)
+            RequestCode.BLE_PERMISSIONS -> if (results.isEmpty()) {
+                promptedBle = false; return
+            }
         }
         if (results.isEmpty() || results.any { it != PackageManager.PERMISSION_GRANTED }) {
             emit("error", "Permission denied"); return
@@ -384,7 +387,6 @@ class SesameActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume(); if (::web.isInitialized) {
-            autoUnlockMap.resume()
             nfc.enable()
             SesameConnectedDeviceService.sync(this)
             childWeb?.onResume()
@@ -395,7 +397,6 @@ class SesameActivity : ComponentActivity() {
     override fun onPause() {
         if (::web.isInitialized) emit("pause")
         nfc.disable()
-        autoUnlockMap.pause()
         if (::ble.isInitialized) {
             childWeb?.onPause()
             registration.stop(); ble.pause(); web.onPause()
@@ -412,7 +413,6 @@ class SesameActivity : ComponentActivity() {
     override fun onDestroy() {
         if (::startupCover.isInitialized) startupCover.close()
         media.close()
-        autoUnlockMap.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++
         registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset()
