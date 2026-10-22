@@ -501,11 +501,12 @@ internal class CHSesame2Device : CHSesameOS2(), CHSesame2, CHDeviceUtil {
         if (!isBleAvailable(result)) return
 
         L.d("sendEncryptCommand", "readHistoryCommand")
+        val deleteHistory = isInternetAvailable()
         sendEncryptCommand(
             SSM2Payload(
                 SSM2OpCode.read,
                 SesameItemCode.history,
-                if (isInternetAvailable()) byteArrayOf(0x01) else byteArrayOf(0x00)
+                if (deleteHistory) byteArrayOf(0x01) else byteArrayOf(0x00)
             )
         ) { res ->
             onHistoryReceived(res.payload)
@@ -516,6 +517,8 @@ internal class CHSesame2Device : CHSesameOS2(), CHSesame2, CHDeviceUtil {
                         CHBleSupport.backend.postSS2History(deviceId.toString().uppercase(), data) {}
                     }
                 }
+                // 每次只返回一条；一次操作会产生带 tag 的 BLE 记录和 DRIVE 记录，读到 notFound 为止（与 iOS 一致）
+                if (deleteHistory) readHistoryCommand {}
             }
         }
     }
