@@ -28,6 +28,10 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
     <application
         android:name=".SesameApp"
         android:allowBackup="false"
