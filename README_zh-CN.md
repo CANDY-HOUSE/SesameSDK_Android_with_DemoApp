@@ -248,4 +248,6 @@ APK 不内置 Biz 页面。Service Worker 联网优先加载 HTML，并在资源
 
 离线设备读取本地数据库，不等待 Cognito 或 WebSocket。`offlineDevices` 只返回名称、型号、UUID 和权限等级，不返回钥匙。在线注册、钥匙同步／分享及受限钥匙签名流程仍会通过可信 Bridge 传递所需钥匙材料，不能将离线名单的限制理解为所有钥匙都不经过 Biz。在线收到完整设备清单后更新可见范围，避免退出后恢复旧账号设备；未上传钥匙保留。受限钥匙仍需云端签名，无法承诺离线开锁；云端操作、注册和固件下载需要网络。
 
+钥匙保存在原生 Room（`word_database`），不放入 WebView 存储（如 IndexedDB）：BLE 由原生执行，钥匙留在原生可减少经 Bridge 传递；WebView 存储可被同源 JS 读取，且可能随 WebView 数据清理或系统回收而丢失。
+
 同 applicationId、兼容签名、允许的 versionCode 覆盖安装且不清数据时保留数据库和偏好。旧用户会话由 LegacySession 衔接，游客钥匙经 KeyHandoff 待同步。

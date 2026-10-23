@@ -248,4 +248,6 @@ The APK contains no Biz page bundle. A Service Worker loads HTML from the networ
 
 Offline devices come from the local database, without waiting for Cognito or WebSocket. `offlineDevices` returns only names, models, UUIDs and permission levels, without keys. Online registration, key synchronization/sharing and restricted-key signing still pass required key material through the trusted Bridge; the offline-list restriction does not mean keys never pass through Biz. A complete online list updates local visibility so signed-out accounts do not reappear; pending keys survive. Restricted keys still require online signing. Cloud actions, registration and firmware downloads need connectivity.
 
+Keys are stored in native Room (`word_database`), not in WebView storage such as IndexedDB: BLE runs natively, so keeping keys native minimizes passing them over the Bridge; WebView storage is readable by same-origin JS and can be lost when WebView data is cleared or reclaimed by the system.
+
 An in-place update with the same applicationId, compatible signing and permitted versionCode preserves the database and preferences unless data is cleared. LegacySession bridges previous logins; KeyHandoff queues guest keys for synchronization.

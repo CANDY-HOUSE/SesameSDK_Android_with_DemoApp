@@ -117,6 +117,7 @@ dependencies {
     implementation(project(":sesameSdk"))
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+    // Amplify 仅用于衔接旧版原生 App 的登录会话（LegacySession）；待旧版用户基本升级到 Web App 后，可连同下方 core-kotlin 一并移除
     implementation(libs.amplify.aws.auth.cognito)
     implementation(libs.amplify.core.kotlin)
     implementation(libs.androidx.activity)
