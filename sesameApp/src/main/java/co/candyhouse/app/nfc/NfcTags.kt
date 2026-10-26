@@ -55,14 +55,18 @@ class NfcTags(
         ) return
         @Suppress("DEPRECATION") val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
         val tagId = tag.id.joinToString("") { "%02x".format(it.toInt() and 255) }
+        val newlyBound = binding?.takeUnless { app.devicePreferences.nfc(it).equals(tagId, true) }
         binding?.let { id ->
             app.devicePreferences.setNfc(id, tagId); emit("devicePreferences", app.devicePreferences.snapshot(id))
             if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED) scope.launch(Dispatchers.IO) { format(tag) }
-            return
+            if (intent.action != NfcAdapter.ACTION_NDEF_DISCOVERED) return
         }
         scope.launch {
             ble.restoreSaved(); requestBle()
-            ble.allDevices().filter { app.devicePreferences.nfc(it.deviceId.toString()).equals(tagId, true) }.forEach { device ->
+            ble.allDevices().filter {
+                val id = it.deviceId.toString()
+                !id.equals(newlyBound, true) && app.devicePreferences.nfc(id).equals(tagId, true)
+            }.forEach { device ->
                 launch {
                     runCatching {
                         withTimeout(12000.milliseconds) {
