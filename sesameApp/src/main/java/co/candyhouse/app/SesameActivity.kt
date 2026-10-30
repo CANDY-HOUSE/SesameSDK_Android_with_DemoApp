@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.AndroidRuntimeException
 import android.view.Gravity
 import android.view.View
 import android.webkit.PermissionRequest
@@ -55,6 +56,7 @@ import co.candyhouse.app.util.openNotificationSettings
 import co.candyhouse.app.util.toKeyJson
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHScanStatus
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -93,6 +95,7 @@ class SesameActivity : ComponentActivity() {
     private val origin = BuildConfig.WEB_ORIGIN
     private val entry get() = "$origin/?appHome=1&fromType=app"
 
+    @SuppressLint("WebViewApiAvailability")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -102,6 +105,10 @@ class SesameActivity : ComponentActivity() {
         initializeBle()
         createLayout()
         startupCover = StartupCover(this, root) {
+            if (!::web.isInitialized) {
+                tryCreateWebView()
+                return@StartupCover
+            }
             startupDocumentFailed = false
             bridge.reset()
             webReady = false
@@ -109,11 +116,11 @@ class SesameActivity : ComponentActivity() {
             web.loadUrl(entry)
         }
         connectBridge()
-        createWebView()
+        tryCreateWebView()
         observePush()
         nfcIntent = intent.takeIf { it.action?.startsWith("android.nfc.action.") == true }
         // Let WebView start loading before asking Firebase to refresh the installation token.
-        web.post { scope.launch { (application as SesameApp).subscriptionManager.refreshToken() } }
+        root.post { scope.launch { (application as SesameApp).subscriptionManager.refreshToken() } }
     }
 
     private fun initializeBle() {
@@ -189,6 +196,17 @@ class SesameActivity : ComponentActivity() {
         scope.launch { (application as SesameApp).subscriptionManager.changes.collect { emit("push") } }
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), RequestCode.NOTIFICATIONS)
+        }
+    }
+
+    private fun tryCreateWebView() {
+        try {
+            createWebView()
+        } catch (e: AndroidRuntimeException) {
+            FirebaseCrashlytics.getInstance().apply {
+                setCustomKey("webview", (if (Build.VERSION.SDK_INT >= 26) WebView.getCurrentWebViewPackage()?.versionName else null) ?: "unknown")
+                recordException(e)
+            }
         }
     }
 
@@ -399,7 +417,8 @@ class SesameActivity : ComponentActivity() {
         nfc.disable()
         if (::ble.isInitialized) {
             childWeb?.onPause()
-            registration.stop(); ble.pause(); web.onPause()
+            registration.stop(); ble.pause()
+            if (::web.isInitialized) web.onPause()
         }; super.onPause()
     }
 
@@ -417,7 +436,11 @@ class SesameActivity : ComponentActivity() {
         pageLoadGeneration++
         registration.close(); ble.peripheralSettings.close(); ble.observers.remove(bleObserver); ble.pause(); bridge.reset()
         returnToApp()
-        webContainer.removeView(web); web.destroy(); scope.cancel()
+        if (::web.isInitialized) {
+            webContainer.removeView(web)
+            web.destroy()
+        }
+        scope.cancel()
         (application as SesameApp).apply {
             activityPresent = false
             if (SesameConnectedDeviceService.live != null) ensureBackgroundWeb() else ble.close()
