@@ -58,6 +58,8 @@ object BleFirmwareUpdate {
             var listener: DfuProgressListenerAdapter? = null
             try {
                 if (!cached) withContext(Dispatchers.IO) {
+                    val kept = cachedFiles.values.map { it.name }.toSet()
+                    app.cacheDir.listFiles { f -> f.name.startsWith("firmware-runtime-") && f.name !in kept }?.forEach { it.delete() }
                     val connection = source.openConnection() as HttpsURLConnection
                     connection.connectTimeout = 15000; connection.readTimeout = 15000; connection.instanceFollowRedirects = false
                     try {
