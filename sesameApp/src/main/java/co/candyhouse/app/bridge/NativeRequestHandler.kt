@@ -43,6 +43,7 @@ class NativeRequestHandler(
     private val openExternal: (String) -> Unit,
     private val requestLocationPermission: () -> Unit = { error("Location permission requires an Activity") },
     private val openAppSettings: () -> Unit = { error("App settings require an Activity") },
+    private val locationDisclosure: (Boolean) -> Unit = {},
     private val watchNfc: (String?) -> Unit = {},
     private val haptic: (Long) -> Unit = {},
     private val uiReady: () -> Unit = {}
@@ -147,6 +148,11 @@ class NativeRequestHandler(
                 }
 
                 "home.autoUnlock" -> reply(true, AutoUnlockSettings.handle(context, json, requestLocationPermission, openAppSettings))
+                "home.locationDisclosure" -> {
+                    locationDisclosure(json.getBoolean("accepted"))
+                    reply(true)
+                }
+
                 "home.haptic" -> {
                     haptic(json.optLong("duration", 0).coerceIn(0, 100)); reply(true)
                 }

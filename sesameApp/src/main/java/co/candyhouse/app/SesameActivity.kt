@@ -183,6 +183,7 @@ class SesameActivity : ComponentActivity() {
             requestLocationPermission = {
                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), RequestCode.AUTO_UNLOCK_LOCATION)
             },
+            locationDisclosure = ::answerLocationDisclosure,
             openAppSettings = { startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))) },
             watchNfc = { nfc.binding = it },
             haptic = { haptic(web, it) },
@@ -311,13 +312,20 @@ class SesameActivity : ComponentActivity() {
 
     private var askedBle = false
     private var promptedBle = false
+    private var disclosedBlePermissions: Array<String>? = null
     private fun requestBle() {
         val permissions =
             if (Build.VERSION.SDK_INT >= 31) arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.ACCESS_FINE_LOCATION)
             else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (permissions.any { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }) {
             if (!promptedBle || discovering) {
-                askedBle = true; promptedBle = true; requestPermissions(permissions, RequestCode.BLE_PERMISSIONS)
+                askedBle = true
+                promptedBle = true
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) requestPermissions(permissions, RequestCode.BLE_PERMISSIONS)
+                else {
+                    disclosedBlePermissions = permissions
+                    emit("locationDisclosure")
+                }
             }
             return
         }
@@ -379,6 +387,14 @@ class SesameActivity : ComponentActivity() {
             return
         }
         PushNotification.consumeUrl(intent)?.let { runCatching { openWebPage(it) } }
+    }
+
+    // Biz shows the prominent disclosure store review requires before the first location prompt.
+    private fun answerLocationDisclosure(accepted: Boolean) {
+        val permissions = disclosedBlePermissions ?: return
+        disclosedBlePermissions = null
+        if (accepted) requestPermissions(permissions, RequestCode.BLE_PERMISSIONS)
+        else emit("error", "Permission denied")
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
