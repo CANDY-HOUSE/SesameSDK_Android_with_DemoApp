@@ -196,8 +196,6 @@ candyhouse.sesame.web.prod=https://biz.candyhouse.co
 
 Debug 页面地址由 `candyhouse.sesame.web.dev` 指定；Release/CI 页面地址由 `candyhouse.sesame.web.prod` 指定。APP 通过这些配置选择 Biz 预发或正式环境，与 Android 的分支名称无关。Biz 预发分支可独立发布；正式环境地址为 `https://biz.candyhouse.co`。修改 APP 页面地址后重新构建 Android。
 
-当前 `app.properties` 的 Release/CI 地址仍指向预发，并非正式域名。
-
 在两个终端中分别运行，以下均从 Web APP 根目录开始；保持 Biz 开发服务运行：
 
 ```bash
@@ -244,10 +242,7 @@ flowchart LR
   Local -->|Cloud ready| Cloud[Updated device list]
 ```
 
-APK 不内置 Biz 页面。Service Worker 联网优先加载 HTML，并在资源成功缓存后保存离线入口；无网络使用已缓存页面。首次安装/首次切换域名/清除 WebView 数据后必须联网加载一次。页面缓存可能被系统清理，不能保证从未联网也能启动。
-
-离线设备读取本地数据库，不等待 Cognito 或 WebSocket。`offlineDevices` 只返回名称、型号、UUID 和权限等级，不返回钥匙。在线注册、钥匙同步／分享及受限钥匙签名流程仍会通过可信 Bridge 传递所需钥匙材料，不能将离线名单的限制理解为所有钥匙都不经过 Biz。在线收到完整设备清单后更新可见范围，避免退出后恢复旧账号设备；未上传钥匙保留。受限钥匙仍需云端签名，无法承诺离线开锁；云端操作、注册和固件下载需要网络。
-
-钥匙保存在原生 Room（`word_database`），不放入 WebView 存储（如 IndexedDB）：BLE 由原生执行，钥匙留在原生可减少经 Bridge 传递；WebView 存储可被同源 JS 读取，且可能随 WebView 数据清理或系统回收而丢失。
-
-同 applicationId、兼容签名、允许的 versionCode 覆盖安装且不清数据时保留数据库和偏好。旧用户会话由 LegacySession 衔接，游客钥匙经 KeyHandoff 待同步。
+- APK 不内置 Biz 页面：首次安装、切换域名或清除 WebView 数据后需联网加载一次；之后断网使用 Service Worker 缓存的页面（可能被系统清理）。
+- 离线列表读取本地数据库，`offlineDevices` 不返回钥匙；注册、钥匙同步／分享、受限钥匙签名仍经可信 Bridge 传递钥匙材料，并需要网络。
+- 钥匙保存在原生 Room（`word_database`），不放入 WebView 存储。
+- 覆盖安装（同 applicationId、兼容签名）保留数据；LegacySession 衔接旧登录，KeyHandoff 同步游客钥匙。

@@ -196,8 +196,6 @@ candyhouse.sesame.web.prod=https://biz.candyhouse.co
 
 Debug のページ URL は `candyhouse.sesame.web.dev`、Release/CI は `candyhouse.sesame.web.prod` で指定します。Android のブランチ名とは独立して、Biz のステージング環境または本番環境を選択できます。Biz のステージングブランチは個別に配信でき、本番 URL は `https://biz.candyhouse.co` です。APP のページ URL を変更した場合は Android を再ビルドします。
 
-現在の `app.properties` の Release/CI URL は、本番ではなくステージングを指しています。
-
 Web APP ルートから、それぞれ別のターミナルで実行します。Biz の開発サーバーは起動したままにします。
 
 ```bash
@@ -244,10 +242,7 @@ flowchart LR
   Local -->|Cloud ready| Cloud[Updated device list]
 ```
 
-APK に Biz の画面資源を同梱しません。Service Worker は HTML をネットワーク優先で取得し、必要な資源のキャッシュ成功後にオフライン入口を保存します。初回インストール・ドメイン変更・WebView データ削除後は一度オンラインで起動してください。OS によるキャッシュ削除があるため、未接続の初回起動は保証しません。
-
-オフライン一覧はローカル DB から取得し、Cognito・WebSocket を待ちません。`offlineDevices` は名前・モデル・UUID・権限レベルのみを返し、鍵は返しません。オンラインの登録、鍵の同期・共有、制限付き鍵の署名では、必要な鍵情報が信頼された Bridge を通過します。オフライン一覧の制限は、すべての鍵が Biz を通らないことを意味しません。完全なオンライン一覧で表示範囲を更新し、ログアウトしたアカウントの再表示を防ぎます。未同期鍵は保持します。制限付き鍵の署名、クラウド操作、登録、ファームウェア取得には通信が必要です。
-
-鍵はネイティブの Room（`word_database`）に保存し、WebView ストレージ（IndexedDB など）には置きません。BLE はネイティブが実行するため、鍵をネイティブに置くことで Bridge 経由の受け渡しを減らせます。WebView ストレージは同一オリジンの JS から読み取れ、WebView データの消去やシステムによる回収で失われる可能性があります。
-
-同じ applicationId・互換署名・許可される versionCode による上書き更新では、データを消去しなければ DB と設定を引き継ぎます。LegacySession が旧ログインを、KeyHandoff がゲスト鍵の同期を担当します。
+- APK に Biz の画面は同梱しません。初回インストール・ドメイン変更・WebView データ削除後は一度オンラインで起動が必要で、以降のオフライン時は Service Worker のキャッシュを使います（OS により削除される場合があります）。
+- オフライン一覧はローカル DB から取得し、`offlineDevices` は鍵を返しません。登録・鍵の同期／共有・制限付き鍵の署名では信頼された Bridge 経由で鍵情報を渡し、通信が必要です。
+- 鍵はネイティブの Room（`word_database`）に保存し、WebView ストレージには置きません。
+- 上書き更新（同じ applicationId・互換署名）ではデータを引き継ぎます。LegacySession が旧ログインを、KeyHandoff がゲスト鍵の同期を担当します。

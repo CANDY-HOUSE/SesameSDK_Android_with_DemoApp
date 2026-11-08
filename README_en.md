@@ -196,8 +196,6 @@ candyhouse.sesame.web.prod=https://biz.candyhouse.co
 
 `candyhouse.sesame.web.dev` selects the Debug page URL; `candyhouse.sesame.web.prod` selects the Release/CI page URL. These settings select the Biz staging or production environment independently of the Android branch name. The Biz staging branch can be deployed independently; production is `https://biz.candyhouse.co`. Rebuild Android after changing its page URL.
 
-The current Release/CI URL in `app.properties` still points to staging, not the production domain.
-
 Run these in two terminals, each starting at the Web APP root. Keep the Biz dev server running:
 
 ```bash
@@ -244,10 +242,7 @@ flowchart LR
   Local -->|Cloud ready| Cloud[Updated device list]
 ```
 
-The APK contains no Biz page bundle. A Service Worker loads HTML from the network first and publishes the cached entry after its assets are cached successfully. Offline starts reuse that page. A first installation, new origin or cleared WebView storage needs one online visit. The OS may evict caches; a never-online start is not guaranteed.
-
-Offline devices come from the local database, without waiting for Cognito or WebSocket. `offlineDevices` returns only names, models, UUIDs and permission levels, without keys. Online registration, key synchronization/sharing and restricted-key signing still pass required key material through the trusted Bridge; the offline-list restriction does not mean keys never pass through Biz. A complete online list updates local visibility so signed-out accounts do not reappear; pending keys survive. Restricted keys still require online signing. Cloud actions, registration and firmware downloads need connectivity.
-
-Keys are stored in native Room (`word_database`), not in WebView storage such as IndexedDB: BLE runs natively, so keeping keys native minimizes passing them over the Bridge; WebView storage is readable by same-origin JS and can be lost when WebView data is cleared or reclaimed by the system.
-
-An in-place update with the same applicationId, compatible signing and permitted versionCode preserves the database and preferences unless data is cleared. LegacySession bridges previous logins; KeyHandoff queues guest keys for synchronization.
+- The APK contains no Biz pages. A first install, new origin or cleared WebView data needs one online start; later offline starts use the Service Worker cache, which the OS may evict.
+- The offline list reads the local database; `offlineDevices` returns no keys. Registration, key sync/sharing and restricted-key signing still pass key material through the trusted Bridge and need connectivity.
+- Keys live in native Room (`word_database`), not in WebView storage.
+- An in-place update (same applicationId, compatible signing) keeps the data; LegacySession bridges previous logins and KeyHandoff syncs guest keys.
