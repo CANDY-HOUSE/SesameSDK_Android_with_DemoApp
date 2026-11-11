@@ -32,7 +32,7 @@ class StartupCover(activity: Activity, private val parent: FrameLayout, retry: (
         addView(coverIcon, FrameLayout.LayoutParams(activity.dp(192), activity.dp(192), Gravity.CENTER))
     }
     private val retryButton = ImageButton(activity).apply {
-        setImageResource(android.R.drawable.ic_popup_sync)
+        setImageResource(R.drawable.ic_startup_retry)
         imageTintList = ColorStateList.valueOf(0xff28aeb1.toInt())
         val padding = activity.dp(14)
         setPadding(padding, padding, padding, padding)
@@ -53,7 +53,7 @@ class StartupCover(activity: Activity, private val parent: FrameLayout, retry: (
 
     init {
         cover.addView(retryButton, FrameLayout.LayoutParams(activity.dp(56), activity.dp(56), Gravity.CENTER).apply {
-            topMargin = activity.dp(240)
+            topMargin = activity.dp(120)
         })
         parent.addView(cover, FrameLayout.LayoutParams(-1, -1))
         if (Build.VERSION.SDK_INT >= 31) {

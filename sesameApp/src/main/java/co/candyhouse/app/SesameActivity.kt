@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.Network
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -94,6 +96,14 @@ class SesameActivity : ComponentActivity() {
     private var discovering = false
     private val origin = BuildConfig.WEB_ORIGIN
     private val entry get() = "$origin/?appHome=1&fromType=app"
+    private val connectivity by lazy { getSystemService(ConnectivityManager::class.java) }
+    private val retryStartupWhenOnline = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            scope.launch {
+                if (::web.isInitialized && startupCover.active && startupDocumentFailed) reloadEntry()
+            }
+        }
+    }
 
     @SuppressLint("WebViewApiAvailability")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,18 +119,23 @@ class SesameActivity : ComponentActivity() {
                 tryCreateWebView()
                 return@StartupCover
             }
-            startupDocumentFailed = false
-            bridge.reset()
-            webReady = false
-            web.stopLoading()
-            web.loadUrl(entry)
+            reloadEntry()
         }
         connectBridge()
         tryCreateWebView()
+        connectivity.registerDefaultNetworkCallback(retryStartupWhenOnline)
         observePush()
         nfcIntent = intent.takeIf { it.action?.startsWith("android.nfc.action.") == true }
         // Let WebView start loading before asking Firebase to refresh the installation token.
         root.post { scope.launch { (application as SesameApp).subscriptionManager.refreshToken() } }
+    }
+
+    private fun reloadEntry() {
+        startupDocumentFailed = false
+        bridge.reset()
+        webReady = false
+        web.stopLoading()
+        web.loadUrl(entry)
     }
 
     private fun initializeBle() {
@@ -447,6 +462,7 @@ class SesameActivity : ComponentActivity() {
 
     override fun onDestroy() {
         if (::startupCover.isInitialized) startupCover.close()
+        connectivity.unregisterNetworkCallback(retryStartupWhenOnline)
         media.close()
         (application as SesameApp).bleBackend.requestCloud = null
         pageLoadGeneration++

@@ -61,7 +61,10 @@ class BleBackend(private val context: Context) : CHBleHost {
         request("history", JSONObject().put("s", deviceID).put("v", hisHex).put("t", "5"), onResponse) { Unit }
 
     override fun postBatteryData(deviceID: String, payloadString: String, onResponse: CHResult<Any>) =
-        request("battery", JSONObject().put("payload", payloadString), onResponse, id(deviceID)) { Unit }
+        request("battery", JSONObject().put("payload", payloadString), onResponse, id(deviceID)) {
+            val percentage = checkNotNull((it as? JSONObject)?.opt("batteryPercentage") as? Number) { "Invalid battery response" }
+            mapOf("batteryPercentage" to percentage)
+        }
 
     override fun registerOs2(deviceId: String, appKey: String, nonce: String, registrationKey: String, productType: String, onResponse: CHResult<CHRegistrationResult>) =
         request(
