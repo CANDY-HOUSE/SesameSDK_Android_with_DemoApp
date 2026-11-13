@@ -145,9 +145,9 @@ class BleController(
             updates.withLock {
                 if (revision != keyHandoff.scopeRevision()) return@withLock
                 val keys = runCatching {
-                    (0 until rows.length()).map { index ->
-                        val row = rows.getJSONObject(index)
-                        require(CHProductModel.getByModel(row.getString("deviceModel")) != null)
+                    (0 until rows.length()).map { rows.getJSONObject(it) }.filter {
+                        CHProductModel.getByModel(it.getString("deviceModel")) != null
+                    }.map { row ->
                         CHDevice(
                             UUID.fromString(row.getString("deviceUUID")).toString(), row.getString("deviceModel"),
                             row.optString("deviceName").toByteArray(), row.getString("keyIndex"),
