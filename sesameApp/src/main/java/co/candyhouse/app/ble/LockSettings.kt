@@ -4,6 +4,8 @@ import co.candyhouse.sesame.ble.CHDeviceLoginStatus
 import co.candyhouse.sesame.ble.CHDevices
 import co.candyhouse.sesame.ble.CHProductModel
 import co.candyhouse.sesame.ble.CHSesameLock
+import co.candyhouse.sesame.ble.os2.bot.CHSesameBot
+import co.candyhouse.sesame.ble.os2.bot.CHSesameBotMechSettings
 import co.candyhouse.sesame.ble.os2.sesame2.CHSesame2
 import co.candyhouse.sesame.ble.os3.sesame5.CHSesame5
 import co.candyhouse.sesame.utils.CHEmpty
@@ -47,6 +49,7 @@ object LockSettings {
             device.opsSetting?.let { put("sensorLockSeconds", it.opsLockSecond.toInt()) }
             put("magnet", true)
         }
+        if (device is CHSesameBot) device.mechSetting?.let { put("botMode", botMode(it)) }
         put("position", device.mechStatus?.position?.toInt() ?: JSONObject.NULL)
         if (device.hasLockUnlockSwitchPointSetting) put("switchPoint", device.lockUnlockSwitchPoint.toInt())
         if (device.sensorDetectIntervalMs != CHDevices.UNSET_SENSOR_DETECT_INTERVAL_MS) put("sensorInterval", device.sensorDetectIntervalMs.toInt())
@@ -59,6 +62,7 @@ object LockSettings {
         // Version reads also serve Bot devices after OTA; lock-specific settings stay restricted.
         require(
             device is CHSesame2 || device is CHSesame5 ||
+                    (device is CHSesameBot && (operation == "read" || operation == "botMode")) ||
                     (device is CHSesameLock && (operation == "txPower" || operation == "version"))
         )
         when (operation) {
@@ -157,9 +161,27 @@ object LockSettings {
                 awaitResult<CHEmpty> { device.setSensorDetectInterval(interval.toShort(), it) }
             }
 
+            "botMode" -> {
+                require(device is CHSesameBot)
+                val current = requireNotNull(device.mechSetting)
+                val setting = when (json.getString("value")) {
+                    "normal" -> current.copy(userPrefDir = 0, clickLockSec = 10, clickHoldSec = 10, clickUnlockSec = 8)
+                    "circle" -> current.copy(userPrefDir = 0, clickLockSec = 20, clickHoldSec = 0, clickUnlockSec = 0)
+                    "longPress" -> current.copy(userPrefDir = 1, clickLockSec = 10, clickHoldSec = 20, clickUnlockSec = 15)
+                    else -> error("Unsupported bot mode")
+                }
+                awaitResult<CHEmpty> { device.updateSetting(setting, ble.os2HistoryTag(), it) }
+            }
+
             else -> error("Unsupported lock setting")
         }
         ble.snapshot()
         return snapshot(device)
+    }
+
+    private fun botMode(setting: CHSesameBotMechSettings): String = when {
+        setting.clickLockSec.toInt() == 20 -> "circle"
+        setting.clickHoldSec.toInt() == 20 -> "longPress"
+        else -> "normal"
     }
 }
