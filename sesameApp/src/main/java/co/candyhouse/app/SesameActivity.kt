@@ -149,7 +149,11 @@ class SesameActivity : ComponentActivity() {
 
     private fun createLayout() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        root = FrameLayout(this).apply { setBackgroundColor(Color.WHITE) }
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = true
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            window.navigationBarColor = Color.BLACK
+        }
+        root =FrameLayout(this).apply { setBackgroundColor(Color.WHITE) }
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
             view.setPadding(safe.left, safe.top, safe.right, safe.bottom)
