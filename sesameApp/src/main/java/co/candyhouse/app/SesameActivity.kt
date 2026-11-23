@@ -59,6 +59,7 @@ import co.candyhouse.app.util.toKeyJson
 import co.candyhouse.sesame.ble.CHBleManager
 import co.candyhouse.sesame.ble.CHScanStatus
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -206,7 +207,8 @@ class SesameActivity : ComponentActivity() {
             openAppSettings = { startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))) },
             watchNfc = { nfc.binding = it },
             haptic = { haptic(web, it) },
-            uiReady = { if (!startupDocumentFailed) startupCover.ready(web) }
+            uiReady = { if (!startupDocumentFailed) startupCover.ready(web) },
+            requestPermission = ::requestSaveMediaPermission
         )
         bridge = WebViewBridge(origin, scope, requests::handle)
         (application as SesameApp).bleBackend.requestCloud = bridge::requestCloud
@@ -416,10 +418,24 @@ class SesameActivity : ComponentActivity() {
         else emit("error", "Permission denied")
     }
 
+    private var saveMediaGrant: CompletableDeferred<Boolean>? = null
+    private suspend fun requestSaveMediaPermission(permission: String): Boolean {
+        if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) return true
+        saveMediaGrant?.complete(false)
+        val grant = CompletableDeferred<Boolean>().also { saveMediaGrant = it }
+        requestPermissions(arrayOf(permission), RequestCode.SAVE_MEDIA)
+        return grant.await()
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, results: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, results)
         when (requestCode) {
             RequestCode.WEB_MEDIA -> return media.permissionResult(results)
+            RequestCode.SAVE_MEDIA -> {
+                saveMediaGrant?.complete(results.isNotEmpty() && results.all { it == PackageManager.PERMISSION_GRANTED })
+                saveMediaGrant = null
+                return
+            }
             RequestCode.AUTO_UNLOCK_LOCATION -> return emit("locationPermission")
             RequestCode.NOTIFICATIONS -> return SesameConnectedDeviceService.sync(this)
             RequestCode.BLE_PERMISSIONS -> if (results.isEmpty()) {

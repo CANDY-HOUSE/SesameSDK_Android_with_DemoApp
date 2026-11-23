@@ -18,6 +18,7 @@ import co.candyhouse.app.connecteddevice.AutoUnlockSettings
 import co.candyhouse.app.connecteddevice.SesameConnectedDeviceService
 import co.candyhouse.app.data.KeyHandoff
 import co.candyhouse.app.data.auth.LegacySession
+import co.candyhouse.app.media.MediaSaver
 import co.candyhouse.app.ui.AppRoute
 import co.candyhouse.app.util.toKeyJson
 import co.candyhouse.sesame.utils.L
@@ -46,8 +47,11 @@ class NativeRequestHandler(
     private val locationDisclosure: (Boolean) -> Unit = {},
     private val watchNfc: (String?) -> Unit = {},
     private val haptic: (Long) -> Unit = {},
-    private val uiReady: () -> Unit = {}
+    private val uiReady: () -> Unit = {},
+    requestPermission: suspend (String) -> Boolean = { false }
 ) {
+    private val media = MediaSaver(context, requestPermission)
+
     suspend fun handle(json: JSONObject, respond: (Boolean, Any?, String?) -> Unit) {
         fun reply(ok: Boolean, data: Any? = null, error: String? = null) = respond(ok, data, error)
         runCatching {
@@ -78,6 +82,7 @@ class NativeRequestHandler(
                             .put("signedIn", token != null)
                             .put("language", language())
                             .put("guestIdentityId", LegacySession.guestIdentityId())
+                            .put("capabilities", JSONArray(CAPABILITIES))
                     )
                 }
 
@@ -209,11 +214,18 @@ class NativeRequestHandler(
                     openExternal(json.getString("url")); reply(true)
                 }
 
+                "home.saveMedia" -> reply(true, media.handle(json))
+
                 else -> reply(false, error = "This native capability is not available in this version")
             }
         }.onFailure {
             if (it is CancellationException) throw it
-            reply(false, null, "Native request failed; retry when connected")
+            reply(false, null, if (it is MediaSaver.PermissionDenied) it.message else "Native request failed; retry when connected")
         }
+    }
+
+    private companion object {
+        // Biz assumes nfc + widget when this list is absent; keep them when adding new entries.
+        val CAPABILITIES = listOf("nfc", "widget", "saveImage", "saveVideo")
     }
 }

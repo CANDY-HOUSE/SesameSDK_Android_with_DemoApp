@@ -7,5 +7,6 @@ object RequestCode {
     const val NOTIFICATIONS = 13
     const val AUTO_UNLOCK_LOCATION = 14
     const val WEB_MEDIA = 15
+    const val SAVE_MEDIA = 16
     const val FILE_CHOOSER = 20
 }
