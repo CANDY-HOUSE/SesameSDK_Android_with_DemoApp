@@ -144,21 +144,22 @@ class BleController(
         return scope.launch {
             updates.withLock {
                 if (revision != keyHandoff.scopeRevision()) return@withLock
-                val keys = runCatching {
-                    (0 until rows.length()).map { rows.getJSONObject(it) }.filter {
-                        CHProductModel.getByModel(it.getString("deviceModel")) != null
-                    }.map { row ->
-                        CHDevice(
-                            UUID.fromString(row.getString("deviceUUID")).toString(), row.getString("deviceModel"),
-                            row.optString("deviceName").toByteArray(), row.getString("keyIndex"),
-                            row.getString("secretKey"), row.getString("sesame2PublicKey")
-                        )
-                    }.also { require(it.map { key -> key.deviceUUID }.distinct().size == it.size) }
-                }.getOrNull() ?: return@withLock
+                val validRows = (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }.filter { row ->
+                    runCatching { UUID.fromString(row.getString("deviceUUID")) }.isSuccess &&
+                        CHProductModel.getByModel(row.optString("deviceModel")) != null &&
+                        listOf("keyIndex", "secretKey", "sesame2PublicKey").all { !row.isNull(it) && row.getString(it).isNotEmpty() }
+                }.distinctBy { UUID.fromString(it.getString("deviceUUID")) }
+                val keys = validRows.map { row ->
+                    CHDevice(
+                        UUID.fromString(row.getString("deviceUUID")).toString(), row.getString("deviceModel"),
+                        row.optString("deviceName").toByteArray(), row.getString("keyIndex"),
+                        row.getString("secretKey"), row.getString("sesame2PublicKey")
+                    )
+                }
                 val incoming = keys.map { it.deviceUUID.uppercase() }.toSet()
                 receivedCloudList = true
                 cloudRows = rows
-                keyHandoff.remember(rows)
+                keyHandoff.remember(JSONArray(validRows))
                 // Keep unsent keys on disk; an H5 empty list must not erase legacy guest keys.
                 devices.keys.filter { it !in incoming }.forEach { id ->
                     peripheralSettings.forget(id)
@@ -185,7 +186,7 @@ class BleController(
                     os2History = null
                     localPreferences.edit().remove("historyName").apply()
                 }
-                backend.gatewayDevices = (0 until rows.length()).map { rows.getJSONObject(it) }
+                backend.gatewayDevices = validRows
                     .filter { it.optJSONObject("stateInfo")?.optBoolean("wm2State") == true }
                     .map { it.getString("deviceUUID").uppercase() }.toSet()
                 for (key in keys) {
