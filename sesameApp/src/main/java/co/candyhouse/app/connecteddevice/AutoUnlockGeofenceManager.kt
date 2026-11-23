@@ -43,9 +43,10 @@ object AutoUnlockGeofenceManager {
             val data = app.devicePreferences.snapshot(id)
             val lat = data.getDouble("latitude");
             val lng = data.getDouble("longitude")
+            // ENTER is unused by the receiver but required: with EXIT only, Play services keeps the fence OUTSIDE and later exits never fire.
             if (lat == 0.0 && lng == 0.0) null else Geofence.Builder().setRequestId(id)
                 .setCircularRegion(lat, lng, data.getDouble("radius").toFloat()).setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT).build()
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT).build()
         }.take(100)
         client.removeGeofences(intent).addOnCompleteListener {
             if (epoch != generation.get() || fences.isEmpty()) return@addOnCompleteListener

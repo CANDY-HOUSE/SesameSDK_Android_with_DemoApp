@@ -51,6 +51,8 @@ class SesameConnectedDeviceService : Service() {
     private var updates: Job? = null
     private var pendingCommands = 0
     private var widgetChannel = CHANNEL
+    private var foregroundId = SERVICE_ID
+    private var foregroundNotification: Notification? = null
     private val network by lazy { getSystemService(ConnectivityManager::class.java) }
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -97,16 +99,7 @@ class SesameConnectedDeviceService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
-            startForeground(
-                SERVICE_ID,
-                NotificationCompat.Builder(this, SERVICE_CHANNEL).setSmallIcon(R.drawable.ic_notification).setContentTitle(getString(R.string.Sesame)).setContentText(
-                    getString(
-                        if (app.ble.allDevices()
-                                .any { app.devicePreferences.enabled("wid", it.deviceId.toString()) }
-                        ) R.string.sesame_widget else R.string.auto_unlock_service_notification
-                    )
-                ).setOngoing(true).setSilent(true).setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_LOW).build()
-            )
+            startForeground(foregroundId, foregroundNotification ?: serviceNotification())
         } catch (e: RuntimeException) {
             L.e("SesameWidget", "Unable to start connected service", e); stopSelf(); return START_NOT_STICKY
         }
@@ -154,19 +147,51 @@ class SesameConnectedDeviceService : Service() {
             val widgets = app.ble.allDevices().filter { it is CHSesameLock && app.devicePreferences.enabled("wid", it.deviceId.toString()) }
             val manager = NotificationManagerCompat.from(this@SesameConnectedDeviceService)
             val expected = widgets.map { it.deviceId.hashCode() }.toMutableSet().apply { if (widgets.size > 1) add(ALL_ID) }
-            (shown - expected).forEach { manager.cancel(it); shown.remove(it) }
-            if (manager.areNotificationsEnabled()) {
-                widgets.forEach { device ->
-                    manager.notify(device.deviceId.hashCode(), notification(device)); shown.add(device.deviceId.hashCode()); delay(300.milliseconds)
-                }
-                if (widgets.size > 1) {
-                    manager.notify(ALL_ID, allNotification()); shown.add(ALL_ID)
-                }
-            }
             val armed =
                 app.ble.allDevices().any { app.devicePreferences.enabled("nohand", it.deviceId.toString()) && app.devicePreferences.enabled("nohandg", it.deviceId.toString()) }
+            if ((!manager.areNotificationsEnabled() || widgets.isEmpty()) && foregroundId != SERVICE_ID && (armed || pendingCommands > 0)) {
+                moveForeground(SERVICE_ID, serviceNotification())
+            }
+            (shown - expected).forEach { manager.cancel(it); shown.remove(it) }
+            if (manager.areNotificationsEnabled()) {
+                val target = foregroundId.takeIf { it in expected } ?: expected.firstOrNull()
+                widgets.forEach { device ->
+                    showWidget(manager, device.deviceId.hashCode(), notification(device), target)
+                    delay(300.milliseconds)
+                }
+                if (widgets.size > 1) {
+                    showWidget(manager, ALL_ID, allNotification(), target)
+                }
+            }
             if ((!manager.areNotificationsEnabled() || widgets.isEmpty()) && !armed && pendingCommands == 0) stopSelf()
         }
+    }
+
+    private fun serviceNotification() =
+        NotificationCompat.Builder(this, SERVICE_CHANNEL).setSmallIcon(R.drawable.ic_notification).setContentTitle(getString(R.string.Sesame)).setContentText(
+            getString(
+                if (app.ble.allDevices()
+                        .any { app.devicePreferences.enabled("wid", it.deviceId.toString()) }
+                ) R.string.sesame_widget else R.string.auto_unlock_service_notification
+            )
+        ).setOngoing(true).setSilent(true).setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_LOW).build()
+
+    // startForeground with a new id makes the system cancel the previous foreground notification; manager.cancel cannot remove it.
+    private fun moveForeground(id: Int, notification: Notification) {
+        try {
+            startForeground(id, notification)
+            foregroundId = id
+            foregroundNotification = notification
+        } catch (e: RuntimeException) {
+            L.e("SesameWidget", "Unable to move foreground notification to $id", e)
+        }
+    }
+
+    private fun showWidget(manager: NotificationManagerCompat, id: Int, notification: Notification, target: Int?) {
+        manager.notify(id, notification)
+        shown.add(id)
+        if (id == target && id != foregroundId) moveForeground(id, notification)
+        if (id == foregroundId) foregroundNotification = notification
     }
 
     private fun action(id: String?, operation: String): PendingIntent {

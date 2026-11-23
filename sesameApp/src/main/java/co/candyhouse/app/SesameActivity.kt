@@ -154,7 +154,7 @@ class SesameActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             window.navigationBarColor = Color.BLACK
         }
-        root =FrameLayout(this).apply { setBackgroundColor(Color.WHITE) }
+        root = FrameLayout(this).apply { setBackgroundColor(Color.WHITE) }
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
             view.setPadding(safe.left, safe.top, safe.right, safe.bottom)
@@ -436,6 +436,7 @@ class SesameActivity : ComponentActivity() {
                 saveMediaGrant = null
                 return
             }
+
             RequestCode.AUTO_UNLOCK_LOCATION -> return emit("locationPermission")
             RequestCode.NOTIFICATIONS -> return SesameConnectedDeviceService.sync(this)
             RequestCode.BLE_PERMISSIONS -> if (results.isEmpty()) {

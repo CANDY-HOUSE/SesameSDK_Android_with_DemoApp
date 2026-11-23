@@ -146,8 +146,8 @@ class BleController(
                 if (revision != keyHandoff.scopeRevision()) return@withLock
                 val validRows = (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }.filter { row ->
                     runCatching { UUID.fromString(row.getString("deviceUUID")) }.isSuccess &&
-                        CHProductModel.getByModel(row.optString("deviceModel")) != null &&
-                        listOf("keyIndex", "secretKey", "sesame2PublicKey").all { !row.isNull(it) && row.getString(it).isNotEmpty() }
+                            CHProductModel.getByModel(row.optString("deviceModel")) != null &&
+                            listOf("keyIndex", "secretKey", "sesame2PublicKey").all { !row.isNull(it) && row.getString(it).isNotEmpty() }
                 }.distinctBy { UUID.fromString(it.getString("deviceUUID")) }
                 val keys = validRows.map { row ->
                     CHDevice(
