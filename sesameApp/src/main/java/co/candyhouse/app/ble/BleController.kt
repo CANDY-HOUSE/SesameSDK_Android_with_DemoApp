@@ -145,9 +145,13 @@ class BleController(
             updates.withLock {
                 if (revision != keyHandoff.scopeRevision()) return@withLock
                 val validRows = (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }.filter { row ->
+                    val wm2 = CHProductModel.getByModel(row.optString("deviceModel")) == CHProductModel.WM2
                     runCatching { UUID.fromString(row.getString("deviceUUID")) }.isSuccess &&
                             CHProductModel.getByModel(row.optString("deviceModel")) != null &&
-                            listOf("keyIndex", "secretKey", "sesame2PublicKey").all { !row.isNull(it) && row.getString(it).isNotEmpty() }
+                            // WM2 keys have empty keyIndex and sesame2PublicKey; other models need both.
+                            listOf("keyIndex", "secretKey", "sesame2PublicKey").all {
+                                !row.isNull(it) && (row.getString(it).isNotEmpty() || (wm2 && it != "secretKey"))
+                            }
                 }.distinctBy { UUID.fromString(it.getString("deviceUUID")) }
                 val keys = validRows.map { row ->
                     CHDevice(
