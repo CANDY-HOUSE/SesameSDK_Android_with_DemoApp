@@ -270,7 +270,6 @@ class BleController(
 
     fun device(id: String): CHDevices? = devices[id.uppercase()]
 
-    fun testDevices(): List<CHDevices> = devices.values.toList()
     fun deviceName(device: CHDevices): String = appliedKeys[device.deviceId.toString().uppercase()]?.historyTag?.toString(Charsets.UTF_8) ?: device.productModel.deviceModelName()
     fun historyTag(): ByteArray = history.copyOf()
     fun os2HistoryTag(): ByteArray? = os2History?.copyOf()

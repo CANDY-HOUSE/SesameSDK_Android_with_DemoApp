@@ -24,7 +24,7 @@ class CHWifiModule2NetWorkStatus(
     var isAPCheck: Boolean?
 ) : CHSesameProtocolMechStatus {
     override val data: ByteArray
-        get() = TODO("Not yet implemented")
+        get() = ByteArray(0)
 }
 
 interface CHWifiModule2 : CHDevices {

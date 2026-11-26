@@ -394,7 +394,7 @@ internal class CHSesame2Device : CHSesameOS2(), CHSesame2, CHDeviceUtil {
     }
 
     private fun transmit() {
-        mCharacteristic ?: return //todo check return work
+        mCharacteristic ?: return
         mCharacteristic?.value = gattTxBuffer?.getChunk() ?: return
         val check = mBluetoothGatt?.writeCharacteristic(mCharacteristic)
         if (check == false) {
