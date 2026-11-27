@@ -36,6 +36,10 @@
         android:name="android.hardware.microphone"
         android:required="false" />
 
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+
     <application
         android:name=".SesameApp"
         android:allowBackup="false"

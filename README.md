@@ -4,7 +4,7 @@
 
 [日本語](README.md) | [简体中文](README_zh-CN.md) | [English](README_en.md)
 
-Android Web App のホストと独立した Sesame BLE SDK です。画面・アカウント・クラウド業務は Biz3、WebView・Bluetooth・OS 機能は Android が担当します。
+Android Web App のホストと独立した Sesame BLE SDK です。画面・アカウント・クラウド業務は [Biz3](https://github.com/CANDY-HOUSE/biz.candyhouse.co)、WebView・Bluetooth・OS 機能は Android が担当します。
 
 **Biz は業務ロジック、Android はネイティブ機能、Bridge は通信を担当します。**
 
@@ -16,6 +16,8 @@ flowchart LR
   App --> DB[(Room keys)]
   Biz <-->|WebSocket| AWS[Cloud services]
 ```
+
+App の実行には [Biz](https://github.com/CANDY-HOUSE/biz.candyhouse.co) が必要です（App は起動時にこのページを読み込みます）。
 
 ## 公開 SDK の導入
 
@@ -196,7 +198,9 @@ candyhouse.sesame.web.prod=https://biz.candyhouse.co
 
 Debug のページ URL は `candyhouse.sesame.web.dev`、Release/CI は `candyhouse.sesame.web.prod` で指定します。Android のブランチ名とは独立して、Biz のステージング環境または本番環境を選択できます。Biz のステージングブランチは個別に配信でき、本番 URL は `https://biz.candyhouse.co` です。APP のページ URL を変更した場合は Android を再ビルドします。
 
-Web APP ルートから、それぞれ別のターミナルで実行します。Biz の開発サーバーは起動したままにします。
+Biz を変更しない場合は、`candyhouse.sesame.web.dev` を `https://biz.candyhouse.co` にすると本番の Biz を読み込むため、Biz の起動と `adb reverse` は不要です。
+
+Biz も変更する場合は、`git clone https://github.com/CANDY-HOUSE/biz.candyhouse.co.git Biz3` で本リポジトリと同じ階層に clone し、親ディレクトリから、それぞれ別のターミナルで実行します。Biz の開発サーバーは起動したままにします。
 
 ```bash
 # Terminal 1: Biz3

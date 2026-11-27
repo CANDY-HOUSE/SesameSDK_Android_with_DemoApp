@@ -4,7 +4,7 @@
 
 [日本語](README.md) | [简体中文](README_zh-CN.md) | [English](README_en.md)
 
-Android Web App host and standalone Sesame BLE SDK. Biz3 owns pages, accounts and cloud business logic; Android supplies WebView, Bluetooth and platform capabilities.
+Android Web App host and standalone Sesame BLE SDK. [Biz3](https://github.com/CANDY-HOUSE/biz.candyhouse.co) owns pages, accounts and cloud business logic; Android supplies WebView, Bluetooth and platform capabilities.
 
 **Biz owns business logic, Android provides native capabilities, and Bridge handles communication.**
 
@@ -16,6 +16,8 @@ flowchart LR
   App --> DB[(Room keys)]
   Biz <-->|WebSocket| AWS[Cloud services]
 ```
+
+Running the app requires [Biz](https://github.com/CANDY-HOUSE/biz.candyhouse.co) (the app loads this page at startup).
 
 ## Public SDK integration
 
@@ -196,7 +198,9 @@ candyhouse.sesame.web.prod=https://biz.candyhouse.co
 
 `candyhouse.sesame.web.dev` selects the Debug page URL; `candyhouse.sesame.web.prod` selects the Release/CI page URL. These settings select the Biz staging or production environment independently of the Android branch name. The Biz staging branch can be deployed independently; production is `https://biz.candyhouse.co`. Rebuild Android after changing its page URL.
 
-Run these in two terminals, each starting at the Web APP root. Keep the Biz dev server running:
+If you are not changing Biz, set `candyhouse.sesame.web.dev` to `https://biz.candyhouse.co` to load production Biz; you then do not need to run Biz or `adb reverse`.
+
+To change Biz as well, clone it next to this repository with `git clone https://github.com/CANDY-HOUSE/biz.candyhouse.co.git Biz3`, then run these in two terminals from the parent directory. Keep the Biz dev server running:
 
 ```bash
 # Terminal 1: Biz3

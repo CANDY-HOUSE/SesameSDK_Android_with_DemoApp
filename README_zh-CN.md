@@ -4,7 +4,7 @@
 
 [日本語](README.md) | [简体中文](README_zh-CN.md) | [English](README_en.md)
 
-Android Web App 宿主与独立 Sesame BLE SDK。页面、账号和云端业务由 Biz3 实现；Android 提供 WebView、蓝牙及系统能力。
+Android Web App 宿主与独立 Sesame BLE SDK。页面、账号和云端业务由 [Biz3](https://github.com/CANDY-HOUSE/biz.candyhouse.co) 实现；Android 提供 WebView、蓝牙及系统能力。
 
 **Biz 负责业务逻辑，Android 负责原生能力，Bridge 负责通信。**
 
@@ -16,6 +16,8 @@ flowchart LR
   App --> DB[(Room keys)]
   Biz <-->|WebSocket| AWS[Cloud services]
 ```
+
+运行 App 需要 [Biz](https://github.com/CANDY-HOUSE/biz.candyhouse.co)（App 启动时加载该页面）。
 
 ## 对外 SDK 接入
 
@@ -196,7 +198,9 @@ candyhouse.sesame.web.prod=https://biz.candyhouse.co
 
 Debug 页面地址由 `candyhouse.sesame.web.dev` 指定；Release/CI 页面地址由 `candyhouse.sesame.web.prod` 指定。APP 通过这些配置选择 Biz 预发或正式环境，与 Android 的分支名称无关。Biz 预发分支可独立发布；正式环境地址为 `https://biz.candyhouse.co`。修改 APP 页面地址后重新构建 Android。
 
-在两个终端中分别运行，以下均从 Web APP 根目录开始；保持 Biz 开发服务运行：
+不修改 Biz 时，把 `candyhouse.sesame.web.dev` 设为 `https://biz.candyhouse.co` 即加载正式环境的 Biz，无需启动 Biz 或执行 `adb reverse`。
+
+需要修改 Biz 时，用 `git clone https://github.com/CANDY-HOUSE/biz.candyhouse.co.git Biz3` 克隆到与本仓库同级的目录，再从上级目录在两个终端中分别运行；保持 Biz 开发服务运行：
 
 ```bash
 # Terminal 1: Biz3
